@@ -1,0 +1,27 @@
+:py:mod:`baklava`
+==========================================
+
+.. py:module:: ariel.gui_code.litegraph.baklava
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.gui_code.litegraph.baklava.Editor
+
+
+
+
+.. py:class:: Editor(title: str, *, on_change: Optional[Callable] = None)
+
+   Bases: :py:obj:`nicegui.ui.element`
+
+   .. autoapi-inheritance-diagram:: ariel.gui_code.litegraph.baklava.Editor
+      :parts: 1
+
+

@@ -1,0 +1,32 @@
+:py:mod:`ariel`
+===============
+
+.. py:module:: ariel
+
+.. autoapi-nested-parse::
+
+   Ariel.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   body_phenotypes/index.rst
+   ec/index.rst
+   gui_code/index.rst
+   simulation/index.rst
+   utils/index.rst
+   viz/index.rst
+
+
+Package Contents
+----------------
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+

@@ -1,0 +1,17 @@
+:py:mod:`gui`
+=======================
+
+.. py:module:: ariel.viz.gui
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   backend_example/index.rst
+   resources/index.rst
+   viewer/index.rst
+
+

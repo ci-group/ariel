@@ -1,0 +1,21 @@
+:py:mod:`controllers`
+======================================
+
+.. py:module:: ariel.simulation.controllers
+
+.. autoapi-nested-parse::
+
+   Robogen Lite.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   cpg_with_sensory_feedback/index.rst
+   hopfs_cpg/index.rst
+
+

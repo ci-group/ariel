@@ -1,0 +1,97 @@
+:py:mod:`test_ea`
+======================================
+
+.. py:module:: ariel.viz.gui.viewer.test_ea
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.viewer.test_ea.EAParameters
+   ariel.viz.gui.viewer.test_ea.EARun
+   ariel.viz.gui.viewer.test_ea.EAResult
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.viewer.test_ea.console
+   ariel.viz.gui.viewer.test_ea.app
+   ariel.viz.gui.viewer.test_ea.dialog
+   ariel.viz.gui.viewer.test_ea.ea_result_node
+
+
+.. py:data:: console
+
+.. py:class:: EAParameters
+
+   Bases: :py:obj:`QNodeEditor.Node`
+
+   .. autoapi-inheritance-diagram:: ariel.viz.gui.viewer.test_ea.EAParameters
+      :parts: 1
+
+
+   .. py:attribute:: code
+      :value: 0
+
+
+
+   .. py:method:: create()
+
+
+   .. py:method:: evaluate(values: dict)
+
+
+.. py:class:: EARun
+
+   Bases: :py:obj:`QNodeEditor.Node`
+
+   .. autoapi-inheritance-diagram:: ariel.viz.gui.viewer.test_ea.EARun
+      :parts: 1
+
+
+   .. py:attribute:: code
+      :value: 1
+
+
+
+   .. py:method:: create()
+
+
+   .. py:method:: evaluate(values: dict)
+
+      Run the EA using the parameters provided by EAParameters.
+
+
+
+.. py:class:: EAResult
+
+   Bases: :py:obj:`QNodeEditor.Node`
+
+   .. autoapi-inheritance-diagram:: ariel.viz.gui.viewer.test_ea.EAResult
+      :parts: 1
+
+
+   .. py:attribute:: code
+      :value: 2
+
+
+
+   .. py:method:: create()
+
+
+.. py:data:: app
+
+.. py:data:: dialog
+
+.. py:data:: ea_result_node
+

@@ -1,0 +1,40 @@
+:py:mod:`results_viewer`
+=============================================
+
+.. py:module:: ariel.viz.gui.viewer.results_viewer
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.viewer.results_viewer.EmbeddedPlotWidget
+
+
+
+
+.. py:class:: EmbeddedPlotWidget(parent=None)
+
+   Bases: :py:obj:`PyQt5.QtWidgets.QWidget`
+
+   .. autoapi-inheritance-diagram:: ariel.viz.gui.viewer.results_viewer.EmbeddedPlotWidget
+      :parts: 1
+
+
+   .. py:attribute:: figure
+
+
+   .. py:attribute:: canvas
+
+
+   .. py:method:: plot_fitness(fitnesses_per_generation)
+
+      Plot fitness over generations, averaged.
+      fitnesses_per_generation: list of lists of fitness values
+
+
+

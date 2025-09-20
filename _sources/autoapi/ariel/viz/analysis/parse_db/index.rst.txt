@@ -1,0 +1,21 @@
+:py:mod:`parse_db`
+=====================================
+
+.. py:module:: ariel.viz.analysis.parse_db
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.analysis.parse_db.get_fitness_over_generations
+
+
+
+.. py:function:: get_fitness_over_generations(population_count, db_path)
+

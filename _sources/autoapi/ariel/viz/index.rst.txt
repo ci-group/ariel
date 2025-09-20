@@ -1,0 +1,16 @@
+:py:mod:`viz`
+===================
+
+.. py:module:: ariel.viz
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   analysis/index.rst
+   gui/index.rst
+
+

@@ -1,0 +1,54 @@
+:py:mod:`main`
+=======================================
+
+.. py:module:: ariel.gui_code.litegraph.main
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.gui_code.litegraph.main.page
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.gui_code.litegraph.main.head_html
+   ariel.gui_code.litegraph.main.canvas
+
+
+.. py:data:: head_html
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """
+      <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/jagenjo/litegraph.js/css/litegraph.css">
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/jagenjo/litegraph.js/build/litegraph.min.js"></script>
+      """
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:data:: canvas
+   :value: "<canvas id='node-editor' width='1024' height='720' style='border: 1px solid'></canvas>"
+
+
+.. py:function:: page() -> None
+

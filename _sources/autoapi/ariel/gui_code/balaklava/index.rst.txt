@@ -1,0 +1,22 @@
+:py:mod:`balaklava`
+==================================
+
+.. py:module:: ariel.gui_code.balaklava
+
+.. autoapi-nested-parse::
+
+   Robogen Lite.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   1_nice_node_editor/index.rst
+   baklava/index.rst
+   main/index.rst
+
+

@@ -1,0 +1,392 @@
+:py:mod:`environments`
+=======================================
+
+.. py:module:: ariel.simulation.environments
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   amphiteater_heightmap/index.rst
+   amphitheatre_heightmap/index.rst
+   boxy_heightmap/index.rst
+   crater_heightmap/index.rst
+   djoser_pyramid/index.rst
+   rugged_heightmap/index.rst
+   simple_flat_world/index.rst
+   simple_tilted_world/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.AmphitheatreTerrainWorld
+   ariel.simulation.environments.BoxyRugged
+   ariel.simulation.environments.CraterTerrainWorld
+   ariel.simulation.environments.PyramidWorld
+   ariel.simulation.environments.RuggedTerrainWorld
+   ariel.simulation.environments.SimpleFlatWorld
+   ariel.simulation.environments.TiltedFlatWorld
+
+
+
+
+.. py:class:: AmphitheatreTerrainWorld(size: Tuple[float, float] = (10.0, 10.0), resolution: int = 128, ring_inner_radius: float = 0.2, ring_outer_radius: float = 0.45, cone_height: float = 1.0, ruggedness: float = 0.05, height: float = 3.0)
+
+   MuJoCo world with an amphitheater-shaped terrain.
+
+
+   .. py:attribute:: size
+      :value: (10.0, 10.0)
+
+
+
+   .. py:attribute:: resolution
+      :value: 128
+
+
+
+   .. py:attribute:: ring_inner_radius
+      :value: 0.2
+
+
+
+   .. py:attribute:: ring_outer_radius
+      :value: 0.45
+
+
+
+   .. py:attribute:: cone_height
+      :value: 1.0
+
+
+
+   .. py:attribute:: ruggedness
+      :value: 0.05
+
+
+
+   .. py:attribute:: height
+      :value: 3.0
+
+
+
+   .. py:attribute:: heightmap
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot inside the amphitheater world.
+
+      :param mj_spec: The mujoco specification of the entity you want to spawn in to the world
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The spawn position of the entity. [0 ,0 ,0] by default.
+      :type spawn_position: :class:`list[float] | None`
+      :param small_gap: Add a small gap between the entity and the ground. This can help avoid physics glitches.
+      :type small_gap: :class:`float`
+      :param correct_for_bounding_box: In some environments, depending on the spawn_position, the bounding box might spawn inside
+                                       the ground. If enabled, this will automatically adjust the spawn position to avoid that.
+      :type correct_for_bounding_box: :class:`bool`
+
+
+
+.. py:class:: BoxyRugged(floor_size: tuple[float, float, float] = (10, 10, 0.05), pos: list[float] = [0, 0, 0])
+
+   .. py:attribute:: floor_size
+      :value: (10, 10, 0.05)
+
+
+
+   .. py:attribute:: pos
+      :value: [0, 0, 0]
+
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float, float, float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot at a specific position in the world.
+
+      :param mj_spec: The MuJoCo specification for the robot.
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The position (x, y, z) to spawn the robot at, by default (0, 0, 0)
+      :type spawn_position: :class:`list[float`, :class:`float`, :class:`float] | None`, *optional*
+      :param small_gap: A small gap to add to the spawn position, by default 0.0
+      :type small_gap: :class:`float`, *optional*
+      :param correct_for_bounding_box: If True, the spawn position will be adjusted to account for the robot's bounding box,
+                                       by default True
+      :type correct_for_bounding_box: :class:`bool`
+
+
+
+.. py:class:: CraterTerrainWorld(size: Tuple[float, float] = (10.0, 10.0), resolution: int = 128, crater_depth: float = 3, crater_radius: float = 5, height: float = 5, ruggedness: float = 0.01)
+
+   MuJoCo world with a crater-like terrain using a heightfield.
+
+
+   .. py:attribute:: size
+      :value: (10.0, 10.0)
+
+
+
+   .. py:attribute:: resolution
+      :value: 128
+
+
+
+   .. py:attribute:: crater_depth
+      :value: 3
+
+
+
+   .. py:attribute:: crater_radius
+      :value: 5
+
+
+
+   .. py:attribute:: height
+      :value: 5
+
+
+
+   .. py:attribute:: ruggedness
+      :value: 0.01
+
+
+
+   .. py:attribute:: heightmap
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot inside the amphitheater world.
+
+      :param mj_spec: The mujoco specification of the entity you want to spawn in to the world
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The spawn position of the entity. [0 ,0 ,0] by default.
+      :type spawn_position: :class:`list[float] | None`
+      :param small_gap: Add a small gap between the entity and the ground. This can help avoid physics glitches.
+      :type small_gap: :class:`float`
+      :param correct_for_bounding_box: In some environments, depending on the spawn_position, the bounding box might spawn inside
+                                       the ground. If enabled, this will automatically adjust the spawn position to avoid that.
+      :type correct_for_bounding_box: :class:`bool`
+
+
+
+.. py:class:: PyramidWorld(pos: list[float] = [0, 0, 0], num_stairs: int = 8, gap: int = 1, name: str = 'stair', floor_size: tuple[float, float, float] = (10, 10, 0.05))
+
+   MuJoCo world with stairs placed on a flat terrain.
+
+
+   .. py:attribute:: SQUARE_LENGTH
+      :value: 2
+
+
+
+   .. py:attribute:: V_SIZE
+      :value: 0.076
+
+
+
+   .. py:attribute:: H_SIZE
+      :value: 0.12
+
+
+
+   .. py:attribute:: H_STEP
+      :value: 0.24
+
+
+
+   .. py:attribute:: V_STEP
+      :value: 0.152
+
+
+
+   .. py:attribute:: SAND
+      :value: [0.85, 0.75, 0.6, 1.0]
+
+
+
+   .. py:attribute:: pos
+      :value: [0, 0, 0]
+
+
+
+   .. py:attribute:: num_stairs
+      :value: 8
+
+
+
+   .. py:attribute:: gap
+      :value: 1
+
+
+
+   .. py:attribute:: name
+      :value: 'stair'
+
+
+
+   .. py:attribute:: floor_size
+      :value: (10, 10, 0.05)
+
+
+
+   .. py:attribute:: spec
+      :type:  mujoco.MjSpec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float, float, float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot at a specific position in the world.
+
+      :param mj_spec: The MuJoCo specification for the robot.
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The position (x, y, z) to spawn the robot at, by default (0, 0, 0)
+      :type spawn_position: :class:`list[float`, :class:`float`, :class:`float] | None`
+      :param small_gap: A small gap to add to the spawn position, by default 0.0
+      :type small_gap: :class:`float`
+      :param correct_for_bounding_box: If True, the spawn position will be adjusted to account for the robot's bounding box,
+                                       by default True
+      :type correct_for_bounding_box: :class:`bool`
+
+
+
+.. py:class:: RuggedTerrainWorld(size: Tuple[float, float] = (10.0, 10.0), resolution: int = 128, scale: float = 8.0, hillyness: float = 10.0, height: float = 0.5)
+
+   MuJoCo world with a Perlin-noise-based rugged heightfield.
+
+
+   .. py:attribute:: size
+      :value: (10.0, 10.0)
+
+
+
+   .. py:attribute:: resolution
+      :value: 128
+
+
+
+   .. py:attribute:: scale
+      :value: 8.0
+
+
+
+   .. py:attribute:: hillyness
+      :value: 10.0
+
+
+
+   .. py:attribute:: height
+      :value: 0.5
+
+
+
+   .. py:attribute:: heightmap
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot inside the amphitheater world.
+
+      :param mj_spec: The mujoco specification of the entity you want to spawn in to the world
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The spawn position of the entity. [0 ,0 ,0] by default.
+      :type spawn_position: :class:`list[float] | None`
+      :param small_gap: Add a small gap between the entity and the ground. This can help avoid physics glitches.
+      :type small_gap: :class:`float`
+      :param correct_for_bounding_box: In some environments, depending on the spawn_position, the bounding box might spawn inside
+                                       the ground. If enabled, this will automatically adjust the spawn position to avoid that.
+      :type correct_for_bounding_box: :class:`bool`
+
+
+
+.. py:class:: SimpleFlatWorld(floor_size: tuple[float, float, float] = (1, 1, 0.1))
+
+   Specification for a basic MuJoCo world.
+
+
+   .. py:attribute:: floor_size
+      :value: (1, 1, 0.1)
+
+
+
+   .. py:attribute:: spec
+      :type:  mujoco.MjSpec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float, float, float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot at a specific position in the world.
+
+      :param mj_spec: The MuJoCo specification for the robot.
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The position (x, y, z) to spawn the robot at, by default (0, 0, 0)
+      :type spawn_position: :class:`list[float`, :class:`float`, :class:`float] | None`, *optional*
+      :param small_gap: A small gap to add to the spawn position, by default 0.0
+      :type small_gap: :class:`float`, *optional*
+      :param correct_for_bounding_box: If True, the spawn position will be adjusted to account for the robot's bounding box,
+                                       by default True
+      :type correct_for_bounding_box: :class:`bool`, *optional*
+
+
+
+.. py:class:: TiltedFlatWorld(floor_size: tuple[float, float, float] = (1, 1, 0.1), tilt_degrees: float = 10.0, axis: str = 'y')
+
+   A simple MuJoCo world with a flat box floor tilted around the X, Y or Z axis.
+
+
+   .. py:attribute:: floor_size
+      :value: (1, 1, 0.1)
+
+
+
+   .. py:attribute:: tilt_degrees
+      :value: 10.0
+
+
+
+   .. py:attribute:: axis
+      :value: ''
+
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float, float, float] | None = None, *, small_gap: float = 0.01, correct_for_bounding_box: bool = True)
+
+      Spawn a robot at a specific position in the world.
+
+      :param mj_spec: The MuJoCo specification for the robot.
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The position (x, y, z) to spawn the robot at, by default (0, 0, 0)
+      :type spawn_position: :class:`list[float`, :class:`float`, :class:`float] | None`, *optional*
+      :param small_gap: A small gap to add to the spawn position, by default 0.0
+      :type small_gap: :class:`float`, *optional*
+      :param correct_for_bounding_box: If True, the spawn position will be adjusted to account for the robot's bounding box,
+                                       by default True
+      :type correct_for_bounding_box: :class:`bool`, *optional*
+
+
+

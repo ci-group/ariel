@@ -1,0 +1,41 @@
+:py:mod:`main_window`
+==========================================
+
+.. py:module:: ariel.viz.gui.viewer.main_window
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.viewer.main_window.AddNode
+
+
+
+
+.. py:class:: AddNode
+
+   Bases: :py:obj:`QNodeEditor.Node`
+
+   .. autoapi-inheritance-diagram:: ariel.viz.gui.viewer.main_window.AddNode
+      :parts: 1
+
+
+   .. py:attribute:: code
+      :value: 0
+
+
+
+   .. py:method:: create()
+
+
+   .. py:method:: evaluate(values: dict)
+
+
+   .. py:attribute:: dialog
+
+

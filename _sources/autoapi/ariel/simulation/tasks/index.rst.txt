@@ -1,0 +1,113 @@
+:py:mod:`tasks`
+================================
+
+.. py:module:: ariel.simulation.tasks
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   gate_learning/index.rst
+   targeted_locomotion/index.rst
+   turning_in_place/index.rst
+
+
+Package Contents
+----------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.tasks.x_speed
+   ariel.simulation.tasks.xy_displacement
+   ariel.simulation.tasks.y_speed
+   ariel.simulation.tasks.distance_to_target
+   ariel.simulation.tasks.turning_in_place
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.tasks.tasks
+
+
+.. py:function:: x_speed(xy1, xy2, dt) -> float
+
+   Calculate the speed in the x direction between two points.
+
+   :param xy1: Coordinates of the first point (x1, y1).
+   :type xy1: :class:`tuple`
+   :param xy2: Coordinates of the second point (x2, y2).
+   :type xy2: :class:`tuple`
+   :param dt: Time difference between the two points.
+   :type dt: :class:`float`
+
+   :returns: The speed in the x direction.
+   :rtype: :class:`float`
+
+
+.. py:function:: xy_displacement(xy1, xy2) -> float
+
+   Calculate the displacement between two points in 2D space.
+
+   :param xy1: Coordinates of the first point (x1, y1).
+   :type xy1: :class:`tuple`
+   :param xy2: Coordinates of the second point (x2, y2).
+   :type xy2: :class:`tuple`
+
+   :returns: The Euclidean distance between the two points.
+   :rtype: :class:`float`
+
+
+.. py:function:: y_speed(xy1, xy2, dt) -> float
+
+   Calculate the speed in the x direction between two points.
+
+   :param xy1: Coordinates of the first point (x1, y1).
+   :type xy1: :class:`tuple`
+   :param xy2: Coordinates of the second point (x2, y2).
+   :type xy2: :class:`tuple`
+   :param dt: Time difference between the two points.
+   :type dt: :class:`float`
+
+   :returns: The speed in the y direction.
+   :rtype: :class:`float`
+
+
+.. py:function:: distance_to_target(initial_position, target_position)
+
+   Calculate the Euclidean distance between the current position and the target position.
+
+   :param initial_position: The current position as (x, y).
+   :type initial_position: :class:`tuple`
+   :param target_position: The target position as (x, y).
+   :type target_position: :class:`tuple`
+
+   :returns: The distance between the two positions.
+   :rtype: :class:`float`
+
+
+.. py:function:: turning_in_place(xy_history) -> float
+
+   Determines the total angle turned by a robot based on its path history.
+
+   :param xy_history: The history of x, y coordinates from a simulation i.e. robot path.
+   :type xy_history: :class:`list[tuple]`
+
+   :returns: The total angle turned by the robot.
+   :rtype: :class:`float`
+
+
+.. py:data:: tasks
+   :value: ['Gate Learning', 'Targeted Locomotion', 'Turning In Place']
+
+

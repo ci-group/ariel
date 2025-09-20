@@ -1,0 +1,6 @@
+:py:mod:`backend_example`
+=======================================
+
+.. py:module:: ariel.viz.gui.backend_example
+
+

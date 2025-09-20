@@ -1,0 +1,30 @@
+:py:mod:`turning_in_place`
+=================================================
+
+.. py:module:: ariel.simulation.tasks.turning_in_place
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.tasks.turning_in_place.turning_in_place
+
+
+
+.. py:function:: turning_in_place(xy_history) -> float
+
+   Determines the total angle turned by a robot based on its path history.
+
+   :param xy_history: The history of x, y coordinates from a simulation i.e. robot path.
+   :type xy_history: :class:`list[tuple]`
+
+   :returns: The total angle turned by the robot.
+   :rtype: :class:`float`
+
+

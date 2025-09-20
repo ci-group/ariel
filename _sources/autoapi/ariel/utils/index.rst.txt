@@ -1,0 +1,23 @@
+:py:mod:`utils`
+=====================
+
+.. py:module:: ariel.utils
+
+.. autoapi-nested-parse::
+
+   Robogen Lite.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   mjspec_ops/index.rst
+   renderers/index.rst
+   runners/index.rst
+   video_recorder/index.rst
+
+

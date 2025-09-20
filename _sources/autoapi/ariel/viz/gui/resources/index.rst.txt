@@ -1,0 +1,6 @@
+:py:mod:`resources`
+=================================
+
+.. py:module:: ariel.viz.gui.resources
+
+
