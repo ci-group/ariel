@@ -18,7 +18,15 @@ USE_DEGREES = False
 
 
 def quaternion_from_axis_angle(axis: str, angle_deg):
-    """Compute a unit quaternion from an axis and angle (degrees)."""
+    """Compute a unit quaternion from an axis and angle (degrees).
+    
+    Parameters
+    -----------
+    axis : str[x|y|z]
+        Which of the 3 axis to turn in to quaternion.
+    angle_deg : float
+        Number of degrees for the axis.
+    """
     if axis == "x":
         axis = [1, 0, 0]
     elif axis == "y":

@@ -5,11 +5,15 @@ def turning_in_place(xy_history) -> float:
     """
     Determines the total angle turned by a robot based on its path history.
 
-    Parameters:
-    xy_history (list of tuples): The history of x, y coordinates from a simulation i.e. robot path.
+    Parameters
+    -----------
+    xy_history : list[tuple]
+        The history of x, y coordinates from a simulation i.e. robot path.
 
-    Returns:
-    float: The total angle turned by the robot.
+    Returns
+    --------
+    float
+        The total angle turned by the robot.
     """
 
     xy = np.array(xy_history)

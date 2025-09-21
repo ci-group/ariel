@@ -19,6 +19,7 @@ alg
 algpseudocodex
 ALIFE
 amphitheater
+amsmath
 analyzer
 anyio
 Aorus
@@ -34,11 +35,15 @@ ASTRK
 astropy
 asyncio
 aurelia
+autoapi
 autobuild
 AUTOCONNECT
 autolimits
 automodule
 autoref
+autosectionlabel
+autosummary
+Autosummary
 autoupdate
 avc
 avg
@@ -86,6 +91,7 @@ BTCLR
 buildc
 bvh
 bvhnum
+bysource
 bzr
 captionpos
 captionsetup
@@ -144,6 +150,7 @@ CONVEXHULL
 Cookiecuter
 cookiecutter
 cookiecutters
+copybutton
 copyfile
 copypath
 corne
@@ -176,6 +183,7 @@ debugpy
 deemphasized
 deepcopy
 defenses
+deflist
 Deniz
 devcontainers
 dialog
@@ -194,6 +202,7 @@ docstrings
 doctest
 doctests
 dof
+dollarmath
 donjayamanne
 donotpresent
 dotnet
@@ -240,6 +249,7 @@ fbcpg
 FBT
 fcl
 fdfind
+fieldlist
 figsize
 filelock
 FILTEREXACT
@@ -347,6 +357,7 @@ isinstance
 isort
 iterm
 itsdangerous
+ivar
 jabref
 Jakub
 jax
@@ -513,6 +524,7 @@ myst
 nala
 Nala
 nbody
+nbsphinx
 nbvh
 ncol
 ncols
@@ -695,6 +707,7 @@ rpc
 rpt
 RSE
 rstrip
+rtype
 RUF
 savefig
 schaffers
@@ -728,6 +741,7 @@ siunitx
 SLF
 slvs
 smam
+smartquotes
 sniffio
 socketio
 softwareupdate
@@ -772,6 +786,7 @@ tabularray
 Taichi
 talltblr
 tamasfe
+tasklist
 tblr
 testmod
 testpypi
@@ -812,6 +827,7 @@ Tyrrell
 underfull
 Underglow
 UNDERGLOW
+undoc
 uniapprox
 urdf
 usernamehw

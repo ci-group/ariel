@@ -37,7 +37,13 @@ class BrickModule(Module):
     module_type: str = ModuleType.BRICK
 
     def __init__(self, index: int) -> None:
-        """Initialize the brick module."""
+        """Initialize the brick module.
+        
+        Parameters
+        ----------
+        index : int
+            The index of the brick module being instantiated
+        """
         # Set the index of the module
         self.index = index
 
@@ -162,7 +168,7 @@ class BrickModule(Module):
         Parameters
         ----------
         angle : float
-            The angle in radians to rotate the brick.
+            The angle in degrees to rotate the brick.
         """
         # Convert angle to quaternion
         quat = qnp.from_euler_angles([

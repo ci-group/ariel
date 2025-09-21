@@ -1,9 +1,7 @@
-click
 matplotlib
 mujoco
 networkx
 nicegui
-noise
 numpy
 Pillow
 pydantic

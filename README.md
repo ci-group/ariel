@@ -2,7 +2,7 @@
 
 # ARIEL: Autonomous Robots through Integrated Evolution and Learning
 
-## Requirements
+<!-- ## Requirements
 
 * [vscode](https://code.visualstudio.com/)
   * [containers ext](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
@@ -14,7 +14,7 @@
   
 * [vscode containers tut](https://code.visualstudio.com/docs/devcontainers/tutorial)
 
----
+--- -->
 ## Installation and Running
 
 This project uses [uv](https://docs.astral.sh/uv/).
@@ -27,7 +27,7 @@ uv sync
 uv run examples/0_render_single_frame.py
 ```
 
-## TODO: Installation
+<!-- ## TODO: Installation
 
 ## Notes
 
@@ -36,7 +36,7 @@ uv run examples/0_render_single_frame.py
 ### Python Code Style Guide
 
 This repository uses the `numpydoc` documentation standard.
-For more information checkout: [numpydoc-style guide](https://numpydoc.readthedocs.io/en/latest/format.html#)
+For more information checkout: [numpydoc-style guide](https://numpydoc.readthedocs.io/en/latest/format.html#) -->
 
 <!-- ### Units
 
@@ -44,7 +44,7 @@ To ensure that Ariel uses a consistent set of units for all simulations, we use 
 
 For more information, see: [astropy: units and quantities](https://docs.astropy.org/en/stable/units/index.html) and [astropy: standard units](https://docs.astropy.org/en/stable/units/standard_units.html#standard-units). -->
 
-### MuJoCo
+<!-- ### MuJoCo
 
 #### Attachments
 
@@ -102,7 +102,7 @@ uv run examples/_hi_prob_dec.py
 uv add tool pipreqs
 pipreqs path/to/parse --mode no-pin --force
 uv add -r requirements.txt
-```
+``` -->
 
 
 <!-- # Ariel

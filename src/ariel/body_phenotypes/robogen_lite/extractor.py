@@ -68,4 +68,3 @@ class RoboGenCoreExtractor:
             None,
             None,
         )
-        )

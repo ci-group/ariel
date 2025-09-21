@@ -118,7 +118,21 @@ class RuggedTerrainWorld:
         small_gap: float = 0.0,
         correct_for_bounding_box: bool = True,
     ) -> None:
-        """Spawn a robot into the terrain world."""
+        """Spawn a robot inside the amphitheater world.
+        
+        Parameters
+        ----------
+        
+        mj_spec : mujoco.MjSpec
+            The mujoco specification of the entity you want to spawn in to the world
+        spawn_position : list[float] | None 
+            The spawn position of the entity. [0 ,0 ,0] by default.
+        small_gap : float
+            Add a small gap between the entity and the ground. This can help avoid physics glitches.
+        correct_for_bounding_box : bool
+            In some environments, depending on the spawn_position, the bounding box might spawn inside
+            the ground. If enabled, this will automatically adjust the spawn position to avoid that.
+        """
         if spawn_position is None:
             spawn_position = [0.0, 0.0, 0.0]
 

@@ -35,7 +35,7 @@ def simple_runner(
     steps_per_loop: int = 100,
 ) -> None:
     """
-    Run a simple simulation for a given duration.
+    Run a simple headless simulation for a given duration.
     
     Parameters
     ----------
@@ -52,7 +52,7 @@ def simple_runner(
     mujoco.mj_resetData(model, data)
 
     # Define action specification and set policy
-    data.ctrl = RNG.normal(scale=0.1, size=model.nu)
+    data.ctrl = RNG.normal(scale=0.1, size=model.nu) # type: ignore
 
     while data.time < duration:
         mujoco.mj_step(model, data, nstep=steps_per_loop)

@@ -17,34 +17,34 @@ ARIEL contains and requires many other libraries to function properly, and avoid
 
 1. Install `uv` (if not already installed):
 
-    ```bash
-    pip install uv
-    ```
+```bash
+pip install uv
+```
 
 2. Install ariel:
-    ```bash
-    uv add ariel
-    ```
+```bash
+uv add ariel
+```
 
 3. Install all dependencies and activate venv.
 If you installed ARIEL using `uv add` all packages should be installed, but if any were not installed this step should fix it.
 
 Run the following command to have uv create a virtual environment, double check that all dependencies are installed and install any if they are missing.
-    ```bash
-    uv sync
-    ```
+```bash
+uv sync
+```
 
 You can activate the uv virtual environment the same way you would activate a normal one using `.\.venv\Scripts\activate`
 
 ## Installation using dev containers
 
 1. Install the `dev containers` extension on vs code.
-![dev_containers](../resources/dev_containers_1.png)
+![dev_containers](../resources/dev_containers_1.jpg)
 
 2. Open the ARIEL folder in vs code
 
 3. You should automatically see an pop up on the bottom right of your screen that asks you to create a dev container for this project. This will create a `.devcontainer` folder in your directory. If you already have a `.devcontainer` folder, vs code will ask you to reopen the container.
-![reopen_dev_container](../resources/dev_containers_2.png)
+![reopen_dev_container](../resources/dev_containers_2.jpg)
 
 4. If you do not see the popup asking you to create/reopen the container you can do it manually using `ctrl+shift+p` (for windows) or `cmd+shift+p`(for mac) and select `Dev Containers: Build and Open in container`. This will create the container and install the requirements.
 
@@ -54,9 +54,9 @@ You can activate the uv virtual environment the same way you would activate a no
 
 2. Install ariel:
 
-    ```bash
-    pip install ariel
-    ```
+```bash
+pip install ariel
+```
 
 Pip is much less strict with dependencies than uv, so packages might conflict or might not be installed. You will need to fix the missing dependencies manually, if any arise.
 

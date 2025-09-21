@@ -17,13 +17,9 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": false
     },
-    "mypy.dmypyExecutable": "/home/vscode/.local/bin/dmypy",
-    "mypy.mypyExecutable": "/home/vscode/.local/bin/mypy",
     "python-envs.pythonProjects": [],
     "ruff.path": [
         "/home/vscode/.local/bin/ruff"
     ],
     "workbench.iconTheme": "material-icon-theme",
-    "mypy.enabled": false,
-    "ruff.enable": false
 }

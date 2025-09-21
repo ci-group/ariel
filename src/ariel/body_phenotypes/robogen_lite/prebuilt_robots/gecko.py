@@ -8,6 +8,13 @@ def gecko():
     """
     Create and attach bodies/sites, then print relative orientations between
     abdomen and spine bodies to debug hinge placement/orientation.
+
+    Body Description
+    ---------
+    The gecko body consists of a core module, 4 legs (flippers), a neck and a spine.
+    For better mobility the front two flippers have 2 hinges (joints), each rotated 90 degrees
+    to each other. Additionally, the back two flippers are rotated 45 degrees compared to the 
+    bode, to encourage forward movement.
     """
 
     core = CoreModule(

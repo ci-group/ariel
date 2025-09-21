@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run Script: uv run ${file}",
+            "label": "Run script with: uv run",
             "type": "shell",
             "command": "uv",
             "args": [
@@ -13,14 +13,28 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": true,
+                "presentation": {
+                    "reveal": "always",
+                    "panel": "new"
+                }
             },
-            "presentation": {
-                "reveal": "always",
-                // "panel": "new", // <-- uncomment for presistent panels
-                "focus": true
+        },
+        {
+            "label": "Run nox: docs",
+            "type": "shell",
+            "command": "nox",
+            "args": [
+                "--session=docs",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true,
+                "presentation": {
+                    "reveal": "always",
+                    "panel": "new"
+                }
             },
-            "problemMatcher": []
-        }
-    ]
+        },
+    ],
 }

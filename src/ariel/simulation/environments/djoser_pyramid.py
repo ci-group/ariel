@@ -149,11 +149,11 @@ class PyramidWorld:
         ----------
         mj_spec : mujoco.MjSpec
             The MuJoCo specification for the robot.
-        spawn_position : list[float, float, float] | None, optional
+        spawn_position : list[float, float, float] | None
             The position (x, y, z) to spawn the robot at, by default (0, 0, 0)
-        small_gap : float, optional
+        small_gap : float
             A small gap to add to the spawn position, by default 0.0
-        correct_for_bounding_box : bool, optional
+        correct_for_bounding_box : bool
             If True, the spawn position will be adjusted to account for the robot's bounding box,
             by default True
         """

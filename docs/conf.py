@@ -1,13 +1,15 @@
 """Sphinx configuration."""
 
-project = "ARIEL"
-author = "CI Group"
-copyright = "2025, CI Group"
-
+# --------- BASICS --------- #
 html_theme = "shibuya"
 
-# Sphinx
+project = "ARIEL"
+
+copyright = "Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors"
+author = "Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors"
+
 extensions = [
+    # "autodoc2",
     "autoapi.extension",
     "jupyter_sphinx",
     "myst_parser",
@@ -19,18 +21,53 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
-    "nbsphinx",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.todo",
 ]
 
-# Myst notebook settings
-nbsphinx_execute = "never" # Do not run notebooks during build
+add_module_names = False
+autosectionlabel_prefix_document = True
 
-# AutoAPI
+# --------- SHIBUYA --------- #
+templates_path = ["_templates"]
+# html_title =
+# html_logo = 
+html_favicon = "resources/ariel_favicon.ico"
+
+# --------- MYST --------- #
+myst_enable_extensions = [
+    "amsmath",
+    "attrs_inline",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "linkify",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+
+
+# --------- AUTODOC2 --------- #
+# autodoc2_packages = [
+#     "../src/ariel",
+# ]
+
+# --------- NBSPHINX --------- #
+# Myst notebook settings
+nbsphinx_execute = "never"  # Do not run notebooks during build
+
+# --------- AUTOAPI --------- #
 autoapi_add_toctree_entry = True
-autoapi_dirs = ["../src"]
+autoapi_dirs = ["../src/ariel/"]
 autoapi_template_dir = "_build/autoapi"
 autoapi_options = [
-    # "members",
+    "members",
     "undoc-members",
     "special-members",
     "show-inheritance",
@@ -41,12 +78,13 @@ autoapi_options = [
 ]
 add_module_names = False
 autoapi_keep_module_path = False
+autoapi_template_dir = "_templates/autoapi"
 
-# Autosummary settings
+# --------- AUTOSUMMARY --------- #
 autosummary_generate = True
 autosummary_generate_overwrite = True
 
-# Autodoc settings
+# --------- AUTODOC --------- #
 autodoc_default_options: dict[str, bool | str | list[str]] = {
     # "autodoc_preserve_defaults": True,
     # "autodoc_type_aliases": False,
@@ -69,11 +107,11 @@ autodoc_default_options: dict[str, bool | str | list[str]] = {
     # "exclude-members": [",
 }
 
-# Napoleon settings
+# --------- NAPOLEON --------- #
 napoleon_attr_annotations = True
 napoleon_google_docstring = True
 napoleon_include_init_with_doc = True
-napoleon_include_private_with_doc = True
+napoleon_include_private_with_doc = False
 napoleon_include_special_with_doc = True
 napoleon_numpy_docstring = True
 napoleon_preprocess_types = True

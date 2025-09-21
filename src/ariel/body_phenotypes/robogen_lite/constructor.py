@@ -28,7 +28,8 @@ if TYPE_CHECKING:
 
 def construct_mjspec_from_graph(graph: Graph) -> CoreModule:
     """
-    Construct a MuJoCo specification from a graph representation.
+    Construct a MuJoCo specification from a graph representation. Can be used for 
+    constructing the body of a robot after crossover using the graph representation.
 
     Parameters
     ----------
