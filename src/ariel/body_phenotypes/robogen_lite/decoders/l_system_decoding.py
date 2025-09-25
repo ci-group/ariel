@@ -58,7 +58,7 @@ class LSystemDecoder:
             Number of iterations to apply the rules.
         module_type_map : dict, optional
             Maps L-system symbols to module types (for node attributes).
-        """
+    """
         self.axiom = axiom
         self.rules = rules
         self.iterations = iterations
@@ -79,24 +79,49 @@ class LSystemDecoder:
         """
         Decode the L-system string into a directed graph.
         Supports branches using '[' (push) and ']' (pop) as in classic L-systems.
-        Each symbol is a module; edges are created from the current parent node.
+        Each gene can encode orientation as SYMBOL(orientation), e.g., B(90).
+        Orientation is stored as a node attribute (default 0 if not specified).
         """
+        import re
         stack = []  # Stack for branching
         prev_node = None
         idx = 0
-        for symbol in self.lsystem_string:
-            if symbol == '[':
-                # Push the current node onto the stack
+        # Regex to match symbol with optional orientation, e.g., B(90)
+        token_pattern = re.compile(r"([A-Za-z])(?:\((\d{1,3})\))?")
+        # Tokenize the string, preserving brackets
+        tokens = []
+        i = 0
+        s = self.lsystem_string
+        while i < len(s):
+            if s[i] in '[]':
+                tokens.append(s[i])
+                i += 1
+            elif s[i].isalpha():
+                m = token_pattern.match(s, i)
+                if m:
+                    symbol = m.group(1)
+                    orientation = int(m.group(2)) if m.group(2) is not None else 0
+                    tokens.append((symbol, orientation))
+                    i = m.end()
+                else:
+                    tokens.append((s[i], 0))
+                    i += 1
+            else:
+                i += 1  # skip any other character
+
+        for token in tokens:
+            if token == '[':
                 stack.append(prev_node)
-            elif symbol == ']':
-                # Pop the node from the stack
+            elif token == ']':
                 if stack:
                     prev_node = stack.pop()
             else:
+                symbol, orientation = token
                 node_label = f"{symbol}{idx}"
                 self.graph.add_node(
                     node_label,
                     type=self.module_type_map.get(symbol, symbol),
+                    orientation=orientation,
                 )
                 if prev_node is not None:
                     self.graph.add_edge(prev_node, node_label)
@@ -143,9 +168,9 @@ class LSystemDecoder:
 if __name__ == "__main__":
     # Example: F->F+F, axiom F, 3 iterations
     axiom = "F"
-    rules = {"F": "C[H][B][H][N]",
-             "H" : "HB",
-             "B" : "BH"}
+    rules = {"F": "C[H(180)][B(45)][H(90)][N]",
+             "H" : "H(45)B",
+             "B" : "BH(45)"}
     module_type_map = {"C": "CORE", "H": "HINGE", "B": "BRICK"}
     decoder = LSystemDecoder(axiom, rules, iterations=3, module_type_map=module_type_map)
     decoder.draw_graph()
