@@ -40,7 +40,7 @@ from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleRotatio
 SEED = 42
 DPI = 300
 
-class SymbolToModuleType(Enum):
+class SymbolToModuleType(Enum): # for auto-transcoding between L-system string characters and ModuleType elements
     """Enum for module types."""
 
     C = 'CORE'
@@ -65,8 +65,9 @@ class LSystemDecoder:
         self.rules = rules
         self.iterations = iterations
         self.graph = nx.DiGraph()
-        self.lsystem_string = self.expand_lsystem()
-        self.build_graph_from_string(self.lsystem_string)
+        self.lsystem_string = self.expand_lsystem() # first we expand the string applying recursively all the rules 
+                                                    # and return the fully expanded L-system string intermediate genotype 
+        self.build_graph_from_string(self.lsystem_string) # we create the graph with networkx from a fully expanded L-system string 
 
     def expand_lsystem(self, axiom: str = None, rules: Dict[str, str] = None, iterations: int = None) -> str:
         """
@@ -74,19 +75,19 @@ class LSystemDecoder:
         Each token is replaced in place by its rule expansion (not appended after).
         """
         gene_pattern = re.compile(r"([A-Za-z](?:\(\d{1,3}(?:,[A-Za-z]+)?\))?)|\[|\]")
-        axiom = axiom if axiom is not None else self.axiom
-        rules = rules if rules is not None else self.rules
-        iterations = iterations if iterations is not None else self.iterations
+        axiom = axiom if axiom is not None else self.axiom # if we call it without axiom defined then we pick the one already assigned
+        rules = rules if rules is not None else self.rules # same for rules
+        iterations = iterations if iterations is not None else self.iterations # same for iterations
 
         def expand_all(s, depth):
-            if depth == 0:
+            if depth == 0: # end of recursion ... just return the string.
                 return s
             tokens = [m.group(0) for m in gene_pattern.finditer(s)]
             result = []
             i = 0
-            while i < len(tokens):
+            while i < len(tokens): #go through all the token identified
                 token = tokens[i]
-                if token == '[':
+                if token == '[': 
                     # Find the matching closing bracket
                     bracket_level = 1
                     j = i + 1
@@ -167,7 +168,7 @@ class LSystemDecoder:
                     m = token_pattern.match(node)
                     if m:
                         symbol = m.group(1)
-                        try:
+                        try: # checl if the type of elements is authorized (part of ModuleType enum)
                             symbol_to_look = SymbolToModuleType[symbol]
                             node_type = ModuleType[symbol_to_look.value]
                         except KeyError:
@@ -177,26 +178,26 @@ class LSystemDecoder:
                             if core_count > 1:
                                 raise ValueError("L-system string contains more than one CORE module.")
                         if m.group(2) is not None:
-                            try:
+                            try: # check if the rotation is part of the allowed rotations (Module RotationsTheta enum)
                                 rotation_val = int(m.group(2))
                                 rotation_enum = next((r for r in ModuleRotationsTheta if r.value == rotation_val), ModuleRotationsTheta.DEG_0)
-                            except Exception:
+                            except Exception: # if error then default to 0
                                 rotation_enum = ModuleRotationsTheta.DEG_0
-                        else:
+                        else: # if no rotation is provided then is is defaulted to 0
                             rotation_enum = ModuleRotationsTheta.DEG_0
                         face_str = m.group(3) if m.group(3) is not None else "FRONT"
-                        try:
+                        try: # check if the face is in the allowed faces (Module ModuleFaces enum)
                             face = ModuleFaces[face_str]
-                        except KeyError:
+                        except KeyError: # if error then default to FRONT
                             face = ModuleFaces.FRONT
-                        node_label = f"{symbol}{idx_counter[0]}"
+                        node_label = f"{symbol}{idx_counter[0]}" # generate a unique ID for the node
                         self.graph.add_node(
                             node_label,
                             type=node_type,
                             rotation=rotation_enum,
                             face=face,
-                        )
-                        if parent is not None:
+                        ) #create and add the node to the graph
+                        if parent is not None: # if there is a parent, create a link in the graph
                             self.graph.add_edge(parent, node_label)
                         idx_counter[0] += 1
                         parent = node_label
