@@ -241,4 +241,21 @@ class LSystemDecoder:
         else:
             plt.show()
 
+# in case we want to test on an example
 
+def main():
+    # Example: axiom with orientation and face
+    axiom = "C[H(0,FRONT)][H(0,LEFT)][H(0,RIGHT)]"
+    rules = {"H(0,FRONT)" :  "H(0,FRONT)B(0,FRONT)",
+             "H(0,LEFT)" :  "H(0,LEFT)B(0,FRONT)",
+             "H(0,RIGHT)" :  "H(0,RIGHT)B(0,FRONT)",
+            }
+    decoder = LSystemDecoder(axiom, rules, iterations=4)
+    print("Nodes and attributes:")
+    for n, d in decoder.graph.nodes(data=True):
+        print(n, d)
+    print(decoder.lsystem_string)
+    decoder.draw_graph()
+
+if __name__ == "__main__":
+    main()
