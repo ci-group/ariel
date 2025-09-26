@@ -1,21 +1,4 @@
-"""TODO(jmdm): description of script.
-
-Date:       2025-07-08
-Status:     In progress ⚙️
-
-Notes
------
-    *
-
-Todo:
-----
-    [ ]
-
-References
-----------
-    [1]
-
-"""
+"""TODO(jmdm): description of script."""
 
 # Standard library
 from pathlib import Path

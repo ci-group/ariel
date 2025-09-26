@@ -19,22 +19,20 @@ from mujoco import viewer
 from rich.console import Console
 
 # Local libraries
-from ariel.body_phenotypes.robogen_lite.config import (NUM_OF_FACES,
-                                                       NUM_OF_ROTATIONS,
-                                                       NUM_OF_TYPES_OF_MODULES)
-from ariel.body_phenotypes.robogen_lite.constructor import \
-    construct_mjspec_from_graph
+from ariel.body_phenotypes.robogen_lite.config import (
+    NUM_OF_FACES,
+    NUM_OF_ROTATIONS,
+    NUM_OF_TYPES_OF_MODULES,
+)
+from ariel.body_phenotypes.robogen_lite.constructor import (
+    construct_mjspec_from_graph,
+)
 from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
-    HighProbabilityDecoder, save_graph_as_json)
+    HighProbabilityDecoder,
+    save_graph_as_json,
+)
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
-from ariel.simulation.environments.amphiteater_heightmap import \
-    AmphitheatreTerrainWorld
-from ariel.simulation.environments.boxy_heightmap import BoxyRugged
-from ariel.simulation.environments.crater_heightmap import CraterTerrainWorld
-from ariel.simulation.environments.djoser_pyramid import PyramidWorld
-from ariel.simulation.environments.rugged_heightmap import RuggedTerrainWorld
-from ariel.simulation.environments.simple_flat_world import SimpleFlatWorld
-from ariel.simulation.environments.simple_tilted_world import TiltedFlatWorld
+from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.renderers import single_frame_renderer
 
 if TYPE_CHECKING:
@@ -111,7 +109,7 @@ def run(
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = True
 
     # MuJoCo basics
-    world = AmphitheatreTerrainWorld()
+    world = SimpleFlatWorld()
 
     # Set random colors for geoms
     for i in range(len(robot.spec.geoms)):

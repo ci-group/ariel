@@ -1,8 +1,4 @@
-"""TODO(jmdm): description of script.
-
-Date:       2025-07-08
-Status:     Completed ✅
-"""
+"""TODO(jmdm): description of script."""
 
 # Third-party libraries
 import mujoco
@@ -10,8 +6,11 @@ import numpy as np
 import quaternion as qnp
 
 # Local libraries
-from ariel.body_phenotypes.robogen_lite.config import (IDX_OF_CORE,
-                                                       ModuleFaces, ModuleType)
+from ariel.body_phenotypes.robogen_lite.config import (
+    IDX_OF_CORE,
+    ModuleFaces,
+    ModuleType,
+)
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
 
 # Type Aliases
@@ -77,7 +76,7 @@ class CoreModule(Module):
         shift = -1  # mujoco uses xyzw instead of wxyz
         self.sites[ModuleFaces.FRONT] = core.add_site(
             name=f"{core_name}-front",
-            pos=[0, CORE_DIMENSIONS[1] * 2, -CORE_DIMENSIONS[1]/2],
+            pos=[0, CORE_DIMENSIONS[1] * 2, -CORE_DIMENSIONS[1] / 2],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(
@@ -94,7 +93,7 @@ class CoreModule(Module):
         )
         self.sites[ModuleFaces.BACK] = core.add_site(
             name=f"{core_name}-back",
-            pos=[0, 0, -CORE_DIMENSIONS[1]/2],
+            pos=[0, 0, -CORE_DIMENSIONS[1] / 2],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(
@@ -111,7 +110,11 @@ class CoreModule(Module):
         )
         self.sites[ModuleFaces.LEFT] = core.add_site(
             name=f"{core_name}-left",
-            pos=[-CORE_DIMENSIONS[0], CORE_DIMENSIONS[1], -CORE_DIMENSIONS[1]/2],
+            pos=[
+                -CORE_DIMENSIONS[0],
+                CORE_DIMENSIONS[1],
+                -CORE_DIMENSIONS[1] / 2,
+            ],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(
@@ -128,7 +131,11 @@ class CoreModule(Module):
         )
         self.sites[ModuleFaces.RIGHT] = core.add_site(
             name=f"{core_name}-right",
-            pos=[CORE_DIMENSIONS[0], CORE_DIMENSIONS[1], -CORE_DIMENSIONS[1]/2],
+            pos=[
+                CORE_DIMENSIONS[0],
+                CORE_DIMENSIONS[1],
+                -CORE_DIMENSIONS[1] / 2,
+            ],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(

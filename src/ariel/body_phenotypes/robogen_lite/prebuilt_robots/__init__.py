@@ -1,1 +1,1 @@
-"""Robogen Lite."""
+"""Pre-built ARIEL-robots."""

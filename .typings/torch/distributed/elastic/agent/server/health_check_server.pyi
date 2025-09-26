@@ -1,0 +1,34 @@
+from typing import Callable
+
+__all__ = ['HealthCheckServer', 'create_healthcheck_server']
+
+class HealthCheckServer:
+    """
+    Interface for health check monitoring server, which can be extended
+    by starting tcp/http server on the specified port.
+
+    Args:
+
+        alive_callback: Callable[[], int], callback to last progress time of agent
+
+        port: int, port number to start tcp/http server
+
+        timeout: int, timeout seconds to decide agent is alive/dead
+    """
+    _alive_callback: Callable[[], int]
+    _port: int
+    _timeout: int
+    def __init__(self, alive_callback: Callable[[], int], port: int, timeout: int) -> None: ...
+    def start(self) -> None:
+        """
+        Unsupported functionality for Pytorch, doesn't start any health check server
+        """
+    def stop(self) -> None:
+        """
+        Function to stop health check server
+        """
+
+def create_healthcheck_server(alive_callback: Callable[[], int], port: int, timeout: int) -> HealthCheckServer:
+    """
+    creates health check server object
+    """

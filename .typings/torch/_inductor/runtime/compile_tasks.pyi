@@ -1,0 +1,9 @@
+import functools
+from torch._inductor.runtime.triton_heuristics import CachingAutotuner as CachingAutotuner
+from types import ModuleType
+from typing import Any, Callable
+
+def _reload_python_module(key: str, path: str, set_sys_modules: bool = True) -> ModuleType: ...
+@functools.cache
+def _set_triton_ptxas_path() -> None: ...
+def _worker_compile_triton(load_kernel: Callable[[], CachingAutotuner], extra_env: dict[str, str], extra_config: dict[str, Any]) -> tuple[CachingAutotuner, int]: ...

@@ -1,0 +1,1 @@
+from torch.ao.nn.quantized.modules.utils import WeightedQuantizedModule as WeightedQuantizedModule, _hide_packed_params_repr as _hide_packed_params_repr, _ntuple_from_first as _ntuple_from_first, _pair_from_first as _pair_from_first, _quantize_weight as _quantize_weight

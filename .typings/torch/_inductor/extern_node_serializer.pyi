@@ -1,0 +1,6 @@
+from torch._export.serde.schema import ExternKernelNode as ExternKernelNode, ExternKernelNodes as ExternKernelNodes, Node as Node
+from torch._export.serde.serialize import EnumEncoder as EnumEncoder, _dataclass_to_dict as _dataclass_to_dict
+from torch._inductor.ir import ExternKernelNode as inductor_ExternKernelNode
+
+def serialize_extern_kernel_node(extern_kernel_node: inductor_ExternKernelNode) -> ExternKernelNode: ...
+def extern_node_json_serializer(extern_kernel_nodes: list[inductor_ExternKernelNode]) -> str: ...

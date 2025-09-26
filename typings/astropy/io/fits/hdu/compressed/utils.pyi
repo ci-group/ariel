@@ -1,3 +1,0 @@
-__all__ = ['_validate_tile_shape']
-
-def _validate_tile_shape(*, tile_shape, compression_type, image_header): ...
