@@ -56,115 +56,154 @@ class LSystemDecoder:
         axiom: str,
         rules: Dict[str, str],
         iterations: int = 2,
-        module_type_map: Optional[Dict[str, str]] = None,
     ) -> None:
         """
         Initialize the L-system decoder.
-
-        Parameters
-        ----------
-        axiom : str
-            The initial string (genotype) of the L-system.
-        rules : dict
-            Production rules for the L-system.
-        iterations : int
-            Number of iterations to apply the rules.
-        module_type_map : dict, optional
-            Maps L-system symbols to module types (for node attributes).
-    """
+        Automatically expands the L-system and builds the graph.
+        """
         self.axiom = axiom
         self.rules = rules
         self.iterations = iterations
-        self.module_type_map = module_type_map or {}
-        self.lsystem_string = self._generate_lsystem()
         self.graph = nx.DiGraph()
-        self._decode_lsystem_to_graph()
+        self.lsystem_string = self.expand_lsystem()
+        self.build_graph_from_string(self.lsystem_string)
 
-    def _generate_lsystem(self) -> str:
-        """Generate the L-system string after the given number of iterations."""
-        current = self.axiom
-        for _ in range(self.iterations):
-            next_str = "".join(self.rules.get(c, c) for c in current)
-            current = next_str
-        return current
+    def expand_lsystem(self, axiom: str = None, rules: Dict[str, str] = None, iterations: int = None) -> str:
+        """
+        Generate the L-system string after the given number of iterations, recursively expanding inside brackets as well, but stopping at the required depth.
+        Each token is replaced in place by its rule expansion (not appended after).
+        """
+        gene_pattern = re.compile(r"([A-Za-z](?:\(\d{1,3}(?:,[A-Za-z]+)?\))?)|\[|\]")
+        axiom = axiom if axiom is not None else self.axiom
+        rules = rules if rules is not None else self.rules
+        iterations = iterations if iterations is not None else self.iterations
 
-    def _decode_lsystem_to_graph(self) -> None:
-        """
-        Decode the L-system string into a directed graph.
-        Supports branches using '[' (push) and ']' (pop) as in classic L-systems.
-        Each gene can encode orientation and face as SYMBOL(rotation,face), e.g., B(90,FRONT).
-        Orientation and face are stored as node attributes (defaults: 0, FRONT).
-        """
-        stack = []  # Stack for branching
-        prev_node = None
-        idx = 0
-        # Regex to match symbol with optional rotation and face, e.g., B(90,FRONT)
-        token_pattern = re.compile(r"([A-Za-z])(?:\((\d{1,3})(?:,([A-Za-z]+))?\))?")
-        # Tokenize the string, preserving brackets
-        tokens = []
-        i = 0
-        s = self.lsystem_string
-        core_count = 0
-        while i < len(s):
-            if s[i] in '[]':
-                tokens.append(s[i])
-                i += 1
-            elif s[i].isalpha():
-                m = token_pattern.match(s, i)
-                if m:
-                    symbol = m.group(1)
-                    # Enforce node type from ModuleType enum
-                    try:
-                        symbol_to_look = SymbolToModuleType[symbol]
-                        node_type = ModuleType[symbol_to_look.value]
-                    except KeyError:
-                        raise ValueError(f"Symbol '{symbol}' is not a valid ModuleType enum name.")
-                    if node_type == ModuleType.CORE:
-                        core_count += 1
-                        if core_count > 1:
-                            raise ValueError("L-system string contains more than one CORE module.")
-                    # Parse and validate orientation
-                    if m.group(2) is not None:
-                        try:
-                            rotation_val = int(m.group(2))
-                            rotation_enum = next((r for r in ModuleRotationsTheta if r.value == rotation_val), ModuleRotationsTheta.DEG_0)
-                        except Exception:
-                            rotation_enum = ModuleRotationsTheta.DEG_0
-                    else:
-                        rotation_enum = ModuleRotationsTheta.DEG_0
-                    face_str = m.group(3) if m.group(3) is not None else "FRONT"
-                    try:
-                        face = ModuleFaces[face_str]
-                    except KeyError:
-                        face = ModuleFaces.FRONT
-                    tokens.append((symbol, node_type, rotation_enum, face))
-                    i = m.end()
-                else:
-                    # fallback: treat as NONE
-                    tokens.append((s[i], ModuleType.NONE, ModuleRotationsTheta.DEG_0, ModuleFaces.FRONT))
+        def expand_all(s, depth):
+            if depth == 0:
+                return s
+            tokens = [m.group(0) for m in gene_pattern.finditer(s)]
+            result = []
+            i = 0
+            while i < len(tokens):
+                token = tokens[i]
+                if token == '[':
+                    # Find the matching closing bracket
+                    bracket_level = 1
+                    j = i + 1
+                    while j < len(tokens) and bracket_level > 0:
+                        if tokens[j] == '[':
+                            bracket_level += 1
+                        elif tokens[j] == ']':
+                            bracket_level -= 1
+                        j += 1
+                    # Recursively expand the inside of the brackets
+                    inside = expand_all(''.join(tokens[i+1:j-1]), depth)
+                    result.append('[' + inside + ']')
+                    i = j
+                elif token == ']':
                     i += 1
-            else:
-                i += 1  # skip any other character
+                elif token in rules:
+                    # Replace the token in place with its expansion
+                    replacement = rules[token]
+                    expanded = expand_all(replacement, depth-1)
+                    result.append(expanded)  # This replaces the token at this position
+                    i += 1
+                else:
+                    result.append(token)
+                    i += 1
+            return ''.join(result)
 
-        for token in tokens:
-            if token == '[':
-                stack.append(prev_node)
-            elif token == ']':
-                if stack:
-                    prev_node = stack.pop()
-            else:
-                symbol, node_type, rotation_enum, face = token
-                node_label = f"{symbol}{idx}"
-                self.graph.add_node(
-                    node_label,
-                    type=node_type,
-                    rotation=rotation_enum,
-                    face=face,
-                )
-                if prev_node is not None:
-                    self.graph.add_edge(prev_node, node_label)
-                prev_node = node_label
-                idx += 1
+        return expand_all(axiom, iterations)
+
+    def build_graph_from_string(self, lsystem_string: str) -> None:
+        """
+        Build the graph from a fully expanded L-system string.
+        """
+        self.graph = nx.DiGraph()
+        token_pattern = re.compile(r"([A-Za-z])(?:\((\d{1,3})(?:,([A-Za-z]+))?\))?")
+        s = lsystem_string
+        core_count = 0
+        idx_counter = [0]  # mutable counter for unique node labels
+
+        def parse_tokens(s):
+            # Parse the string into a tree of (gene, [children])
+            tokens = []
+            i = 0
+            while i < len(s):
+                if s[i] == '[':
+                    # Find matching bracket
+                    bracket_level = 1
+                    j = i + 1
+                    while j < len(s) and bracket_level > 0:
+                        if s[j] == '[':
+                            bracket_level += 1
+                        elif s[j] == ']':
+                            bracket_level -= 1
+                        j += 1
+                    subtree = parse_tokens(s[i+1:j-1])
+                    tokens.append(subtree)
+                    i = j
+                elif s[i] == ']':
+                    i += 1
+                elif s[i].isalpha():
+                    m = token_pattern.match(s, i)
+                    if m:
+                        tokens.append(s[i:m.end()])
+                        i = m.end()
+                    else:
+                        tokens.append(s[i])
+                        i += 1
+                else:
+                    i += 1
+            return tokens
+
+        def build_graph(tree, parent=None):
+            nonlocal core_count
+            for node in tree:
+                if isinstance(node, list):
+                    # This is a branch, attach to the same parent
+                    build_graph(node, parent)
+                else:
+                    m = token_pattern.match(node)
+                    if m:
+                        symbol = m.group(1)
+                        try:
+                            symbol_to_look = SymbolToModuleType[symbol]
+                            node_type = ModuleType[symbol_to_look.value]
+                        except KeyError:
+                            raise ValueError(f"Symbol '{symbol}' is not a valid ModuleType enum name.")
+                        if node_type == ModuleType.CORE:
+                            core_count += 1
+                            if core_count > 1:
+                                raise ValueError("L-system string contains more than one CORE module.")
+                        if m.group(2) is not None:
+                            try:
+                                rotation_val = int(m.group(2))
+                                rotation_enum = next((r for r in ModuleRotationsTheta if r.value == rotation_val), ModuleRotationsTheta.DEG_0)
+                            except Exception:
+                                rotation_enum = ModuleRotationsTheta.DEG_0
+                        else:
+                            rotation_enum = ModuleRotationsTheta.DEG_0
+                        face_str = m.group(3) if m.group(3) is not None else "FRONT"
+                        try:
+                            face = ModuleFaces[face_str]
+                        except KeyError:
+                            face = ModuleFaces.FRONT
+                        node_label = f"{symbol}{idx_counter[0]}"
+                        self.graph.add_node(
+                            node_label,
+                            type=node_type,
+                            rotation=rotation_enum,
+                            face=face,
+                        )
+                        if parent is not None:
+                            self.graph.add_edge(parent, node_label)
+                        idx_counter[0] += 1
+                        parent = node_label
+            return parent
+
+        tree = parse_tokens(s)
+        build_graph(tree)
 
     def get_graph(self) -> DiGraph:
         """Return the generated NetworkX DiGraph."""
@@ -201,3 +240,5 @@ class LSystemDecoder:
             plt.savefig(save_file, dpi=DPI)
         else:
             plt.show()
+
+
