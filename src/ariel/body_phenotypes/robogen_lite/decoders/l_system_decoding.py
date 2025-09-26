@@ -2,9 +2,9 @@
 """Example of L-system-based decoding for modular robot graphs.
 
 Author:     omn (with help from GitHub Copilot)
-Date:       2025-09-25
+Date:       2025-09-26
 Py Ver:     3.12
-OS:         macOS Sequoia 15.3.1
+OS:         macOS Tahoe 26
 Status:     Prototype
 
 Notes
