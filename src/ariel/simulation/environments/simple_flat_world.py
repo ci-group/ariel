@@ -51,15 +51,17 @@ class SimpleFlatWorld:
             name=grid_name,
             type=mujoco.mjtTexture.mjTEXTURE_2D,
             builtin=mujoco.mjtBuiltin.mjBUILTIN_CHECKER,
-            rgb1=[0.1, 0.2, 0.3],
-            rgb2=[0.2, 0.3, 0.4],
+            # rgb1=[0.1, 0.2, 0.3],
+            # rgb2=[0.2, 0.3, 0.4],
+            rgb1=[0,0,0],
+            rgb2=[1,1,1],
             width=600,  # pixels
             height=600,  # pixels
         )
         spec.add_material(
             name=grid_name,
             textures=["", f"{grid_name}"],
-            texrepeat=[3, 3],
+            texrepeat=[10, 10],
             texuniform=True,
             reflectance=0.2,
         )
@@ -87,6 +89,7 @@ class SimpleFlatWorld:
         *,
         small_gap: float = 0.0,
         correct_for_bounding_box: bool = True,
+        prefix_id = 0
     ) -> None:
         """
         Spawn a robot at a specific position in the world.
@@ -113,6 +116,7 @@ class SimpleFlatWorld:
             data = mujoco.MjData(model)
             mujoco.mj_step(model, data, nstep=10)
             min_corner, _ = compute_geom_bounding_box(model, data)
+            print(compute_geom_bounding_box(model, data))
             spawn_position[2] -= min_corner[2]
 
         # If small_gap is True, add a small gap to the spawn position
@@ -124,7 +128,7 @@ class SimpleFlatWorld:
 
         spawn = spawn_site.attach_body(
             body=mj_spec.worldbody,
-            prefix="robot-",
+            prefix=f"robot-{prefix_id}",
         )
 
         spawn.add_freejoint()

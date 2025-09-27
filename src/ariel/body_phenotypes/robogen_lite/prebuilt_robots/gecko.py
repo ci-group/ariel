@@ -63,14 +63,14 @@ def gecko():
     bl_leg = HingeModule(
         index=9,
     )
-    bl_leg.rotate(45)
+    bl_leg.rotate(0)
     bl_flipper = BrickModule(
         index=10,
     )
     br_leg = HingeModule(
         index=11,
     )
-    br_leg.rotate(-45)
+    br_leg.rotate(0)
     br_flipper = BrickModule(
         index=12,
     )
