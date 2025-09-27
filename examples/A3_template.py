@@ -113,8 +113,7 @@ def nn_controller(
     outputs = np.tanh(np.dot(layer2, w3))
 
     # Scale the outputs
-    outputs *= outputs * np.pi
-    return outputs
+    return outputs * np.pi
 
 
 def experiment(
@@ -254,10 +253,11 @@ def main() -> None:
         tracker=tracker,
     )
 
-    experiment(robot=core, controller=ctrl, mode="launcher")
+    experiment(robot=core, controller=ctrl, mode="frame")
 
-    show_xpos_history(tracker.history["xpos"][0])
+    # show_xpos_history(tracker.history["xpos"][0])
 
 
 if __name__ == "__main__":
-    main()
+    for i in range(1000):
+        main()
