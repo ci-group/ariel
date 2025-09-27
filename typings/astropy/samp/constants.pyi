@@ -1,9 +1,0 @@
-from _typeshed import Incomplete
-
-__all__ = ['SAMP_STATUS_OK', 'SAMP_STATUS_WARNING', 'SAMP_STATUS_ERROR', 'SAFE_MTYPES', 'SAMP_ICON']
-
-SAMP_STATUS_OK: str
-SAMP_STATUS_WARNING: str
-SAMP_STATUS_ERROR: str
-SAFE_MTYPES: Incomplete
-SAMP_ICON: Incomplete

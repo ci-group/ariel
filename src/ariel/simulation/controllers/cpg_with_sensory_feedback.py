@@ -1,8 +1,5 @@
 """CPG model with attached sensory feedback.
 
-Date:       2025-05-29
-Status:     In progress ⚙️
-
 Sources:
 -------
     [1] DOI: 10.5772/59186

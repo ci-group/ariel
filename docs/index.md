@@ -41,6 +41,7 @@ Installation Guide <source/installation_guide>
 Evolutionary Computing Course Documentation <source/ec_course_docs>
 GUI <source/GUI>
 Your first EA with ARIEL <source/ea_intro/ea_example>
+MuJoCo Data Variables Documentation <source/Mujoco_docs/mujoco_docs>
 ```
 ---
 

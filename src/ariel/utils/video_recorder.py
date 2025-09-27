@@ -1,31 +1,4 @@
-"""TODO(jmdm): description of script.
-
-Author:     jmdm
-Date:       2025-05-02
-Py Ver:     3.12
-OS:         macOS  Sequoia 15.3.1
-Hardware:   M4 Pro
-
-Status:     In progress ⚙️
-Status:     Paused ⏸️
-Status:     Completed ✅
-Status:     Incomplete ❌
-Status:     Broken ⚠️
-Status:     To Improve ⬆️
-
-Sources
------
-    1.
-
-Notes
------
-    *
-
-Todo
------
-    * [ ]
-
-"""
+"""TODO(jmdm): description of script."""
 
 # Standard library
 import datetime

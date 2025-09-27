@@ -1,1 +1,1 @@
-"""Robogen Lite."""
+"""Types of robotic controllers."""

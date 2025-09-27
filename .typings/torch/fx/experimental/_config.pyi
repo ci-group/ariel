@@ -1,0 +1,20 @@
+from _typeshed import Incomplete
+from torch.utils._config_module import install_config_module as install_config_module
+
+no_data_dependent_graph_break: Incomplete
+translation_validation: Incomplete
+translation_validation_timeout: Incomplete
+translation_validation_no_bisect: Incomplete
+check_shape_env_recorded_events: bool
+extended_debug_guard_added: Incomplete
+extended_debug_create_symbol: Incomplete
+extended_debug_cpp: Incomplete
+extended_debug_current_loc: Incomplete
+print_specializations: bool
+inject_EVALUATE_EXPR_flip_equality_TESTING_ONLY: bool
+validate_shape_env_version_key: bool
+symbol_guard_limit_before_specialize: int | None
+use_duck_shape: bool
+meta_nonzero_assume_all_nonzero: bool
+backed_size_oblivious: bool
+skip_dtype_check_in_meta_registrations: bool

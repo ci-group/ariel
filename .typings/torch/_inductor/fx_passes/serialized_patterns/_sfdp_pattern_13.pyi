@@ -1,0 +1,42 @@
+from _typeshed import Incomplete
+from torch._inductor.pattern_matcher import Arg as Arg, CallFunction as CallFunction, CallFunctionVarArgs as CallFunctionVarArgs, CallMethod as CallMethod, CallMethodVarArgs as CallMethodVarArgs, CallModule as CallModule, CallModuleVarArgs as CallModuleVarArgs, ExclusiveKeywordArg as ExclusiveKeywordArg, Ignored as Ignored, KeywordArg as KeywordArg, ListOf as ListOf, MultiOutputPattern as MultiOutputPattern, PatternExpr as PatternExpr, RepeatedExpr as RepeatedExpr, _TargetArgsExpr as _TargetArgsExpr, _TargetExpr as _TargetExpr, _TargetExprVarArgs as _TargetExprVarArgs
+
+aten: Incomplete
+prims: Incomplete
+rand_default: Incomplete
+gt_Scalar: Incomplete
+permute_default: Incomplete
+bmm_default: Incomplete
+amax_default: Incomplete
+sub_Tensor: Incomplete
+exp_default: Incomplete
+sum_dim_IntList: Incomplete
+div_Tensor: Incomplete
+mul_Tensor: Incomplete
+mul_Tensor_1: Incomplete
+bmm_default_1: Incomplete
+neg_default: Incomplete
+permute_default_1: Incomplete
+bmm_default_2: Incomplete
+convert_element_type_default: Incomplete
+mul_Tensor_2: Incomplete
+mul_Tensor_3: Incomplete
+mul_Tensor_4: Incomplete
+sum_dim_IntList_1: Incomplete
+fma_default: Incomplete
+permute_default_2: Incomplete
+bmm_default_3: Incomplete
+permute_default_3: Incomplete
+bmm_default_4: Incomplete
+permute_default_4: Incomplete
+permute_default_5: Incomplete
+bmm_default_5: Incomplete
+_sfdp_pattern_13_training: Incomplete
+_sfdp_pattern_13_inference: Incomplete
+convert_element_type_default_1: Incomplete
+convert_element_type_default_2: Incomplete
+convert_element_type_default_3: Incomplete
+convert_element_type_default_4: Incomplete
+convert_element_type_default_5: Incomplete
+_sfdp_pattern_13_half_training: Incomplete
+_sfdp_pattern_13_half_inference: Incomplete

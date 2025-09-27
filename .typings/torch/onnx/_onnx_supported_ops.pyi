@@ -1,0 +1,23 @@
+from torch import _C as _C
+from torch.onnx import _constants as _constants
+from torch.onnx._internal import registration as registration
+
+class _TorchSchema:
+    name: str
+    overload_name: str
+    arguments: list[str]
+    optional_arguments: list[str]
+    returns: list[str]
+    opsets: list[int]
+    def __init__(self, schema: _C.FunctionSchema | str) -> None: ...
+    def __str__(self) -> str: ...
+    def __hash__(self): ...
+    def __eq__(self, other) -> bool: ...
+    def is_aten(self) -> bool: ...
+    def is_backward(self) -> bool: ...
+
+def _symbolic_argument_count(func): ...
+def all_forward_schemas() -> dict[str, _TorchSchema]:
+    """Returns schemas for all TorchScript forward ops."""
+def all_symbolics_schemas() -> dict[str, _TorchSchema]:
+    """Returns schemas for all onnx supported ops."""

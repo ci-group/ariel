@@ -1,3 +1,0 @@
-from _typeshed import Incomplete
-
-def main(args: Incomplete | None = None) -> None: ...

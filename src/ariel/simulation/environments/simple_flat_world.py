@@ -1,8 +1,4 @@
-"""TODO(jmdm): description of script.
-
-Date:       2025-07-08
-Status:     Completed ✅
-"""
+"""TODO(jmdm): description of script."""
 
 # Third-party libraries
 import mujoco

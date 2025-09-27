@@ -1,12 +1,4 @@
-"""
-Pyramid on top of flat terrain.
-
-Date:       2025-07-28
-Author:     A-lamo (Aron F.)
-References: mjspec.ipynb
-Status:     Completed ✅
-
-"""
+"""Pyramid on top of flat terrain."""
 
 # Third-party libraries
 import mujoco

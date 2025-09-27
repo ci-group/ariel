@@ -1,0 +1,16 @@
+from . import functions as functions, rpc_async as rpc_async
+from .constants import UNSET_RPC_TIMEOUT as UNSET_RPC_TIMEOUT
+from _typeshed import Incomplete
+from torch.futures import Future as Future
+
+def _local_invoke(rref, func_name, args, kwargs): ...
+@functions.async_execution
+def _local_invoke_async_execution(rref, func_name, args, kwargs): ...
+def _invoke_rpc(rref, rpc_api, func_name, timeout, *args, **kwargs): ...
+
+class RRefProxy:
+    rref: Incomplete
+    rpc_api: Incomplete
+    rpc_timeout: Incomplete
+    def __init__(self, rref, rpc_api, timeout=...) -> None: ...
+    def __getattr__(self, func_name): ...

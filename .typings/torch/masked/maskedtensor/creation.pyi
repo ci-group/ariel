@@ -1,0 +1,6 @@
+from .core import MaskedTensor
+
+__all__ = ['as_masked_tensor', 'masked_tensor']
+
+def masked_tensor(data: object, mask: object, requires_grad: bool = False) -> MaskedTensor: ...
+def as_masked_tensor(data: object, mask: object) -> MaskedTensor: ...

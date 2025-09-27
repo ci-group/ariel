@@ -1,8 +1,5 @@
 """TODO(jmdm): description of script.
 
-Date:       2025-07-08
-Status:     To Improve ⬆️
-
 Todo:
 ----
     [ ] Autoincrement of index in subclasses.

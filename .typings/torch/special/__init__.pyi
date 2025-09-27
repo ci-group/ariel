@@ -1,0 +1,62 @@
+import torch
+from _typeshed import Incomplete
+
+__all__ = ['airy_ai', 'bessel_j0', 'bessel_j1', 'bessel_y0', 'bessel_y1', 'chebyshev_polynomial_t', 'chebyshev_polynomial_u', 'chebyshev_polynomial_v', 'chebyshev_polynomial_w', 'digamma', 'entr', 'erf', 'erfc', 'erfcx', 'erfinv', 'exp2', 'expit', 'expm1', 'gammainc', 'gammaincc', 'gammaln', 'hermite_polynomial_h', 'hermite_polynomial_he', 'i0', 'i0e', 'i1', 'i1e', 'laguerre_polynomial_l', 'legendre_polynomial_p', 'log1p', 'log_ndtr', 'log_softmax', 'logit', 'logsumexp', 'modified_bessel_i0', 'modified_bessel_i1', 'modified_bessel_k0', 'modified_bessel_k1', 'multigammaln', 'ndtr', 'ndtri', 'polygamma', 'psi', 'round', 'shifted_chebyshev_polynomial_t', 'shifted_chebyshev_polynomial_u', 'shifted_chebyshev_polynomial_v', 'shifted_chebyshev_polynomial_w', 'scaled_modified_bessel_k0', 'scaled_modified_bessel_k1', 'sinc', 'softmax', 'spherical_bessel_j0', 'xlog1py', 'xlogy', 'zeta']
+
+Tensor = torch.Tensor
+entr: Incomplete
+psi: Incomplete
+digamma: Incomplete
+gammaln: Incomplete
+polygamma: Incomplete
+erf: Incomplete
+erfc: Incomplete
+erfcx: Incomplete
+erfinv: Incomplete
+logit: Incomplete
+logsumexp: Incomplete
+expit: Incomplete
+exp2: Incomplete
+expm1: Incomplete
+xlog1py: Incomplete
+xlogy: Incomplete
+i0: Incomplete
+i0e: Incomplete
+i1: Incomplete
+i1e: Incomplete
+ndtr: Incomplete
+ndtri: Incomplete
+log_ndtr: Incomplete
+log1p: Incomplete
+sinc: Incomplete
+round: Incomplete
+softmax: Incomplete
+log_softmax: Incomplete
+zeta: Incomplete
+multigammaln: Incomplete
+gammainc: Incomplete
+gammaincc: Incomplete
+airy_ai: Incomplete
+bessel_j0: Incomplete
+bessel_j1: Incomplete
+bessel_y0: Incomplete
+bessel_y1: Incomplete
+chebyshev_polynomial_t: Incomplete
+chebyshev_polynomial_u: Incomplete
+chebyshev_polynomial_v: Incomplete
+chebyshev_polynomial_w: Incomplete
+hermite_polynomial_h: Incomplete
+hermite_polynomial_he: Incomplete
+laguerre_polynomial_l: Incomplete
+legendre_polynomial_p: Incomplete
+modified_bessel_i0: Incomplete
+modified_bessel_i1: Incomplete
+modified_bessel_k0: Incomplete
+modified_bessel_k1: Incomplete
+scaled_modified_bessel_k0: Incomplete
+scaled_modified_bessel_k1: Incomplete
+shifted_chebyshev_polynomial_t: Incomplete
+shifted_chebyshev_polynomial_u: Incomplete
+shifted_chebyshev_polynomial_v: Incomplete
+shifted_chebyshev_polynomial_w: Incomplete
+spherical_bessel_j0: Incomplete

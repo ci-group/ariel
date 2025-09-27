@@ -1,0 +1,45 @@
+from _typeshed import Incomplete
+from torch._C import _add_docstr as _add_docstr, _linalg as _linalg
+
+common_notes: Incomplete
+cross: Incomplete
+cholesky: Incomplete
+cholesky_ex: Incomplete
+inv: Incomplete
+solve_ex: Incomplete
+inv_ex: Incomplete
+det: Incomplete
+slogdet: Incomplete
+eig: Incomplete
+eigvals: Incomplete
+eigh: Incomplete
+eigvalsh: Incomplete
+householder_product: Incomplete
+ldl_factor: Incomplete
+ldl_factor_ex: Incomplete
+ldl_solve: Incomplete
+lstsq: Incomplete
+matrix_power: Incomplete
+matrix_rank: Incomplete
+norm: Incomplete
+vector_norm: Incomplete
+matrix_norm: Incomplete
+matmul: Incomplete
+diagonal: Incomplete
+multi_dot: Incomplete
+svd: Incomplete
+svdvals: Incomplete
+cond: Incomplete
+pinv: Incomplete
+matrix_exp: Incomplete
+solve: Incomplete
+solve_triangular: Incomplete
+lu_factor: Incomplete
+lu_factor_ex: Incomplete
+lu_solve: Incomplete
+lu: Incomplete
+tensorinv: Incomplete
+tensorsolve: Incomplete
+qr: Incomplete
+vander: Incomplete
+vecdot: Incomplete

@@ -17,11 +17,16 @@ import numpy as np
 from rich.console import Console
 
 # Local libraries
-from ariel.body_phenotypes.robogen_lite.config import (NUM_OF_FACES,
-                                                       NUM_OF_ROTATIONS,
-                                                       NUM_OF_TYPES_OF_MODULES)
+from ariel.body_phenotypes.robogen_lite.config import (
+    NUM_OF_FACES,
+    NUM_OF_ROTATIONS,
+    NUM_OF_TYPES_OF_MODULES,
+)
 from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
-    HighProbabilityDecoder, draw_graph, save_graph_as_json)
+    HighProbabilityDecoder,
+    draw_graph,
+    save_graph_as_json,
+)
 
 # Type Checking
 if TYPE_CHECKING:

@@ -1,0 +1,1 @@
+from torch.ao.nn.quantized.reference.modules.utils import ReferenceQuantizedModule as ReferenceQuantizedModule, _get_weight_qparam_keys as _get_weight_qparam_keys, _quantize_and_dequantize_weight as _quantize_and_dequantize_weight, _quantize_weight as _quantize_weight, _save_weight_qparams as _save_weight_qparams

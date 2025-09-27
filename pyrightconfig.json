@@ -1,0 +1,21 @@
+{
+    "pythonVersion": "3.12",
+    "typeCheckingMode": "strict",
+    "deprecateTypingAliases": true,
+    "exclude": [
+        ".venv",
+        ".git",
+        ".typings",
+        "_build",
+        "_autoapi"
+    ],
+    "stubPath": ".typings",
+    // -------------------------------------------------------------------- //
+    // TODO: MuJoCo
+    "reportArgumentType": false,
+    "reportUnknownMemberType": false,
+    "reportAttributeAccessIssue": false,
+    "reportUnknownVariableType": false,
+    "reportUnknownArgumentType": false // + PIL
+    // -------------------------------------------------------------------- //
+}
