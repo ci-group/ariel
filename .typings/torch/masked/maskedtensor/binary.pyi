@@ -1,0 +1,19 @@
+from .core import _map_mt_args_kwargs as _map_mt_args_kwargs, _masks_match as _masks_match, _tensors_match as _tensors_match, _wrap_result as _wrap_result, is_masked_tensor as is_masked_tensor
+from _typeshed import Incomplete
+
+__all__: Incomplete
+BINARY_NAMES: Incomplete
+INPLACE_BINARY_NAMES: Incomplete
+
+def _get_at_least_one_mask(a, b): ...
+def _binary_helper(fn, args, kwargs, inplace): ...
+def _torch_binary(fn_name): ...
+def _torch_inplace_binary(fn_name): ...
+
+NATIVE_BINARY_MAP: Incomplete
+NATIVE_INPLACE_BINARY_MAP: Incomplete
+NATIVE_BINARY_FNS: Incomplete
+NATIVE_INPLACE_BINARY_FNS: Incomplete
+
+def _is_native_binary(fn): ...
+def _apply_native_binary(fn, *args, **kwargs): ...

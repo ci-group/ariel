@@ -2,60 +2,14 @@
 target-version = "py312"
 
 # Exclude a variety of commonly ignored directories.
-exclude = [
-    "__pycache__",
-    "__pypackages__",
-    "_build",
-    ".bzr",
-    ".cache",
-    ".config",
-    ".direnv",
-    ".DS_Store",
-    ".eggs",
-    ".env",
-    ".git",
-    ".git-rewrite",
-    ".github",
-    ".hg",
-    ".history",
-    ".ipynb_checkpoints",
-    ".local",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pyenv",
-    ".pytest_cache",
-    ".pytype",
-    ".ruff_cache",
-    ".rye",
-    ".svn",
-    ".tox",
-    ".venv",
-    ".vscode",
-    "~/.cache",
-    "~/.config",
-    "~/.local",
-    "~/.pyenv",
-    "~/.rye",
-    "~/.vscode",
-    "buck-out",
-    "build",
-    "dist",
-    "env",
-    "node_modules",
-    "site-packages",
-    "vendor",
-    "typings",
-    "out",
-    "venv",
-]
+exclude = [".venv", ".git", ".typings"]
 
-# Customization of the linter and formatter.
-fix = true                # Enable auto-fixes for all rules.
-unsafe-fixes = true       # Enable unsafe auto-fixes.
-show-fixes = true         # Show fixes in the output.
-preview = true            # Allow unstable features.
-respect-gitignore = false # Ignore files listed in .gitignore.
+# Customization of the linter and formatter
+fix = true                # Enable auto-fixes for all rules
+unsafe-fixes = true       # Enable unsafe auto-fixes
+show-fixes = true         # Show fixes in the output
+preview = true            # Allow unstable features
+respect-gitignore = false # Ignore files listed in .gitignore
 
 # Same as Black.
 line-length = 80
@@ -73,21 +27,13 @@ indent-style = "space"
 # Like Black, respect magic trailing commas.
 skip-magic-trailing-comma = false
 
-# LF = line endings converted to \n
+# Mine
 line-ending = "lf"
 
-# Enable auto-formatting of code examples in docstrings. Markdown,
-# reStructuredText code/literal blocks and doctests are all supported.
-#
-# This is currently disabled by default, but it is planned for this
-# to be opt-out in the future.
+# Enable auto-formatting of code examples in docstrings.
 docstring-code-format = true
 
-# Set the line length limit used when formatting code snippets in
-# docstrings.
-#
-# This only has an effect when the `docstring-code-format` setting is
-# enabled.
+# Set the line length limit used when formatting code snippets in docstrings.
 docstring-code-line-length = "dynamic"
 
 [lint.pycodestyle]
@@ -142,5 +88,11 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 # Source: https://github.com/astral-sh/ruff/issues/4368#issuecomment-2245567481
 [lint.extend-per-file-ignores]
 "**/tests/**/*.py" = [
-    "S101", # asserts allowed in tests
+    "S101", # asserts not allowed --> ok in tests
+]
+"*/test_*.py" = [
+    "S101", # asserts not allowed --> ok in tests
+]
+"noxfile.py" = [
+    "S101", # asserts not allowed --> ok in nox config
 ]

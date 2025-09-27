@@ -1,27 +1,22 @@
-"""Example of high-probability-decoding for graphs.
+"""Highest-probability-decoding algorithm for ARIEL-robots.
 
-Author:     jmdm
-Date:       2025-06-25
-Py Ver:     3.12
-OS:         macOS  Sequoia 15.3.1
-Hardware:   M4 Pro
-Status:     To Improve ⬆️
-
-Notes
+Note
 -----
-    * Graphs are represented as directed graphs (DiGraph) using NetworkX.
+* Graphs are represented as directed graphs (DiGraph) using NetworkX.
+* Graphs are saved as JSON [1]_.
 
 References
 ----------
-    [1] https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.tree_data.html#networkx.readwrite.json_graph.tree_data
-
+.. [1] `NetworkX JSON Graph <https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.tree_data.html#networkx.readwrite.json_graph.tree_data>`_
 Todo
 ----
-    [ ] for loops to be replaced with vectorized operations
-    [ ] DiGraph positioning use cartesian coordinates instead of spring layout
-    [ ] Should probably move the graph functions to a separate script
-
+    - [ ] for loops to be replaced with vectorized operations
+    - [ ] DiGraph positioning use cartesian coordinates instead of spring layout
+    - [ ] Should probably move the graph functions to a separate script
 """
+
+# Evaluate type annotations in a deferred manner (ruff: UP037)
+from __future__ import annotations
 
 # Standard library
 import json
@@ -33,7 +28,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import numpy.typing as npt
-from networkx import DiGraph, Graph
+from networkx import DiGraph
 from networkx.readwrite import json_graph
 
 # Local libraries
@@ -74,24 +69,24 @@ class HighProbabilityDecoder:
         self._graph: dict[int, ModuleInstance] = {}
 
         # NetworkX graph
-        self.graph: Graph[Any] = nx.DiGraph()
+        self.graph: DiGraph[Any] = nx.DiGraph()
 
     def probability_matrices_to_graph(
         self,
         type_probability_space: npt.NDArray[np.float32],
         connection_probability_space: npt.NDArray[np.float32],
         rotation_probability_space: npt.NDArray[np.float32],
-    ) -> DiGraph:
+    ) -> DiGraph[Any]:
         """
         Convert probability matrices to a graph.
 
         Parameters
         ----------
-        type_probability_space : npt.NDArray[np.float32]
+        type_probability_space
             Probability space for module types.
-        connection_probability_space : npt.NDArray[np.float32]
+        connection_probability_space
             Probability space for connections between modules.
-        rotation_probability_space : npt.NDArray[np.float32]
+        rotation_probability_space
             Probability space for module rotations.
 
         Returns
@@ -269,7 +264,7 @@ class HighProbabilityDecoder:
 
 
 def save_graph_as_json(
-    graph: DiGraph,
+    graph: DiGraph[Any],
     save_file: Path | str | None = None,
 ) -> None:
     """
@@ -293,7 +288,7 @@ def save_graph_as_json(
 
 
 def draw_graph(
-    graph: DiGraph,
+    graph: DiGraph[Any],
     title: str = "NetworkX Directed Graph",
     save_file: Path | str | None = None,
 ) -> None:
@@ -315,19 +310,15 @@ def draw_graph(
 
     pos = nx.spring_layout(graph, pos=pos, k=1, iterations=20, seed=SEED)
 
-    options = {
-        "with_labels": True,
-        "node_size": 150,
-        "node_color": "#FFFFFF00",
-        "edgecolors": "blue",
-        "font_size": 8,
-        "width": 0.5,
-    }
-
     nx.draw(
         graph,
         pos,
-        **options,
+        with_labels=True,
+        node_size=150,
+        node_color="#FFFFFF00",
+        edgecolors="blue",
+        font_size=8,
+        width=0.5,
     )
 
     edge_labels = nx.get_edge_attributes(graph, "face")

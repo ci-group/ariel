@@ -1,0 +1,26 @@
+from _typeshed import Incomplete
+from torch.types import Storage as Storage
+
+__serialization_id_record_name__: str
+
+class _HasStorage:
+    _storage: Incomplete
+    def __init__(self, storage) -> None: ...
+    def storage(self): ...
+
+class DirectoryReader:
+    """
+    Class to allow PackageImporter to operate on unzipped packages. Methods
+    copy the behavior of the internal PyTorchFileReader class (which is used for
+    accessing packages in all other cases).
+
+    N.B.: ScriptObjects are not depickleable or accessible via this DirectoryReader
+    class due to ScriptObjects requiring an actual PyTorchFileReader instance.
+    """
+    directory: Incomplete
+    def __init__(self, directory) -> None: ...
+    def get_record(self, name): ...
+    def get_storage_from_record(self, name, numel, dtype): ...
+    def has_record(self, path): ...
+    def get_all_records(self): ...
+    def serialization_id(self): ...

@@ -1,0 +1,14 @@
+op_add: str
+op_sub: str
+op_mul: str
+op_div: str
+op_eq: str
+op_neq: str
+op_imp: str
+op_matching: str
+op_consistency: str
+op_precision: str
+op_leq: str
+op_lt: str
+op_gt: str
+op_mod: str

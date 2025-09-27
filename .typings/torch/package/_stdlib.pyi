@@ -1,0 +1,6 @@
+from _typeshed import Incomplete
+
+def is_stdlib_module(module: str) -> bool: ...
+def _get_stdlib_modules(): ...
+
+stdlib3_9: Incomplete

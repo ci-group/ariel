@@ -1,1 +1,1 @@
-"""Robogen Lite Modules."""
+"""Modules of ARIEL-robots."""

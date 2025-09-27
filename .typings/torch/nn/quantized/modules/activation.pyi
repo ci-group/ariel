@@ -1,0 +1,1 @@
+from torch.ao.nn.quantized.modules.activation import ELU as ELU, Hardswish as Hardswish, LeakyReLU as LeakyReLU, MultiheadAttention as MultiheadAttention, PReLU as PReLU, ReLU6 as ReLU6, Sigmoid as Sigmoid, Softmax as Softmax

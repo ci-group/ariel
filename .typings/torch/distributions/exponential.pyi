@@ -1,0 +1,43 @@
+from _typeshed import Incomplete
+from torch import Tensor
+from torch.distributions.exp_family import ExponentialFamily
+from torch.types import _size
+
+__all__ = ['Exponential']
+
+class Exponential(ExponentialFamily):
+    '''
+    Creates a Exponential distribution parameterized by :attr:`rate`.
+
+    Example::
+
+        >>> # xdoctest: +IGNORE_WANT("non-deterministic")
+        >>> m = Exponential(torch.tensor([1.0]))
+        >>> m.sample()  # Exponential distributed with rate=1
+        tensor([ 0.1046])
+
+    Args:
+        rate (float or Tensor): rate = 1 / scale of the distribution
+    '''
+    arg_constraints: Incomplete
+    support: Incomplete
+    has_rsample: bool
+    _mean_carrier_measure: int
+    @property
+    def mean(self) -> Tensor: ...
+    @property
+    def mode(self) -> Tensor: ...
+    @property
+    def stddev(self) -> Tensor: ...
+    @property
+    def variance(self) -> Tensor: ...
+    def __init__(self, rate: Tensor | float, validate_args: bool | None = None) -> None: ...
+    def expand(self, batch_shape, _instance=None): ...
+    def rsample(self, sample_shape: _size = ...) -> Tensor: ...
+    def log_prob(self, value): ...
+    def cdf(self, value): ...
+    def icdf(self, value): ...
+    def entropy(self): ...
+    @property
+    def _natural_params(self) -> tuple[Tensor]: ...
+    def _log_normalizer(self, x): ...

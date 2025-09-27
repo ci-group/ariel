@@ -1,0 +1,3 @@
+from torch.utils.hipify.hipify_python import PYTORCH_MAP as PYTORCH_MAP, PYTORCH_TRIE as PYTORCH_TRIE
+
+def maybe_hipify_code_wrapper(source_codes: str, force_hipify: bool = False) -> str: ...

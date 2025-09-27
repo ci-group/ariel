@@ -1,14 +1,4 @@
-"""
-Boxes extrude from the ground to form a terrain.
-
-TODO: Parameters:
-
-Date:       2025-07-28
-Author:     A-lamo (Aron F.)
-References: mjspec.ipynb
-Status:     Completed ✅
-
-"""
+"""Boxes extrude from the ground to form a terrain."""
 
 # Third-party libraries
 import random

@@ -1,8 +1,5 @@
 """TODO(jmdm): description of script.
 
-Date:       2025-07-08
-Status:     Completed ✅
-
 Todo:
 ----
     [ ] ".rotate" as superclass method?
@@ -43,7 +40,7 @@ class HingeModule(Module):
 
     def __init__(self, index: int) -> None:
         """Initialize the brick module.
-        
+
         Parameters
         ----------
         index : int
@@ -141,7 +138,10 @@ class HingeModule(Module):
             biasprm=biasprm,
             trntype=trntype,
             target=servo_name,
-            ctrlrange=(-np.pi/2, np.pi/2),  # [-90, 90] degrees (range of 180)
+            ctrlrange=(
+                -np.pi / 2,
+                np.pi / 2,
+            ),  # [-90, 90] degrees (range of 180)
         )
 
         # Save model specifications

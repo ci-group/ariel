@@ -34,7 +34,7 @@ def main() -> None:
     world.spawn(body)
 
     # Generate the model and data
-    model: mujoco.MjModel = world.spec.compile()
+    model = world.spec.compile()
     data = mujoco.MjData(model)
 
     # Render a single frame

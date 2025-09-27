@@ -1,8 +1,5 @@
 """Hopf-based Central Pattern Generator (CPG).
 
-Date:       2025-05-03
-Status:     In progress ⚙️
-
 Sources
 -------
     [1] https://www.sciencedirect.com/science/article/pii/S2667379722000353#sec4
@@ -57,12 +54,18 @@ class HopfCPG:
         # Adjacency list for coupling
         self.adjacency_list = adjacency_list
         if len(adjacency_list) != num_neurons:
-            raise ValueError("Adjacency list length must match number of neurons.")
-        
+            raise ValueError(
+                "Adjacency list length must match number of neurons."
+            )
+
         # --- Initialize state variables --- #
         self.init_state = 0.5
-        self.x: ArrayLike = RNG.uniform(-self.init_state, self.init_state, self.num_neurons)
-        self.y: ArrayLike = RNG.uniform(-self.init_state, self.init_state, self.num_neurons)
+        self.x: ArrayLike = RNG.uniform(
+            -self.init_state, self.init_state, self.num_neurons
+        )
+        self.y: ArrayLike = RNG.uniform(
+            -self.init_state, self.init_state, self.num_neurons
+        )
 
         # --- Adjustable parameters --- #
         # Angular frequency (1Hz default)
@@ -81,8 +84,12 @@ class HopfCPG:
 
     def reset(self) -> None:
         # Reset state variables
-        self.x = RNG.uniform(-self.init_state, self.init_state, self.num_neurons)
-        self.y = RNG.uniform(-self.init_state, self.init_state, self.num_neurons)
+        self.x = RNG.uniform(
+            -self.init_state, self.init_state, self.num_neurons
+        )
+        self.y = RNG.uniform(
+            -self.init_state, self.init_state, self.num_neurons
+        )
         self.omega = np.ones(self.num_neurons) * 2 * np.pi
         self.A = np.ones(self.num_neurons) * 1.0
 

@@ -1,0 +1,39 @@
+import torch.fx
+from .graph_region_tracker import Node as Node, Region as Region
+from .graph_utils import _detect_cycles as _detect_cycles, _get_flat_args as _get_flat_args, _get_flat_args_unique as _get_flat_args_unique
+from _typeshed import Incomplete
+from collections.abc import Iterable
+from torch._dynamo import config as config
+from torch.multiprocessing.reductions import StorageWeakRef as StorageWeakRef
+from torch.utils._ordered_set import OrderedSet as OrderedSet
+
+UsageIndex = tuple[int, int]
+log: Incomplete
+last_node_to_additional_deps: dict[Node, OrderedSet[Node]] | None
+
+def apply_graph_deduplication(output_graph) -> dict[str, torch.fx.GraphModule]:
+    """
+    This is the main entry point for applying the graph deduplication pass. Deduplication occurs in two phases:
+    1. Subgraph creation:
+        Subgraph creation works by taking one representative region from each region group and creating a subgraph from it, which will then be used to replace all regions in the group. This is implemented by first copying all nodes of the region to the new subgraph and then finding all inputs which are not within the region and creating placeholders for them. For the outputs, all regions in a region group need to be scanned to ensure the largest set of outputs is found, and then an output node is created which returns a tuple of all outputs.
+
+    2. Graph replacement:
+        To replace each region with the extracted subgraph, the node index in the region and argument index within the node's flattened args and kwargs are recorded once during subgraph creation. This allows us to determine which (external to the region) nodes and in which order these nodes are passed as inputs. For the outputs, getitem nodes are created for each output, and all nodes in the region with external outputs are replaced by the proper getitem node. Finally, all original nodes are erased (there should be no uses of these left in the graph).
+
+The deduplication mutates the output_graph argument in place.
+
+Returns a mapping of nodes to their subgraph output replacement node to remap outputs
+when they are created in output_graph.
+    """
+def _replace_region_with_subgraph(graph: torch.fx.Graph, region: Region, get_subgraph_node: Node, external_node_usages: Iterable[OrderedSet[UsageIndex]], inds_with_external_users: list[int], subgraph_name: str, node_to_additional_deps: dict[Node, OrderedSet[Node]], node_to_mutated_arg_positions: dict[Node, OrderedSet[int]]) -> None: ...
+def _get_external_inputs(region: Region) -> dict[Node, OrderedSet[UsageIndex]]: ...
+def _get_all_output_indices(regions: list[Region]) -> list[int]: ...
+def _get_inds_with_external_users(region: Region, inds_unique: set[int]) -> None: ...
+def _copy_nodes_and_remap_inputs(subgraph: torch.fx.Graph, region: Region) -> list[OrderedSet[UsageIndex]]: ...
+def _create_subgraph_outputs(subgraph: torch.fx.Graph, inds_to_output: list[int]) -> None: ...
+def _create_subgraph(region: Region, inds_with_external_users: list[int]) -> tuple[torch.fx.Graph, list[OrderedSet[UsageIndex]]]: ...
+def _stable_topological_sort(graph: torch.fx.Graph, node_to_additional_deps: dict[Node, OrderedSet[Node]]) -> None: ...
+def _populate_additional_deps(graph: torch.fx.Graph, node_to_mutated_arg_positions: dict[Node, OrderedSet[int]]) -> dict[Node, OrderedSet[Node]]: ...
+def _add_global_state_dependencies(graph: torch.fx.Graph, node_to_additional_deps: dict[Node, OrderedSet[Node]]) -> None: ...
+def _add_mutation_dependencies(node_to_mutated_arg_positions: dict[Node, OrderedSet[int]], node_to_additional_deps: dict[Node, OrderedSet[Node]]) -> None: ...
+def _has_aliasing(region: Region, inputs: list[Node], inds_with_external_users: list[int]) -> bool: ...

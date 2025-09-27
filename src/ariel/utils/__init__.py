@@ -1,1 +1,1 @@
-"""Robogen Lite."""
+"""Common utility functions and classes."""

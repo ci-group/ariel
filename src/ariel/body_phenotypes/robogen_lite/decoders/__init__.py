@@ -1,1 +1,1 @@
-"""Robogen Lite."""
+"""Decoders for ARIEL-robots."""

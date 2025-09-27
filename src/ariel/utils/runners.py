@@ -1,21 +1,4 @@
-"""TODO(jmdm): description of script.
-
-Date:       2025-07-08
-Status:     In progress ⚙️
-
-Notes
------
-    *
-
-References
-----------
-    [1]
-
-Todo
-----
-    [ ]
-
-"""
+"""TODO(jmdm): description of script."""
 
 # Third-party libraries
 import mujoco
@@ -36,7 +19,7 @@ def simple_runner(
 ) -> None:
     """
     Run a simple headless simulation for a given duration.
-    
+
     Parameters
     ----------
     model : mujoco.MjModel
@@ -52,8 +35,7 @@ def simple_runner(
     mujoco.mj_resetData(model, data)
 
     # Define action specification and set policy
-    data.ctrl = RNG.normal(scale=0.1, size=model.nu) # type: ignore
+    data.ctrl = RNG.normal(scale=0.1, size=model.nu)  # type: ignore
 
     while data.time < duration:
         mujoco.mj_step(model, data, nstep=steps_per_loop)
-    

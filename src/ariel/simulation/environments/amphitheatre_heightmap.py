@@ -1,3 +1,5 @@
+"""TODO(jmdm): description of script."""
+
 from typing import Tuple
 
 import mujoco
@@ -33,7 +35,7 @@ class AmphitheatreTerrainWorld:
         resolution : int
             Number of heightmap pixels along one axis.
         ring_inner_radius : float
-            Radius (normalized) of the flat inner region [0–0.5].
+            Radius (normalized) of the flat inner region [0,–0.5].
         ring_outer_radius : float
             Radius where the outer ring ends [> inner radius].
         cone_height : float
@@ -55,7 +57,13 @@ class AmphitheatreTerrainWorld:
         self.spec = self._build_spec()
 
     def _generate_heightmap(self) -> np.ndarray:
-        """Generate an amphitheater-style terrain with flat base and sloped ring."""
+        """Generate an amphitheater-style terrain with flat base and sloped ring.
+
+        Returns
+        --------
+        np.ndarray
+            The heightmap of the amphitheater environment.
+        """
         res = self.resolution
         y, x = np.mgrid[0:res, 0:res]
         x = x / res
@@ -80,7 +88,9 @@ class AmphitheatreTerrainWorld:
             freq = 4.0
             noise = np.fromfunction(
                 np.vectorize(
-                    lambda j, i: pnoise2(i / res * freq, j / res * freq, octaves=3)
+                    lambda j, i: pnoise2(
+                        i / res * freq, j / res * freq, octaves=3
+                    )
                 ),
                 (res, res),
                 dtype=float,
@@ -92,7 +102,13 @@ class AmphitheatreTerrainWorld:
         return heightmap
 
     def _build_spec(self) -> mujoco.MjSpec:
-        """Create MuJoCo MjSpec with the amphitheater heightfield."""
+        """Create MuJoCo MjSpec with the amphitheater heightfield.
+
+        Returns
+        -------
+        mujoco.MjSpec
+            Creates the mujoco specification for the amphitheater environment
+        """
         spec = mujoco.MjSpec()
 
         # Compiler and visual settings
@@ -143,13 +159,13 @@ class AmphitheatreTerrainWorld:
         correct_for_bounding_box: bool = True,
     ) -> None:
         """Spawn a robot inside the amphitheater world.
-        
+
         Parameters
         ----------
-        
+
         mj_spec : mujoco.MjSpec
             The mujoco specification of the entity you want to spawn in to the world
-        spawn_position : list[float] | None 
+        spawn_position : list[float] | None
             The spawn position of the entity. [0 ,0 ,0] by default.
         small_gap : float
             Add a small gap between the entity and the ground. This can help avoid physics glitches.

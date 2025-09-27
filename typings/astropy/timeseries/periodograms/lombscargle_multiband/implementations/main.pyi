@@ -1,6 +1,0 @@
-from _typeshed import Incomplete
-
-__all__ = ['lombscargle_multiband', 'available_methods']
-
-def available_methods(): ...
-def lombscargle_multiband(t, y, bands, dy: Incomplete | None = None, frequency: Incomplete | None = None, method: str = 'flexible', sb_method: str = 'auto', assume_regular_frequency: bool = False, normalization: str = 'standard', fit_mean: bool = True, center_data: bool = True, method_kwds: Incomplete | None = None, nterms_base: int = 1, nterms_band: int = 1, reg_base: Incomplete | None = None, reg_band: float = 1e-06, regularize_by_trace: bool = True, fit_period: bool = False): ...

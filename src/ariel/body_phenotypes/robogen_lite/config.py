@@ -1,7 +1,4 @@
-"""High-level configuration for Robogen Lite body phenotypes.
-
-Date:       2025-06-25
-Status:     To Improve ⬆️
+"""High-level configuration for ARIEL-robots body phenotypes.
 
 Notes
 -----
