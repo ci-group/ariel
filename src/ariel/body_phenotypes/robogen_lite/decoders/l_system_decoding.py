@@ -1,4 +1,3 @@
-
 """Example of L-system-based decoding for modular robot graphs.
 
 Author:     omn (with help from GitHub Copilot)
@@ -66,7 +65,6 @@ class LSystemDecoder:
         self.iterations = iterations
         self.graph = nx.DiGraph()
         self.lsystem_string = self.expand_lsystem() # first we expand the string applying recursively all the rules 
-                                                    # and return the fully expanded L-system string intermediate genotype 
         self.build_graph_from_string(self.lsystem_string) # we create the graph with networkx from a fully expanded L-system string 
 
     def expand_lsystem(self, axiom: str = None, rules: Dict[str, str] = None, iterations: int = None) -> str:
@@ -74,7 +72,8 @@ class LSystemDecoder:
         Generate the L-system string after the given number of iterations, recursively expanding inside brackets as well, but stopping at the required depth.
         Each token is replaced in place by its rule expansion (not appended after).
         """
-        gene_pattern = re.compile(r"([A-Za-z](?:\(\d{1,3}(?:,[A-Za-z]+)?\))?)|\[|\]")
+        # Match C as a single character, and other genes as X(num,FACE)
+        gene_pattern = re.compile(r"(C|[A-Za-z]\(\d{1,3},[A-Za-z]+\))|\[|\]")
         axiom = axiom if axiom is not None else self.axiom # if we call it without axiom defined then we pick the one already assigned
         rules = rules if rules is not None else self.rules # same for rules
         iterations = iterations if iterations is not None else self.iterations # same for iterations
@@ -87,7 +86,7 @@ class LSystemDecoder:
             i = 0
             while i < len(tokens): #go through all the token identified
                 token = tokens[i]
-                if token == '[': 
+                if token == '[':
                     # Find the matching closing bracket
                     bracket_level = 1
                     j = i + 1
@@ -97,8 +96,8 @@ class LSystemDecoder:
                         elif tokens[j] == ']':
                             bracket_level -= 1
                         j += 1
-                    # Recursively expand the inside of the brackets
-                    inside = expand_all(''.join(tokens[i+1:j-1]), depth)
+                    # Recursively expand the inside of the brackets with depth-1
+                    inside = expand_all(''.join(tokens[i+1:j-1]), depth-1)
                     result.append('[' + inside + ']')
                     i = j
                 elif token == ']':
@@ -121,7 +120,8 @@ class LSystemDecoder:
         Build the graph from a fully expanded L-system string.
         """
         self.graph = nx.DiGraph()
-        token_pattern = re.compile(r"([A-Za-z])(?:\((\d{1,3})(?:,([A-Za-z]+))?\))?")
+        # Match C as a single character, and other genes as X(num,FACE)
+        token_pattern = re.compile(r"C|([A-Za-z])\((\d{1,3}),(\w+)\)")
         s = lsystem_string
         core_count = 0
         idx_counter = [0]  # mutable counter for unique node labels
@@ -167,29 +167,35 @@ class LSystemDecoder:
                 else:
                     m = token_pattern.match(node)
                     if m:
-                        symbol = m.group(1)
-                        try: # checl if the type of elements is authorized (part of ModuleType enum)
-                            symbol_to_look = SymbolToModuleType[symbol]
-                            node_type = ModuleType[symbol_to_look.value]
-                        except KeyError:
-                            raise ValueError(f"Symbol '{symbol}' is not a valid ModuleType enum name.")
-                        if node_type == ModuleType.CORE:
-                            core_count += 1
-                            if core_count > 1:
-                                raise ValueError("L-system string contains more than one CORE module.")
-                        if m.group(2) is not None:
-                            try: # check if the rotation is part of the allowed rotations (Module RotationsTheta enum)
-                                rotation_val = int(m.group(2))
-                                rotation_enum = next((r for r in ModuleRotationsTheta if r.value == rotation_val), ModuleRotationsTheta.DEG_0)
-                            except Exception: # if error then default to 0
-                                rotation_enum = ModuleRotationsTheta.DEG_0
-                        else: # if no rotation is provided then is is defaulted to 0
+                        if m.group(0) == "C":
+                            symbol = "C"
+                            node_type = ModuleType.CORE
                             rotation_enum = ModuleRotationsTheta.DEG_0
-                        face_str = m.group(3) if m.group(3) is not None else "FRONT"
-                        try: # check if the face is in the allowed faces (Module ModuleFaces enum)
-                            face = ModuleFaces[face_str]
-                        except KeyError: # if error then default to FRONT
                             face = ModuleFaces.FRONT
+                        else:
+                            symbol = m.group(1)
+                            try: # check if the type of elements is authorized (part of ModuleType enum)
+                                symbol_to_look = SymbolToModuleType[symbol]
+                                node_type = ModuleType[symbol_to_look.value]
+                            except KeyError:
+                                raise ValueError(f"Symbol '{symbol}' is not a valid ModuleType enum name.")
+                            if node_type == ModuleType.CORE:
+                                core_count += 1
+                                if core_count > 1:
+                                    raise ValueError("L-system string contains more than one CORE module.")
+                            if m.group(2) is not None:
+                                try: # check if the rotation is part of the allowed rotations (Module RotationsTheta enum)
+                                    rotation_val = int(m.group(2))
+                                    rotation_enum = next((r for r in ModuleRotationsTheta if r.value == rotation_val), ModuleRotationsTheta.DEG_0)
+                                except Exception: # if error then default to 0
+                                    rotation_enum = ModuleRotationsTheta.DEG_0
+                            else: # if no rotation is provided then is is defaulted to 0
+                                rotation_enum = ModuleRotationsTheta.DEG_0
+                            face_str = m.group(3) if m.group(3) is not None else "FRONT"
+                            try: # check if the face is in the allowed faces (Module ModuleFaces enum)
+                                face = ModuleFaces[face_str]
+                            except KeyError: # if error then default to FRONT
+                                face = ModuleFaces.FRONT
                         node_label = f"{symbol}{idx_counter[0]}" # generate a unique ID for the node
                         self.graph.add_node(
                             node_label,
@@ -245,13 +251,14 @@ class LSystemDecoder:
 # in case we want to test on an example
 
 def main():
-    # Example: axiom with orientation and face
+    # Example: axiom with orientation and face, and C expands into branches
     axiom = "C[H(0,FRONT)][H(0,LEFT)][H(0,RIGHT)]"
-    rules = {"H(0,FRONT)" :  "H(0,FRONT)B(0,FRONT)",
-             "H(0,LEFT)" :  "H(0,LEFT)B(0,FRONT)",
-             "H(0,RIGHT)" :  "H(0,RIGHT)B(0,FRONT)",
-            }
-    decoder = LSystemDecoder(axiom, rules, iterations=4)
+    rules = {
+        "H(0,FRONT)": "H(0,FRONT)B(0,FRONT)",
+        "H(0,LEFT)": "H(0,LEFT)B(0,FRONT)",
+        "H(0,RIGHT)": "H(0,RIGHT)B(0,FRONT)" # Example for N, can be expanded as needed
+    }
+    decoder = LSystemDecoder(axiom, rules, iterations=2)
     print("Nodes and attributes:")
     for n, d in decoder.graph.nodes(data=True):
         print(n, d)
