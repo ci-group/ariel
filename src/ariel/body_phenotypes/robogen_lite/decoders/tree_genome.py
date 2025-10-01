@@ -3,9 +3,10 @@ from ast import Dict
 from typing import Any
 from zipfile import Path
 import matplotlib.pyplot as plt
-import src.ariel.body_phenotypes.robogen_lite.config as config
+import body_phenotypes.robogen_lite.config as config
 import contextlib
 from collections import deque
+import copy
 
 import networkx as nx
 from jedi.inference.gradual.typing import Callable
@@ -244,10 +245,33 @@ class TreeGenome:
         else:
             return self._root.find_all_nodes_dfs(predicate)
 
+    def copy(self) -> 'TreeGenome':
+        """Create a shallow copy of the TreeGenome."""
+        new_genome = TreeGenome()
+        if self._root:
+            new_genome._root = self._root.copy()
+        return new_genome
+
+    def __copy__(self) -> 'TreeGenome':
+        """Support for copy.copy()."""
+        return self.copy()
+
+    def __deepcopy__(self, memo) -> 'TreeGenome':
+        """Support for copy.deepcopy()."""
+        new_genome = TreeGenome()
+        if self._root:
+            new_genome._root = copy.deepcopy(self._root, memo)
+        return new_genome
+
 
 class TreeNode:
 
-    def __init__(self, module: config.ModuleInstance, depth: int = 0, node_id: int = None):
+    def __init__(self, module: config.ModuleInstance = None, depth: int = 0, node_id: int = None,
+                 module_type: config.ModuleType = None, module_rotation: config.ModuleRotationsIdx = None,):
+        if module is None:
+            assert module_type is not None, "Module type cannot be None if module is not specified"
+            assert module_rotation is not None, "Module rotation cannot be None if module is not specified"
+            module = config.ModuleInstance(type=module_type, rotation=module_rotation, links={})
         self.module_type = module.type
         self.rotation = module.rotation
         # Keep reference to the original module. Why? Because then the links get automatically filled and we can just read them out when decoding
@@ -322,7 +346,7 @@ class TreeNode:
         # Weird flex
         # ids_to_faces = reduce(lambda acc, x: {**acc, **x}, map(lambda face_node: {face_node[1].id: face_node[0]}, self.children.items()), {})
         return {face_node[1].id: face_node[0] for face_node in self.children.items()}[child_id]
-    
+
     def face_mapping(self, face: config.ModuleFaces):
         mapping = {
             config.ModuleFaces.FRONT: self._front,
@@ -390,6 +414,21 @@ class TreeNode:
             if child is not None:
                 result[face] = child
         return result
+
+    def __eq__(self, other) -> bool:
+        """Two nodes are equal if they have the same ID."""
+        # This is my approach now (Lukas), we could also check for other equalities.
+        if not isinstance(other, TreeNode):
+            return False
+        return self._id == other._id
+
+    def __hash__(self) -> int:
+        """Make TreeNode hashable using its ID."""
+        return hash(self._id)
+
+    def __ne__(self, other) -> bool:
+        """Not equal is the opposite of equal."""
+        return not self.__eq__(other)
 
     def available_faces(self) -> list[config.ModuleFaces]:
         """Return list of faces that can still accept children."""
@@ -484,7 +523,7 @@ class TreeNode:
             queue.extend(current.children.values())
 
         return result
-    
+
     def get_all_nodes(self, mode: str = "dfs", exclude_root: bool = True):
         """
         Returns all the nodes in the subtree that has self as root node
@@ -514,21 +553,76 @@ class TreeNode:
 
     def replace_node(self, node_to_remove: TreeNode, node_to_add: TreeNode):
         """
-        1) Finds the father of node_to_remove in self subtree
-        2) Replaces node_to_remove with node_to_add in the father's children
-        3) 
+        1) Finds the parent of node_to_remove in self subtree
+        2) Replaces node_to_remove with node_to_add in the parent's children
+        3)
         """
-        predicate_is_father = lambda x: node_to_remove in x.children.values()
-        father = self.find_all_nodes_dfs(predicate=predicate_is_father)
-        if not father or len(father) > 1:
+        predicate_is_parent = lambda x: node_to_remove in set(x.children.values())
+        parent = self.find_all_nodes_dfs(predicate=predicate_is_parent)
+        if not parent or len(parent) > 1:
             raise RuntimeError("Father not found, are you sure node_to_remove is in subtree?")
-        # We expect a list of len 1 in which there is the father
-        father = father[0]
-        if self._enable_replacement:
-            with father.enable_replacement():
-                father._set_face(father._get_face_given_child(node_to_remove.id), node_to_add)
-        else:
-            raise RuntimeError("Replacement not enabled, use 'with node.enable_replacement()' context manager")
+        # We expect a list of len 1 in which there is the parent
+        parent = parent[0]
+        parent._set_face(parent._get_face_given_child(node_to_remove.id), node_to_add)
+
+    def copy(self) -> 'TreeNode':
+        """Create a deep copy of this node and all its children."""
+        # Create new module instance
+        new_module = config.ModuleInstance(
+            type=self.module_type,
+            rotation=self.rotation,
+            links={}  # Will be rebuilt
+        )
+
+        # Create new node
+        new_node = TreeNode(new_module, depth=self._depth)
+
+        # Recursively copy children
+        for face, child in self.children.items():
+            child_copy = child.copy()
+            new_node._set_face(face, child_copy)
+
+        return new_node
+
+    def __copy__(self) -> 'TreeNode':
+        """Support for copy.copy() - creates deep copy for tree structures."""
+        return self.copy()
+
+    def __deepcopy__(self, memo) -> 'TreeNode':
+        """Support for copy.deepcopy()."""
+        # Check if already copied
+        if id(self) in memo:
+            return memo[id(self)]
+
+        # Create new module instance
+        new_module = config.ModuleInstance(
+            type=self.module_type,
+            rotation=self.rotation,
+            links={}
+        )
+
+        # Create new node
+        new_node = TreeNode(new_module, depth=self._depth)
+        memo[id(self)] = new_node
+
+        # Recursively deepcopy children
+        for face, child in self.children.items():
+            child_copy = copy.deepcopy(child, memo)
+            new_node._set_face(face, child_copy)
+
+        return new_node
+
+@contextlib.contextmanager
+def enable_replacement(*nodes: TreeNode):
+    try:
+        for node in nodes:
+            node._enable_replacement = True
+        yield
+    finally:
+        for node in nodes:
+            node._enable_replacement = False
+
+
 
 def lukas():
     genome = TreeGenome()
@@ -546,4 +640,4 @@ def lukas():
     print(genome.root.get_all_nodes("dfs", True))
 
 
-lukas()
+#lukas()

@@ -4,7 +4,7 @@
 from pathlib import Path
 
 # Third-party libraries
-from ariel.src.ariel.body_phenotypes.robogen_lite.decoders.tree_genome.tree_genome import Tree
+from ariel.body_phenotypes.robogen_lite.decoders.tree_genome import TreeGenome, enable_replacement
 import numpy as np
 from rich.console import Console
 from rich.traceback import install
@@ -60,14 +60,14 @@ class Crossover:
         child1 = child1.reshape(parent_i_arr_shape).astype(int).tolist()
         child2 = child2.reshape(parent_j_arr_shape).astype(int).tolist()
         return child1, child2
-    
+
 class TreeCrossover:
     @staticmethod
     def koza_default(
-        parent_i: Tree,
-        parent_j: Tree,
+        parent_i: TreeGenome,
+        parent_j: TreeGenome,
         koza_internal_node_prob: float = 0.9,
-    ) -> tuple[Tree, Tree]:
+    ) -> tuple[TreeGenome, TreeGenome]:
         """
         Koza default:
             -   In Parent A: choose an internal node with high probability (e.g., 90%) excluding root.
@@ -88,16 +88,50 @@ class TreeCrossover:
         parent_j_all_nodes = parent_j_root.get_all_nodes()
         node_b = RNG.choice(parent_j_all_nodes)
 
-        child1 = parent_i.copy()
-        child2 = parent_j.copy()
+        parent_i_old = parent_i.copy()
+        parent_j_old = parent_j.copy()
+        child1 = parent_i
+        child2 = parent_j
 
-        with child1.enable_replacement():
-            child1.replace_node(node_a, node_b)
-        with child2.enable_replacement():
-            child2.replace_node(node_b, node_a)
+        with enable_replacement(child1, child2, node_a, node_b):
+            child1.root.replace_node(node_a, node_b)
+            child2.root.replace_node(node_b, node_a)
 
+        parent_i = parent_i_old
+        parent_j = parent_j_old
         return child1, child2
-        
+
+
+def tree_main():
+    import body_phenotypes.robogen_lite.config as config
+    from ariel.body_phenotypes.robogen_lite.decoders.tree_genome import TreeNode, TreeGenome
+
+    # Create first tree
+    genome1 = TreeGenome()
+    genome1.root = TreeNode(
+        config.ModuleInstance(type=config.ModuleType.CORE, rotation=config.ModuleRotationsIdx.DEG_0, links={}))
+    genome1.root.front = TreeNode(
+        config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
+    genome1.root.back = TreeNode(
+        config.ModuleInstance(type=config.ModuleType.HINGE, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
+
+    # Create second tree
+    genome2 = TreeGenome()
+    genome2.root = TreeNode(
+        config.ModuleInstance(type=config.ModuleType.CORE, rotation=config.ModuleRotationsIdx.DEG_0, links={}))
+    genome2.root.right = TreeNode(
+        config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_180, links={}))
+    genome2.root.back = TreeNode(
+        config.ModuleInstance(type=config.ModuleType.HINGE, rotation=config.ModuleRotationsIdx.DEG_270, links={}))
+
+    console.log("Parent 1:", genome1)
+    console.log("Parent 2:", genome2)
+
+    # Perform crossover
+    child1, child2 = TreeCrossover.koza_default(genome1, genome2)
+
+    console.log("Child 1:", child1)
+    console.log("Child 2:", child2)
 
 
 def main() -> None:
@@ -111,4 +145,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    tree_main()
