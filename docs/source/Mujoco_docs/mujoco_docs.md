@@ -71,7 +71,15 @@ to_track = [data.bind(geom) for geom in geoms if "core" in geom.name]
 <!--- `plugin`, `plugin_data`, `plugin_state`: Plugin-related data arrays-->
 
 ## State Variables
-- `qpos`: Position state vector. Returns list that holds x_coord, y_coord, z_coord and the current position of all actuators, among other info.
+- **`qpos`**: Generalized position state vector.  
+  Contains the positions of the core and all hinge joints, in the order they are defined in the XML.  
+  - **Core (free joint)**:   
+    - `[x, y, z]` : 3D position of the core body frame  
+    - `[qw, qx, qy, qz]` : Orientation quaternion of the core  
+  - **Hinge joints (bricks)**: `[angle]` for each hinge, representing the rotation angle in radians  
+  
+  Actuator inputs and states are *not* stored here (see `data.ctrl` and `data.act` instead).
+
 - `qvel`: Velocity state vector. Holds the current velocity of each actuator. 
 - `qacc`: Acceleration state vector
 <!--- `qDeriv`: Position derivatives

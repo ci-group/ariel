@@ -4,7 +4,6 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
-# Third-party libraries
 import matplotlib.pyplot as plt
 import mujoco as mj
 import numpy as np
@@ -12,6 +11,7 @@ import numpy.typing as npt
 from mujoco import viewer
 
 # Local libraries
+from ariel import console
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
@@ -44,48 +44,87 @@ CWD = Path.cwd()
 DATA = CWD / "__data__" / SCRIPT_NAME
 DATA.mkdir(exist_ok=True)
 
+# Global variables
+SPAWN_POS = [-0.8, 0, 0.1]
+NUM_OF_MODULES = 30
+TARGET_POSITION = [5, 0, 0.5]
+
+
+def fitness_function(history: list[float]) -> float:
+    xt, yt, zt = TARGET_POSITION
+    xc, yc, zc = history[-1]
+
+    # Minimize the distance --> maximize the negative distance
+    cartesian_distance = np.sqrt(
+        (xt - xc) ** 2 + (yt - yc) ** 2 + (zt - zc) ** 2,
+    )
+    return -cartesian_distance
+
 
 def show_xpos_history(history: list[float]) -> None:
+    # Create a tracking camera
+    camera = mj.MjvCamera()
+    camera.type = mj.mjtCamera.mjCAMERA_FREE
+    camera.lookat = [2.5, 0, 0]
+    camera.distance = 10
+    camera.azimuth = 0
+    camera.elevation = -90
+
+    # Initialize world to get the background
+    mj.set_mjcb_control(None)
+    world = OlympicArena()
+    model = world.spec.compile()
+    data = mj.MjData(model)
+    save_path = str(DATA / "background.png")
+    single_frame_renderer(
+        model,
+        data,
+        camera=camera,
+        save_path=save_path,
+        save=True,
+    )
+
+    # Setup background image
+    img = plt.imread(save_path)
+    _, ax = plt.subplots()
+    ax.imshow(img)
+    w, h, _ = img.shape
+
     # Convert list of [x,y,z] positions to numpy array
     pos_data = np.array(history)
 
-    # Create figure and axis
-    plt.figure(figsize=(10, 6))
+    # Calculate initial position
+    x0, y0 = int(h * 0.483), int(w * 0.815)
+    xc, yc = int(h * 0.483), int(w * 0.9205)
+    ym0, ymc = 0, SPAWN_POS[0]
+
+    # Convert position data to pixel coordinates
+    pixel_to_dist = -((ymc - ym0) / (yc - y0))
+    pos_data_pixel = [[xc, yc]]
+    for i in range(len(pos_data) - 1):
+        xi, yi, _ = pos_data[i]
+        xj, yj, _ = pos_data[i + 1]
+        xd, yd = (xj - xi) / pixel_to_dist, (yj - yi) / pixel_to_dist
+        xn, yn = pos_data_pixel[i]
+        pos_data_pixel.append([xn + int(xd), yn + int(yd)])
+    pos_data_pixel = np.array(pos_data_pixel)
 
     # Plot x,y trajectory
-    plt.plot(pos_data[:, 0], pos_data[:, 1], "b-", label="Path")
-    plt.plot(pos_data[0, 0], pos_data[0, 1], "go", label="Start")
-    plt.plot(pos_data[-1, 0], pos_data[-1, 1], "ro", label="End")
-    plt.plot(0, 0, "kx", label="Origin")
+    ax.plot(x0, y0, "kx", label="[0, 0, 0]")
+    ax.plot(xc, yc, "go", label="Start")
+    ax.plot(pos_data_pixel[:, 0], pos_data_pixel[:, 1], "b-", label="Path")
+    ax.plot(pos_data_pixel[-1, 0], pos_data_pixel[-1, 1], "ro", label="End")
 
     # Add labels and title
-    plt.xlabel("X Position")
-    plt.ylabel("Y Position")
-    plt.title("Robot Path in XY Plane")
-    plt.legend()
-    plt.grid(visible=True)
+    ax.set_xlabel("X Position")
+    ax.set_ylabel("Y Position")
+    ax.legend()
 
-    # Set equal aspect ratio and center at (0,0)
-    plt.axis("equal")
+    # Title
+    plt.title("Robot Path in XY Plane")
 
     # Show results
     plt.show()
-
-
-def random_move(
-    model: mj.MjModel,
-    data: mj.MjData,
-) -> npt.NDArray[np.float64]:
-    # Get the number of joints
-    num_joints = model.nu
-
-    # Hinges take values between -pi/2 and pi/2
-    hinge_range = np.pi / 2
-    return RNG.uniform(
-        low=-hinge_range,  # -pi/2
-        high=hinge_range,  # pi/2
-        size=num_joints,
-    ).astype(np.float64)
 
 
 def nn_controller(
@@ -133,7 +172,7 @@ def experiment(
 
     # Spawn robot in the world
     # Check docstring for spawn conditions
-    world.spawn(robot.spec, spawn_position=[0, 0, 0.1])
+    world.spawn(robot.spec, spawn_position=SPAWN_POS)
 
     # Generate the model and data
     # These are standard parts of the simulation USE THEM AS IS, DO NOT CHANGE
@@ -200,10 +239,6 @@ def experiment(
 def main() -> None:
     """Entry point."""
     # ? ------------------------------------------------------------------ #
-    # System parameters
-    num_modules = 20
-
-    # ? ------------------------------------------------------------------ #
     genotype_size = 64
     type_p_genes = RNG.random(genotype_size).astype(np.float32)
     conn_p_genes = RNG.random(genotype_size).astype(np.float32)
@@ -215,11 +250,11 @@ def main() -> None:
         rot_p_genes,
     ]
 
-    nde = NeuralDevelopmentalEncoding(number_of_modules=num_modules)
+    nde = NeuralDevelopmentalEncoding(number_of_modules=NUM_OF_MODULES)
     p_matrices = nde.forward(genotype)
 
     # Decode the high-probability graph
-    hpd = HighProbabilityDecoder(num_modules)
+    hpd = HighProbabilityDecoder(NUM_OF_MODULES)
     robot_graph: DiGraph[Any] = hpd.probability_matrices_to_graph(
         p_matrices[0],
         p_matrices[1],
@@ -253,11 +288,14 @@ def main() -> None:
         tracker=tracker,
     )
 
-    experiment(robot=core, controller=ctrl, mode="frame")
+    experiment(robot=core, controller=ctrl, mode="launcher")
 
-    # show_xpos_history(tracker.history["xpos"][0])
+    show_xpos_history(tracker.history["xpos"][0])
+
+    fitness = fitness_function(tracker.history["xpos"][0])
+    msg = f"Fitness of generated robot: {fitness}"
+    console.log(msg)
 
 
 if __name__ == "__main__":
-    for i in range(1000):
-        main()
+    main()

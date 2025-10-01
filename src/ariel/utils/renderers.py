@@ -7,8 +7,8 @@ Todo:
 """
 
 # Standard library
-import datetime
 import math
+from pathlib import Path
 
 # Third-party libraries
 import mujoco
@@ -16,6 +16,7 @@ from PIL import Image
 from rich.console import Console
 
 # Local libraries
+from ariel.utils.file_ops import generate_save_path
 from ariel.utils.video_recorder import VideoRecorder
 
 # Global functions
@@ -28,32 +29,25 @@ def single_frame_renderer(
     steps: int = 10,
     *,
     save: bool = False,
-    save_path: str | None = None,
-    append_date: bool = True,
-) -> None:
-    """
-    Render a single frame of the simulation using MuJoCo's rendering engine.
+    show: bool = False,
+    save_path: str | Path | None = None,
+    camera: mujoco.MjvCamera | None = None,
+    width: int = 480,
+    height: int = 640,
+) -> Image.Image:
+    # Reset state and time of simulation
+    mujoco.mj_resetData(model, data)
 
-    Parameters
-    ----------
-    model : mujoco.MjModel
-        The MuJoCo model to render.
-    data : mujoco.MjData
-        The MuJoCo data to render.
-    steps : int, optional
-        The number of simulation steps to take before rendering, by default 10
-    """
     # Enable joint visualization option:
     scene_option = mujoco.MjvOption()
     scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = True
 
-    # Reset state and time of simulation
-    mujoco.mj_resetData(model, data)
-
     # Call rendering engine
-    msg = f"Rendering single frame with [bold blue] {steps} [/bold blue] steps."
-    console.log(f"[bold yellow] --> {msg} [/bold yellow]")
-    with mujoco.Renderer(model) as renderer:
+    with mujoco.Renderer(
+        model,
+        width=width,
+        height=height,
+    ) as renderer:
         # Move simulation forward one iteration/step
         mujoco.mj_step(model, data, nstep=steps)
 
@@ -61,37 +55,27 @@ def single_frame_renderer(
         renderer.update_scene(
             data,
             scene_option=scene_option,
+            camera=camera or mujoco.MjvCamera(),
         )
 
         # Generate frame using rendering engine
         frame = renderer.render()
 
         # Convert frame into an image which can be shown
-        img = Image.fromarray(frame)
+        img: Image.Image = Image.fromarray(frame)
 
-        # Save or show
-        if save is True:
-            # No save path given (use default)
-            if save_path is None:
-                save_path = "./frame.png"
+    # Save image locally
+    if save is True:
+        if save_path is None:
+            save_path = generate_save_path(file_path="img.png")
+        img.save(save_path, format="png")
 
-            # Add date to name
-            if append_date is True:
-                now = datetime.datetime.now(tz=datetime.UTC)
-                date = now.strftime("%Y-%m-%d_%H-%M-%S")
-                file_format = save_path.split(".")[-1]
+    # Show image
+    if show is True:
+        img.show()
 
-                # Update file name
-                save_path = save_path[: -(len(file_format) + 1)]
-                save_path += f"_{date}"
-                save_path += f".{file_format}"
-
-            # Save image locally
-            img.save(save_path, format="png")
-        else:
-            img.show()
-
-    console.log("[bold green] --> Rendering done![/bold green]")
+    # Return image
+    return img
 
 
 def video_renderer(

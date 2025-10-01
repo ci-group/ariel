@@ -138,41 +138,7 @@ class IntegerMutator:
         mutation_mask = mutator * sub_mask * do_mask
         new_genotype = ind_arr + mutation_mask
         return cast("Integers", new_genotype.astype(int).tolist())
-
-    @staticmethod
-    def float_creep(
-        individual: Floats,
-        span: int | float,
-        mutation_probability: float,
-    ) -> Floats:
-        
-        # Prep
-        ind_arr = np.array(individual)
-        shape = ind_arr.shape
-
-        # Generate mutation values
-        mutator = RNG.uniform(
-            low=0,
-            high=span,
-            size=shape,
-        )
-
-        # Include negative mutations
-        sub_mask = RNG.choice(
-            [-1, 1],
-            size=shape,
-        )
-
-        # Determine which positions to mutate
-        do_mask = RNG.choice(
-            [1, 0],
-            size=shape,
-            p=[mutation_probability, 1 - mutation_probability],
-        )
-        mutation_mask = mutator * sub_mask * do_mask
-        new_genotype = ind_arr + mutation_mask
-        return cast("Floats", new_genotype.astype(float).tolist())
-
+                    
 def main() -> None:
     """Entry point."""
     console.log(IntegersGenerator.integers(-5, 5, 5))
