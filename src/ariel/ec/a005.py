@@ -4,12 +4,12 @@
 from pathlib import Path
 
 # Third-party libraries
-from ariel.body_phenotypes.robogen_lite.decoders.tree_genome import TreeGenome, enable_replacement
 import numpy as np
 from rich.console import Console
 from rich.traceback import install
 
 # Local libraries
+from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from ariel.ec.a000 import IntegersGenerator
 from ariel.ec.a001 import JSONIterable
 
@@ -93,8 +93,9 @@ class TreeCrossover:
         child1 = parent_i
         child2 = parent_j
 
-        with enable_replacement(child1, child2, node_a, node_b):
+        with child1.root.enable_replacement():
             child1.root.replace_node(node_a, node_b)
+        with child2.root.enable_replacement():
             child2.root.replace_node(node_b, node_a)
 
         parent_i = parent_i_old
@@ -103,8 +104,8 @@ class TreeCrossover:
 
 
 def tree_main():
-    import body_phenotypes.robogen_lite.config as config
-    from ariel.body_phenotypes.robogen_lite.decoders.tree_genome import TreeNode, TreeGenome
+    import ariel.body_phenotypes.robogen_lite.config as config
+    from ariel.ec.genotypes.tree.tree_genome import TreeNode, TreeGenome
 
     # Create first tree
     genome1 = TreeGenome()

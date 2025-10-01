@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings
 from rich.console import Console
 from rich.traceback import install
 
-from ariel.body_phenotypes.robogen_lite.decoders.tree_genome import TreeNode, TreeGenome
+from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]

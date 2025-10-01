@@ -3,7 +3,7 @@ from ast import Dict
 from typing import Any
 from zipfile import Path
 import matplotlib.pyplot as plt
-import body_phenotypes.robogen_lite.config as config
+import ariel.body_phenotypes.robogen_lite.config as config
 import contextlib
 from collections import deque
 import copy
@@ -13,145 +13,6 @@ from jedi.inference.gradual.typing import Callable
 from networkx import DiGraph
 from networkx.readwrite import json_graph
 from functools import reduce
-
-'''
-class Tree:
-    def __init__(self):
-        self.graph = nx.DiGraph()
-        self.root = TreeNode(config.ModuleInstance(type=config.ModuleType.CORE, rotation=config.ModuleRotationsIdx.DEG_0, links={}), depth=0)
-
-    def __repr__(self) -> str:
-        """Return a nice string representation of the tree structure."""
-        if not self.root:
-            return "Tree(empty)"
-
-        node_count = len(list(self._iter_nodes()))
-        lines = [f"Tree({node_count} nodes):"]
-        lines.extend(self._format_node(self.root, "", True))
-        return "\n".join(lines)
-
-    def _iter_nodes(self):
-        """Iterator over all nodes in the tree."""
-        if self.root:
-            yield from self._iter_nodes_recursive(self.root)
-
-    def _iter_nodes_recursive(self, node: 'TreeNode'):
-        """Recursively iterate over nodes."""
-        yield node
-        for child in node.children.values():
-            yield from self._iter_nodes_recursive(child)
-
-    def _format_node(self, node: 'TreeNode', prefix: str, is_last: bool) -> list[str]:
-        """Helper method to format a node and its children recursively."""
-        # Current node line
-        connector = "└── " if is_last else "├── "
-        node_info = f"{node.module_type.name}({node.rotation.name}, depth={node._depth})"
-        lines = [f"{prefix}{connector}{node_info}"]
-
-        # Prepare prefix for children
-        child_prefix = prefix + ("    " if is_last else "│   ")
-
-        # Add children
-        if node.children:
-            child_items = list(node.children.items())
-            for i, (face, child) in enumerate(child_items):
-                is_last_child = (i == len(child_items) - 1)
-                face_connector = "└── " if is_last_child else "├── "
-                lines.append(f"{child_prefix}{face_connector}[{face.name}]")
-
-                # Add the child node with additional indentation
-                grandchild_prefix = child_prefix + ("    " if is_last_child else "│   ")
-                lines.extend(self._format_node(child, grandchild_prefix, True))
-
-        return lines
-
-    def tree_to_digraph(self) -> nx.DiGraph:
-        """
-        Convert Tree (rooted at self.root) to a NetworkX DiGraph.
-        Nodes are given integer ids (0..N-1) in DFS order.
-
-        Node attrs:  type=<ModuleType.name>, rotation=<ModuleRotationsIdx.name>, depth=<int>
-        Edge attrs:  face=<ModuleFaces.name>
-        """
-        # Stable ids for each TreeNode instance
-        node_id: Dict[TreeNode, int] = {}
-        next_id = 0
-
-        def get_id(n: TreeNode) -> int:
-            nonlocal next_id
-            if n not in node_id:
-                node_id[n] = next_id
-                next_id += 1
-            return node_id[n]
-
-        def dfs(parent: TreeNode | None, child: TreeNode, via_face: config.ModuleFaces | None):
-            id = get_id(child)
-            # add/update the node with attributes (use .name to make JSON-friendly)
-            self.graph.add_node(
-                id,
-                type=child.module_type.name,
-                rotation=child.rotation.name,
-                # depth=child._depth,
-            )
-
-            if parent is not None:
-                parent_id = get_id(parent)
-                # face stored as string (Enum.name) for readability / JSON
-                self.graph.add_edge(parent_id, id, face=via_face.name if via_face else None)
-
-            # descend
-            for face, sub in child.children.items():
-                # Expect sub to be a TreeNode
-                dfs(child, sub, face)
-
-        dfs(None, self.root, None)
-'''
-# from matplotlib.figure import Figure
-# from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-# from pathlib import Path
-
-# def draw_graph(
-#     graph: DiGraph[Any],
-#     title: str = "NetworkX Directed Graph",
-#     save_file: Path | str = "graph.png",
-# ) -> None:
-#     # --- NO pyplot here; use Figure + Agg canvas ---
-#     fig = Figure()
-#     canvas = FigureCanvas(fig)
-#     ax = fig.add_subplot(111)
-
-#     # Layouts (deterministic seed)
-#     pos = nx.spectral_layout(graph)
-#     pos = nx.spring_layout(graph, pos=pos, k=1, iterations=20, seed=42)
-
-#     # Draw on explicit axes
-#     nx.draw(
-#         graph,
-#         pos,
-#         with_labels=True,
-#         node_size=150,
-#         node_color="#FFFFFF00",
-#         edgecolors="blue",
-#         font_size=8,
-#         width=0.5,
-#         ax=ax,
-#     )
-
-#     edge_labels = nx.get_edge_attributes(graph, "face")
-#     nx.draw_networkx_edge_labels(
-#         graph,
-#         pos,
-#         edge_labels=edge_labels,
-#         font_color="red",
-#         font_size=8,
-#         ax=ax,
-#     )
-
-#     ax.set_title(title)
-#     fig.tight_layout()
-
-#     # Save via Agg canvas (no GUI backend involved)
-#     fig.savefig(save_file, dpi=300, bbox_inches="tight")
 
 
 class TreeGenome:
@@ -266,8 +127,8 @@ class TreeGenome:
 
 class TreeNode:
 
-    def __init__(self, module: config.ModuleInstance = None, depth: int = 0, node_id: int = None,
-                 module_type: config.ModuleType = None, module_rotation: config.ModuleRotationsIdx = None,):
+    def __init__(self, module: config.ModuleInstance | None = None, depth: int = 0, node_id: int | None = None,
+                 module_type: config.ModuleType | None = None, module_rotation: config.ModuleRotationsIdx | None = None):
         if module is None:
             assert module_type is not None, "Module type cannot be None if module is not specified"
             assert module_rotation is not None, "Module rotation cannot be None if module is not specified"
@@ -299,11 +160,14 @@ class TreeNode:
     @contextlib.contextmanager
     def enable_replacement(self):
         """Context manager to temporarily allow replacement of existing children."""
+        all_nodes_to_enable = list(self.get_all_nodes(mode="dfs", exclude_root=False))
         try:
-            self._enable_replacement = True
+            for n in all_nodes_to_enable:
+                n._enable_replacement = True
             yield
         finally:
-            self._enable_replacement = False
+            for n in all_nodes_to_enable:
+                n._enable_replacement = False
 
     def _can_attach_to_face(self, face: config.ModuleFaces, node: TreeNode | None) -> bool:
         """Check if a node can be attached to the given face."""
@@ -415,7 +279,7 @@ class TreeNode:
                 result[face] = child
         return result
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Two nodes are equal if they have the same ID."""
         # This is my approach now (Lukas), we could also check for other equalities.
         if not isinstance(other, TreeNode):
@@ -426,7 +290,7 @@ class TreeNode:
         """Make TreeNode hashable using its ID."""
         return hash(self._id)
 
-    def __ne__(self, other) -> bool:
+    def __ne__(self, other: object) -> bool:
         """Not equal is the opposite of equal."""
         return not self.__eq__(other)
 
@@ -575,7 +439,7 @@ class TreeNode:
         )
 
         # Create new node
-        new_node = TreeNode(new_module, depth=self._depth)
+        new_node = TreeNode(new_module, depth=self._depth, node_id=self._id)
 
         # Recursively copy children
         for face, child in self.children.items():
@@ -587,40 +451,6 @@ class TreeNode:
     def __copy__(self) -> 'TreeNode':
         """Support for copy.copy() - creates deep copy for tree structures."""
         return self.copy()
-
-    def __deepcopy__(self, memo) -> 'TreeNode':
-        """Support for copy.deepcopy()."""
-        # Check if already copied
-        if id(self) in memo:
-            return memo[id(self)]
-
-        # Create new module instance
-        new_module = config.ModuleInstance(
-            type=self.module_type,
-            rotation=self.rotation,
-            links={}
-        )
-
-        # Create new node
-        new_node = TreeNode(new_module, depth=self._depth)
-        memo[id(self)] = new_node
-
-        # Recursively deepcopy children
-        for face, child in self.children.items():
-            child_copy = copy.deepcopy(child, memo)
-            new_node._set_face(face, child_copy)
-
-        return new_node
-
-@contextlib.contextmanager
-def enable_replacement(*nodes: TreeNode):
-    try:
-        for node in nodes:
-            node._enable_replacement = True
-        yield
-    finally:
-        for node in nodes:
-            node._enable_replacement = False
 
 
 
