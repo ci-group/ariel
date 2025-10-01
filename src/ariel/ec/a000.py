@@ -11,6 +11,8 @@ from pydantic_settings import BaseSettings
 from rich.console import Console
 from rich.traceback import install
 
+from ariel.ec.genotypes.tree.tree_genome import TreeGenome
+
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
@@ -138,7 +140,18 @@ class IntegerMutator:
         mutation_mask = mutator * sub_mask * do_mask
         new_genotype = ind_arr + mutation_mask
         return cast("Integers", new_genotype.astype(int).tolist())
-                    
+
+
+class TreeGenerator:
+    @staticmethod
+    def __call__(*args, **kwargs) -> TreeGenome:
+        return TreeGenome.default_init()
+
+    @staticmethod
+    def default():
+        return TreeGenome.default_init()
+
+
 def main() -> None:
     """Entry point."""
     console.log(IntegersGenerator.integers(-5, 5, 5))
