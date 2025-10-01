@@ -4,6 +4,7 @@
 from pathlib import Path
 
 # Third-party libraries
+from ariel.src.ariel.body_phenotypes.robogen_lite.decoders.tree_genome.tree_genome import Tree
 import numpy as np
 from rich.console import Console
 from rich.traceback import install
@@ -59,6 +60,44 @@ class Crossover:
         child1 = child1.reshape(parent_i_arr_shape).astype(int).tolist()
         child2 = child2.reshape(parent_j_arr_shape).astype(int).tolist()
         return child1, child2
+    
+class TreeCrossover:
+    @staticmethod
+    def koza_default(
+        parent_i: Tree,
+        parent_j: Tree,
+        koza_internal_node_prob: float = 0.9,
+    ) -> tuple[Tree, Tree]:
+        """
+        Koza default:
+            -   In Parent A: choose an internal node with high probability (e.g., 90%) excluding root.
+                Falls back to any node if A has no internal nodes.
+            -   In Parent B: choose any node uniformly (internal or terminal).
+
+        Forcing at least one internal node increases the chance you actually change structure
+        (not just swapping a leaf for a leaf), while letting the other parent be unrestricted adds variety.
+        """
+        parent_i_root, parent_j_root = parent_i.root, parent_j.root
+        parent_i_internal_nodes = parent_i_root.get_internal_nodes(mode="dfs", exclude_root=True)
+
+        if RNG.random() > koza_internal_node_prob and parent_i_internal_nodes:
+            node_a = RNG.choice(parent_i_internal_nodes)
+        else:
+            node_a = RNG.choice(parent_i_root.get_all_nodes(mode="dfs", exclude_root=True))
+
+        parent_j_all_nodes = parent_j_root.get_all_nodes()
+        node_b = RNG.choice(parent_j_all_nodes)
+
+        child1 = parent_i.copy()
+        child2 = parent_j.copy()
+
+        with child1.enable_replacement():
+            child1.replace_node(node_a, node_b)
+        with child2.enable_replacement():
+            child2.replace_node(node_b, node_a)
+
+        return child1, child2
+        
 
 
 def main() -> None:

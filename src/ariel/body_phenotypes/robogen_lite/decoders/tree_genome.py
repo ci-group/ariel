@@ -3,7 +3,7 @@ from ast import Dict
 from typing import Any
 from zipfile import Path
 import matplotlib.pyplot as plt
-import ariel.body_phenotypes.robogen_lite.config as config
+import src.ariel.body_phenotypes.robogen_lite.config as config
 import contextlib
 from collections import deque
 
@@ -11,7 +11,7 @@ import networkx as nx
 from jedi.inference.gradual.typing import Callable
 from networkx import DiGraph
 from networkx.readwrite import json_graph
-
+from functools import reduce
 
 '''
 class Tree:
@@ -154,7 +154,7 @@ class Tree:
 
 
 class TreeGenome:
-    def __init__(self, root: TreeNodeLukas | None = None):
+    def __init__(self, root: TreeNode | None = None):
         self._root = root
 
     @classmethod
@@ -164,11 +164,11 @@ class TreeGenome:
                                               rotation=config.ModuleRotationsIdx.DEG_90,
                                               links={})))
     @property
-    def root(self) -> TreeNodeLukas | None:
+    def root(self) -> TreeNode | None:
         return self._root
 
     @root.setter
-    def root(self, value: TreeNodeLukas | None):
+    def root(self, value: TreeNode | None):
         if self._root is not None:
             raise ValueError("Root node cannot be changed once set.")
         self._root = value
@@ -188,13 +188,13 @@ class TreeGenome:
         if self._root:
             yield from self._iter_nodes_recursive(self._root)
 
-    def _iter_nodes_recursive(self, node: TreeNodeLukas):
+    def _iter_nodes_recursive(self, node: TreeNode):
         """Recursively iterate over nodes."""
         yield node
         for child in node.children.values():
             yield from self._iter_nodes_recursive(child)
 
-    def _format_node(self, node: TreeNodeLukas, prefix: str, is_last: bool) -> list[str]:
+    def _format_node(self, node: TreeNode, prefix: str, is_last: bool) -> list[str]:
         """Helper method to format a node and its children recursively."""
         connector = "└── " if is_last else "├── "
         node_info = f"{node.module_type.name}({node.rotation.name}, depth={node._depth})"
@@ -214,15 +214,15 @@ class TreeGenome:
 
         return lines
 
-    def add_child_to_node(self, node: TreeNodeLukas, face: config.ModuleFaces, child_module: config.ModuleInstance):
+    def add_child_to_node(self, node: TreeNode, face: config.ModuleFaces, child_module: config.ModuleInstance):
         """Helper method to add a child to a specific node. However, not recommended to use. Rather use """
         if face not in node.available_faces():
             raise ValueError(f"Face {face} is not available on this node.")
 
-        child_node = TreeNodeLukas(child_module, depth=node._depth + 1)
+        child_node = TreeNode(child_module, depth=node._depth + 1)
         setattr(node, face.name.lower(), child_node)
 
-    def find_node(self, target_id: int, method: str = "dfs") -> TreeNodeLukas | None:
+    def find_node(self, target_id: int, method: str = "dfs") -> TreeNode | None:
         """Find a node by ID in the entire genome."""
         if not self._root:
             return None
@@ -232,7 +232,7 @@ class TreeGenome:
         else:
             return self._root.find_node_dfs(target_id)
 
-    def find_nodes_by_type(self, module_type: config.ModuleType, method: str = "dfs") -> list[TreeNodeLukas]:
+    def find_nodes_by_type(self, module_type: config.ModuleType, method: str = "dfs") -> list[TreeNode]:
         """Find all nodes of a specific module type."""
         if not self._root:
             return []
@@ -246,6 +246,7 @@ class TreeGenome:
 
 
 class TreeNode:
+
     def __init__(self, module: config.ModuleInstance, depth: int = 0, node_id: int = None):
         self.module_type = module.type
         self.rotation = module.rotation
@@ -293,7 +294,7 @@ class TreeNode:
                 return False  # Face already occupied
         return True
 
-    def _set_face(self, face: config.ModuleFaces, value: 'TreeNodeLukas | TreeGenome | None'):
+    def _set_face(self, face: config.ModuleFaces, value: 'TreeNode | TreeGenome | None'):
         """Common method to validate and set a face attribute."""
         # Handle TreeGenome by extracting its root
         if isinstance(value, TreeGenome):
@@ -317,12 +318,28 @@ class TreeNode:
         else:
             self.module.links.pop(face, None)
 
+    def _get_face_given_child(self, child_id: int) -> config.ModuleFaces | None:
+        # Weird flex
+        # ids_to_faces = reduce(lambda acc, x: {**acc, **x}, map(lambda face_node: {face_node[1].id: face_node[0]}, self.children.items()), {})
+        return {face_node[1].id: face_node[0] for face_node in self.children.items()}[child_id]
+    
+    def face_mapping(self, face: config.ModuleFaces):
+        mapping = {
+            config.ModuleFaces.FRONT: self._front,
+            config.ModuleFaces.BACK: self._back,
+            config.ModuleFaces.RIGHT: self._right,
+            config.ModuleFaces.LEFT: self._left,
+            config.ModuleFaces.TOP: self._top,
+            config.ModuleFaces.BOTTOM: self._bottom,
+        }
+        return mapping[face]
+
     @property
     def front(self) -> TreeNode | None:
         return self._front
 
     @front.setter
-    def front(self, value: 'TreeNodeLukas | TreeGenome | None'):
+    def front(self, value: 'TreeNode | TreeGenome | None'):
         self._set_face(config.ModuleFaces.FRONT, value)
 
     @property
@@ -330,7 +347,7 @@ class TreeNode:
         return self._back
 
     @back.setter
-    def back(self, value: 'TreeNodeLukas | TreeGenome | None'):
+    def back(self, value: 'TreeNode | TreeGenome | None'):
         self._set_face(config.ModuleFaces.BACK, value)
 
     @property
@@ -338,7 +355,7 @@ class TreeNode:
         return self._right
 
     @right.setter
-    def right(self, value: 'TreeNodeLukas | TreeGenome | None'):
+    def right(self, value: 'TreeNode | TreeGenome | None'):
         self._set_face(config.ModuleFaces.RIGHT, value)
 
     @property
@@ -346,7 +363,7 @@ class TreeNode:
         return self._left
 
     @left.setter
-    def left(self, value: 'TreeNodeLukas | TreeGenome | None'):
+    def left(self, value: 'TreeNode | TreeGenome | None'):
         self._set_face(config.ModuleFaces.LEFT, value)
 
     @property
@@ -354,7 +371,7 @@ class TreeNode:
         return self._top
 
     @top.setter
-    def top(self, value: 'TreeNodeLukas | TreeGenome | None'):
+    def top(self, value: 'TreeNode | TreeGenome | None'):
         self._set_face(config.ModuleFaces.TOP, value)
 
     @property
@@ -362,23 +379,14 @@ class TreeNode:
         return self._bottom
 
     @bottom.setter
-    def bottom(self, value: 'TreeNodeLukas | TreeGenome | None'):
+    def bottom(self, value: 'TreeNode | TreeGenome | None'):
         self._set_face(config.ModuleFaces.BOTTOM, value)
 
     @property
     def children(self) -> dict[config.ModuleFaces, TreeNode]:
         result = {}
-        face_mapping = {
-            config.ModuleFaces.FRONT: self._front,
-            config.ModuleFaces.BACK: self._back,
-            config.ModuleFaces.RIGHT: self._right,
-            config.ModuleFaces.LEFT: self._left,
-            config.ModuleFaces.TOP: self._top,
-            config.ModuleFaces.BOTTOM: self._bottom,
-        }
-
         for face in config.ALLOWED_FACES[self.module_type]:
-            child = face_mapping[face]
+            child = self.face_mapping(face)
             if child is not None:
                 result[face] = child
         return result
@@ -386,17 +394,8 @@ class TreeNode:
     def available_faces(self) -> list[config.ModuleFaces]:
         """Return list of faces that can still accept children."""
         available = []
-        face_mapping = {
-            config.ModuleFaces.FRONT: self._front,
-            config.ModuleFaces.BACK: self._back,
-            config.ModuleFaces.RIGHT: self._right,
-            config.ModuleFaces.LEFT: self._left,
-            config.ModuleFaces.TOP: self._top,
-            config.ModuleFaces.BOTTOM: self._bottom,
-        }
-
         for face in config.ALLOWED_FACES[self.module_type]:
-            if face_mapping[face] is None:
+            if self.face_mapping(face) is None:
                 available.append(face)
         return available
 
@@ -406,14 +405,14 @@ class TreeNode:
         available_count = len(self.available_faces())
         child_info = f", {child_count} children" if child_count > 0 else ""
         available_info = f", {available_count} available faces" if available_count > 0 else ""
-        return f"TreeNodeLukas({self.module_type.name}, {self.rotation.name}, depth={self._depth}{child_info}{available_info})"
+        return f"TreeNode({self.module_type.name}, {self.rotation.name}, depth={self._depth}{child_info}{available_info})"
 
     def add_child(self, face: config.ModuleFaces, child_module: config.ModuleInstance):
         """Add a child to the specified face."""
         if face not in self.available_faces():
             raise ValueError(f"Face {face} is not available for attachment.")
 
-        child_node = TreeNodeLukas(child_module, depth=self._depth + 1)
+        child_node = TreeNode(child_module, depth=self._depth + 1)
         setattr(self, face.name.lower(), child_node)
 
     def remove_child(self, face: config.ModuleFaces):
@@ -423,13 +422,13 @@ class TreeNode:
 
         setattr(self, face.name.lower(), None)
 
-    def get_child(self, face: config.ModuleFaces) -> 'TreeNodeLukas | None':
+    def get_child(self, face: config.ModuleFaces) -> 'TreeNode | None':
         """Get the child at the specified face."""
         if face not in config.ALLOWED_FACES[self.module_type]:
             return None
         return getattr(self, face.name.lower(), None)
 
-    def find_node_dfs(self, target_id: int) -> 'TreeNodeLukas | None':
+    def find_node_dfs(self, target_id: int) -> 'TreeNode | None':
         """Find a node by ID using Depth-First Search."""
         if self._id == target_id:
             return self
@@ -442,7 +441,7 @@ class TreeNode:
 
         return None
 
-    def find_node_bfs(self, target_id: int) -> 'TreeNodeLukas | None':
+    def find_node_bfs(self, target_id: int) -> 'TreeNode | None':
         """Find a node by ID using Breadth-First Search."""
         queue = deque([self])
 
@@ -457,11 +456,11 @@ class TreeNode:
 
         return None
 
-    def find_all_nodes_dfs(self, predicate: Callable[TreeNode, bool] = None) -> list['TreeNodeLukas']:
+    def find_all_nodes_dfs(self, predicate: Callable[TreeNode, bool] | None = None) -> list['TreeNode']:
         """Find all nodes matching a predicate using DFS."""
         result = []
 
-        def dfs_helper(node: 'TreeNodeLukas'):
+        def dfs_helper(node: 'TreeNode'):
             if predicate is None or predicate(node):
                 result.append(node)
 
@@ -471,7 +470,7 @@ class TreeNode:
         dfs_helper(self)
         return result
 
-    def find_all_nodes_bfs(self, predicate: Callable[TreeNode, bool] = None) -> list['TreeNodeLukas']:
+    def find_all_nodes_bfs(self, predicate: Callable[TreeNode, bool] = None) -> list['TreeNode']:
         """Find all nodes matching a predicate using BFS."""
         result = []
         queue = deque([self])
@@ -485,40 +484,66 @@ class TreeNode:
             queue.extend(current.children.values())
 
         return result
+    
+    def get_all_nodes(self, mode: str = "dfs", exclude_root: bool = True):
+        """
+        Returns all the nodes in the subtree that has self as root node
+        """
+        predicate_root: Callable[TreeNode, bool] = (lambda x: x.id != self.id) if exclude_root else (lambda _: True)
+        if mode == "dfs":
+            return self.find_all_nodes_dfs(predicate=predicate_root)
+        elif mode == "bfs":
+            return self.find_all_nodes_bfs(predicate=predicate_root)
+        else:
+            raise ValueError("Invalid mode. Valid modes: dfs, bfs")
 
-# Generate a simple tree for demonstration
-def davide():
-    tree = Tree()
-    root = tree.root
-    root.add_child(config.ModuleFaces.FRONT, config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
-    root.add_child(config.ModuleFaces.TOP, config.ModuleInstance(type=config.ModuleType.HINGE, rotation=config.ModuleRotationsIdx.DEG_0, links={}))
-    root.children[config.ModuleFaces.FRONT].add_child(config.ModuleFaces.TOP, config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
-    print(tree)
-    print(root)
-    tree.tree_to_digraph()
-    graph = tree.graph
-    print(graph.nodes(data=True))
-    # draw_graph(graph, title="Tree Structure", save_file="tree_structure.png")
+    def get_internal_nodes(self, mode: str = "dfs", exclude_root: bool = True):
+        """
+        Returns all the non-leaf nodes in the subtree that has self as root node
+        """
+        predicate_root: Callable[TreeNode, bool] = (lambda x: x.id != self.id) if exclude_root else (lambda _: True)
+        predicate_internal_nodes: Callable[TreeNode, bool] = (lambda x: len(x.children) > 0)
+        predicate_list = [predicate_root, predicate_internal_nodes]
+        predicate: Callable[TreeNode, bool] = lambda x: reduce(lambda p, q: p(x) and q(x), predicate_list)
+        if mode == "dfs":
+            return self.find_all_nodes_dfs(predicate=predicate)
+        elif mode == "bfs":
+            return self.find_all_nodes_bfs(predicate=predicate)
+        else:
+            raise ValueError("Invalid mode. Valid modes: dfs, bfs")
 
+    def replace_node(self, node_to_remove: TreeNode, node_to_add: TreeNode):
+        """
+        1) Finds the father of node_to_remove in self subtree
+        2) Replaces node_to_remove with node_to_add in the father's children
+        3) 
+        """
+        predicate_is_father = lambda x: node_to_remove in x.children.values()
+        father = self.find_all_nodes_dfs(predicate=predicate_is_father)
+        if not father or len(father) > 1:
+            raise RuntimeError("Father not found, are you sure node_to_remove is in subtree?")
+        # We expect a list of len 1 in which there is the father
+        father = father[0]
+        if self._enable_replacement:
+            with father.enable_replacement():
+                father._set_face(father._get_face_given_child(node_to_remove.id), node_to_add)
+        else:
+            raise RuntimeError("Replacement not enabled, use 'with node.enable_replacement()' context manager")
 
 def lukas():
     genome = TreeGenome()
-    root = TreeNode(config.ModuleInstance(type=config.ModuleType.CORE, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
-    genome.root = root
-    subtree = TreeGenome()
-    subtree.root = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
-    subtree.root.front = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
-    subtree.root.left = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
-    root.front = TreeNode(config.ModuleInstance(type=config.ModuleType.HINGE, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
-    with root.enable_replacement():
-        root.front = TreeNode(config.ModuleInstance(type=config.ModuleType.HINGE, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
-    subtree.root.find_node_bfs(subtree.root.id)
-    root.left = subtree
-    #root.front.back = TreeNode(config.ModuleInstance(type=config.ModuleType.HINGE, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
-    #root.back = root.front
-    print(root.front.available_faces())
+    genome.root = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
+    genome.root.front = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
+    genome.root.left = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
+    #genome.root.front = TreeNode(config.ModuleInstance(type=config.ModuleType.HINGE, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
+    with genome.root.enable_replacement():
+        genome.root.front = TreeNode(config.ModuleInstance(type=config.ModuleType.HINGE, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
+    print(genome.root.front.available_faces())
     print(genome)  # Shows full tree structure
-    print(root)  # Shows node details with available faces
+    print(genome.root)  # Shows node details with available faces
+    with genome.root.enable_replacement():
+        genome.root.replace_node(genome.root.front, genome.root.left)
+    print(genome.root.get_all_nodes("dfs", True))
 
 
 lukas()
