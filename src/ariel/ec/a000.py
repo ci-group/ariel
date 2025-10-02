@@ -8,6 +8,7 @@ from typing import cast
 # Third-party libraries
 import numpy as np
 from pydantic_settings import BaseSettings
+from collections import deque
 from rich.console import Console
 from rich.traceback import install
 
@@ -267,6 +268,31 @@ class TreeGenerator:
 
         return genome
 
+class TreeMutator:
+    @staticmethod
+    def random_subtree_replacement(
+        individual: TreeGenome,
+        max_subtree_depth: int = 2,
+    ) -> TreeGenome:
+        """Replace a random subtree with a new random subtree."""
+        if individual.root is None:
+            return individual
+
+        # Collect all nodes in the tree
+        all_nodes = individual.root.get_all_nodes(exclude_root=True)
+
+        # Select a random node to replace (excluding root)
+        if len(all_nodes) <= 1:
+            return individual  # No replacement possible
+
+        node_to_replace = RNG.choice(all_nodes[1:])  # Avoid replacing root
+
+        # Generate a new random subtree
+        new_subtree = TreeNode.random_tree_node(max_depth=max_subtree_depth)
+
+        individual.root.replace_node(node_to_replace, new_subtree)
+
+        return individual
 
 def main() -> None:
     """Entry point."""

@@ -1,19 +1,15 @@
 from __future__ import annotations
-from ast import Dict
-from typing import Any
-from zipfile import Path
-import matplotlib.pyplot as plt
 import ariel.body_phenotypes.robogen_lite.config as config
 import contextlib
 from collections import deque
 import copy
 
-import networkx as nx
 from jedi.inference.gradual.typing import Callable
-from networkx import DiGraph
-from networkx.readwrite import json_graph
 from functools import reduce
+import numpy as np
 
+SEED = 42
+RNG = np.random.default_rng(SEED)
 
 class TreeGenome:
     def __init__(self, root: TreeNode | None = None):
@@ -25,6 +21,7 @@ class TreeGenome:
         return cls(root=TreeNode(config.ModuleInstance(type=config.ModuleType.CORE,
                                               rotation=config.ModuleRotationsIdx.DEG_90,
                                               links={})))
+
     @property
     def root(self) -> TreeNode | None:
         return self._root
@@ -34,6 +31,10 @@ class TreeGenome:
         if self._root is not None:
             raise ValueError("Root node cannot be changed once set.")
         self._root = value
+
+    @root.getter
+    def root(self) -> TreeNode | None:
+        return self._root
 
     def __repr__(self) -> str:
         """Return a nice string representation of the tree genome."""
@@ -117,12 +118,13 @@ class TreeGenome:
         """Support for copy.copy()."""
         return self.copy()
 
-    def __deepcopy__(self, memo) -> 'TreeGenome':
-        """Support for copy.deepcopy()."""
-        new_genome = TreeGenome()
-        if self._root:
-            new_genome._root = copy.deepcopy(self._root, memo)
-        return new_genome
+    # TODO: Implement this
+    # def __deepcopy__(self, memo) -> 'TreeGenome':
+    #     """Support for copy.deepcopy()."""
+    #     new_genome = TreeGenome()
+    #     if self._root:
+    #         new_genome._root = copy.deepcopy(self._root, memo)
+    #     return new_genome
 
 
 class TreeNode:
@@ -156,6 +158,33 @@ class TreeNode:
     @id.setter
     def id(self, value: int | None):
         raise ValueError("ID cannot be changed once set.")
+    
+    @classmethod
+    def random_tree_node(cls, max_depth: int = 2, branch_prob: float = 0.5) -> 'TreeNode':
+        """Create a random tree node with random children up to max_depth."""
+        if max_depth < 0:
+            raise ValueError("max_depth must be non-negative")
+
+        # Exclude CORE and NONE from random selection
+        module_type = RNG.choice([mt for mt in config.ModuleType if mt not in {config.ModuleType.CORE, config.ModuleType.NONE}])
+        module_rotation = RNG.choice(list(config.ModuleRotationsIdx))
+        node = cls(module_type=module_type, module_rotation=module_rotation)
+
+        if max_depth == 0:
+            return node
+
+        available_faces = config.ALLOWED_FACES[module_type]
+        num_children = RNG.integers(0, len(available_faces) + 1)
+        chosen_faces = RNG.choice(available_faces, size=num_children, replace=False)
+
+        for face in chosen_faces:
+            if RNG.random() > branch_prob:
+                continue  # Skip adding a child based on branch probability
+            # Recursively create child nodes with reduced depth
+            child_node = cls.random_tree_node(max_depth - 1)
+            node._set_face(face, child_node)
+
+        return node
 
     @contextlib.contextmanager
     def enable_replacement(self):

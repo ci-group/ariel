@@ -81,7 +81,7 @@ class Individual(SQLModel, table=True):
         return self.fitness_
 
     @fitness.setter
-    def fitness(self, fitness_value: float) -> None:
+    def fitness(self, fitness_value: float | None) -> None:
         if fitness_value is None:
             msg = "Trying to assign `None` to fitness!\n"
             msg += f"--> {self.fitness_value=}"
