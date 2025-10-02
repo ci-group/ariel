@@ -150,9 +150,6 @@ class EA(AbstractEA):
         self.operations = operations
 
         # Flexible global parameters
-        self.new_generation_are_survivors = (
-            survivors_are_new_generation or config.survivors_are_new_generation
-        )
         self.quiet = quiet or config.quiet
         self.console = Console(quiet=self.quiet)
         self.current_generation = (
