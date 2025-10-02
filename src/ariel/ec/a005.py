@@ -128,6 +128,8 @@ def tree_main():
     console.log("Parent 1:", genome1)
     console.log("Parent 2:", genome2)
 
+    genome2.root.replace_node(genome1, genome2)
+
     # Perform crossover
     child1, child2 = TreeCrossover.koza_default(genome1, genome2)
 

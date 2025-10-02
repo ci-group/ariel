@@ -11,7 +11,8 @@ from pydantic_settings import BaseSettings
 from rich.console import Console
 from rich.traceback import install
 
-from ariel.ec.genotypes.tree.tree_genome import TreeGenome
+from ariel.ec.genotypes.tree.tree_genome import TreeGenome, TreeNode
+import ariel.body_phenotypes.robogen_lite.config as pheno_config
 
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
@@ -151,6 +152,121 @@ class TreeGenerator:
     def default():
         return TreeGenome.default_init()
 
+    @staticmethod
+    def linear_chain(length: int = 3) -> TreeGenome:
+        """Generate a linear chain of modules (snake-like)."""
+        genome = TreeGenome.default_init()  # Start with CORE
+        current_node = genome.root
+
+        for i in range(length):
+            module_type = RNG.choice([pheno_config.ModuleType.BRICK, pheno_config.ModuleType.HINGE])
+            rotation = RNG.choice(list(pheno_config.ModuleRotationsIdx))
+            module = pheno_config.ModuleInstance(type=module_type, rotation=rotation, links={})
+
+            # Always attach to FRONT face for linear chain
+            if pheno_config.ModuleFaces.FRONT in current_node.available_faces():
+                child = TreeNode(module, depth=current_node._depth + 1)
+                current_node._set_face(pheno_config.ModuleFaces.FRONT, child)
+                current_node = child
+
+        return genome
+
+    @staticmethod
+    def star_shape(num_arms: int = 3) -> TreeGenome:
+        """Generate a star-shaped tree with arms radiating from center."""
+        genome = TreeGenome.default_init()  # Start with CORE
+        available_faces = genome.root.available_faces()
+
+        # Limit arms to available faces
+        actual_arms = min(num_arms, len(available_faces))
+        selected_faces = RNG.choice(available_faces, size=actual_arms, replace=False)
+
+        for face in selected_faces:
+            module_type = RNG.choice([pheno_config.ModuleType.BRICK, pheno_config.ModuleType.HINGE])
+            rotation = RNG.choice(list(pheno_config.ModuleRotationsIdx))
+            module = pheno_config.ModuleInstance(type=module_type, rotation=rotation, links={})
+
+            child = TreeNode(module, depth=1)
+            genome.root._set_face(face, child)
+
+        return genome
+
+    @staticmethod
+    def binary_tree(depth: int = 2) -> TreeGenome:
+        """Generate a binary-like tree structure."""
+        def build_subtree(current_depth: int, max_depth: int) -> TreeNode | None:
+            if current_depth >= max_depth:
+                return None
+
+            module_type = RNG.choice([pheno_config.ModuleType.BRICK, pheno_config.ModuleType.HINGE])
+            rotation = RNG.choice(list(pheno_config.ModuleRotationsIdx))
+            module = pheno_config.ModuleInstance(type=module_type, rotation=rotation, links={})
+
+            node = TreeNode(module, depth=current_depth)
+            available_faces = node.available_faces()
+
+            # Add 1-2 children randomly
+            if available_faces and current_depth < max_depth - 1:
+                num_children = RNG.integers(1, min(3, len(available_faces) + 1))
+                selected_faces = RNG.choice(available_faces, size=num_children, replace=False)
+
+                for face in selected_faces:
+                    child = build_subtree(current_depth + 1, max_depth)
+                    if child:
+                        node._set_face(face, child)
+
+            return node
+
+        genome = TreeGenome.default_init()
+
+        # Add children to root
+        available_faces = genome.root.available_faces()
+        if available_faces:
+            num_children = RNG.integers(1, min(3, len(available_faces) + 1))
+            selected_faces = RNG.choice(available_faces, size=num_children, replace=False)
+
+            for face in selected_faces:
+                child = build_subtree(1, depth)
+                if child:
+                    genome.root._set_face(face, child)
+
+        return genome
+
+    @staticmethod
+    def random_tree(max_depth: int = 4, branching_prob: float = 0.7) -> TreeGenome:
+        """Generate a random tree with pheno_configurable branching probability."""
+        def build_random_subtree(current_depth: int) -> TreeNode | None:
+            if current_depth >= max_depth:
+                return None
+
+            module_type = RNG.choice([pheno_config.ModuleType.BRICK, pheno_config.ModuleType.HINGE])
+            rotation = RNG.choice(list(pheno_config.ModuleRotationsIdx))
+            module = pheno_config.ModuleInstance(type=module_type, rotation=rotation, links={})
+
+            node = TreeNode(module, depth=current_depth)
+            available_faces = node.available_faces()
+
+            # Randomly decide to add children
+            for face in available_faces:
+                if RNG.random() < branching_prob:
+                    child = build_random_subtree(current_depth + 1)
+                    if child:
+                        node._set_face(face, child)
+
+            return node
+
+        genome = TreeGenome.default_init()
+
+        # Add children to root
+        available_faces = genome.root.available_faces()
+        for face in available_faces:
+            if RNG.random() < branching_prob:
+                child = build_random_subtree(1)
+                if child:
+                    genome.root._set_face(face, child)
+
+        return genome
+
 
 def main() -> None:
     """Entry point."""
@@ -163,6 +279,16 @@ def main() -> None:
         mutation_probability=1,
     )
     console.log(example2)
+
+    console.rule("[bold blue]Tree Generator Examples")
+
+    # Show different tree types
+    console.log("Linear chain:", TreeGenerator.linear_chain(4))
+    console.log("Star shape:", TreeGenerator.star_shape(3))
+    console.log("Binary tree:", TreeGenerator.binary_tree(3))
+    console.log("Random tree:", TreeGenerator.random_tree(3, 0.6))
+
+
 
 
 if __name__ == "__main__":
