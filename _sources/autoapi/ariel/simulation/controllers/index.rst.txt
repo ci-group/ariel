@@ -1,0 +1,22 @@
+:py:mod:`controllers`
+======================================
+
+.. py:module:: ariel.simulation.controllers
+
+.. autoapi-nested-parse::
+
+   Types of robotic controllers.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   controller/index.rst
+   cpg_with_sensory_feedback/index.rst
+   hopfs_cpg/index.rst
+
+

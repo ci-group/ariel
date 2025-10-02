@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="./">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Python Module Index - ARIEL documentation</title><link rel="shortcut icon" href="_static/ariel_favicon.ico"/><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=d48c410d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto+Slab:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+    rel="stylesheet">
+
+<style>
+    :root {
+        /* --------- FONTS --------- */
+        --sy-f-heading: 'Bree Serif', 'Roboto Slab', 'Georgia', 'Arial', serif;
+        --sy-f-text: 'Verdana', 'Ubuntu', 'Lato', 'Helvetica', 'Arial', var(--sy-f-sys), sans-serif;
+        --sy-f-mono: 'Monaco', monospace;
+
+        /* --------- NAVBAR --------- */
+        /* --sy-s-banner-height: 40px; */
+        /* --sy-s-navbar-height: 50px; */
+
+        /* --------- COLORS --------- */
+        /*  Text */
+        /* --header-foreground: #FFFFFF; */
+        --header-foreground: #ECEEED;
+
+        --text-foreground: #F1F3F2;
+        --text-foreground-light: #1A211E;
+
+        --muted-text: #8A8A8A;
+        --inline-code: #e74c3c;
+
+        /* Window */
+        --main-window: #111113;
+        --side-bar: #111113;
+        --border-color: #303036;
+        --code-border: #8A8A8A;
+
+        --main-window-light: #FFFFFF;
+        --side-bar-light: #FFFFFF;
+        --border-color-light: #FFFFFF;
+        --code-border-light: #8A8A8A;
+
+        /* Links */
+        --unvisited: #4D8BFF;
+        --unvisited-hover: #99BDFF;
+        --visited: #E61986;
+        --visited-hover: #F075B7;
+
+        --unvisited-light: #1A6AFF;
+        --unvisited-hover-light: #003EB3;
+        --visited-light: #CF1779;
+        --visited-hover-light: #A1125E;
+
+        /* Theme */
+        --accent-a2: #29AB8711;
+        --accent-a25: #29AB8722;
+        --accent-a3: #29AB8733;
+        --accent-a4: #29AB8755;
+        --accent-9: #29AB87EE;
+        --accent-a11: #29AB87FF;
+        --color-surface-accent: var(--accent-a2);
+        --sy-c-light: var(--muted-text);
+        --sy-c-border: var(--accent-a4);
+
+        /* --- Code --- */
+        /* highlight */
+        --syntax-highlight-bg: var(--accent-a25);
+        /* background */
+        --syntax-pre-bg: #8A8A8A11;
+        /* header */
+        --syntax-cap-bg: var(--accent-a4);
+
+    }
+
+    html.dark {
+        /* Background */
+        --sy-c-background: var(--side-bar);
+        --sy-c-foot-background: var(--side-bar);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground);
+        --yue-c-code-background: var(--main-window);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #FFA400;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--header-foreground);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-a4); */
+        --sy-c-foot-divider: var(--border-color);
+
+    }
+
+    html.light {
+        /* Background */
+        --sy-c-background: var(--side-bar-light);
+        --sy-c-foot-background: var(--side-bar-light);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground-light);
+        --yue-c-code-background: var(--main-window-light);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #F17300;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--text-foreground-light);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-9); */
+        --sy-c-foot-divider: var(--border-color-light);
+    }
+
+
+    /* --------- CORRECT "BOLD" CHANGES HEADER --------- */
+    .sy-head-brand strong {
+        color: light-dark(var(--text-foreground-light), var(--text-foreground));
+    }
+
+    /* --------- UNDERLINE HEADERS --------- */
+    :is(h1, h2, h3, h4) {
+        font-weight: bold;
+    }
+
+    :is(h1, h2):not(:has(code)) {
+        text-decoration: underline;
+    }
+
+    /* --------- CODE BORDERS --------- */
+    /* .literal {
+        border: 1px solid;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    } */
+
+    .docutils.literal.notranslate {
+        font-weight: bold;
+    }
+
+    .literal-block-wrapper {
+        font-weight: bold;
+        border: 1px solid;
+        border-radius: 0.45em;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    }
+
+    /* --------- EXTERNAL LINKS --------- */
+    /* unseen passive */
+    .reference.external {
+        border-color: light-dark(var(--unvisited-light), var(--unvisited));
+        color: light-dark(var(--unvisited-light), var(--unvisited));
+    }
+
+    /* unseen hover */
+    .reference.external:hover {
+        border-color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+        color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+    }
+
+    /* visited passive */
+    .reference.external:visited {
+        border-color: light-dark(var(--visited-light), var(--visited));
+        color: light-dark(var(--visited-light), var(--visited));
+    }
+
+    /* visited hover */
+    .reference.external:visited:hover {
+        border-color: light-dark(var(--visited-hover-light), var(--visited-hover));
+        color: light-dark(var(--visited-hover-light), var(--visited-hover));
+    }
+
+    /* --------- MAIN WINDOW COLORS --------- */
+    .sy-main {
+        border-left: 1px solid;
+        border-right: 1px solid;
+        border-color: light-dark(var(--border-color-light), var(--border-color));
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Ensure breadcrumb is the same color as the main window */
+    .sy-breadcrumbs {
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Add a little bit of space to right side-bar */
+    .sy-scrollbar {
+        padding-left: 1em;
+    }
+
+    /* --------- API COLORS --------- */
+    .sig {
+        background-color: var(--accent-a2);
+        border-top: 3px solid var(--accent-a4);
+    }
+
+    .k {
+        font-style: italic;
+    }
+
+    /* Flow diagrams */
+    .inheritance.graphviz {
+        background-color: #92A0A077;
+        border-radius: 5px;
+    }
+</style>
+    
+
+
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="index.html">
+      
+      
+      <strong>ARIEL</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div><div class="sy-container mx-auto body">
+    <main class="sy-content mx-auto pt-12 px-6 xl:px-12 break-words">
+      <article class="yue" role="main">
+        
+
+   <h1>Python Module Index</h1>
+
+   <div class="modindex-jumpbox">
+   <a href="#cap-a"><strong>a</strong></a>
+   </div>
+
+   <table class="indextable modindextable">
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-a"><td></td><td>
+       <strong>a</strong></td><td></td></tr>
+     <tr>
+       <td><img src="_static/minus.png" class="toggler"
+              id="toggle-1" style="display: none" alt="-" /></td>
+       <td>
+       <a href="autoapi/ariel/index.html#module-ariel"><code class="xref">ariel</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/index.html#module-ariel.body_phenotypes"><code class="xref">ariel.body_phenotypes</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/index.html#module-ariel.body_phenotypes.robogen_lite"><code class="xref">ariel.body_phenotypes.robogen_lite</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#module-ariel.body_phenotypes.robogen_lite.config"><code class="xref">ariel.body_phenotypes.robogen_lite.config</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/constructor/index.html#module-ariel.body_phenotypes.robogen_lite.constructor"><code class="xref">ariel.body_phenotypes.robogen_lite.constructor</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/index.html#module-ariel.body_phenotypes.robogen_lite.decoders"><code class="xref">ariel.body_phenotypes.robogen_lite.decoders</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#module-ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding"><code class="xref">ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#module-ariel.body_phenotypes.robogen_lite.extractor"><code class="xref">ariel.body_phenotypes.robogen_lite.extractor</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/index.html#module-ariel.body_phenotypes.robogen_lite.modules"><code class="xref">ariel.body_phenotypes.robogen_lite.modules</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#module-ariel.body_phenotypes.robogen_lite.modules.brick"><code class="xref">ariel.body_phenotypes.robogen_lite.modules.brick</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#module-ariel.body_phenotypes.robogen_lite.modules.core"><code class="xref">ariel.body_phenotypes.robogen_lite.modules.core</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#module-ariel.body_phenotypes.robogen_lite.modules.hinge"><code class="xref">ariel.body_phenotypes.robogen_lite.modules.hinge</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html#module-ariel.body_phenotypes.robogen_lite.modules.module"><code class="xref">ariel.body_phenotypes.robogen_lite.modules.module</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/index.html#module-ariel.body_phenotypes.robogen_lite.prebuilt_robots"><code class="xref">ariel.body_phenotypes.robogen_lite.prebuilt_robots</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/gecko/index.html#module-ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko"><code class="xref">ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/index.html#module-ariel.ec"><code class="xref">ariel.ec</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/a000/index.html#module-ariel.ec.a000"><code class="xref">ariel.ec.a000</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/a001/index.html#module-ariel.ec.a001"><code class="xref">ariel.ec.a001</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/a002/index.html#module-ariel.ec.a002"><code class="xref">ariel.ec.a002</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/a003/index.html#module-ariel.ec.a003"><code class="xref">ariel.ec.a003</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/a004/index.html#module-ariel.ec.a004"><code class="xref">ariel.ec.a004</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/a005/index.html#module-ariel.ec.a005"><code class="xref">ariel.ec.a005</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/genotypes/index.html#module-ariel.ec.genotypes"><code class="xref">ariel.ec.genotypes</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/genotypes/nde/index.html#module-ariel.ec.genotypes.nde"><code class="xref">ariel.ec.genotypes.nde</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#module-ariel.ec.genotypes.nde.nde"><code class="xref">ariel.ec.genotypes.nde.nde</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/index.html#module-ariel.simulation"><code class="xref">ariel.simulation</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/controllers/index.html#module-ariel.simulation.controllers"><code class="xref">ariel.simulation.controllers</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/controllers/controller/index.html#module-ariel.simulation.controllers.controller"><code class="xref">ariel.simulation.controllers.controller</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#module-ariel.simulation.controllers.cpg_with_sensory_feedback"><code class="xref">ariel.simulation.controllers.cpg_with_sensory_feedback</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#module-ariel.simulation.controllers.hopfs_cpg"><code class="xref">ariel.simulation.controllers.hopfs_cpg</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/index.html#module-ariel.simulation.environments"><code class="xref">ariel.simulation.environments</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#module-ariel.simulation.environments.amphitheatre_heightmap"><code class="xref">ariel.simulation.environments.amphitheatre_heightmap</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#module-ariel.simulation.environments.boxy_heightmap"><code class="xref">ariel.simulation.environments.boxy_heightmap</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#module-ariel.simulation.environments.crater_heightmap"><code class="xref">ariel.simulation.environments.crater_heightmap</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#module-ariel.simulation.environments.djoser_pyramid"><code class="xref">ariel.simulation.environments.djoser_pyramid</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#module-ariel.simulation.environments.olympic_arena"><code class="xref">ariel.simulation.environments.olympic_arena</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#module-ariel.simulation.environments.rugged_heightmap"><code class="xref">ariel.simulation.environments.rugged_heightmap</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/simple_flat_world/index.html#module-ariel.simulation.environments.simple_flat_world"><code class="xref">ariel.simulation.environments.simple_flat_world</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#module-ariel.simulation.environments.simple_tilted_world"><code class="xref">ariel.simulation.environments.simple_tilted_world</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/tasks/index.html#module-ariel.simulation.tasks"><code class="xref">ariel.simulation.tasks</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/tasks/gate_learning/index.html#module-ariel.simulation.tasks.gate_learning"><code class="xref">ariel.simulation.tasks.gate_learning</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/tasks/targeted_locomotion/index.html#module-ariel.simulation.tasks.targeted_locomotion"><code class="xref">ariel.simulation.tasks.targeted_locomotion</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/simulation/tasks/turning_in_place/index.html#module-ariel.simulation.tasks.turning_in_place"><code class="xref">ariel.simulation.tasks.turning_in_place</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/index.html#module-ariel.utils"><code class="xref">ariel.utils</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/file_ops/index.html#module-ariel.utils.file_ops"><code class="xref">ariel.utils.file_ops</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/mjspec_ops/index.html#module-ariel.utils.mjspec_ops"><code class="xref">ariel.utils.mjspec_ops</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/noise_gen/index.html#module-ariel.utils.noise_gen"><code class="xref">ariel.utils.noise_gen</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/optimizers/index.html#module-ariel.utils.optimizers"><code class="xref">ariel.utils.optimizers</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/optimizers/revde/index.html#module-ariel.utils.optimizers.revde"><code class="xref">ariel.utils.optimizers.revde</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/renderers/index.html#module-ariel.utils.renderers"><code class="xref">ariel.utils.renderers</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/runners/index.html#module-ariel.utils.runners"><code class="xref">ariel.utils.runners</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/tracker/index.html#module-ariel.utils.tracker"><code class="xref">ariel.utils.tracker</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/utils/video_recorder/index.html#module-ariel.utils.video_recorder"><code class="xref">ariel.utils.video_recorder</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/index.html#module-ariel.viz"><code class="xref">ariel.viz</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/analysis/index.html#module-ariel.viz.analysis"><code class="xref">ariel.viz.analysis</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/index.html#module-ariel.viz.gui"><code class="xref">ariel.viz.gui</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/balaklava/index.html#module-ariel.viz.gui.balaklava"><code class="xref">ariel.viz.gui.balaklava</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#module-ariel.viz.gui.balaklava.1_nice_node_editor"><code class="xref">ariel.viz.gui.balaklava.1_nice_node_editor</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/balaklava/baklava/index.html#module-ariel.viz.gui.balaklava.baklava"><code class="xref">ariel.viz.gui.balaklava.baklava</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/balaklava/main/index.html#module-ariel.viz.gui.balaklava.main"><code class="xref">ariel.viz.gui.balaklava.main</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/litegraph/index.html#module-ariel.viz.gui.litegraph"><code class="xref">ariel.viz.gui.litegraph</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#module-ariel.viz.gui.litegraph.0_nice_node_editor"><code class="xref">ariel.viz.gui.litegraph.0_nice_node_editor</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/litegraph/baklava/index.html#module-ariel.viz.gui.litegraph.baklava"><code class="xref">ariel.viz.gui.litegraph.baklava</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="autoapi/ariel/viz/gui/litegraph/main/index.html#module-ariel.viz.gui.litegraph.main"><code class="xref">ariel.viz.gui.litegraph.main</code></a></td><td>
+       <em></em></td></tr>
+   </table>
+
+
+      </article>
+      
+    </main>
+  </div><footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/thebelab-helper.js"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="_static/shibuya.js?v=e730760c"></script></body>
+</html>

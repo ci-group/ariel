@@ -1,0 +1,91 @@
+:py:mod:`core`
+=========================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.modules.core
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.modules.core.CoreModule
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.modules.core.WeightType
+   ariel.body_phenotypes.robogen_lite.modules.core.DimensionType
+   ariel.body_phenotypes.robogen_lite.modules.core.CORE_MASS
+   ariel.body_phenotypes.robogen_lite.modules.core.CORE_DIMENSIONS
+
+
+.. py:type:: WeightType
+   :canonical: float
+
+
+.. py:type:: DimensionType
+   :canonical: tuple[float, float, float]
+
+
+.. py:data:: CORE_MASS
+   :type:  WeightType
+   :value: 1
+
+
+.. py:data:: CORE_DIMENSIONS
+   :type:  DimensionType
+   :value: (0.1, 0.1, 0.1)
+
+
+.. py:class:: CoreModule(index: int)
+
+   Bases: :py:obj:`ariel.body_phenotypes.robogen_lite.modules.module.Module`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.modules.core.CoreModule
+      :parts: 1
+
+
+   Core module specifications.
+
+
+   .. py:attribute:: index
+      :type:  int | None
+      :value: None
+
+
+
+   .. py:attribute:: module_type
+      :type:  str
+
+
+   .. py:attribute:: sites
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: rotate(angle: float) -> None
+
+      Rotate the core module by a specified angle.
+
+      :param angle: The angle in radians to rotate the core.
+      :type angle: :class:`float`
+
+      :raises AttributeError: Core module does not support rotation.
+
+
+

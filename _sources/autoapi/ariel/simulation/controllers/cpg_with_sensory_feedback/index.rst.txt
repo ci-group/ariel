@@ -1,0 +1,85 @@
+:py:mod:`cpg_with_sensory_feedback`
+================================================================
+
+.. py:module:: ariel.simulation.controllers.cpg_with_sensory_feedback
+
+.. autoapi-nested-parse::
+
+   CPG model with attached sensory feedback.
+
+   Sources:
+   -------
+       [1] DOI: 10.5772/59186
+
+   .. admonition:: Notes
+
+      *
+
+   .. todo:: [ ] Add targeted locomotion
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.cpg_with_sensory_feedback.SEED
+   ariel.simulation.controllers.cpg_with_sensory_feedback.RNG
+
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: RNG
+
+.. py:class:: CPGSensoryFeedback(num_neurons: int, dt: float = 0.002, coupling_weights: numpy.ndarray | None = None, sensory_term: float = 0.0, _lambda: float = 0.1)
+
+   .. py:attribute:: num_neurons
+
+
+   .. py:attribute:: dt
+      :value: 0.002
+
+
+
+   .. py:attribute:: sensory_term
+      :value: 0.0
+
+
+
+   .. py:attribute:: x
+
+
+   .. py:attribute:: y
+
+
+   .. py:attribute:: omega
+
+
+   .. py:attribute:: amplitude
+
+
+   .. py:method:: step() -> tuple[numpy.ndarray[tuple[int, Ellipsis], numpy.dtype[Any]], numpy.ndarray[tuple[int, Ellipsis], numpy.dtype[Any]]]
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: simulate(steps: int) -> tuple[numpy.ndarray[tuple[int, Ellipsis], numpy.dtype[Any]], numpy.ndarray[tuple[int, Ellipsis], numpy.dtype[Any]]]
+
+

@@ -1,0 +1,22 @@
+:py:mod:`balaklava`
+=================================
+
+.. py:module:: ariel.viz.gui.balaklava
+
+.. autoapi-nested-parse::
+
+   Baklavka-based GUI.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   1_nice_node_editor/index.rst
+   baklava/index.rst
+   main/index.rst
+
+

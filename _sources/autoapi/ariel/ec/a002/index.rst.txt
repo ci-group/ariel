@@ -1,0 +1,94 @@
+:py:mod:`a002`
+=======================
+
+.. py:module:: ariel.ec.a002
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.a002.fetch_population
+   ariel.ec.a002.commit_population
+   ariel.ec.a002.kill_members
+   ariel.ec.a002.evaluate
+   ariel.ec.a002.create_individual
+   ariel.ec.a002.test_fetch_logic
+   ariel.ec.a002.test_evaluate_mechanics
+   ariel.ec.a002.test_kill_mechanics
+   ariel.ec.a002.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.a002.SCRIPT_NAME
+   ariel.ec.a002.CWD
+   ariel.ec.a002.DATA
+   ariel.ec.a002.DB_NAME
+   ariel.ec.a002.DB_PATH
+   ariel.ec.a002.SEED
+   ariel.ec.a002.console
+   ariel.ec.a002.RNG
+   ariel.ec.a002.Population
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: DB_NAME
+   :value: 'database.db'
+
+
+.. py:data:: DB_PATH
+   :type:  pathlib.Path
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: console
+
+.. py:data:: RNG
+
+.. py:type:: Population
+   :canonical: Sequence[Individual]
+
+
+.. py:function:: fetch_population(engine: sqlalchemy.Engine, *, logic: tuple[bool, Ellipsis] | None = None, constrain_alive: bool = True) -> Population
+
+.. py:function:: commit_population(population: Population, engine: sqlalchemy.Engine) -> None
+
+.. py:function:: kill_members(population: Population) -> Population
+
+.. py:function:: evaluate(population: Population) -> Population
+
+.. py:function:: create_individual() -> ariel.ec.a001.Individual
+
+.. py:function:: test_fetch_logic() -> None
+
+.. py:function:: test_evaluate_mechanics() -> None
+
+.. py:function:: test_kill_mechanics() -> None
+
+.. py:function:: main() -> None
+
+   Entry point.
+
+

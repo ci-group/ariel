@@ -1,0 +1,37 @@
+:py:mod:`gecko`
+==================================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko.gecko
+
+
+
+.. py:function:: gecko() -> ariel.body_phenotypes.robogen_lite.modules.core.CoreModule
+
+   Create and attach bodies/sites, then print relative orientations between
+   abdomen and spine bodies to debug hinge placement/orientation.
+
+   Body Description
+   ---------
+   The gecko body consists of a core module, 4 legs (flippers), a neck and a
+   spine. For better mobility the front two flippers have 2 hinges (joints),
+   each rotated 90 degrees to each other. Additionally, the back two flippers
+   are rotated 45 degrees compared to the bode, to encourage forward movement.
+
+

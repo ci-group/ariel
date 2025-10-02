@@ -1,0 +1,57 @@
+:py:mod:`controller`
+=================================================
+
+.. py:module:: ariel.simulation.controllers.controller
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.controller.Controller
+
+
+
+
+.. py:class:: Controller
+
+   .. py:attribute:: controller_callback_function
+      :type:  collections.abc.Callable[Ellipsis, Any]
+
+
+   .. py:attribute:: time_steps_per_ctrl_step
+      :type:  int
+      :value: 100
+
+
+
+   .. py:attribute:: time_steps_per_save
+      :type:  int
+      :value: 500
+
+
+
+   .. py:attribute:: alpha
+      :type:  float
+      :value: 1
+
+
+
+   .. py:attribute:: tracker
+      :type:  ariel.utils.tracker.Tracker | None
+      :value: None
+
+
+
+   .. py:method:: set_control(model: mujoco.MjModel, data: mujoco.MjData, *args: Any, **kwargs: dict[Any, Any]) -> None
+
+

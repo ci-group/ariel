@@ -1,0 +1,11 @@
+:py:mod:`analysis`
+============================
+
+.. py:module:: ariel.viz.analysis
+
+.. autoapi-nested-parse::
+
+   Functions for analyzing results.
+
+
+

@@ -1,0 +1,74 @@
+:py:mod:`noise_gen`
+===============================
+
+.. py:module:: ariel.utils.noise_gen
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.noise_gen.PerlinNoise
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.noise_gen.noise
+
+
+.. py:class:: PerlinNoise
+
+   Vectorized Perlin noise (2D) using NumPy only.
+
+   :param seed: Random seed for reproducibility.
+   :type seed: :class:`int | None`
+
+
+   .. py:attribute:: seed
+      :type:  int | None
+      :value: None
+
+
+
+   .. py:method:: __post_init__() -> None
+
+      Initialize the Perlin noise generator.
+
+
+
+   .. py:method:: as_grid(width: int, height: int, *, scale: float = 64.0, normalize: bool = True) -> numpy.ndarray
+
+      Generate a (height, width) grid of Perlin noise.
+
+      :param width:
+      :type width: :class:`int`
+      :param height:
+      :type height: :class:`int`
+      :param scale: The number of pixels per noise unit. Larger -> smoother noise.
+      :type scale: :class:`float`
+      :param normalize: If True, map result from [-1, 1] to [0, 1].
+      :type normalize: :class:`bool`
+
+      :raises ValueError: If scale <= 0.
+
+      :returns: Array of shape (height, width), dtype float32.
+      :rtype: :class:`np.ndarray`
+
+
+
+.. py:data:: noise
+

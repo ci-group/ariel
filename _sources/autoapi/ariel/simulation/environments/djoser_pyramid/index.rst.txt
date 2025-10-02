@@ -1,0 +1,116 @@
+:py:mod:`djoser_pyramid`
+======================================================
+
+.. py:module:: ariel.simulation.environments.djoser_pyramid
+
+.. autoapi-nested-parse::
+
+   Pyramid on top of flat terrain.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.djoser_pyramid.PyramidWorld
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.djoser_pyramid.USE_DEGREES
+
+
+.. py:data:: USE_DEGREES
+   :value: False
+
+
+.. py:class:: PyramidWorld(pos: list[float] = [0, 0, 0], num_stairs: int = 8, gap: int = 1, name: str = 'stair', floor_size: tuple[float, float, float] = (10, 10, 0.05))
+
+   MuJoCo world with stairs placed on a flat terrain.
+
+
+   .. py:attribute:: SQUARE_LENGTH
+      :value: 2
+
+
+
+   .. py:attribute:: V_SIZE
+      :value: 0.076
+
+
+
+   .. py:attribute:: H_SIZE
+      :value: 0.12
+
+
+
+   .. py:attribute:: H_STEP
+      :value: 0.24
+
+
+
+   .. py:attribute:: V_STEP
+      :value: 0.152
+
+
+
+   .. py:attribute:: SAND
+      :value: [0.85, 0.75, 0.6, 1.0]
+
+
+
+   .. py:attribute:: pos
+      :value: [0, 0, 0]
+
+
+
+   .. py:attribute:: num_stairs
+      :value: 8
+
+
+
+   .. py:attribute:: gap
+      :value: 1
+
+
+
+   .. py:attribute:: name
+      :value: 'stair'
+
+
+
+   .. py:attribute:: floor_size
+      :value: (10, 10, 0.05)
+
+
+
+   .. py:attribute:: spec
+      :type:  mujoco.MjSpec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float, float, float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot at a specific position in the world.
+
+      :param mj_spec: The MuJoCo specification for the robot.
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The position (x, y, z) to spawn the robot at, by default (0, 0, 0)
+      :type spawn_position: :class:`list[float`, :class:`float`, :class:`float] | None`
+      :param small_gap: A small gap to add to the spawn position, by default 0.0
+      :type small_gap: :class:`float`
+      :param correct_for_bounding_box: If True, the spawn position will be adjusted to account for the robot's bounding box,
+                                       by default True
+      :type correct_for_bounding_box: :class:`bool`
+
+
+

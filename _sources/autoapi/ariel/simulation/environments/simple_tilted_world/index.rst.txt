@@ -1,0 +1,93 @@
+:py:mod:`simple_tilted_world`
+===========================================================
+
+.. py:module:: ariel.simulation.environments.simple_tilted_world
+
+.. autoapi-nested-parse::
+
+   Tilted flat terrain with a specified tilt angle and axis.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.simple_tilted_world.TiltedFlatWorld
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.simple_tilted_world.quaternion_from_axis_angle
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.simple_tilted_world.USE_DEGREES
+
+
+.. py:data:: USE_DEGREES
+   :value: False
+
+
+.. py:function:: quaternion_from_axis_angle(axis: str, angle_deg)
+
+   Compute a unit quaternion from an axis and angle (degrees).
+
+   :param axis: Which of the 3 axis to turn in to quaternion.
+   :type axis: :class:`str[x|y|z]`
+   :param angle_deg: Number of degrees for the axis.
+   :type angle_deg: :class:`float`
+
+
+.. py:class:: TiltedFlatWorld(floor_size: tuple[float, float, float] = (1, 1, 0.1), tilt_degrees: float = 10.0, axis: str = 'y')
+
+   A simple MuJoCo world with a flat box floor tilted around the X, Y or Z axis.
+
+
+   .. py:attribute:: floor_size
+      :value: (1, 1, 0.1)
+
+
+
+   .. py:attribute:: tilt_degrees
+      :value: 10.0
+
+
+
+   .. py:attribute:: axis
+      :value: ''
+
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float, float, float] | None = None, *, small_gap: float = 0.01, correct_for_bounding_box: bool = True)
+
+      Spawn a robot at a specific position in the world.
+
+      :param mj_spec: The MuJoCo specification for the robot.
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The position (x, y, z) to spawn the robot at, by default (0, 0, 0)
+      :type spawn_position: :class:`list[float`, :class:`float`, :class:`float] | None`, *optional*
+      :param small_gap: A small gap to add to the spawn position, by default 0.0
+      :type small_gap: :class:`float`, *optional*
+      :param correct_for_bounding_box: If True, the spawn position will be adjusted to account for the robot's bounding box,
+                                       by default True
+      :type correct_for_bounding_box: :class:`bool`, *optional*
+
+
+

@@ -1,0 +1,21 @@
+:py:mod:`viz`
+===================
+
+.. py:module:: ariel.viz
+
+.. autoapi-nested-parse::
+
+   ARIEL visualization component.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   analysis/index.rst
+   gui/index.rst
+
+

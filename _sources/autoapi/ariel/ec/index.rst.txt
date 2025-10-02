@@ -1,0 +1,34 @@
+:py:mod:`ec`
+==================
+
+.. py:module:: ariel.ec
+
+.. autoapi-nested-parse::
+
+   EA Framework.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   genotypes/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   a000/index.rst
+   a001/index.rst
+   a002/index.rst
+   a003/index.rst
+   a004/index.rst
+   a005/index.rst
+
+

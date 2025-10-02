@@ -1,0 +1,21 @@
+:py:mod:`gui`
+=======================
+
+.. py:module:: ariel.viz.gui
+
+.. autoapi-nested-parse::
+
+   ARIEL graphical user interface (GUI).
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   balaklava/index.rst
+   litegraph/index.rst
+
+

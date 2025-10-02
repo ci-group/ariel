@@ -1,0 +1,115 @@
+:py:mod:`0_nice_node_editor`
+====================================================
+
+.. py:module:: ariel.viz.gui.litegraph.0_nice_node_editor
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.litegraph.0_nice_node_editor.page
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.litegraph.0_nice_node_editor.SCRIPT_NAME
+   ariel.viz.gui.litegraph.0_nice_node_editor.CWD
+   ariel.viz.gui.litegraph.0_nice_node_editor.DATA
+   ariel.viz.gui.litegraph.0_nice_node_editor.console
+   ariel.viz.gui.litegraph.0_nice_node_editor.head_html
+   ariel.viz.gui.litegraph.0_nice_node_editor.canvas
+   ariel.viz.gui.litegraph.0_nice_node_editor.html_code
+   ariel.viz.gui.litegraph.0_nice_node_editor.register_new_nodes
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: console
+
+.. py:data:: head_html
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """
+      <head>
+          <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/jagenjo/litegraph.js/css/litegraph.css">
+          <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/jagenjo/litegraph.js/build/litegraph.min.js"></script>
+      </head>
+      """
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:data:: canvas
+   :value: "<canvas id='node-editor' width='1024' height='720' style='border: 1px solid'></canvas>"
+
+
+.. py:data:: html_code
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """
+      var graph = new LGraph();
+      var canvas = new LGraphCanvas("#node-editor", graph);
+      graph.start()
+      """
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:data:: register_new_nodes
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """
+      LiteGraph.wrapFunctionAsNode("ec/sum", sum, ["Number", "Number"], "Number")
+      """
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:function:: page() -> None
+

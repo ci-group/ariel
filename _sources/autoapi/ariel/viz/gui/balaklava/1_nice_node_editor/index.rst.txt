@@ -1,0 +1,124 @@
+:py:mod:`1_nice_node_editor`
+====================================================
+
+.. py:module:: ariel.viz.gui.balaklava.1_nice_node_editor
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.balaklava.1_nice_node_editor.page
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.balaklava.1_nice_node_editor.SCRIPT_NAME
+   ariel.viz.gui.balaklava.1_nice_node_editor.CWD
+   ariel.viz.gui.balaklava.1_nice_node_editor.DATA
+   ariel.viz.gui.balaklava.1_nice_node_editor.console
+   ariel.viz.gui.balaklava.1_nice_node_editor.head_html
+   ariel.viz.gui.balaklava.1_nice_node_editor.body_html
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: console
+
+.. py:data:: head_html
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """
+      <head>
+          <meta charset="UTF-8" />
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Document</title>
+      
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@baklavajs/themes@2.0.2-beta.3/dist/syrup-dark.css" />
+          <style>
+              html,
+              body {
+                  margin-left: 5vw;
+                  margin-right: 5vw;
+                  margin-top: 5vh;
+                  margin-bottom: 5vh;
+              }
+      
+              #editor {
+                  width: 90vw;
+                  height: 90vh;
+              }
+          </style>
+      </head>
+      """
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:data:: body_html
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """
+      <body>
+          <div id="editor"></div>
+      
+          <script src="https://cdn.jsdelivr.net/npm/baklavajs@2.0.2-beta.3/dist/bundle.js"></script>
+          <script>
+              const viewModel = BaklavaJS.createBaklava(document.getElementById("editor"));
+              const TestNode = BaklavaJS.Core.defineNode({
+                  type: "TestNode",
+                  inputs: {
+                      a: () => new BaklavaJS.RendererVue.TextInputInterface("Hello", "world"),
+                      c: () => new BaklavaJS.RendererVue.ButtonInterface("Name", () => console.log("Button clicked")),
+                  },
+                  outputs: {
+                      b: () => new BaklavaJS.RendererVue.TextInputInterface("Hello", "world"),
+                  },
+              });
+              viewModel.editor.registerNodeType(TestNode);
+          </script>
+      </body>
+      """
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:function:: page() -> None
+

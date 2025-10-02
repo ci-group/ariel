@@ -1,0 +1,98 @@
+:py:mod:`crater_heightmap`
+========================================================
+
+.. py:module:: ariel.simulation.environments.crater_heightmap
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.crater_heightmap.CraterTerrainWorld
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.crater_heightmap.USE_DEGREES
+   ariel.simulation.environments.crater_heightmap.TERRAIN_COLOR
+
+
+.. py:data:: USE_DEGREES
+   :value: False
+
+
+.. py:data:: TERRAIN_COLOR
+   :value: [0.5, 0.4, 0.3, 1.0]
+
+
+.. py:class:: CraterTerrainWorld(size: Tuple[float, float] = (10.0, 10.0), resolution: int = 128, crater_depth: float = 3, crater_radius: float = 5, height: float = 5, ruggedness: float = 0.01)
+
+   MuJoCo world with a crater-like terrain using a heightfield.
+
+
+   .. py:attribute:: size
+      :value: (10.0, 10.0)
+
+
+
+   .. py:attribute:: resolution
+      :value: 128
+
+
+
+   .. py:attribute:: crater_depth
+      :value: 3
+
+
+
+   .. py:attribute:: crater_radius
+      :value: 5
+
+
+
+   .. py:attribute:: height
+      :value: 5
+
+
+
+   .. py:attribute:: ruggedness
+      :value: 0.01
+
+
+
+   .. py:attribute:: heightmap
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot inside the amphitheater world.
+
+      :param mj_spec: The mujoco specification of the entity you want to spawn in to the world
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The spawn position of the entity. [0 ,0 ,0] by default.
+      :type spawn_position: :class:`list[float] | None`
+      :param small_gap: Add a small gap between the entity and the ground. This can help avoid physics glitches.
+      :type small_gap: :class:`float`
+      :param correct_for_bounding_box: In some environments, depending on the spawn_position, the bounding box might spawn inside
+                                       the ground. If enabled, this will automatically adjust the spawn position to avoid that.
+      :type correct_for_bounding_box: :class:`bool`
+
+
+

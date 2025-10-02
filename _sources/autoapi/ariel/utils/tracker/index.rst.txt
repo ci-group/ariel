@@ -1,0 +1,47 @@
+:py:mod:`tracker`
+=============================
+
+.. py:module:: ariel.utils.tracker
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.tracker.Tracker
+
+
+
+
+.. py:class:: Tracker(mujoco_obj_to_find: mujoco.mjtObj, name_to_bind: str, observable_attributes: list[str] = ['xpos'])
+
+   .. py:attribute:: mujoco_obj_to_find
+
+
+   .. py:attribute:: name_to_bind
+
+
+   .. py:attribute:: observable_attributes
+      :value: ['xpos']
+
+
+
+   .. py:attribute:: history
+      :type:  dict[str, dict[int, list[Any]]]
+
+
+   .. py:method:: setup(world: mujoco.MjSpec, data: mujoco.MjData) -> None
+
+
+   .. py:method:: update(data: mujoco.MjData) -> None
+
+

@@ -1,0 +1,96 @@
+:py:mod:`brick`
+==========================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.modules.brick
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   Todo:
+   ----
+       [ ] ".rotate" as superclass method?
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.modules.brick.WeightType
+   ariel.body_phenotypes.robogen_lite.modules.brick.DimensionType
+   ariel.body_phenotypes.robogen_lite.modules.brick.BRICK_MASS
+   ariel.body_phenotypes.robogen_lite.modules.brick.BRICK_DIMENSIONS
+
+
+.. py:type:: WeightType
+   :canonical: float
+
+
+.. py:type:: DimensionType
+   :canonical: tuple[float, float, float]
+
+
+.. py:data:: BRICK_MASS
+   :type:  WeightType
+   :value: 0.055
+
+
+.. py:data:: BRICK_DIMENSIONS
+   :type:  DimensionType
+   :value: (0.05, 0.05, 0.05)
+
+
+.. py:class:: BrickModule(index: int)
+
+   Bases: :py:obj:`ariel.body_phenotypes.robogen_lite.modules.module.Module`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule
+      :parts: 1
+
+
+   Brick module specifications.
+
+
+   .. py:attribute:: index
+      :type:  int | None
+      :value: None
+
+
+
+   .. py:attribute:: module_type
+      :type:  ariel.body_phenotypes.robogen_lite.config.ModuleType
+
+
+   .. py:attribute:: sites
+
+
+   .. py:attribute:: spec
+
+
+   .. py:attribute:: body
+
+
+   .. py:method:: rotate(angle: float) -> None
+
+      Rotate the brick module by a specified angle.
+
+      :param angle: The angle in degrees to rotate the brick.
+      :type angle: :class:`float`
+
+
+

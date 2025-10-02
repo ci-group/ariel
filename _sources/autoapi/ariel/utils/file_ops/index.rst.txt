@@ -1,0 +1,36 @@
+:py:mod:`file_ops`
+==============================
+
+.. py:module:: ariel.utils.file_ops
+
+.. autoapi-nested-parse::
+
+   Common file operations.
+
+   .. admonition:: Notes
+
+      *
+
+   .. admonition:: References
+
+      [1]
+
+   .. todo:: [ ]
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.file_ops.generate_save_path
+
+
+
+.. py:function:: generate_save_path(*, file_name: str | pathlib.Path | None = None, file_path: str | pathlib.Path | None = None, file_extension: str | None = None, append_date: bool = True) -> pathlib.Path
+

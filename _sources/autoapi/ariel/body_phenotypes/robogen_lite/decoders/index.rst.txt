@@ -1,0 +1,20 @@
+:py:mod:`decoders`
+=====================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.decoders
+
+.. autoapi-nested-parse::
+
+   Decoders for ARIEL-robots.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   hi_prob_decoding/index.rst
+
+

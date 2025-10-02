@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>This file shows the process of creating an EA using ARIEL - ARIEL documentation</title><link rel="shortcut icon" href="../../_static/ariel_favicon.ico"/><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="MuJoCo Data Class Variables Documentation" href="../Mujoco_docs/mujoco_docs.html" /><link rel="prev" title="GUI" href="../GUI.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=d48c410d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto+Slab:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+    rel="stylesheet">
+
+<style>
+    :root {
+        /* --------- FONTS --------- */
+        --sy-f-heading: 'Bree Serif', 'Roboto Slab', 'Georgia', 'Arial', serif;
+        --sy-f-text: 'Verdana', 'Ubuntu', 'Lato', 'Helvetica', 'Arial', var(--sy-f-sys), sans-serif;
+        --sy-f-mono: 'Monaco', monospace;
+
+        /* --------- NAVBAR --------- */
+        /* --sy-s-banner-height: 40px; */
+        /* --sy-s-navbar-height: 50px; */
+
+        /* --------- COLORS --------- */
+        /*  Text */
+        /* --header-foreground: #FFFFFF; */
+        --header-foreground: #ECEEED;
+
+        --text-foreground: #F1F3F2;
+        --text-foreground-light: #1A211E;
+
+        --muted-text: #8A8A8A;
+        --inline-code: #e74c3c;
+
+        /* Window */
+        --main-window: #111113;
+        --side-bar: #111113;
+        --border-color: #303036;
+        --code-border: #8A8A8A;
+
+        --main-window-light: #FFFFFF;
+        --side-bar-light: #FFFFFF;
+        --border-color-light: #FFFFFF;
+        --code-border-light: #8A8A8A;
+
+        /* Links */
+        --unvisited: #4D8BFF;
+        --unvisited-hover: #99BDFF;
+        --visited: #E61986;
+        --visited-hover: #F075B7;
+
+        --unvisited-light: #1A6AFF;
+        --unvisited-hover-light: #003EB3;
+        --visited-light: #CF1779;
+        --visited-hover-light: #A1125E;
+
+        /* Theme */
+        --accent-a2: #29AB8711;
+        --accent-a25: #29AB8722;
+        --accent-a3: #29AB8733;
+        --accent-a4: #29AB8755;
+        --accent-9: #29AB87EE;
+        --accent-a11: #29AB87FF;
+        --color-surface-accent: var(--accent-a2);
+        --sy-c-light: var(--muted-text);
+        --sy-c-border: var(--accent-a4);
+
+        /* --- Code --- */
+        /* highlight */
+        --syntax-highlight-bg: var(--accent-a25);
+        /* background */
+        --syntax-pre-bg: #8A8A8A11;
+        /* header */
+        --syntax-cap-bg: var(--accent-a4);
+
+    }
+
+    html.dark {
+        /* Background */
+        --sy-c-background: var(--side-bar);
+        --sy-c-foot-background: var(--side-bar);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground);
+        --yue-c-code-background: var(--main-window);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #FFA400;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--header-foreground);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-a4); */
+        --sy-c-foot-divider: var(--border-color);
+
+    }
+
+    html.light {
+        /* Background */
+        --sy-c-background: var(--side-bar-light);
+        --sy-c-foot-background: var(--side-bar-light);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground-light);
+        --yue-c-code-background: var(--main-window-light);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #F17300;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--text-foreground-light);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-9); */
+        --sy-c-foot-divider: var(--border-color-light);
+    }
+
+
+    /* --------- CORRECT "BOLD" CHANGES HEADER --------- */
+    .sy-head-brand strong {
+        color: light-dark(var(--text-foreground-light), var(--text-foreground));
+    }
+
+    /* --------- UNDERLINE HEADERS --------- */
+    :is(h1, h2, h3, h4) {
+        font-weight: bold;
+    }
+
+    :is(h1, h2):not(:has(code)) {
+        text-decoration: underline;
+    }
+
+    /* --------- CODE BORDERS --------- */
+    /* .literal {
+        border: 1px solid;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    } */
+
+    .docutils.literal.notranslate {
+        font-weight: bold;
+    }
+
+    .literal-block-wrapper {
+        font-weight: bold;
+        border: 1px solid;
+        border-radius: 0.45em;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    }
+
+    /* --------- EXTERNAL LINKS --------- */
+    /* unseen passive */
+    .reference.external {
+        border-color: light-dark(var(--unvisited-light), var(--unvisited));
+        color: light-dark(var(--unvisited-light), var(--unvisited));
+    }
+
+    /* unseen hover */
+    .reference.external:hover {
+        border-color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+        color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+    }
+
+    /* visited passive */
+    .reference.external:visited {
+        border-color: light-dark(var(--visited-light), var(--visited));
+        color: light-dark(var(--visited-light), var(--visited));
+    }
+
+    /* visited hover */
+    .reference.external:visited:hover {
+        border-color: light-dark(var(--visited-hover-light), var(--visited-hover));
+        color: light-dark(var(--visited-hover-light), var(--visited-hover));
+    }
+
+    /* --------- MAIN WINDOW COLORS --------- */
+    .sy-main {
+        border-left: 1px solid;
+        border-right: 1px solid;
+        border-color: light-dark(var(--border-color-light), var(--border-color));
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Ensure breadcrumb is the same color as the main window */
+    .sy-breadcrumbs {
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Add a little bit of space to right side-bar */
+    .sy-scrollbar {
+        padding-left: 1em;
+    }
+
+    /* --------- API COLORS --------- */
+    .sig {
+        background-color: var(--accent-a2);
+        border-top: 3px solid var(--accent-a4);
+    }
+
+    .k {
+        font-style: italic;
+    }
+
+    /* Flow diagrams */
+    .inheritance.graphviz {
+        background-color: #92A0A077;
+        border-radius: 5px;
+    }
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="This file shows the process of creating an EA using ARIEL"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../index.html">
+      
+      
+      <strong>ARIEL</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction_to_modular_robots/index.html">Introduction to modular robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing_guide/index.html">Contributing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ec_course_docs.html">Evolutionary Computing Course Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GUI.html">GUI</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Your first EA with ARIEL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mujoco_docs/mujoco_docs.html">MuJoCo Data Variables Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/ariel/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">body_phenotypes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">robogen_lite</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/ec/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genotypes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a000/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a001/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a001</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a002/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a002</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a003/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a003</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a004/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a005/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/simulation/controllers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/simulation/environments/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/simulation/tasks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tasks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/optimizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/file_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">file_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/mjspec_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mjspec_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/noise_gen/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">noise_gen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/renderers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">renderers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/runners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runners</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/tracker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/video_recorder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">video_recorder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/viz/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">viz</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/viz/analysis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/viz/gui/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gui</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#How-does-ARIEL-EC-module-work?">How does ARIEL EC module work?</a><ul>
+<li><a class="reference internal" href="#Define-fitness-function">Define fitness function</a></li>
+<li><a class="reference internal" href="#Initialize-the-global-constants">Initialize the global constants</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Initialize-the-EASettings-class.">Initialize the EASettings class.</a><ul>
+<li><a class="reference internal" href="#And-just-like-that-we-have-everything-we-need-to-get-started.-Now-all-we-need-to-do-define-our-evolutionary-operators">And just like that we have everything we need to get started. Now all we need to do define our evolutionary operators</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Define-evolutionary-loop">Define evolutionary loop</a></li>
+<li><a class="reference internal" href="#Will-update-with-the-plot-showing-the-mean-performance-and-standard-deviation-of-the-algorithm">Will update with the plot showing the mean performance and standard deviation of the algorithm</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">ARIEL</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">This file shows the process of creating an EA using ARIEL</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="This-file-shows-the-process-of-creating-an-EA-using-ARIEL">
+<h1>This file shows the process of creating an EA using ARIEL<a class="headerlink" href="#This-file-shows-the-process-of-creating-an-EA-using-ARIEL" title="Link to this heading">¶</a></h1>
+<section id="How-does-ARIEL-EC-module-work?">
+<h2>How does ARIEL EC module work?<a class="headerlink" href="#How-does-ARIEL-EC-module-work?" title="Link to this heading">¶</a></h2>
+<p>The ARIEL EC (Evolutionary Computing) module works a bit different than other EAs (Evolutionary Algorithms). While other EAs represent the population as a simple list of individuals, here they the population is made as its own class, with a population being type of <code class="docutils literal notranslate"><span class="pre">list[Individuals]</span></code>.</p>
+<p>Similarly, in traditional EA architecture an individual is chosen for certain operators (for example parent selection) according to some criteria, put into a separate list and then given to the operator function. ARIEL works by giving individuals what we call <code class="docutils literal notranslate"><span class="pre">tags</span></code>. An individual has <code class="docutils literal notranslate"><span class="pre">tags</span></code> that can be toggled, which qualify it for any and all operations. The tag can be whether an individual can crossover or mutate in the future, but it can also show if it can enter the learning cycle.</p>
+<p>The tags can be changed at all times, and default values for each tag can be given to more closely represent a traditional EA structure.</p>
+<p>Additionally, ARIEL utilizes an SQL database to handle the variables and outputs of the code. This makes the code run faster, but it adds an extra step to the process.</p>
+<p>This file demonstrates the process of initializing an EA class and running it for a simple problem, in our case, the Sphere function.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[ ]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Standard library</span>
+</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">cast</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="c1"># Pretty little errors and progress bars</span>
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">rich.console</span><span class="w"> </span><span class="kn">import</span> <span class="n">Console</span>
+</span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">rich.traceback</span><span class="w"> </span><span class="kn">import</span> <span class="n">install</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="c1"># Third-party libraries</span>
+</span><span data-line="10"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="c1"># Local libraries</span>
+</span><span data-line="13"><span class="kn">from</span><span class="w"> </span><span class="nn">ariel.ec.a000</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegerMutator</span>
+</span><span data-line="14"><span class="kn">from</span><span class="w"> </span><span class="nn">ariel.ec.a001</span><span class="w"> </span><span class="kn">import</span> <span class="n">Individual</span>
+</span><span data-line="15"><span class="kn">from</span><span class="w"> </span><span class="nn">ariel.ec.a005</span><span class="w"> </span><span class="kn">import</span> <span class="n">Crossover</span>
+</span><span data-line="16"><span class="kn">from</span><span class="w"> </span><span class="nn">ariel.ec.a004</span><span class="w"> </span><span class="kn">import</span> <span class="n">EASettings</span><span class="p">,</span> <span class="n">EAStep</span><span class="p">,</span> <span class="n">EA</span><span class="p">,</span> <span class="n">Population</span>
+</span><span data-line="17">
+</span><span data-line="18"><span class="c1"># Library to show fitness landscape</span>
+</span><span data-line="19"><span class="kn">from</span><span class="w"> </span><span class="nn">fitness_plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">fitness_landscape_plot</span>
+</span><br/></pre></div>
+</div>
+</div>
+<section id="Define-fitness-function">
+<h3>Define fitness function<a class="headerlink" href="#Define-fitness-function" title="Link to this heading">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[2]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1">#### Define the fitness function</span>
+</span><span data-line="2"><span class="k">def</span><span class="w"> </span><span class="nf">Ackley</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+</span><span data-line="3"><span class="w">    </span><span class="sd">&quot;&quot;&quot;source: https://www.sfu.ca/~ssurjano/ackley.html&quot;&quot;&quot;</span>
+</span><span data-line="4">
+</span><span data-line="5">    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span data-line="6">    <span class="c1"># Ackley function parameters</span>
+</span><span data-line="7">    <span class="n">a</span> <span class="o">=</span> <span class="mi">20</span>
+</span><span data-line="8">    <span class="n">b</span> <span class="o">=</span> <span class="mf">0.2</span>
+</span><span data-line="9">    <span class="n">c</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+</span><span data-line="10">    <span class="n">dimension</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span data-line="11">
+</span><span data-line="12">    <span class="c1"># Individual terms</span>
+</span><span data-line="13">    <span class="n">term1</span> <span class="o">=</span> <span class="o">-</span><span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">dimension</span><span class="p">))</span>
+</span><span data-line="14">    <span class="n">term2</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">xi</span><span class="p">)</span> <span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">dimension</span><span class="p">)</span>
+</span><span data-line="15">    <span class="k">return</span> <span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="k">def</span><span class="w"> </span><span class="nf">evaluate_ind</span><span class="p">(</span><span class="n">ind</span><span class="p">:</span> <span class="n">Individual</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="18"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate an individual by calculating its fitness using the Ackley function.&quot;&quot;&quot;</span>
+</span><span data-line="19">
+</span><span data-line="20">    <span class="k">return</span> <span class="n">Ackley</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;list[float]&quot;</span><span class="p">,</span> <span class="n">ind</span><span class="o">.</span><span class="n">genotype</span><span class="p">))</span>
+</span><span data-line="21">
+</span><span data-line="22"><span class="k">def</span><span class="w"> </span><span class="nf">evaluate_pop</span><span class="p">(</span><span class="n">population</span><span class="p">:</span> <span class="n">Population</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Population</span><span class="p">:</span>
+</span><span data-line="23"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate a population by calculating the fitness of each individual.&quot;&quot;&quot;</span>
+</span><span data-line="24">    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">population</span><span class="p">:</span>
+</span><span data-line="25">        <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">requires_eval</span><span class="p">:</span>
+</span><span data-line="26">            <span class="n">ind</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">evaluate_ind</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+</span><span data-line="27">    <span class="k">return</span> <span class="n">population</span>
+</span><span data-line="28">
+</span><span data-line="29"><span class="n">fitness_landscape_plot</span><span class="p">()</span>
+</span><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_ea_intro_ea_example_4_0.png" src="../../_images/source_ea_intro_ea_example_4_0.png" />
+</div>
+</div>
+</section>
+<section id="Initialize-the-global-constants">
+<h3>Initialize the global constants<a class="headerlink" href="#Initialize-the-global-constants" title="Link to this heading">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[3]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># A seed is optional, but it helps with reproducibility</span>
+</span><span data-line="2"><span class="n">SEED</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># e.g., 42</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># The database has a few handling modes</span>
+</span><span data-line="5">    <span class="c1"># &quot;delete&quot; will delete the existing database</span>
+</span><span data-line="6">    <span class="c1"># &quot;halt&quot; will stop the execution if a database already exists</span>
+</span><span data-line="7"><span class="n">DB_HANDLING_MODES</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="s2">&quot;halt&quot;</span><span class="p">]</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="c1"># Initialize RNG</span>
+</span><span data-line="10"><span class="n">RNG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">SEED</span><span class="p">)</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="c1"># Initialize rich console and traceback handler</span>
+</span><span data-line="13"><span class="n">install</span><span class="p">()</span>
+</span><span data-line="14"><span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">()</span>
+</span></pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Initialize-the-EASettings-class.">
+<h2>Initialize the EASettings class.<a class="headerlink" href="#Initialize-the-EASettings-class." title="Link to this heading">¶</a></h2>
+<p>The EASettings class acts as the handles the database and other parameters</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[4]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Set config</span>
+</span><span data-line="2"><span class="n">config</span> <span class="o">=</span> <span class="n">EASettings</span><span class="p">()</span>
+</span><span data-line="3"><span class="n">config</span><span class="o">.</span><span class="n">is_maximisation</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="4"><span class="n">config</span><span class="o">.</span><span class="n">db_handling</span> <span class="o">=</span> <span class="s2">&quot;delete&quot;</span>
+</span><br/></pre></div>
+</div>
+</div>
+<section id="And-just-like-that-we-have-everything-we-need-to-get-started.-Now-all-we-need-to-do-define-our-evolutionary-operators">
+<h3>And just like that we have everything we need to get started. Now all we need to do define our evolutionary operators<a class="headerlink" href="#And-just-like-that-we-have-everything-we-need-to-get-started.-Now-all-we-need-to-do-define-our-evolutionary-operators" title="Link to this heading">¶</a></h3>
+<p>Keep in mind that all operators in ARIEL have to work with the <code class="docutils literal notranslate"><span class="pre">Individual</span></code> and <code class="docutils literal notranslate"><span class="pre">Population</span></code> classes. You could define your own operators from scratch, but using the built in ones is easier.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[5]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">create_individual</span><span class="p">(</span><span class="n">num_dims</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Individual</span><span class="p">:</span>
+</span><span data-line="2">    <span class="n">ind</span> <span class="o">=</span> <span class="n">Individual</span><span class="p">()</span>
+</span><span data-line="3">    <span class="n">ind</span><span class="o">.</span><span class="n">genotype</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;list[float]&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span data-line="4">                                                        <span class="n">scale</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+</span><span data-line="5">                                                        <span class="n">size</span><span class="o">=</span><span class="n">num_dims</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</span><span data-line="6">    <span class="k">return</span> <span class="n">ind</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="k">def</span><span class="w"> </span><span class="nf">parent_selection</span><span class="p">(</span><span class="n">population</span><span class="p">:</span> <span class="n">Population</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Population</span><span class="p">:</span>
+</span><span data-line="9"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Tournament selection&quot;&quot;&quot;</span>
+</span><span data-line="10">
+</span><span data-line="11">    <span class="c1"># Shuffle population to avoid bias</span>
+</span><span data-line="12">    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+</span><span data-line="13">
+</span><span data-line="14">    <span class="c1"># Tournament selection</span>
+</span><span data-line="15">    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+</span><span data-line="16">        <span class="n">ind_i</span> <span class="o">=</span> <span class="n">population</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</span><span data-line="17">        <span class="n">ind_j</span> <span class="o">=</span> <span class="n">population</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span><span data-line="18">
+</span><span data-line="19">        <span class="c1"># Compare fitness values and update tags</span>
+</span><span data-line="20">        <span class="k">if</span> <span class="n">ind_i</span><span class="o">.</span><span class="n">fitness</span> <span class="o">&gt;</span> <span class="n">ind_j</span><span class="o">.</span><span class="n">fitness</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">is_maximisation</span><span class="p">:</span>
+</span><span data-line="21">            <span class="n">ind_i</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ps&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+</span><span data-line="22">            <span class="n">ind_j</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ps&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+</span><span data-line="23">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="24">            <span class="n">ind_i</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ps&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+</span><span data-line="25">            <span class="n">ind_j</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ps&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+</span><span data-line="26">    <span class="k">return</span> <span class="n">population</span>
+</span><span data-line="27">
+</span><span data-line="28"><span class="k">def</span><span class="w"> </span><span class="nf">crossover</span><span class="p">(</span><span class="n">population</span><span class="p">:</span> <span class="n">Population</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Population</span><span class="p">:</span>
+</span><span data-line="29"><span class="w">    </span><span class="sd">&quot;&quot;&quot;One point crossover&quot;&quot;&quot;</span>
+</span><span data-line="30">
+</span><span data-line="31">    <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">population</span> <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ps&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]</span>
+</span><span data-line="32">    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+</span><span data-line="33">        <span class="n">parent_i</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</span><span data-line="34">        <span class="n">parent_j</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</span><span data-line="35">        <span class="n">genotype_i</span><span class="p">,</span> <span class="n">genotype_j</span> <span class="o">=</span> <span class="n">Crossover</span><span class="o">.</span><span class="n">one_point</span><span class="p">(</span>
+</span><span data-line="36">            <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;list[float]&quot;</span><span class="p">,</span> <span class="n">parent_i</span><span class="o">.</span><span class="n">genotype</span><span class="p">),</span>
+</span><span data-line="37">            <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;list[float]&quot;</span><span class="p">,</span> <span class="n">parent_j</span><span class="o">.</span><span class="n">genotype</span><span class="p">),</span>
+</span><span data-line="38">        <span class="p">)</span>
+</span><span data-line="39">
+</span><span data-line="40">        <span class="c1"># First child</span>
+</span><span data-line="41">        <span class="n">child_i</span> <span class="o">=</span> <span class="n">Individual</span><span class="p">()</span>
+</span><span data-line="42">        <span class="n">child_i</span><span class="o">.</span><span class="n">genotype</span> <span class="o">=</span> <span class="n">genotype_i</span>
+</span><span data-line="43">        <span class="n">child_i</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mut&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+</span><span data-line="44">        <span class="n">child_i</span><span class="o">.</span><span class="n">requires_eval</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="45">
+</span><span data-line="46">        <span class="c1"># Second child</span>
+</span><span data-line="47">        <span class="n">child_j</span> <span class="o">=</span> <span class="n">Individual</span><span class="p">()</span>
+</span><span data-line="48">        <span class="n">child_j</span><span class="o">.</span><span class="n">genotype</span> <span class="o">=</span> <span class="n">genotype_j</span>
+</span><span data-line="49">        <span class="n">child_j</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mut&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+</span><span data-line="50">        <span class="n">child_j</span><span class="o">.</span><span class="n">requires_eval</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="51">
+</span><span data-line="52">        <span class="n">population</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">child_i</span><span class="p">,</span> <span class="n">child_j</span><span class="p">])</span>
+</span><span data-line="53">    <span class="k">return</span> <span class="n">population</span>
+</span><span data-line="54">
+</span><span data-line="55"><span class="k">def</span><span class="w"> </span><span class="nf">mutation</span><span class="p">(</span><span class="n">population</span><span class="p">:</span> <span class="n">Population</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Population</span><span class="p">:</span>
+</span><span data-line="56">    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">population</span><span class="p">:</span>
+</span><span data-line="57">        <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mut&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+</span><span data-line="58">            <span class="n">genes</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;list[int]&quot;</span><span class="p">,</span> <span class="n">ind</span><span class="o">.</span><span class="n">genotype</span><span class="p">)</span>
+</span><span data-line="59">            <span class="n">mutated</span> <span class="o">=</span> <span class="n">IntegerMutator</span><span class="o">.</span><span class="n">float_creep</span><span class="p">(</span>
+</span><span data-line="60">                <span class="n">individual</span><span class="o">=</span><span class="n">genes</span><span class="p">,</span>
+</span><span data-line="61">                <span class="n">span</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+</span><span data-line="62">                <span class="n">mutation_probability</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+</span><span data-line="63">            <span class="p">)</span>
+</span><span data-line="64">            <span class="n">ind</span><span class="o">.</span><span class="n">genotype</span> <span class="o">=</span> <span class="n">mutated</span>
+</span><span data-line="65">    <span class="k">return</span> <span class="n">population</span>
+</span><span data-line="66">
+</span><span data-line="67"><span class="k">def</span><span class="w"> </span><span class="nf">survivor_selection</span><span class="p">(</span><span class="n">population</span><span class="p">:</span> <span class="n">Population</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Population</span><span class="p">:</span>
+</span><span data-line="68">
+</span><span data-line="69">    <span class="c1"># Shuffle population to avoid bias</span>
+</span><span data-line="70">    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+</span><span data-line="71">    <span class="n">current_pop_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+</span><span data-line="72">
+</span><span data-line="73">    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)):</span>
+</span><span data-line="74">        <span class="n">ind_i</span> <span class="o">=</span> <span class="n">population</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</span><span data-line="75">        <span class="n">ind_j</span> <span class="o">=</span> <span class="n">population</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span><span data-line="76">
+</span><span data-line="77">        <span class="c1"># Kill worse individual</span>
+</span><span data-line="78">        <span class="k">if</span> <span class="n">ind_i</span><span class="o">.</span><span class="n">fitness</span> <span class="o">&gt;</span> <span class="n">ind_j</span><span class="o">.</span><span class="n">fitness</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">is_maximisation</span><span class="p">:</span>
+</span><span data-line="79">            <span class="n">ind_j</span><span class="o">.</span><span class="n">alive</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="80">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="81">            <span class="n">ind_i</span><span class="o">.</span><span class="n">alive</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="82">
+</span><span data-line="83">        <span class="c1"># Termination condition</span>
+</span><span data-line="84">        <span class="n">current_pop_size</span> <span class="o">-=</span> <span class="mi">1</span>
+</span><span data-line="85">        <span class="k">if</span> <span class="n">current_pop_size</span> <span class="o">&lt;=</span> <span class="n">config</span><span class="o">.</span><span class="n">target_population_size</span><span class="p">:</span>
+</span><span data-line="86">            <span class="k">break</span>
+</span><span data-line="87">    <span class="k">return</span> <span class="n">population</span>
+</span></pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="Define-evolutionary-loop">
+<h2>Define evolutionary loop<a class="headerlink" href="#Define-evolutionary-loop" title="Link to this heading">¶</a></h2>
+<p>Now that all our operators are done, we can define the evolutionary loop and run the algorithm</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[6]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">EA</span><span class="p">:</span>
+</span><span data-line="2"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Entry point.&quot;&quot;&quot;</span>
+</span><span data-line="3">    <span class="c1"># Create initial population</span>
+</span><span data-line="4">    <span class="n">population_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">create_individual</span><span class="p">(</span><span class="n">num_dims</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</span><span data-line="5">    <span class="nb">print</span><span class="p">(</span><span class="n">population_list</span><span class="p">)</span>
+</span><span data-line="6">    <span class="n">population_list</span> <span class="o">=</span> <span class="n">evaluate_pop</span><span class="p">(</span><span class="n">population_list</span><span class="p">)</span>
+</span><span data-line="7">
+</span><span data-line="8">    <span class="c1"># Create EA steps</span>
+</span><span data-line="9">    <span class="n">ops</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="10">        <span class="n">EAStep</span><span class="p">(</span><span class="s2">&quot;evaluation&quot;</span><span class="p">,</span> <span class="n">evaluate_pop</span><span class="p">),</span>
+</span><span data-line="11">        <span class="n">EAStep</span><span class="p">(</span><span class="s2">&quot;parent_selection&quot;</span><span class="p">,</span> <span class="n">parent_selection</span><span class="p">),</span>
+</span><span data-line="12">        <span class="n">EAStep</span><span class="p">(</span><span class="s2">&quot;crossover&quot;</span><span class="p">,</span> <span class="n">crossover</span><span class="p">),</span>
+</span><span data-line="13">        <span class="n">EAStep</span><span class="p">(</span><span class="s2">&quot;mutation&quot;</span><span class="p">,</span> <span class="n">mutation</span><span class="p">),</span>
+</span><span data-line="14">        <span class="n">EAStep</span><span class="p">(</span><span class="s2">&quot;evaluation&quot;</span><span class="p">,</span> <span class="n">evaluate_pop</span><span class="p">),</span>
+</span><span data-line="15">        <span class="n">EAStep</span><span class="p">(</span><span class="s2">&quot;survivor_selection&quot;</span><span class="p">,</span> <span class="n">survivor_selection</span><span class="p">),</span>
+</span><span data-line="16">    <span class="p">]</span>
+</span><span data-line="17">
+</span><span data-line="18">    <span class="c1"># Initialize EA</span>
+</span><span data-line="19">    <span class="n">ea</span> <span class="o">=</span> <span class="n">EA</span><span class="p">(</span>
+</span><span data-line="20">        <span class="n">population_list</span><span class="p">,</span>
+</span><span data-line="21">        <span class="n">operations</span><span class="o">=</span><span class="n">ops</span><span class="p">,</span>
+</span><span data-line="22">        <span class="n">num_of_generations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+</span><span data-line="23">    <span class="p">)</span>
+</span><span data-line="24">
+</span><span data-line="25">    <span class="n">ea</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</span><span data-line="26">
+</span><span data-line="27">    <span class="n">best</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="n">get_solution</span><span class="p">(</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">only_alive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span data-line="28">    <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">best</span><span class="p">)</span>
+</span><span data-line="29">
+</span><span data-line="30">    <span class="n">median</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="n">get_solution</span><span class="p">(</span><span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="n">only_alive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span data-line="31">    <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">median</span><span class="p">)</span>
+</span><span data-line="32">
+</span><span data-line="33">    <span class="n">worst</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="n">get_solution</span><span class="p">(</span><span class="s2">&quot;worst&quot;</span><span class="p">,</span> <span class="n">only_alive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span data-line="34">    <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">worst</span><span class="p">)</span>
+</span><span data-line="35">
+</span><span data-line="36">    <span class="k">return</span> <span class="n">ea</span>
+</span></pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[7]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">ea</span> <span class="o">=</span> <span class="n">main</span><span class="p">()</span>
+</span></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[2.408246382881381, 5.79605190806094, -79.54098188412165, 15.722240082230273, 40.908873629938554, 23.655791886798323, -29.0401778456501, -44.0910910860608, 46.6994979834531, 44.51539693959488], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[38.220368939127326, 60.658833461353524, 55.66507395396577, 71.31449041051489, 90.68420709242794, -41.79576370072132, -48.79004377864702, 31.46344668265647, -48.003370589026225, 14.02324800551763], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[-32.90740512919547, 25.036141835548538, 0.36711466327349074, 53.76353799300189, -38.53125411144, 5.35745175330088, -23.019156012124697, -66.337062441846, -50.75845026113798, 48.871897267390615], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[8.480801108291654, 37.324015811202074, 13.77265902980842, -1.674551608353941, 33.60714493740689, -68.04372634235611, -21.07910761451974, 90.43188951031527, 40.810541611687874, -41.991014937738484], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[22.598011128899692, 81.21670228397613, 107.72432244657797, 62.451789603804855, 4.115812806901929, -22.829906859778426, -95.05978577286338, -21.393570976959076, 54.62456102918504, 56.26303001018417], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[-74.90248116978553, -11.608668709580524, -6.543964231789149, -13.846612344646648, 51.83963355511509, 14.54237506248581, -81.0733495761288, 77.61737393510838, -7.5836843180492775, -0.4067953373474761], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[-67.80960209698705, 33.39780118847392, 32.55670675817498, -16.403100152228347, -9.433215961739206, 22.568662989164785, -30.05464476440501, -41.711418138880255, 55.80315469671937, -13.910639063186434], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[-33.06434449432155, 52.54747489946278, -44.17130149134966, 115.0643332294387, 32.58912362478761, 64.33393127521214, 16.71974489005757, 36.90015504392898, -54.005293408302826, -9.982137689745969], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[-24.170818363594336, -33.78692216610353, -30.895768744016184, 41.402978496168906, -15.979658595357071, 48.43945857621487, 15.745167596368304, -73.02747531014909, 66.7679632217159, -69.10790924577002], tags_={}), Individual(id=None, alive=True, time_of_birth=-1, time_of_death=-1, requires_eval=True, fitness_=None, requires_init=False, genotype_=[-79.3089113486005, 20.924907957331843, 76.49876452092195, -3.2991870397473755, 110.76415118349598, 83.50069159571638, -43.16998478652831, 4.037131419505667, 12.567409545787934, -31.844919779373075], tags_={})]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[15:04:58] </span><span style="color: #808000; text-decoration-color: #808000">Database file exists at d:\University\EC TA\ariel\docs\source\EA_intro\__data__\database.db! </span> <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">a004.py:98</span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span><span style="color: #808000; text-decoration-color: #808000">Behaviour is set to: </span><span style="color: #008000; text-decoration-color: #008000">'delete'</span><span style="color: #808000; text-decoration-color: #808000"> --&gt; ⚠️  Deleting file!                                          </span> <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">          </span>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #00ff00; text-decoration-color: #00ff00">───────────────────────────────────────────────── </span><span style="color: #000080; text-decoration-color: #000080">EA Initialised</span><span style="color: #00ff00; text-decoration-color: #00ff00"> ──────────────────────────────────────────────────</span>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3b8040c383ae4036aee4d229d3a5ac8c", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #00ff00; text-decoration-color: #00ff00">─────────────────────────────────────────────── </span><span style="color: #008000; text-decoration-color: #008000">EA Finished Running</span><span style="color: #00ff00; text-decoration-color: #00ff00"> ───────────────────────────────────────────────</span>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[15:05:25] </span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">Individual</span><span style="font-weight: bold">(</span>                                                                             <a href="file://C:\Users\johng\AppData\Local\Temp\ipykernel_13864\2235138345.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">2235138345.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file://C:\Users\johng\AppData\Local\Temp\ipykernel_13864\2235138345.py#28" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">28</span></a>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">time_of_birth</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">53</span>,                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">alive</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">id</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2441</span>,                                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">requires_eval</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">requires_init</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">tags_</span>=<span style="font-weight: bold">{</span><span style="color: #008000; text-decoration-color: #008000">'mut'</span>: <span style="color: #00ff00; text-decoration-color: #00ff00; font-style: italic">True</span>, <span style="color: #008000; text-decoration-color: #008000">'ps'</span>: <span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span><span style="font-weight: bold">}</span>,                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">time_of_death</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">55</span>,                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">fitness_</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">19.943074283612287</span>,                                                        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">genotype_</span>=<span style="font-weight: bold">[</span>                                                                         <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-44.349598792593326</span>,                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">22.71370375509321</span>,                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">41.98038192155346</span>,                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-23.57200595364493</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-4.0</span>,                                                                           <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9.710941958036557</span>,                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-15.0</span>,                                                                          <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-29.219839593502666</span>,                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">45.0</span>,                                                                           <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-3.596580788360625</span>                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="font-weight: bold">]</span>                                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span><span style="font-weight: bold">)</span>                                                                                       <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+</pre></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">Individual</span><span style="font-weight: bold">(</span>                                                                             <a href="file://C:\Users\johng\AppData\Local\Temp\ipykernel_13864\2235138345.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">2235138345.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file://C:\Users\johng\AppData\Local\Temp\ipykernel_13864\2235138345.py#31" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">31</span></a>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">time_of_birth</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">36</span>,                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">alive</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">id</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1594</span>,                                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">requires_eval</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">requires_init</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">tags_</span>=<span style="font-weight: bold">{</span><span style="color: #008000; text-decoration-color: #008000">'mut'</span>: <span style="color: #00ff00; text-decoration-color: #00ff00; font-style: italic">True</span>, <span style="color: #008000; text-decoration-color: #008000">'ps'</span>: <span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span><span style="font-weight: bold">}</span>,                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">time_of_death</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">38</span>,                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">fitness_</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">21.039838308157428</span>,                                                        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">genotype_</span>=<span style="font-weight: bold">[</span>                                                                         <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-22.123023231520712</span>,                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-51.0</span>,                                                                          <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-29.0</span>,                                                                          <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">19.334789764916277</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-11.003167733933545</span>,                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">54.33341825346689</span>,                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6.893693921909005</span>,                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-59.29463815270952</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">61.643872996796034</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-71.15502894628382</span>                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="font-weight: bold">]</span>                                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span><span style="font-weight: bold">)</span>                                                                                       <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+</pre></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">Individual</span><span style="font-weight: bold">(</span>                                                                             <a href="file://C:\Users\johng\AppData\Local\Temp\ipykernel_13864\2235138345.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">2235138345.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file://C:\Users\johng\AppData\Local\Temp\ipykernel_13864\2235138345.py#34" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">34</span></a>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">time_of_birth</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">60</span>,                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">alive</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">id</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2817</span>,                                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">requires_eval</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">requires_init</span>=<span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>,                                                                <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">tags_</span>=<span style="font-weight: bold">{</span><span style="color: #008000; text-decoration-color: #008000">'mut'</span>: <span style="color: #00ff00; text-decoration-color: #00ff00; font-style: italic">True</span>, <span style="color: #008000; text-decoration-color: #008000">'ps'</span>: <span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span><span style="font-weight: bold">}</span>,                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">time_of_death</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">61</span>,                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">fitness_</span>=<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">22.007885345384366</span>,                                                        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="color: #808000; text-decoration-color: #808000">genotype_</span>=<span style="font-weight: bold">[</span>                                                                         <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-38.43861042164279</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-25.580955959432835</span>,                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-11.373770419240499</span>,                                                            <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">50.55614494636733</span>,                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.7959731101461838</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">60.154819324843714</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">19.764137429216152</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-43.37437022761751</span>,                                                             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">74.18702515362334</span>,                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-64.28798233024189</span>                                                              <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span>    <span style="font-weight: bold">]</span>                                                                                   <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">           </span><span style="font-weight: bold">)</span>                                                                                       <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                </span>
+</pre></div>
+</div>
+</section>
+<section id="Will-update-with-the-plot-showing-the-mean-performance-and-standard-deviation-of-the-algorithm">
+<h2>Will update with the plot showing the mean performance and standard deviation of the algorithm<a class="headerlink" href="#Will-update-with-the-plot-showing-the-mean-performance-and-standard-deviation-of-the-algorithm" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../GUI.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">GUI</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../Mujoco_docs/mujoco_docs.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">MuJoCo Data Class Variables Documentation</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/thebelab-helper.js"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../../_static/shibuya.js?v=e730760c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
+</html>

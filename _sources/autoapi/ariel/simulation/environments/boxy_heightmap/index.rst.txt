@@ -1,0 +1,67 @@
+:py:mod:`boxy_heightmap`
+======================================================
+
+.. py:module:: ariel.simulation.environments.boxy_heightmap
+
+.. autoapi-nested-parse::
+
+   Boxes extrude from the ground to form a terrain.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.boxy_heightmap.BoxyRugged
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.boxy_heightmap.USE_DEGREES
+
+
+.. py:data:: USE_DEGREES
+   :value: False
+
+
+.. py:class:: BoxyRugged(floor_size: tuple[float, float, float] = (10, 10, 0.05), pos: list[float] = [0, 0, 0])
+
+   .. py:attribute:: floor_size
+      :value: (10, 10, 0.05)
+
+
+
+   .. py:attribute:: pos
+      :value: [0, 0, 0]
+
+
+
+   .. py:attribute:: spec
+
+
+   .. py:method:: spawn(mj_spec: mujoco.MjSpec, spawn_position: list[float, float, float] | None = None, *, small_gap: float = 0.0, correct_for_bounding_box: bool = True) -> None
+
+      Spawn a robot at a specific position in the world.
+
+      :param mj_spec: The MuJoCo specification for the robot.
+      :type mj_spec: :class:`mujoco.MjSpec`
+      :param spawn_position: The position (x, y, z) to spawn the robot at, by default (0, 0, 0)
+      :type spawn_position: :class:`list[float`, :class:`float`, :class:`float] | None`, *optional*
+      :param small_gap: A small gap to add to the spawn position, by default 0.0
+      :type small_gap: :class:`float`, *optional*
+      :param correct_for_bounding_box: If True, the spawn position will be adjusted to account for the robot's bounding box,
+                                       by default True
+      :type correct_for_bounding_box: :class:`bool`
+
+
+

@@ -1,0 +1,38 @@
+:py:mod:`constructor`
+========================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.constructor
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.constructor.construct_mjspec_from_graph
+
+
+
+.. py:function:: construct_mjspec_from_graph(graph: networkx.Graph) -> ariel.body_phenotypes.robogen_lite.modules.core.CoreModule
+
+   Construct a MuJoCo specification from a graph representation. Can be used for
+   constructing the body of a robot after crossover using the graph representation.
+
+   :param graph: A graph representation of the robot's structure.
+   :type graph: :class:`Graph`
+
+   :returns: The core module of the robot, which contains all other modules.
+   :rtype: :class:`CoreModule`
+
+   :raises ValueError: If the graph contains unknown module types.
+
+

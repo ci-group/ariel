@@ -1,0 +1,35 @@
+:py:mod:`utils`
+=====================
+
+.. py:module:: ariel.utils
+
+.. autoapi-nested-parse::
+
+   Common utility functions and classes.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   optimizers/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   file_ops/index.rst
+   mjspec_ops/index.rst
+   noise_gen/index.rst
+   renderers/index.rst
+   runners/index.rst
+   tracker/index.rst
+   video_recorder/index.rst
+
+

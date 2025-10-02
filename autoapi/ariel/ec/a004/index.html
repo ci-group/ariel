@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>a004 - ARIEL documentation</title><link rel="shortcut icon" href="../../../../_static/ariel_favicon.ico"/><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="a005" href="../a005/index.html" /><link rel="prev" title="a003" href="../a003/index.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/shibuya.css?v=d48c410d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto+Slab:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+    rel="stylesheet">
+
+<style>
+    :root {
+        /* --------- FONTS --------- */
+        --sy-f-heading: 'Bree Serif', 'Roboto Slab', 'Georgia', 'Arial', serif;
+        --sy-f-text: 'Verdana', 'Ubuntu', 'Lato', 'Helvetica', 'Arial', var(--sy-f-sys), sans-serif;
+        --sy-f-mono: 'Monaco', monospace;
+
+        /* --------- NAVBAR --------- */
+        /* --sy-s-banner-height: 40px; */
+        /* --sy-s-navbar-height: 50px; */
+
+        /* --------- COLORS --------- */
+        /*  Text */
+        /* --header-foreground: #FFFFFF; */
+        --header-foreground: #ECEEED;
+
+        --text-foreground: #F1F3F2;
+        --text-foreground-light: #1A211E;
+
+        --muted-text: #8A8A8A;
+        --inline-code: #e74c3c;
+
+        /* Window */
+        --main-window: #111113;
+        --side-bar: #111113;
+        --border-color: #303036;
+        --code-border: #8A8A8A;
+
+        --main-window-light: #FFFFFF;
+        --side-bar-light: #FFFFFF;
+        --border-color-light: #FFFFFF;
+        --code-border-light: #8A8A8A;
+
+        /* Links */
+        --unvisited: #4D8BFF;
+        --unvisited-hover: #99BDFF;
+        --visited: #E61986;
+        --visited-hover: #F075B7;
+
+        --unvisited-light: #1A6AFF;
+        --unvisited-hover-light: #003EB3;
+        --visited-light: #CF1779;
+        --visited-hover-light: #A1125E;
+
+        /* Theme */
+        --accent-a2: #29AB8711;
+        --accent-a25: #29AB8722;
+        --accent-a3: #29AB8733;
+        --accent-a4: #29AB8755;
+        --accent-9: #29AB87EE;
+        --accent-a11: #29AB87FF;
+        --color-surface-accent: var(--accent-a2);
+        --sy-c-light: var(--muted-text);
+        --sy-c-border: var(--accent-a4);
+
+        /* --- Code --- */
+        /* highlight */
+        --syntax-highlight-bg: var(--accent-a25);
+        /* background */
+        --syntax-pre-bg: #8A8A8A11;
+        /* header */
+        --syntax-cap-bg: var(--accent-a4);
+
+    }
+
+    html.dark {
+        /* Background */
+        --sy-c-background: var(--side-bar);
+        --sy-c-foot-background: var(--side-bar);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground);
+        --yue-c-code-background: var(--main-window);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #FFA400;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--header-foreground);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-a4); */
+        --sy-c-foot-divider: var(--border-color);
+
+    }
+
+    html.light {
+        /* Background */
+        --sy-c-background: var(--side-bar-light);
+        --sy-c-foot-background: var(--side-bar-light);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground-light);
+        --yue-c-code-background: var(--main-window-light);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #F17300;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--text-foreground-light);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-9); */
+        --sy-c-foot-divider: var(--border-color-light);
+    }
+
+
+    /* --------- CORRECT "BOLD" CHANGES HEADER --------- */
+    .sy-head-brand strong {
+        color: light-dark(var(--text-foreground-light), var(--text-foreground));
+    }
+
+    /* --------- UNDERLINE HEADERS --------- */
+    :is(h1, h2, h3, h4) {
+        font-weight: bold;
+    }
+
+    :is(h1, h2):not(:has(code)) {
+        text-decoration: underline;
+    }
+
+    /* --------- CODE BORDERS --------- */
+    /* .literal {
+        border: 1px solid;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    } */
+
+    .docutils.literal.notranslate {
+        font-weight: bold;
+    }
+
+    .literal-block-wrapper {
+        font-weight: bold;
+        border: 1px solid;
+        border-radius: 0.45em;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    }
+
+    /* --------- EXTERNAL LINKS --------- */
+    /* unseen passive */
+    .reference.external {
+        border-color: light-dark(var(--unvisited-light), var(--unvisited));
+        color: light-dark(var(--unvisited-light), var(--unvisited));
+    }
+
+    /* unseen hover */
+    .reference.external:hover {
+        border-color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+        color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+    }
+
+    /* visited passive */
+    .reference.external:visited {
+        border-color: light-dark(var(--visited-light), var(--visited));
+        color: light-dark(var(--visited-light), var(--visited));
+    }
+
+    /* visited hover */
+    .reference.external:visited:hover {
+        border-color: light-dark(var(--visited-hover-light), var(--visited-hover));
+        color: light-dark(var(--visited-hover-light), var(--visited-hover));
+    }
+
+    /* --------- MAIN WINDOW COLORS --------- */
+    .sy-main {
+        border-left: 1px solid;
+        border-right: 1px solid;
+        border-color: light-dark(var(--border-color-light), var(--border-color));
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Ensure breadcrumb is the same color as the main window */
+    .sy-breadcrumbs {
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Add a little bit of space to right side-bar */
+    .sy-scrollbar {
+        padding-left: 1em;
+    }
+
+    /* --------- API COLORS --------- */
+    .sig {
+        background-color: var(--accent-a2);
+        border-top: 3px solid var(--accent-a4);
+    }
+
+    .k {
+        font-style: italic;
+    }
+
+    /* Flow diagrams */
+    .inheritance.graphviz {
+        background-color: #92A0A077;
+        border-radius: 5px;
+    }
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="a004"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../../../index.html">
+      
+      
+      <strong>ARIEL</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/introduction_to_modular_robots/index.html">Introduction to modular robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/contributing_guide/index.html">Contributing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/ec_course_docs.html">Evolutionary Computing Course Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/ea_intro/ea_example.html">Your first EA with ARIEL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/Mujoco_docs/mujoco_docs.html">MuJoCo Data Variables Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../body_phenotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">body_phenotypes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../body_phenotypes/robogen_lite/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">robogen_lite</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../genotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genotypes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a000/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a001/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a001</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a002/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a002</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a003/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a003</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a005/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../simulation/controllers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../simulation/environments/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../simulation/tasks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tasks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/optimizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/file_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">file_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/mjspec_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mjspec_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/noise_gen/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">noise_gen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/renderers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">renderers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/runners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runners</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/tracker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/video_recorder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">video_recorder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../viz/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">viz</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../viz/analysis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../viz/gui/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gui</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#ariel.ec.a004.SEED"><code class="docutils literal notranslate"><span class="pre">SEED</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.DB_HANDLING_MODES"><code class="docutils literal notranslate"><span class="pre">DB_HANDLING_MODES</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.console"><code class="docutils literal notranslate"><span class="pre">console</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.RNG"><code class="docutils literal notranslate"><span class="pre">RNG</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.Population"><code class="docutils literal notranslate"><span class="pre">Population</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.PopulationFunc"><code class="docutils literal notranslate"><span class="pre">PopulationFunc</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings"><code class="docutils literal notranslate"><span class="pre">EASettings</span></code></a><ul>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.quiet"><code class="docutils literal notranslate">quiet</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.is_maximisation"><code class="docutils literal notranslate">is_maximisation</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.first_generation_id"><code class="docutils literal notranslate">first_generation_id</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.num_of_generations"><code class="docutils literal notranslate">num_of_generations</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.target_population_size"><code class="docutils literal notranslate">target_population_size</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.output_folder"><code class="docutils literal notranslate">output_folder</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.db_file_name"><code class="docutils literal notranslate">db_file_name</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.db_file_path"><code class="docutils literal notranslate">db_file_path</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EASettings.db_handling"><code class="docutils literal notranslate">db_handling</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ariel.ec.a004.config"><code class="docutils literal notranslate"><span class="pre">config</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.AbstractEA"><code class="docutils literal notranslate"><span class="pre">AbstractEA</span></code></a><ul>
+<li><a class="reference internal" href="#ariel.ec.a004.AbstractEA.init_database"><code class="docutils literal notranslate">init_database()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ariel.ec.a004.EAStep"><code class="docutils literal notranslate"><span class="pre">EAStep</span></code></a><ul>
+<li><a class="reference internal" href="#ariel.ec.a004.EAStep.name"><code class="docutils literal notranslate">name</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EAStep.operation"><code class="docutils literal notranslate">operation</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EAStep.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA"><code class="docutils literal notranslate"><span class="pre">EA</span></code></a><ul>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.operations"><code class="docutils literal notranslate">operations</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.quiet"><code class="docutils literal notranslate">quiet</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.console"><code class="docutils literal notranslate">console</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.current_generation"><code class="docutils literal notranslate">current_generation</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.num_of_generations"><code class="docutils literal notranslate">num_of_generations</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.is_maximisation"><code class="docutils literal notranslate">is_maximisation</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.target_population_size"><code class="docutils literal notranslate">target_population_size</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.population"><code class="docutils literal notranslate">population</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.population_size"><code class="docutils literal notranslate">population_size</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.commit_population"><code class="docutils literal notranslate">commit_population()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.fetch_population"><code class="docutils literal notranslate">fetch_population()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.get_solution"><code class="docutils literal notranslate">get_solution()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.step"><code class="docutils literal notranslate">step()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.EA.run"><code class="docutils literal notranslate">run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ariel.ec.a004.parent_selection"><code class="docutils literal notranslate"><span class="pre">parent_selection()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.crossover"><code class="docutils literal notranslate"><span class="pre">crossover()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.mutation"><code class="docutils literal notranslate"><span class="pre">mutation()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.evaluate"><code class="docutils literal notranslate"><span class="pre">evaluate()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.survivor_selection"><code class="docutils literal notranslate"><span class="pre">survivor_selection()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.create_individual"><code class="docutils literal notranslate"><span class="pre">create_individual()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a004.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../../index.html"><span itemprop="name">ARIEL</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name">API Reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></span></a>
+        <span>/</span>
+        <meta itemprop="position" content="4" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code></strong>
+        <meta itemprop="position" content="5" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="module-ariel.ec.a004">
+<span id="a004"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code><a class="headerlink" href="#module-ariel.ec.a004" title="Link to this heading">¶</a></h1>
+<p>TODO(jmdm): description of script.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<ul class="simple">
+<li><p>Do we consider survivors to be of the new generation?</p></li>
+</ul>
+</div>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.EASettings" title="ariel.ec.a004.EASettings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EASettings</span></code></a></p></td>
+<td><p>Base class for settings, allowing values to be overridden by environment variables.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a004.AbstractEA" title="ariel.ec.a004.AbstractEA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractEA</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.EAStep" title="ariel.ec.a004.EAStep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EAStep</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a004.EA" title="ariel.ec.a004.EA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EA</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.parent_selection" title="ariel.ec.a004.parent_selection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parent_selection</span></code></a>(→ Population)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a004.crossover" title="ariel.ec.a004.crossover"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crossover</span></code></a>(→ Population)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.mutation" title="ariel.ec.a004.mutation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mutation</span></code></a>(→ Population)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a004.evaluate" title="ariel.ec.a004.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>(→ Population)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.survivor_selection" title="ariel.ec.a004.survivor_selection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">survivor_selection</span></code></a>(→ Population)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a004.create_individual" title="ariel.ec.a004.create_individual"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_individual</span></code></a>(→ ariel.ec.a001.Individual)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.main" title="ariel.ec.a004.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(→ None)</p></td>
+<td><p>Entry point.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.SEED" title="ariel.ec.a004.SEED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SEED</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a004.DB_HANDLING_MODES" title="ariel.ec.a004.DB_HANDLING_MODES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DB_HANDLING_MODES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.console" title="ariel.ec.a004.console"><code class="xref py py-obj docutils literal notranslate"><span class="pre">console</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a004.RNG" title="ariel.ec.a004.RNG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RNG</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.Population" title="ariel.ec.a004.Population"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Population</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a004.PopulationFunc" title="ariel.ec.a004.PopulationFunc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PopulationFunc</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a004.config" title="ariel.ec.a004.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a004.SEED">
+<span class="sig-name descname"><span class="pre">SEED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">42</span></em><a class="headerlink" href="#ariel.ec.a004.SEED" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a004.DB_HANDLING_MODES">
+<span class="sig-name descname"><span class="pre">DB_HANDLING_MODES</span></span><a class="headerlink" href="#ariel.ec.a004.DB_HANDLING_MODES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a004.console">
+<span class="sig-name descname"><span class="pre">console</span></span><a class="headerlink" href="#ariel.ec.a004.console" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a004.RNG">
+<span class="sig-name descname"><span class="pre">RNG</span></span><a class="headerlink" href="#ariel.ec.a004.RNG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="ariel.ec.a004.Population">
+<em class="property"><span class="pre">type</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Population</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../a001/index.html#ariel.ec.a001.Individual" title="ariel.ec.a001.Individual"><span class="pre">Individual</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ariel.ec.a004.Population" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py type">
+<dt class="sig sig-object py" id="ariel.ec.a004.PopulationFunc">
+<em class="property"><span class="pre">type</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PopulationFunc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Population</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Population</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ariel.ec.a004.PopulationFunc" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EASettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_case_sensitive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_nested_model_default_partial_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic_settings.sources.DotenvType</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">ENV_FILE_SENTINEL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_file_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_ignore_empty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_nested_delimiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_nested_max_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_parse_none_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_parse_enums</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_prog_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_parse_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_settings_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic_settings.sources.CliSettingsSource</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_parse_none_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_hide_none_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_avoid_json</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_enforce_required</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_use_class_docs_for_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_exit_on_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_flag_prefix_char</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_implicit_flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_ignore_unknown_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_kebab_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_shortcuts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_secrets_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pydantic_settings.sources.PathType</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ariel.ec.a004.EASettings" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic_settings.BaseSettings</span></code></p>
+digraph inheritance95c797dad6 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;BaseModel&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;!!! abstract \&quot;Usage Documentation\&quot;&quot;];
+  &quot;BaseSettings&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Base class for settings, allowing values to be overridden by environment variables.&quot;];
+  &quot;BaseModel&quot; -&gt; &quot;BaseSettings&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;EASettings&quot; [URL=&quot;#ariel.ec.a004.EASettings&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;BaseSettings&quot; -&gt; &quot;EASettings&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<p>Base class for settings, allowing values to be overridden by environment variables.</p>
+<p>This is useful in production for secrets you do not wish to save in code, it plays nicely with docker(-compose),
+Heroku and any 12 factor app design.</p>
+<p>All the below attributes can be set via <cite>model_config</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_case_sensitive</strong> – Whether environment and CLI variable names should be read with case-sensitivity.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>_nested_model_default_partial_update</strong> – Whether to allow partial updates on nested model default object fields.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>_env_prefix</strong> – Prefix for all environment variables. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>_env_file</strong> – The env file(s) to load settings values from. Defaults to <cite>Path(‘’)</cite>, which
+means that the value from <cite>model_config[‘env_file’]</cite> should be used. You can also pass
+<cite>None</cite> to indicate that environment variables should not be loaded from an env file.</p></li>
+<li><p><strong>_env_file_encoding</strong> – The env file encoding, e.g. <cite>‘latin-1’</cite>. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>_env_ignore_empty</strong> – Ignore environment variables where the value is an empty string. Default to <cite>False</cite>.</p></li>
+<li><p><strong>_env_nested_delimiter</strong> – The nested env values delimiter. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>_env_nested_max_split</strong> – The nested env values maximum nesting. Defaults to <cite>None</cite>, which means no limit.</p></li>
+<li><p><strong>_env_parse_none_str</strong> – The env string value that should be parsed (e.g. “null”, “void”, “None”, etc.)
+into <cite>None</cite> type(None). Defaults to <cite>None</cite> type(None), which means no parsing should occur.</p></li>
+<li><p><strong>_env_parse_enums</strong> – Parse enum field names to values. Defaults to <cite>None.</cite>, which means no parsing should occur.</p></li>
+<li><p><strong>_cli_prog_name</strong> – The CLI program name to display in help text. Defaults to <cite>None</cite> if _cli_parse_args is <cite>None</cite>.
+Otherwise, defaults to sys.argv[0].</p></li>
+<li><p><strong>_cli_parse_args</strong> – The list of CLI arguments to parse. Defaults to None.
+If set to <cite>True</cite>, defaults to sys.argv[1:].</p></li>
+<li><p><strong>_cli_settings_source</strong> – Override the default CLI settings source with a user defined instance. Defaults to None.</p></li>
+<li><p><strong>_cli_parse_none_str</strong> – The CLI string value that should be parsed (e.g. “null”, “void”, “None”, etc.) into
+<cite>None</cite> type(None). Defaults to _env_parse_none_str value if set. Otherwise, defaults to “null” if
+_cli_avoid_json is <cite>False</cite>, and “None” if _cli_avoid_json is <cite>True</cite>.</p></li>
+<li><p><strong>_cli_hide_none_type</strong> – Hide <cite>None</cite> values in CLI help text. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>_cli_avoid_json</strong> – Avoid complex JSON objects in CLI help text. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>_cli_enforce_required</strong> – Enforce required fields at the CLI. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>_cli_use_class_docs_for_groups</strong> – Use class docstrings in CLI group help text instead of field descriptions.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>_cli_exit_on_error</strong> – Determines whether or not the internal parser exits with error info when an error occurs.
+Defaults to <cite>True</cite>.</p></li>
+<li><p><strong>_cli_prefix</strong> – The root parser command line arguments prefix. Defaults to “”.</p></li>
+<li><p><strong>_cli_flag_prefix_char</strong> – The flag prefix character to use for CLI optional arguments. Defaults to ‘-‘.</p></li>
+<li><p><strong>_cli_implicit_flags</strong> – Whether <cite>bool</cite> fields should be implicitly converted into CLI boolean flags.
+(e.g. –flag, –no-flag). Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>_cli_ignore_unknown_args</strong> – Whether to ignore unknown CLI args and parse only known ones. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>_cli_kebab_case</strong> – CLI args use kebab case. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>_cli_shortcuts</strong> – Mapping of target field name to alias names. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>_secrets_dir</strong> – The secret files directory or a sequence of directories. Defaults to <cite>None</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.quiet">
+<span class="sig-name descname"><span class="pre">quiet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.quiet" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.is_maximisation">
+<span class="sig-name descname"><span class="pre">is_maximisation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.is_maximisation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.first_generation_id">
+<span class="sig-name descname"><span class="pre">first_generation_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.first_generation_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.num_of_generations">
+<span class="sig-name descname"><span class="pre">num_of_generations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.num_of_generations" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.target_population_size">
+<span class="sig-name descname"><span class="pre">target_population_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.target_population_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.output_folder">
+<span class="sig-name descname"><span class="pre">output_folder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pathlib.Path</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.output_folder" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.db_file_name">
+<span class="sig-name descname"><span class="pre">db_file_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'database.db'</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.db_file_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.db_file_path">
+<span class="sig-name descname"><span class="pre">db_file_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pathlib.Path</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.db_file_path" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EASettings.db_handling">
+<span class="sig-name descname"><span class="pre">db_handling</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DB_HANDLING_MODES</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'delete'</span></em><a class="headerlink" href="#ariel.ec.a004.EASettings.db_handling" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a004.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#ariel.ec.a004.config" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ariel.ec.a004.AbstractEA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractEA</span></span><a class="headerlink" href="#ariel.ec.a004.AbstractEA" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="ariel.ec.a004.AbstractEA.init_database">
+<span class="sig-name descname"><span class="pre">init_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pathlib.Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_handling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DB_HANDLING_MODES</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.ec.a004.AbstractEA.init_database" title="Link to this definition">¶</a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_file_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">Path</span> <span class="pre">|</span> <span class="pre">None</span></code>, <em>optional</em>) – _description_, by default None</p></li>
+<li><p><strong>db_handling</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DB_HANDLING_MODES</span> <span class="pre">|</span> <span class="pre">None</span></code>, <em>optional</em>) – _description_, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>FileExistsError</strong> – _description_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ariel.ec.a004.EAStep">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EAStep</span></span><a class="headerlink" href="#ariel.ec.a004.EAStep" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EAStep.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ariel.ec.a004.EAStep.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EAStep.operation">
+<span class="sig-name descname"><span class="pre">operation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Population</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Population</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ariel.ec.a004.EAStep.operation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.ec.a004.EAStep.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Population</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Population</span></span></span><a class="headerlink" href="#ariel.ec.a004.EAStep.__call__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Population</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ariel.ec.a004.EAStep" title="ariel.ec.a004.EAStep"><span class="pre">EAStep</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_of_generations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_generation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ariel.ec.a004.EA" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ariel.ec.a004.AbstractEA" title="ariel.ec.a004.AbstractEA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractEA</span></code></a></p>
+digraph inheritance335ccff982 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;AbstractEA&quot; [URL=&quot;#ariel.ec.a004.AbstractEA&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;EA&quot; [URL=&quot;#ariel.ec.a004.EA&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;AbstractEA&quot; -&gt; &quot;EA&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><a class="headerlink" href="#ariel.ec.a004.EA.operations" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.quiet">
+<span class="sig-name descname"><span class="pre">quiet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#ariel.ec.a004.EA.quiet" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.console">
+<span class="sig-name descname"><span class="pre">console</span></span><a class="headerlink" href="#ariel.ec.a004.EA.console" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.current_generation">
+<span class="sig-name descname"><span class="pre">current_generation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#ariel.ec.a004.EA.current_generation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.num_of_generations">
+<span class="sig-name descname"><span class="pre">num_of_generations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#ariel.ec.a004.EA.num_of_generations" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.is_maximisation">
+<span class="sig-name descname"><span class="pre">is_maximisation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#ariel.ec.a004.EA.is_maximisation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.target_population_size">
+<span class="sig-name descname"><span class="pre">target_population_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#ariel.ec.a004.EA.target_population_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.population">
+<span class="sig-name descname"><span class="pre">population</span></span><a class="headerlink" href="#ariel.ec.a004.EA.population" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.population_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">population_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ariel.ec.a004.EA.population_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.commit_population">
+<span class="sig-name descname"><span class="pre">commit_population</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.ec.a004.EA.commit_population" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.fetch_population">
+<span class="sig-name descname"><span class="pre">fetch_population</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_comes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'first'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'last'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_alive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">already_evaluated</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_logic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.ec.a004.EA.fetch_population" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.get_solution">
+<span class="sig-name descname"><span class="pre">get_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'best'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'median'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'worst'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_alive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../a001/index.html#ariel.ec.a001.Individual" title="ariel.ec.a001.Individual"><span class="pre">ariel.ec.a001.Individual</span></a></span></span><a class="headerlink" href="#ariel.ec.a004.EA.get_solution" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.ec.a004.EA.step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.ec.a004.EA.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.ec.a004.EA.run" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.ec.a004.parent_selection">
+<span class="sig-name descname"><span class="pre">parent_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Population</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Population</span></span></span><a class="headerlink" href="#ariel.ec.a004.parent_selection" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.ec.a004.crossover">
+<span class="sig-name descname"><span class="pre">crossover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Population</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Population</span></span></span><a class="headerlink" href="#ariel.ec.a004.crossover" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.ec.a004.mutation">
+<span class="sig-name descname"><span class="pre">mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Population</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Population</span></span></span><a class="headerlink" href="#ariel.ec.a004.mutation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.ec.a004.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Population</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Population</span></span></span><a class="headerlink" href="#ariel.ec.a004.evaluate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.ec.a004.survivor_selection">
+<span class="sig-name descname"><span class="pre">survivor_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Population</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Population</span></span></span><a class="headerlink" href="#ariel.ec.a004.survivor_selection" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.ec.a004.create_individual">
+<span class="sig-name descname"><span class="pre">create_individual</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../a001/index.html#ariel.ec.a001.Individual" title="ariel.ec.a001.Individual"><span class="pre">ariel.ec.a001.Individual</span></a></span></span><a class="headerlink" href="#ariel.ec.a004.create_individual" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.ec.a004.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.ec.a004.main" title="Link to this definition">¶</a></dt>
+<dd><p>Entry point.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../a003/index.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a003</span></code></div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../a005/index.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code></div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/thebelab-helper.js"></script>
+      <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../../../../_static/shibuya.js?v=e730760c"></script></body>
+</html>

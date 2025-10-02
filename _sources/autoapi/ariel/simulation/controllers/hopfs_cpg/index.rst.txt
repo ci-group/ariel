@@ -1,0 +1,107 @@
+:py:mod:`hopfs_cpg`
+================================================
+
+.. py:module:: ariel.simulation.controllers.hopfs_cpg
+
+.. autoapi-nested-parse::
+
+   Hopf-based Central Pattern Generator (CPG).
+
+   Sources
+   -------
+       [1] https://www.sciencedirect.com/science/article/pii/S2667379722000353#sec4
+
+   .. admonition:: Notes
+
+      *
+
+   .. todo:: [ ]
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.hopfs_cpg.HopfCPG
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.hopfs_cpg.ArrayLike
+   ariel.simulation.controllers.hopfs_cpg.SEED
+   ariel.simulation.controllers.hopfs_cpg.RNG
+
+
+.. py:type:: ArrayLike
+   :canonical: npt.NDArray[np.float64]
+
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: RNG
+
+.. py:class:: HopfCPG(num_neurons: int, adjacency_list: dict[int, list[int]], dt: float = 0.02, h: float = 0.1, alpha: float = 1.0)
+
+   .. py:attribute:: num_neurons
+
+
+   .. py:attribute:: dt
+      :value: 0.02
+
+
+
+   .. py:attribute:: alpha
+
+
+   .. py:attribute:: h
+      :value: 0.1
+
+
+
+   .. py:attribute:: adjacency_list
+
+
+   .. py:attribute:: init_state
+      :value: 0.5
+
+
+
+   .. py:attribute:: x
+      :type:  ArrayLike
+
+
+   .. py:attribute:: y
+      :type:  ArrayLike
+
+
+   .. py:attribute:: omega
+
+
+   .. py:attribute:: A
+
+
+   .. py:attribute:: phase_diff
+      :type:  ArrayLike
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: step() -> tuple[ArrayLike, ArrayLike]
+
+
+   .. py:method:: simulate(steps: int) -> tuple[ArrayLike, ArrayLike]
+
+

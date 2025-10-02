@@ -1,0 +1,32 @@
+:py:mod:`targeted_locomotion`
+====================================================
+
+.. py:module:: ariel.simulation.tasks.targeted_locomotion
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.tasks.targeted_locomotion.distance_to_target
+
+
+
+.. py:function:: distance_to_target(initial_position, target_position)
+
+   Calculate the Euclidean distance between the current position and the target position.
+
+   :param initial_position: The current position as (x, y).
+   :type initial_position: :class:`tuple`
+   :param target_position: The target position as (x, y).
+   :type target_position: :class:`tuple`
+
+   :returns: The distance between the two positions.
+   :rtype: :class:`float`
+
+

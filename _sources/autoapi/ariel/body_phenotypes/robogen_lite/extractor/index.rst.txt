@@ -1,0 +1,77 @@
+:py:mod:`extractor`
+======================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.extractor
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor
+
+
+
+
+.. py:class:: RoboGenCoreExtractor(model, data, world)
+
+   Extractor for core geoms in a Mujoco simulation with RoboGenLite robots.
+
+
+   .. py:attribute:: model
+
+
+   .. py:attribute:: data
+
+
+   .. py:attribute:: world
+
+
+   .. py:attribute:: geoms
+
+
+   .. py:method:: track_core_geoms() -> list
+
+      Extract core geoms from mujoco data.
+
+      :returns: List of core geoms.
+      :rtype: :class:`list`
+
+
+
+   .. py:method:: get_core_path() -> numpy.ndarray
+
+      Get the path of core geoms -> [xpos, xpos, ...]
+
+      :returns: Numpy Array of core geom positions.
+      :rtype: :class:`np.ndarray`
+
+
+
+   .. py:method:: xyz_displacement_extractor() -> tuple[numpy.ndarray, numpy.ndarray]
+
+      Get the first and last core geom xpos for displacement calculation.
+
+      :returns: Tuple of first and last core geom positions.
+      :rtype: :class:`tuple[np.ndarray`, :class:`np.ndarray]`
+
+
+
+   .. py:method:: xy_displacement_extractor() -> tuple[numpy.ndarray, numpy.ndarray]
+
+      Get the first and last core geom (x,y)-position for displacement calculation.
+
+      :returns: Tuple of first and last core geom (x,y)-positions.
+      :rtype: :class:`tuple[np.ndarray`, :class:`np.ndarray]`
+
+
+

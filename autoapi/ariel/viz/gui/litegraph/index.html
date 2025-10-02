@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>litegraph - ARIEL documentation</title><link rel="shortcut icon" href="../../../../../_static/ariel_favicon.ico"/><link rel="index" title="Index" href="../../../../../genindex.html" /><link rel="search" title="Search" href="../../../../../search.html" /><link rel="next" title="0_nice_node_editor" href="0_nice_node_editor/index.html" /><link rel="prev" title="main" href="../balaklava/main/index.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/shibuya.css?v=d48c410d" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../../../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto+Slab:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+    rel="stylesheet">
+
+<style>
+    :root {
+        /* --------- FONTS --------- */
+        --sy-f-heading: 'Bree Serif', 'Roboto Slab', 'Georgia', 'Arial', serif;
+        --sy-f-text: 'Verdana', 'Ubuntu', 'Lato', 'Helvetica', 'Arial', var(--sy-f-sys), sans-serif;
+        --sy-f-mono: 'Monaco', monospace;
+
+        /* --------- NAVBAR --------- */
+        /* --sy-s-banner-height: 40px; */
+        /* --sy-s-navbar-height: 50px; */
+
+        /* --------- COLORS --------- */
+        /*  Text */
+        /* --header-foreground: #FFFFFF; */
+        --header-foreground: #ECEEED;
+
+        --text-foreground: #F1F3F2;
+        --text-foreground-light: #1A211E;
+
+        --muted-text: #8A8A8A;
+        --inline-code: #e74c3c;
+
+        /* Window */
+        --main-window: #111113;
+        --side-bar: #111113;
+        --border-color: #303036;
+        --code-border: #8A8A8A;
+
+        --main-window-light: #FFFFFF;
+        --side-bar-light: #FFFFFF;
+        --border-color-light: #FFFFFF;
+        --code-border-light: #8A8A8A;
+
+        /* Links */
+        --unvisited: #4D8BFF;
+        --unvisited-hover: #99BDFF;
+        --visited: #E61986;
+        --visited-hover: #F075B7;
+
+        --unvisited-light: #1A6AFF;
+        --unvisited-hover-light: #003EB3;
+        --visited-light: #CF1779;
+        --visited-hover-light: #A1125E;
+
+        /* Theme */
+        --accent-a2: #29AB8711;
+        --accent-a25: #29AB8722;
+        --accent-a3: #29AB8733;
+        --accent-a4: #29AB8755;
+        --accent-9: #29AB87EE;
+        --accent-a11: #29AB87FF;
+        --color-surface-accent: var(--accent-a2);
+        --sy-c-light: var(--muted-text);
+        --sy-c-border: var(--accent-a4);
+
+        /* --- Code --- */
+        /* highlight */
+        --syntax-highlight-bg: var(--accent-a25);
+        /* background */
+        --syntax-pre-bg: #8A8A8A11;
+        /* header */
+        --syntax-cap-bg: var(--accent-a4);
+
+    }
+
+    html.dark {
+        /* Background */
+        --sy-c-background: var(--side-bar);
+        --sy-c-foot-background: var(--side-bar);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground);
+        --yue-c-code-background: var(--main-window);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #FFA400;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--header-foreground);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-a4); */
+        --sy-c-foot-divider: var(--border-color);
+
+    }
+
+    html.light {
+        /* Background */
+        --sy-c-background: var(--side-bar-light);
+        --sy-c-foot-background: var(--side-bar-light);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground-light);
+        --yue-c-code-background: var(--main-window-light);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #F17300;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--text-foreground-light);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-9); */
+        --sy-c-foot-divider: var(--border-color-light);
+    }
+
+
+    /* --------- CORRECT "BOLD" CHANGES HEADER --------- */
+    .sy-head-brand strong {
+        color: light-dark(var(--text-foreground-light), var(--text-foreground));
+    }
+
+    /* --------- UNDERLINE HEADERS --------- */
+    :is(h1, h2, h3, h4) {
+        font-weight: bold;
+    }
+
+    :is(h1, h2):not(:has(code)) {
+        text-decoration: underline;
+    }
+
+    /* --------- CODE BORDERS --------- */
+    /* .literal {
+        border: 1px solid;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    } */
+
+    .docutils.literal.notranslate {
+        font-weight: bold;
+    }
+
+    .literal-block-wrapper {
+        font-weight: bold;
+        border: 1px solid;
+        border-radius: 0.45em;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    }
+
+    /* --------- EXTERNAL LINKS --------- */
+    /* unseen passive */
+    .reference.external {
+        border-color: light-dark(var(--unvisited-light), var(--unvisited));
+        color: light-dark(var(--unvisited-light), var(--unvisited));
+    }
+
+    /* unseen hover */
+    .reference.external:hover {
+        border-color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+        color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+    }
+
+    /* visited passive */
+    .reference.external:visited {
+        border-color: light-dark(var(--visited-light), var(--visited));
+        color: light-dark(var(--visited-light), var(--visited));
+    }
+
+    /* visited hover */
+    .reference.external:visited:hover {
+        border-color: light-dark(var(--visited-hover-light), var(--visited-hover));
+        color: light-dark(var(--visited-hover-light), var(--visited-hover));
+    }
+
+    /* --------- MAIN WINDOW COLORS --------- */
+    .sy-main {
+        border-left: 1px solid;
+        border-right: 1px solid;
+        border-color: light-dark(var(--border-color-light), var(--border-color));
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Ensure breadcrumb is the same color as the main window */
+    .sy-breadcrumbs {
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Add a little bit of space to right side-bar */
+    .sy-scrollbar {
+        padding-left: 1em;
+    }
+
+    /* --------- API COLORS --------- */
+    .sig {
+        background-color: var(--accent-a2);
+        border-top: 3px solid var(--accent-a4);
+    }
+
+    .k {
+        font-style: italic;
+    }
+
+    /* Flow diagrams */
+    .inheritance.graphviz {
+        background-color: #92A0A077;
+        border-radius: 5px;
+    }
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="litegraph"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../../../../index.html">
+      
+      
+      <strong>ARIEL</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/introduction_to_modular_robots/index.html">Introduction to modular robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/contributing_guide/index.html">Contributing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/ec_course_docs.html">Evolutionary Computing Course Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/ea_intro/ea_example.html">Your first EA with ARIEL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/Mujoco_docs/mujoco_docs.html">MuJoCo Data Variables Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../../body_phenotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">body_phenotypes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../body_phenotypes/robogen_lite/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">robogen_lite</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ec/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/genotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genotypes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a000/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a001/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a001</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a002/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a002</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a003/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a003</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a004/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a005/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../simulation/controllers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../simulation/environments/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../simulation/tasks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tasks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/optimizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/file_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">file_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/mjspec_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mjspec_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/noise_gen/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">noise_gen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/renderers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">renderers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/runners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runners</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/tracker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/video_recorder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">video_recorder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">viz</span></code></a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../analysis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gui</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../../../index.html"><span itemprop="name">ARIEL</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../../index.html"><span itemprop="name">API Reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">viz</span></code></span></a>
+        <span>/</span>
+        <meta itemprop="position" content="4" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gui</span></code></span></a>
+        <span>/</span>
+        <meta itemprop="position" content="5" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">litegraph</span></code></strong>
+        <meta itemprop="position" content="6" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="module-ariel.viz.gui.litegraph">
+<span id="litegraph"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">litegraph</span></code><a class="headerlink" href="#module-ariel.viz.gui.litegraph" title="Link to this heading">¶</a></h1>
+<p>Litegraph-based GUI.</p>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="0_nice_node_editor/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">0_nice_node_editor</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="baklava/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">baklava</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="main/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">main</span></code></a></li>
+</ul>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../balaklava/main/index.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">main</span></code></div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="0_nice_node_editor/index.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">0_nice_node_editor</span></code></div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/thebelab-helper.js"></script>
+      <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../../../../../_static/shibuya.js?v=e730760c"></script></body>
+</html>

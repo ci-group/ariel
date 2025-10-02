@@ -1,0 +1,113 @@
+:py:mod:`hinge`
+==========================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.modules.hinge
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   Todo:
+   ----
+       [ ] ".rotate" as superclass method?
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.modules.hinge.SHRINK
+   ariel.body_phenotypes.robogen_lite.modules.hinge.WeightType
+   ariel.body_phenotypes.robogen_lite.modules.hinge.DimensionType
+   ariel.body_phenotypes.robogen_lite.modules.hinge.STATOR_MASS
+   ariel.body_phenotypes.robogen_lite.modules.hinge.ROTOR_MASS
+   ariel.body_phenotypes.robogen_lite.modules.hinge.STATOR_DIMENSIONS
+   ariel.body_phenotypes.robogen_lite.modules.hinge.ROTOR_DIMENSIONS
+
+
+.. py:data:: SHRINK
+   :value: 0.99
+
+
+.. py:type:: WeightType
+   :canonical: float
+
+
+.. py:type:: DimensionType
+   :canonical: tuple[float, float, float]
+
+
+.. py:data:: STATOR_MASS
+   :type:  WeightType
+   :value: 0.02
+
+
+.. py:data:: ROTOR_MASS
+   :type:  WeightType
+   :value: 0.04
+
+
+.. py:data:: STATOR_DIMENSIONS
+   :type:  DimensionType
+   :value: (0.025, 0.03, 0.025)
+
+
+.. py:data:: ROTOR_DIMENSIONS
+   :type:  DimensionType
+   :value: (0.025, 0.02, 0.025)
+
+
+.. py:class:: HingeModule(index: int)
+
+   Bases: :py:obj:`ariel.body_phenotypes.robogen_lite.modules.module.Module`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule
+      :parts: 1
+
+
+   Hinge module specifications.
+
+
+   .. py:attribute:: index
+      :type:  int | None
+      :value: None
+
+
+
+   .. py:attribute:: module_type
+      :type:  str
+
+
+   .. py:attribute:: sites
+
+
+   .. py:attribute:: spec
+
+
+   .. py:attribute:: body
+
+
+   .. py:method:: rotate(angle: float) -> None
+
+      Rotate the hinge module by a specified angle.
+
+      :param angle: The angle in degrees to rotate the hinge.
+      :type angle: :class:`float`
+
+
+

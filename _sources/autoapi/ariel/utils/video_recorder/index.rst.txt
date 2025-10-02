@@ -1,0 +1,67 @@
+:py:mod:`video_recorder`
+====================================
+
+.. py:module:: ariel.utils.video_recorder
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.video_recorder.VideoRecorder
+
+
+
+
+.. py:class:: VideoRecorder(file_name: str = 'video', output_folder: str | pathlib.Path | None = None, width: int = 640, height: int = 480, fps: int = 30)
+
+   Simple video recorder for ariel.
+
+
+   .. py:attribute:: width
+      :value: 640
+
+
+
+   .. py:attribute:: height
+      :value: 480
+
+
+
+   .. py:attribute:: fps
+      :value: 30
+
+
+
+   .. py:attribute:: frame_count
+      :value: 0
+
+
+
+   .. py:attribute:: video_writer
+
+
+   .. py:method:: write(frame: numpy.typing.ArrayLike) -> None
+
+      Write MuJoCo frame to video.
+
+      :param frame: Frame to write to the video.
+      :type frame: :class:`npt.ArrayLike`
+
+
+
+   .. py:method:: release() -> None
+
+      Close video writer and save video locally.
+
+
+

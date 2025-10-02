@@ -1,0 +1,100 @@
+:py:mod:`main`
+======================================
+
+.. py:module:: ariel.viz.gui.balaklava.main
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.balaklava.main.page
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.balaklava.main.head_html
+   ariel.viz.gui.balaklava.main.body_html
+
+
+.. py:data:: head_html
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """
+      <head>
+          <meta charset="UTF-8" />
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Document</title>
+      
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@baklavajs/themes@2.0.2-beta.3/dist/syrup-dark.css" />
+          <style>
+              html,
+              body {
+                  margin-left: 5vw;
+                  margin-right: 5vw;
+                  margin-top: 5vh;
+                  margin-bottom: 5vh;
+              }
+      
+              #editor {
+                  width: 90vw;
+                  height: 90vh;
+              }
+          </style>
+      </head>
+      """
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:data:: body_html
+   :value: Multiline-String
+
+   .. raw:: html
+
+      <details><summary>Show Value</summary>
+
+   .. code-block:: python
+
+      """
+      <body>
+          <div id="editor"></div>
+          <script src="https://cdn.jsdelivr.net/npm/baklavajs@2.0.2-beta.3/dist/bundle.js"></script>
+          <script>
+          const viewModel = BaklavaJS.createBaklava(document.getElementById("editor"));
+          </script>
+      </body>
+      """
+
+   .. raw:: html
+
+      </details>
+
+
+
+.. py:function:: page() -> None
+

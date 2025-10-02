@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="./">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Index - ARIEL documentation</title><link rel="shortcut icon" href="_static/ariel_favicon.ico"/><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=397bb51e" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=d48c410d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto+Slab:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+    rel="stylesheet">
+
+<style>
+    :root {
+        /* --------- FONTS --------- */
+        --sy-f-heading: 'Bree Serif', 'Roboto Slab', 'Georgia', 'Arial', serif;
+        --sy-f-text: 'Verdana', 'Ubuntu', 'Lato', 'Helvetica', 'Arial', var(--sy-f-sys), sans-serif;
+        --sy-f-mono: 'Monaco', monospace;
+
+        /* --------- NAVBAR --------- */
+        /* --sy-s-banner-height: 40px; */
+        /* --sy-s-navbar-height: 50px; */
+
+        /* --------- COLORS --------- */
+        /*  Text */
+        /* --header-foreground: #FFFFFF; */
+        --header-foreground: #ECEEED;
+
+        --text-foreground: #F1F3F2;
+        --text-foreground-light: #1A211E;
+
+        --muted-text: #8A8A8A;
+        --inline-code: #e74c3c;
+
+        /* Window */
+        --main-window: #111113;
+        --side-bar: #111113;
+        --border-color: #303036;
+        --code-border: #8A8A8A;
+
+        --main-window-light: #FFFFFF;
+        --side-bar-light: #FFFFFF;
+        --border-color-light: #FFFFFF;
+        --code-border-light: #8A8A8A;
+
+        /* Links */
+        --unvisited: #4D8BFF;
+        --unvisited-hover: #99BDFF;
+        --visited: #E61986;
+        --visited-hover: #F075B7;
+
+        --unvisited-light: #1A6AFF;
+        --unvisited-hover-light: #003EB3;
+        --visited-light: #CF1779;
+        --visited-hover-light: #A1125E;
+
+        /* Theme */
+        --accent-a2: #29AB8711;
+        --accent-a25: #29AB8722;
+        --accent-a3: #29AB8733;
+        --accent-a4: #29AB8755;
+        --accent-9: #29AB87EE;
+        --accent-a11: #29AB87FF;
+        --color-surface-accent: var(--accent-a2);
+        --sy-c-light: var(--muted-text);
+        --sy-c-border: var(--accent-a4);
+
+        /* --- Code --- */
+        /* highlight */
+        --syntax-highlight-bg: var(--accent-a25);
+        /* background */
+        --syntax-pre-bg: #8A8A8A11;
+        /* header */
+        --syntax-cap-bg: var(--accent-a4);
+
+    }
+
+    html.dark {
+        /* Background */
+        --sy-c-background: var(--side-bar);
+        --sy-c-foot-background: var(--side-bar);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground);
+        --yue-c-code-background: var(--main-window);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #FFA400;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--header-foreground);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-a4); */
+        --sy-c-foot-divider: var(--border-color);
+
+    }
+
+    html.light {
+        /* Background */
+        --sy-c-background: var(--side-bar-light);
+        --sy-c-foot-background: var(--side-bar-light);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground-light);
+        --yue-c-code-background: var(--main-window-light);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #F17300;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--text-foreground-light);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-9); */
+        --sy-c-foot-divider: var(--border-color-light);
+    }
+
+
+    /* --------- CORRECT "BOLD" CHANGES HEADER --------- */
+    .sy-head-brand strong {
+        color: light-dark(var(--text-foreground-light), var(--text-foreground));
+    }
+
+    /* --------- UNDERLINE HEADERS --------- */
+    :is(h1, h2, h3, h4) {
+        font-weight: bold;
+    }
+
+    :is(h1, h2):not(:has(code)) {
+        text-decoration: underline;
+    }
+
+    /* --------- CODE BORDERS --------- */
+    /* .literal {
+        border: 1px solid;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    } */
+
+    .docutils.literal.notranslate {
+        font-weight: bold;
+    }
+
+    .literal-block-wrapper {
+        font-weight: bold;
+        border: 1px solid;
+        border-radius: 0.45em;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    }
+
+    /* --------- EXTERNAL LINKS --------- */
+    /* unseen passive */
+    .reference.external {
+        border-color: light-dark(var(--unvisited-light), var(--unvisited));
+        color: light-dark(var(--unvisited-light), var(--unvisited));
+    }
+
+    /* unseen hover */
+    .reference.external:hover {
+        border-color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+        color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+    }
+
+    /* visited passive */
+    .reference.external:visited {
+        border-color: light-dark(var(--visited-light), var(--visited));
+        color: light-dark(var(--visited-light), var(--visited));
+    }
+
+    /* visited hover */
+    .reference.external:visited:hover {
+        border-color: light-dark(var(--visited-hover-light), var(--visited-hover));
+        color: light-dark(var(--visited-hover-light), var(--visited-hover));
+    }
+
+    /* --------- MAIN WINDOW COLORS --------- */
+    .sy-main {
+        border-left: 1px solid;
+        border-right: 1px solid;
+        border-color: light-dark(var(--border-color-light), var(--border-color));
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Ensure breadcrumb is the same color as the main window */
+    .sy-breadcrumbs {
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Add a little bit of space to right side-bar */
+    .sy-scrollbar {
+        padding-left: 1em;
+    }
+
+    /* --------- API COLORS --------- */
+    .sig {
+        background-color: var(--accent-a2);
+        border-top: 3px solid var(--accent-a4);
+    }
+
+    .k {
+        font-style: italic;
+    }
+
+    /* Flow diagrams */
+    .inheritance.graphviz {
+        background-color: #92A0A077;
+        border-radius: 5px;
+    }
+</style>
+    </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="index.html">
+      
+      
+      <strong>ARIEL</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2 -translate-x-2"></span>
+          <span class="hamburger_3 -translate-x-1"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div><div class="sy-container mx-auto body">
+    <main class="sy-content mx-auto pt-12 px-6 xl:px-12 break-words">
+      <article class="yue" role="main">
+        
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
+ | <a href="#K"><strong>K</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ | <a href="#X"><strong>X</strong></a>
+ | <a href="#Y"><strong>Y</strong></a>
+ 
+</div>
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EAStep.__call__">__call__() (EAStep method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html#ariel.body_phenotypes.robogen_lite.modules.module.Module.__init_subclass__">__init_subclass__() (Module class method)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/noise_gen/index.html#ariel.utils.noise_gen.PerlinNoise.__post_init__">__post_init__() (PerlinNoise method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.A">A (HopfCPG attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.AbstractEA">AbstractEA (class in ariel.ec.a003)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.AbstractEA">(class in ariel.ec.a004)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.adjacency_list">adjacency_list (HopfCPG attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.alive">alive (Individual attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ALLOWED_FACES">ALLOWED_FACES (in module ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ALLOWED_ROTATIONS">ALLOWED_ROTATIONS (in module ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#ariel.simulation.controllers.controller.Controller.alpha">alpha (Controller attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.alpha">(HopfCPG attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld">AmphitheatreTerrainWorld (class in ariel.simulation.environments.amphitheatre_heightmap)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.amplitude">amplitude (CPGSensoryFeedback attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.HighProbabilityDecoder.apply_connection_constraints">apply_connection_constraints() (HighProbabilityDecoder method)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.arena_width">arena_width (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.arena_width">[1]</a>
+</li>
+      <li>
+    ariel
+
+      <ul>
+        <li><a href="autoapi/ariel/index.html#module-ariel">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/index.html#module-ariel.body_phenotypes">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/index.html#module-ariel.body_phenotypes.robogen_lite">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.config
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#module-ariel.body_phenotypes.robogen_lite.config">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.constructor
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/constructor/index.html#module-ariel.body_phenotypes.robogen_lite.constructor">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.decoders
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/index.html#module-ariel.body_phenotypes.robogen_lite.decoders">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#module-ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.extractor
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#module-ariel.body_phenotypes.robogen_lite.extractor">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.modules
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/index.html#module-ariel.body_phenotypes.robogen_lite.modules">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.modules.brick
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#module-ariel.body_phenotypes.robogen_lite.modules.brick">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.modules.core
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#module-ariel.body_phenotypes.robogen_lite.modules.core">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.modules.hinge
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#module-ariel.body_phenotypes.robogen_lite.modules.hinge">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.modules.module
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html#module-ariel.body_phenotypes.robogen_lite.modules.module">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.prebuilt_robots
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/index.html#module-ariel.body_phenotypes.robogen_lite.prebuilt_robots">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/gecko/index.html#module-ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/index.html#module-ariel.ec">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.a000
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a000/index.html#module-ariel.ec.a000">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.a001
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a001/index.html#module-ariel.ec.a001">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.a002
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a002/index.html#module-ariel.ec.a002">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.a003
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a003/index.html#module-ariel.ec.a003">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.a004
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#module-ariel.ec.a004">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.a005
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a005/index.html#module-ariel.ec.a005">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.genotypes
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/genotypes/index.html#module-ariel.ec.genotypes">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.genotypes.nde
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#module-ariel.ec.genotypes.nde">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.ec.genotypes.nde.nde
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#module-ariel.ec.genotypes.nde.nde">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/index.html#module-ariel.simulation">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.controllers
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/index.html#module-ariel.simulation.controllers">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.controllers.controller
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#module-ariel.simulation.controllers.controller">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.controllers.cpg_with_sensory_feedback
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#module-ariel.simulation.controllers.cpg_with_sensory_feedback">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.controllers.hopfs_cpg
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#module-ariel.simulation.controllers.hopfs_cpg">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    ariel.simulation.environments
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/index.html#module-ariel.simulation.environments">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.environments.amphitheatre_heightmap
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#module-ariel.simulation.environments.amphitheatre_heightmap">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.environments.boxy_heightmap
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#module-ariel.simulation.environments.boxy_heightmap">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.environments.crater_heightmap
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#module-ariel.simulation.environments.crater_heightmap">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.environments.djoser_pyramid
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#module-ariel.simulation.environments.djoser_pyramid">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.environments.olympic_arena
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#module-ariel.simulation.environments.olympic_arena">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.environments.rugged_heightmap
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#module-ariel.simulation.environments.rugged_heightmap">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.environments.simple_flat_world
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/simple_flat_world/index.html#module-ariel.simulation.environments.simple_flat_world">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.environments.simple_tilted_world
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#module-ariel.simulation.environments.simple_tilted_world">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.tasks
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/index.html#module-ariel.simulation.tasks">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.tasks.gate_learning
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/gate_learning/index.html#module-ariel.simulation.tasks.gate_learning">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.tasks.targeted_locomotion
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/targeted_locomotion/index.html#module-ariel.simulation.tasks.targeted_locomotion">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.simulation.tasks.turning_in_place
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/turning_in_place/index.html#module-ariel.simulation.tasks.turning_in_place">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/index.html#module-ariel.utils">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.file_ops
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/file_ops/index.html#module-ariel.utils.file_ops">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.mjspec_ops
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/mjspec_ops/index.html#module-ariel.utils.mjspec_ops">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.noise_gen
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/noise_gen/index.html#module-ariel.utils.noise_gen">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.optimizers
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/optimizers/index.html#module-ariel.utils.optimizers">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.optimizers.revde
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#module-ariel.utils.optimizers.revde">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.renderers
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/renderers/index.html#module-ariel.utils.renderers">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.runners
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/runners/index.html#module-ariel.utils.runners">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.tracker
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/tracker/index.html#module-ariel.utils.tracker">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.utils.video_recorder
+
+      <ul>
+        <li><a href="autoapi/ariel/utils/video_recorder/index.html#module-ariel.utils.video_recorder">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/index.html#module-ariel.viz">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.analysis
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/analysis/index.html#module-ariel.viz.analysis">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/index.html#module-ariel.viz.gui">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui.balaklava
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/index.html#module-ariel.viz.gui.balaklava">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui.balaklava.1_nice_node_editor
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#module-ariel.viz.gui.balaklava.1_nice_node_editor">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui.balaklava.baklava
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/baklava/index.html#module-ariel.viz.gui.balaklava.baklava">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui.balaklava.main
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/main/index.html#module-ariel.viz.gui.balaklava.main">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui.litegraph
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/index.html#module-ariel.viz.gui.litegraph">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui.litegraph.0_nice_node_editor
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#module-ariel.viz.gui.litegraph.0_nice_node_editor">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui.litegraph.baklava
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/baklava/index.html#module-ariel.viz.gui.litegraph.baklava">module</a>
+</li>
+      </ul></li>
+      <li>
+    ariel.viz.gui.litegraph.main
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/main/index.html#module-ariel.viz.gui.litegraph.main">module</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.ArrayGenotype">ArrayGenotype (in module ariel.utils.optimizers.revde)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.ArrayLike">ArrayLike (in module ariel.simulation.controllers.hopfs_cpg)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/noise_gen/index.html#ariel.utils.noise_gen.PerlinNoise.as_grid">as_grid() (PerlinNoise method)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#ariel.simulation.environments.simple_tilted_world.TiltedFlatWorld.axis">axis (TiltedFlatWorld attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleFaces.BACK">BACK (ModuleFaces attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA">BasicEA (class in ariel.ec.a003)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule.body">body (BrickModule attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule.body">(HingeModule attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#ariel.viz.gui.balaklava.1_nice_node_editor.body_html">body_html (in module ariel.viz.gui.balaklava.1_nice_node_editor)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/main/index.html#ariel.viz.gui.balaklava.main.body_html">(in module ariel.viz.gui.balaklava.main)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleFaces.BOTTOM">BOTTOM (ModuleFaces attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#ariel.simulation.environments.boxy_heightmap.BoxyRugged">BoxyRugged (class in ariel.simulation.environments.boxy_heightmap)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleType.BRICK">BRICK (ModuleType attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BRICK_DIMENSIONS">BRICK_DIMENSIONS (in module ariel.body_phenotypes.robogen_lite.modules.brick)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BRICK_MASS">BRICK_MASS (in module ariel.body_phenotypes.robogen_lite.modules.brick)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule">BrickModule (class in ariel.body_phenotypes.robogen_lite.modules.brick)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.canvas">canvas (in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/main/index.html#ariel.viz.gui.litegraph.main.canvas">(in module ariel.viz.gui.litegraph.main)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegersGenerator.choice">choice() (IntegersGenerator static method)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegersGeneratorSettings.choice_replace">choice_replace (IntegersGeneratorSettings attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegersGeneratorSettings.choice_shuffle">choice_shuffle (IntegersGeneratorSettings attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.commit_population">commit_population() (BasicEA method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.commit_population">(EA method)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.commit_population">(in module ariel.ec.a002)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/utils/mjspec_ops/index.html#ariel.utils.mjspec_ops.compute_geom_bounding_box">compute_geom_bounding_box() (in module ariel.utils.mjspec_ops)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.cone_height">cone_height (AmphitheatreTerrainWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.config">config (in module ariel.ec.a000)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.config">(in module ariel.ec.a003)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.config">(in module ariel.ec.a004)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.conn_p_out">conn_p_out (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.conn_p_out">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.conn_p_shape">conn_p_shape (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.conn_p_shape">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.console">console (BasicEA attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.console">(EA attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/index.html#ariel.console">(in module ariel)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.console">(in module ariel.ec.a000)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.console">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.console">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.console">(in module ariel.ec.a003)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.console">(in module ariel.ec.a004)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.console">(in module ariel.ec.a005)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.console">(in module ariel.ec.genotypes.nde.nde)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/mjspec_ops/index.html#ariel.utils.mjspec_ops.console">(in module ariel.utils.mjspec_ops)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.console">(in module ariel.utils.optimizers.revde)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/renderers/index.html#ariel.utils.renderers.console">(in module ariel.utils.renderers)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#ariel.viz.gui.balaklava.1_nice_node_editor.console">(in module ariel.viz.gui.balaklava.1_nice_node_editor)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.console">(in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/constructor/index.html#ariel.body_phenotypes.robogen_lite.constructor.construct_mjspec_from_graph">construct_mjspec_from_graph() (in module ariel.body_phenotypes.robogen_lite.constructor)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#ariel.simulation.controllers.controller.Controller">Controller (class in ariel.simulation.controllers.controller)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#ariel.simulation.controllers.controller.Controller.controller_callback_function">controller_callback_function (Controller attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleType.CORE">CORE (ModuleType attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.CORE_DIMENSIONS">CORE_DIMENSIONS (in module ariel.body_phenotypes.robogen_lite.modules.core)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.CORE_MASS">CORE_MASS (in module ariel.body_phenotypes.robogen_lite.modules.core)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.CoreModule">CoreModule (class in ariel.body_phenotypes.robogen_lite.modules.core)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback">CPGSensoryFeedback (class in ariel.simulation.controllers.cpg_with_sensory_feedback)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.crater_depth">crater_depth (CraterTerrainWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.crater_radius">crater_radius (CraterTerrainWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld">CraterTerrainWorld (class in ariel.simulation.environments.crater_heightmap)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.create_individual">create_individual() (in module ariel.ec.a002)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.create_individual">(in module ariel.ec.a003)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.create_individual">(in module ariel.ec.a004)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.Crossover">Crossover (class in ariel.ec.a005)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.crossover">crossover() (in module ariel.ec.a004)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.current_generation">current_generation (BasicEA attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.current_generation">(EA attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/index.html#ariel.CWD">CWD (in module ariel)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.CWD">(in module ariel.ec.a000)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.CWD">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.CWD">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.CWD">(in module ariel.ec.a005)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.CWD">(in module ariel.ec.genotypes.nde.nde)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/mjspec_ops/index.html#ariel.utils.mjspec_ops.CWD">(in module ariel.utils.mjspec_ops)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.CWD">(in module ariel.utils.optimizers.revde)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#ariel.viz.gui.balaklava.1_nice_node_editor.CWD">(in module ariel.viz.gui.balaklava.1_nice_node_editor)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.CWD">(in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/index.html#ariel.DATA">DATA (in module ariel)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.DATA">(in module ariel.ec.a000)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.DATA">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.DATA">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.DATA">(in module ariel.ec.a005)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.DATA">(in module ariel.ec.genotypes.nde.nde)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/mjspec_ops/index.html#ariel.utils.mjspec_ops.DATA">(in module ariel.utils.mjspec_ops)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.DATA">(in module ariel.utils.optimizers.revde)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#ariel.viz.gui.balaklava.1_nice_node_editor.DATA">(in module ariel.viz.gui.balaklava.1_nice_node_editor)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.DATA">(in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor.data">data (RoboGenCoreExtractor attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.db_file_name">db_file_name (EASettings attribute)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.db_file_name">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.db_file_path">db_file_path (EASettings attribute)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.db_file_path">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.db_handling">db_handling (EASettings attribute)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.db_handling">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.DB_HANDLING_MODES">DB_HANDLING_MODES (in module ariel.ec.a003)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.DB_HANDLING_MODES">(in module ariel.ec.a004)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.DB_NAME">DB_NAME (in module ariel.ec.a000)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.DB_NAME">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.DB_NAME">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.DB_NAME">(in module ariel.ec.a005)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.DB_PATH">DB_PATH (in module ariel.ec.a000)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.DB_PATH">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.DB_PATH">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.DB_PATH">(in module ariel.ec.a005)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.HighProbabilityDecoder.decode_probability_to_graph">decode_probability_to_graph() (HighProbabilityDecoder method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx.DEG_0">DEG_0 (ModuleRotationsIdx attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta.DEG_0">(ModuleRotationsTheta attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx.DEG_135">DEG_135 (ModuleRotationsIdx attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta.DEG_135">(ModuleRotationsTheta attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx.DEG_180">DEG_180 (ModuleRotationsIdx attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta.DEG_180">(ModuleRotationsTheta attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx.DEG_225">DEG_225 (ModuleRotationsIdx attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta.DEG_225">(ModuleRotationsTheta attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx.DEG_270">DEG_270 (ModuleRotationsIdx attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta.DEG_270">(ModuleRotationsTheta attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx.DEG_315">DEG_315 (ModuleRotationsIdx attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta.DEG_315">(ModuleRotationsTheta attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx.DEG_45">DEG_45 (ModuleRotationsIdx attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta.DEG_45">(ModuleRotationsTheta attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx.DEG_90">DEG_90 (ModuleRotationsIdx attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta.DEG_90">(ModuleRotationsTheta attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.DimensionType">DimensionType (in module ariel.body_phenotypes.robogen_lite.modules.brick)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.DimensionType">(in module ariel.body_phenotypes.robogen_lite.modules.core)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.DimensionType">(in module ariel.body_phenotypes.robogen_lite.modules.hinge)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/tasks/index.html#ariel.simulation.tasks.distance_to_target">distance_to_target() (in module ariel.simulation.tasks)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/targeted_locomotion/index.html#ariel.simulation.tasks.targeted_locomotion.distance_to_target">(in module ariel.simulation.tasks.targeted_locomotion)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.DPI">DPI (in module ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.draw_graph">draw_graph() (in module ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.dt">dt (CPGSensoryFeedback attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.dt">(HopfCPG attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA">EA (class in ariel.ec.a004)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings">EASettings (class in ariel.ec.a003)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings">(class in ariel.ec.a004)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EAStep">EAStep (class in ariel.ec.a004)</a>
+</li>
+      <li><a href="autoapi/ariel/viz/gui/balaklava/baklava/index.html#ariel.viz.gui.balaklava.baklava.Editor">Editor (class in ariel.viz.gui.balaklava.baklava)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/baklava/index.html#ariel.viz.gui.litegraph.baklava.Editor">(class in ariel.viz.gui.litegraph.baklava)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.evaluate">evaluate() (BasicEA method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.evaluate">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.evaluate">(in module ariel.ec.a004)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.evaluate_func">evaluate_func() (in module ariel.ec.a003)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.evaluation_func">evaluation_func (BasicEA attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.fc1">fc1 (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.fc1">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.fc2">fc2 (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.fc2">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.fc3">fc3 (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.fc3">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.fc4">fc4 (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.fc4">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.fetch_population">fetch_population() (BasicEA method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.fetch_population">(EA method)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.fetch_population">(in module ariel.ec.a002)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.first_generation_id">first_generation_id (EASettings attribute)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.first_generation_id">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.fitness">fitness (Individual property)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.fitness_">fitness_ (Individual attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.flat_thickness">flat_thickness (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.flat_thickness">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.Floats">Floats (in module ariel.ec.a000)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#ariel.simulation.environments.boxy_heightmap.BoxyRugged.floor_size">floor_size (BoxyRugged attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.floor_size">(PyramidWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_flat_world/index.html#ariel.simulation.environments.simple_flat_world.SimpleFlatWorld.floor_size">(SimpleFlatWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#ariel.simulation.environments.simple_tilted_world.TiltedFlatWorld.floor_size">(TiltedFlatWorld attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.forward">forward() (NeuralDevelopmentalEncoding method)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.forward">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/utils/video_recorder/index.html#ariel.utils.video_recorder.VideoRecorder.fps">fps (VideoRecorder attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/video_recorder/index.html#ariel.utils.video_recorder.VideoRecorder.frame_count">frame_count (VideoRecorder attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleFaces.FRONT">FRONT (ModuleFaces attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.gap">gap (PyramidWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/gecko/index.html#ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko.gecko">gecko() (in module ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.HighProbabilityDecoder.generate_networkx_graph">generate_networkx_graph() (HighProbabilityDecoder method)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/file_ops/index.html#ariel.utils.file_ops.generate_save_path">generate_save_path() (in module ariel.utils.file_ops)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.genotype">genotype (Individual property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.genotype_">genotype_ (Individual attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor.geoms">geoms (RoboGenCoreExtractor attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor.get_core_path">get_core_path() (RoboGenCoreExtractor method)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.get_solution">get_solution() (BasicEA method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.get_solution">(EA method)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.HighProbabilityDecoder.graph">graph (HighProbabilityDecoder attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.h">h (HopfCPG attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.H_SIZE">H_SIZE (PyramidWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.H_STEP">H_STEP (PyramidWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#ariel.viz.gui.balaklava.1_nice_node_editor.head_html">head_html (in module ariel.viz.gui.balaklava.1_nice_node_editor)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/main/index.html#ariel.viz.gui.balaklava.main.head_html">(in module ariel.viz.gui.balaklava.main)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.head_html">(in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/main/index.html#ariel.viz.gui.litegraph.main.head_html">(in module ariel.viz.gui.litegraph.main)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.height">height (AmphitheatreTerrainWorld attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.height">(CraterTerrainWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld.height">(RuggedTerrainWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/video_recorder/index.html#ariel.utils.video_recorder.VideoRecorder.height">(VideoRecorder attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.heightmap">heightmap (AmphitheatreTerrainWorld attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.heightmap">(CraterTerrainWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.heightmap">(OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.heightmap">[1]</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld.heightmap">(RuggedTerrainWorld attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.HighProbabilityDecoder">HighProbabilityDecoder (class in ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld.hillyness">hillyness (RuggedTerrainWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleType.HINGE">HINGE (ModuleType attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule">HingeModule (class in ariel.body_phenotypes.robogen_lite.modules.hinge)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/tracker/index.html#ariel.utils.tracker.Tracker.history">history (Tracker attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG">HopfCPG (class in ariel.simulation.controllers.hopfs_cpg)</a>
+</li>
+      <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.html_code">html_code (in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.id">id (Individual attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.IDX_OF_CORE">IDX_OF_CORE (in module ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.incline_axis">incline_axis (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.incline_axis">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.incline_degrees">incline_degrees (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.incline_degrees">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.incline_thickness">incline_thickness (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.incline_thickness">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule.index">index (BrickModule attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.CoreModule.index">(CoreModule attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule.index">(HingeModule attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual">Individual (class in ariel.ec.a001)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.AbstractEA.init_database">init_database() (AbstractEA method)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.AbstractEA.init_database">[1]</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.init_database">(in module ariel.ec.a001)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.init_state">init_state (HopfCPG attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegerMutator.integer_creep">integer_creep() (IntegerMutator static method)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegerMutator">IntegerMutator (class in ariel.ec.a000)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.Integers">Integers (in module ariel.ec.a000)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegersGenerator.integers">integers() (IntegersGenerator static method)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegersGeneratorSettings.integers_endpoint">integers_endpoint (IntegersGeneratorSettings attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegersGenerator">IntegersGenerator (class in ariel.ec.a000)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegersGeneratorSettings">IntegersGeneratorSettings (class in ariel.ec.a000)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.is_maximisation">is_maximisation (BasicEA attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.is_maximisation">(EA attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.is_maximisation">(EASettings attribute)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.is_maximisation">[1]</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.JSONIterable">JSONIterable (in module ariel.ec.a001)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.JSONPrimitive">JSONPrimitive (in module ariel.ec.a001)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.JSONType">JSONType (in module ariel.ec.a001)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.kill_members">kill_members() (in module ariel.ec.a002)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleFaces.LEFT">LEFT (ModuleFaces attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleInstance.links">links (ModuleInstance attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.main">main() (in module ariel.ec.a000)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.main">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.main">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.main">(in module ariel.ec.a003)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.main">(in module ariel.ec.a004)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.main">(in module ariel.ec.a005)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.main">(in module ariel.utils.optimizers.revde)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor.model">model (RoboGenCoreExtractor attribute)</a>
+</li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="autoapi/ariel/index.html#module-ariel">ariel</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/index.html#module-ariel.body_phenotypes">ariel.body_phenotypes</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/index.html#module-ariel.body_phenotypes.robogen_lite">ariel.body_phenotypes.robogen_lite</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#module-ariel.body_phenotypes.robogen_lite.config">ariel.body_phenotypes.robogen_lite.config</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/constructor/index.html#module-ariel.body_phenotypes.robogen_lite.constructor">ariel.body_phenotypes.robogen_lite.constructor</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/index.html#module-ariel.body_phenotypes.robogen_lite.decoders">ariel.body_phenotypes.robogen_lite.decoders</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#module-ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding">ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#module-ariel.body_phenotypes.robogen_lite.extractor">ariel.body_phenotypes.robogen_lite.extractor</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/index.html#module-ariel.body_phenotypes.robogen_lite.modules">ariel.body_phenotypes.robogen_lite.modules</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#module-ariel.body_phenotypes.robogen_lite.modules.brick">ariel.body_phenotypes.robogen_lite.modules.brick</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#module-ariel.body_phenotypes.robogen_lite.modules.core">ariel.body_phenotypes.robogen_lite.modules.core</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#module-ariel.body_phenotypes.robogen_lite.modules.hinge">ariel.body_phenotypes.robogen_lite.modules.hinge</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html#module-ariel.body_phenotypes.robogen_lite.modules.module">ariel.body_phenotypes.robogen_lite.modules.module</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/index.html#module-ariel.body_phenotypes.robogen_lite.prebuilt_robots">ariel.body_phenotypes.robogen_lite.prebuilt_robots</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/gecko/index.html#module-ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko">ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko</a>
+</li>
+        <li><a href="autoapi/ariel/ec/index.html#module-ariel.ec">ariel.ec</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a000/index.html#module-ariel.ec.a000">ariel.ec.a000</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a001/index.html#module-ariel.ec.a001">ariel.ec.a001</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#module-ariel.ec.a002">ariel.ec.a002</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a003/index.html#module-ariel.ec.a003">ariel.ec.a003</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#module-ariel.ec.a004">ariel.ec.a004</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#module-ariel.ec.a005">ariel.ec.a005</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/index.html#module-ariel.ec.genotypes">ariel.ec.genotypes</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#module-ariel.ec.genotypes.nde">ariel.ec.genotypes.nde</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#module-ariel.ec.genotypes.nde.nde">ariel.ec.genotypes.nde.nde</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/index.html#module-ariel.simulation">ariel.simulation</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/index.html#module-ariel.simulation.controllers">ariel.simulation.controllers</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#module-ariel.simulation.controllers.controller">ariel.simulation.controllers.controller</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#module-ariel.simulation.controllers.cpg_with_sensory_feedback">ariel.simulation.controllers.cpg_with_sensory_feedback</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#module-ariel.simulation.controllers.hopfs_cpg">ariel.simulation.controllers.hopfs_cpg</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/index.html#module-ariel.simulation.environments">ariel.simulation.environments</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#module-ariel.simulation.environments.amphitheatre_heightmap">ariel.simulation.environments.amphitheatre_heightmap</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#module-ariel.simulation.environments.boxy_heightmap">ariel.simulation.environments.boxy_heightmap</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#module-ariel.simulation.environments.crater_heightmap">ariel.simulation.environments.crater_heightmap</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#module-ariel.simulation.environments.djoser_pyramid">ariel.simulation.environments.djoser_pyramid</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#module-ariel.simulation.environments.olympic_arena">ariel.simulation.environments.olympic_arena</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#module-ariel.simulation.environments.rugged_heightmap">ariel.simulation.environments.rugged_heightmap</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_flat_world/index.html#module-ariel.simulation.environments.simple_flat_world">ariel.simulation.environments.simple_flat_world</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#module-ariel.simulation.environments.simple_tilted_world">ariel.simulation.environments.simple_tilted_world</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/tasks/index.html#module-ariel.simulation.tasks">ariel.simulation.tasks</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/tasks/gate_learning/index.html#module-ariel.simulation.tasks.gate_learning">ariel.simulation.tasks.gate_learning</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/tasks/targeted_locomotion/index.html#module-ariel.simulation.tasks.targeted_locomotion">ariel.simulation.tasks.targeted_locomotion</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/tasks/turning_in_place/index.html#module-ariel.simulation.tasks.turning_in_place">ariel.simulation.tasks.turning_in_place</a>
+</li>
+        <li><a href="autoapi/ariel/utils/index.html#module-ariel.utils">ariel.utils</a>
+</li>
+        <li><a href="autoapi/ariel/utils/file_ops/index.html#module-ariel.utils.file_ops">ariel.utils.file_ops</a>
+</li>
+        <li><a href="autoapi/ariel/utils/mjspec_ops/index.html#module-ariel.utils.mjspec_ops">ariel.utils.mjspec_ops</a>
+</li>
+        <li><a href="autoapi/ariel/utils/noise_gen/index.html#module-ariel.utils.noise_gen">ariel.utils.noise_gen</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/index.html#module-ariel.utils.optimizers">ariel.utils.optimizers</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#module-ariel.utils.optimizers.revde">ariel.utils.optimizers.revde</a>
+</li>
+        <li><a href="autoapi/ariel/utils/renderers/index.html#module-ariel.utils.renderers">ariel.utils.renderers</a>
+</li>
+        <li><a href="autoapi/ariel/utils/runners/index.html#module-ariel.utils.runners">ariel.utils.runners</a>
+</li>
+        <li><a href="autoapi/ariel/utils/tracker/index.html#module-ariel.utils.tracker">ariel.utils.tracker</a>
+</li>
+        <li><a href="autoapi/ariel/utils/video_recorder/index.html#module-ariel.utils.video_recorder">ariel.utils.video_recorder</a>
+</li>
+        <li><a href="autoapi/ariel/viz/index.html#module-ariel.viz">ariel.viz</a>
+</li>
+        <li><a href="autoapi/ariel/viz/analysis/index.html#module-ariel.viz.analysis">ariel.viz.analysis</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/index.html#module-ariel.viz.gui">ariel.viz.gui</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/index.html#module-ariel.viz.gui.balaklava">ariel.viz.gui.balaklava</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#module-ariel.viz.gui.balaklava.1_nice_node_editor">ariel.viz.gui.balaklava.1_nice_node_editor</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/baklava/index.html#module-ariel.viz.gui.balaklava.baklava">ariel.viz.gui.balaklava.baklava</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/main/index.html#module-ariel.viz.gui.balaklava.main">ariel.viz.gui.balaklava.main</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/index.html#module-ariel.viz.gui.litegraph">ariel.viz.gui.litegraph</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#module-ariel.viz.gui.litegraph.0_nice_node_editor">ariel.viz.gui.litegraph.0_nice_node_editor</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/baklava/index.html#module-ariel.viz.gui.litegraph.baklava">ariel.viz.gui.litegraph.baklava</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/main/index.html#module-ariel.viz.gui.litegraph.main">ariel.viz.gui.litegraph.main</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html#ariel.body_phenotypes.robogen_lite.modules.module.Module">Module (class in ariel.body_phenotypes.robogen_lite.modules.module)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule.module_type">module_type (BrickModule attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.CoreModule.module_type">(CoreModule attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule.module_type">(HingeModule attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleFaces">ModuleFaces (class in ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleInstance">ModuleInstance (class in ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx">ModuleRotationsIdx (class in ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta">ModuleRotationsTheta (class in ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleType">ModuleType (class in ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/tracker/index.html#ariel.utils.tracker.Tracker.mujoco_obj_to_find">mujoco_obj_to_find (Tracker attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.RevDE.mutate">mutate() (RevDE method)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.mutation">mutation() (in module ariel.ec.a004)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EAStep.name">name (EAStep attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.name">(PyramidWorld attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/utils/tracker/index.html#ariel.utils.tracker.Tracker.name_to_bind">name_to_bind (Tracker attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.nde">nde (in module ariel.ec.genotypes.nde.nde)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding">NeuralDevelopmentalEncoding (class in ariel.ec.genotypes.nde)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding">(class in ariel.ec.genotypes.nde.nde)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.new_generation_are_survivors">new_generation_are_survivors (BasicEA attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/noise_gen/index.html#ariel.utils.noise_gen.noise">noise (in module ariel.utils.noise_gen)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleType.NONE">NONE (ModuleType attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.HighProbabilityDecoder.num_modules">num_modules (HighProbabilityDecoder attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.num_neurons">num_neurons (CPGSensoryFeedback attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.num_neurons">(HopfCPG attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.NUM_OF_FACES">NUM_OF_FACES (in module ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.num_of_generations">num_of_generations (BasicEA attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.num_of_generations">(EA attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.num_of_generations">(EASettings attribute)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.num_of_generations">[1]</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.NUM_OF_ROTATIONS">NUM_OF_ROTATIONS (in module ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.NUM_OF_TYPES_OF_MODULES">NUM_OF_TYPES_OF_MODULES (in module ariel.body_phenotypes.robogen_lite.config)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.num_stairs">num_stairs (PyramidWorld attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/utils/tracker/index.html#ariel.utils.tracker.Tracker.observable_attributes">observable_attributes (Tracker attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena">OlympicArena (class in ariel.simulation.environments)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena">(class in ariel.simulation.environments.olympic_arena)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.omega">omega (CPGSensoryFeedback attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.omega">(HopfCPG attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.Crossover.one_point">one_point() (Crossover static method)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EAStep.operation">operation (EAStep attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.operations">operations (EA attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.output_folder">output_folder (EASettings attribute)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.output_folder">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.output_layers">output_layers (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.output_layers">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.output_shapes">output_shapes (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.output_shapes">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#ariel.viz.gui.balaklava.1_nice_node_editor.page">page() (in module ariel.viz.gui.balaklava.1_nice_node_editor)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/main/index.html#ariel.viz.gui.balaklava.main.page">(in module ariel.viz.gui.balaklava.main)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.page">(in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/main/index.html#ariel.viz.gui.litegraph.main.page">(in module ariel.viz.gui.litegraph.main)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.parent_selection">parent_selection() (in module ariel.ec.a004)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/noise_gen/index.html#ariel.utils.noise_gen.PerlinNoise">PerlinNoise (class in ariel.utils.noise_gen)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.phase_diff">phase_diff (HopfCPG attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.population">population (BasicEA attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.population">(EA attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.Population">Population (in module ariel.ec.a002)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.Population">(in module ariel.ec.a003)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.Population">(in module ariel.ec.a004)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.population_size">population_size (BasicEA property)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.population_size">(EA property)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.PopulationFunc">PopulationFunc (in module ariel.ec.a003)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.PopulationFunc">(in module ariel.ec.a004)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#ariel.simulation.environments.boxy_heightmap.BoxyRugged.pos">pos (BoxyRugged attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.pos">(PyramidWorld attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.prnt">prnt (in module ariel.ec.a001)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.HighProbabilityDecoder.probability_matrices_to_graph">probability_matrices_to_graph() (HighProbabilityDecoder method)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld">PyramidWorld (class in ariel.simulation.environments.djoser_pyramid)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.quaternion_from_axis_angle">quaternion_from_axis_angle() (in module ariel.simulation.environments.olympic_arena)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#ariel.simulation.environments.simple_tilted_world.quaternion_from_axis_angle">(in module ariel.simulation.environments.simple_tilted_world)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.quiet">quiet (EA attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.quiet">(EASettings attribute)</a>, <a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.quiet">[1]</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.RevDE.r_matrix">r_matrix (RevDE attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.IntegerMutator.random_swap">random_swap() (IntegerMutator static method)</a>
+</li>
+      <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.register_new_nodes">register_new_nodes (in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/video_recorder/index.html#ariel.utils.video_recorder.VideoRecorder.release">release() (VideoRecorder method)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.relu">relu (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.relu">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html#ariel.body_phenotypes.robogen_lite.modules.module.Module.required_attributes">required_attributes (Module attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.requires_eval">requires_eval (Individual attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.requires_init">requires_init (Individual attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.reset">reset() (CPGSensoryFeedback method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.reset">(HopfCPG method)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.resolution">resolution (AmphitheatreTerrainWorld attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.resolution">(CraterTerrainWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld.resolution">(RuggedTerrainWorld attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.RevDE">RevDE (class in ariel.utils.optimizers.revde)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleFaces.RIGHT">RIGHT (ModuleFaces attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.ring_inner_radius">ring_inner_radius (AmphitheatreTerrainWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.ring_outer_radius">ring_outer_radius (AmphitheatreTerrainWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.rlg">rlg (in module ariel.ec.a001)</a>
+</li>
+      <li><a href="autoapi/ariel/index.html#ariel.RNG">RNG (in module ariel)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.RNG">(in module ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.RNG">(in module ariel.ec.a000)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.RNG">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.RNG">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.RNG">(in module ariel.ec.a003)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.RNG">(in module ariel.ec.a004)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.RNG">(in module ariel.ec.a005)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.RNG">(in module ariel.ec.genotypes.nde.nde)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.RNG">(in module ariel.simulation.controllers.cpg_with_sensory_feedback)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.RNG">(in module ariel.simulation.controllers.hopfs_cpg)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.RNG">(in module ariel.utils.optimizers.revde)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/runners/index.html#ariel.utils.runners.RNG">(in module ariel.utils.runners)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor">RoboGenCoreExtractor (class in ariel.body_phenotypes.robogen_lite.extractor)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.rot_p_out">rot_p_out (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.rot_p_out">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.rot_p_shape">rot_p_shape (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.rot_p_shape">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule.rotate">rotate() (BrickModule method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.CoreModule.rotate">(CoreModule method)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule.rotate">(HingeModule method)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html#ariel.body_phenotypes.robogen_lite.modules.module.Module.rotate">(Module method)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleInstance.rotation">rotation (ModuleInstance attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.ROTOR_DIMENSIONS">ROTOR_DIMENSIONS (in module ariel.body_phenotypes.robogen_lite.modules.hinge)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.ROTOR_MASS">ROTOR_MASS (in module ariel.body_phenotypes.robogen_lite.modules.hinge)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.rugged_height">rugged_height (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.rugged_height">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.rugged_hillyness">rugged_hillyness (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.rugged_hillyness">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.rugged_resolution">rugged_resolution (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.rugged_resolution">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.rugged_scale">rugged_scale (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.rugged_scale">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.ruggedness">ruggedness (AmphitheatreTerrainWorld attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.ruggedness">(CraterTerrainWorld attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld">RuggedTerrainWorld (class in ariel.simulation.environments.rugged_heightmap)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.run">run() (EA method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.SAND">SAND (PyramidWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.save_graph_as_json">save_graph_as_json() (in module ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld.scale">scale (RuggedTerrainWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.SCRIPT_NAME">SCRIPT_NAME (in module ariel.ec.a000)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.SCRIPT_NAME">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.SCRIPT_NAME">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.SCRIPT_NAME">(in module ariel.ec.a005)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.SCRIPT_NAME">(in module ariel.ec.genotypes.nde.nde)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/mjspec_ops/index.html#ariel.utils.mjspec_ops.SCRIPT_NAME">(in module ariel.utils.mjspec_ops)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.SCRIPT_NAME">(in module ariel.utils.optimizers.revde)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/balaklava/1_nice_node_editor/index.html#ariel.viz.gui.balaklava.1_nice_node_editor.SCRIPT_NAME">(in module ariel.viz.gui.balaklava.1_nice_node_editor)</a>
+</li>
+        <li><a href="autoapi/ariel/viz/gui/litegraph/0_nice_node_editor/index.html#ariel.viz.gui.litegraph.0_nice_node_editor.SCRIPT_NAME">(in module ariel.viz.gui.litegraph.0_nice_node_editor)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.section_length">section_length (OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.section_length">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/index.html#ariel.SEED">SEED (in module ariel)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.SEED">(in module ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a000/index.html#ariel.ec.a000.SEED">(in module ariel.ec.a000)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.SEED">(in module ariel.ec.a001)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.SEED">(in module ariel.ec.a002)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.SEED">(in module ariel.ec.a003)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.SEED">(in module ariel.ec.a004)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/a005/index.html#ariel.ec.a005.SEED">(in module ariel.ec.a005)</a>
+</li>
+        <li><a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.SEED">(in module ariel.ec.genotypes.nde.nde)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.SEED">(in module ariel.simulation.controllers.cpg_with_sensory_feedback)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.SEED">(in module ariel.simulation.controllers.hopfs_cpg)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/optimizers/revde/index.html#ariel.utils.optimizers.revde.SEED">(in module ariel.utils.optimizers.revde)</a>
+</li>
+        <li><a href="autoapi/ariel/utils/runners/index.html#ariel.utils.runners.SEED">(in module ariel.utils.runners)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/utils/noise_gen/index.html#ariel.utils.noise_gen.PerlinNoise.seed">seed (PerlinNoise attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.selection_func">selection_func() (in module ariel.ec.a003)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.sensory_term">sensory_term (CPGSensoryFeedback attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#ariel.simulation.controllers.controller.Controller.set_control">set_control() (Controller method)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html#ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding.HighProbabilityDecoder.set_module_types_and_rotations">set_module_types_and_rotations() (HighProbabilityDecoder method)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/tracker/index.html#ariel.utils.tracker.Tracker.setup">setup() (Tracker method)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.SHRINK">SHRINK (in module ariel.body_phenotypes.robogen_lite.modules.hinge)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.sigmoid">sigmoid (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.sigmoid">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/utils/runners/index.html#ariel.utils.runners.simple_runner">simple_runner() (in module ariel.utils.runners)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/simple_flat_world/index.html#ariel.simulation.environments.simple_flat_world.SimpleFlatWorld">SimpleFlatWorld (class in ariel.simulation.environments.simple_flat_world)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.simulate">simulate() (CPGSensoryFeedback method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.simulate">(HopfCPG method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/utils/renderers/index.html#ariel.utils.renderers.single_frame_renderer">single_frame_renderer() (in module ariel.utils.renderers)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule.sites">sites (BrickModule attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.CoreModule.sites">(CoreModule attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule.sites">(HingeModule attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.size">size (AmphitheatreTerrainWorld attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.size">(CraterTerrainWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld.size">(RuggedTerrainWorld attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.spawn">spawn() (AmphitheatreTerrainWorld method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#ariel.simulation.environments.boxy_heightmap.BoxyRugged.spawn">(BoxyRugged method)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.spawn">(CraterTerrainWorld method)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.spawn">(OlympicArena method)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.spawn">[1]</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.spawn">(PyramidWorld method)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld.spawn">(RuggedTerrainWorld method)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_flat_world/index.html#ariel.simulation.environments.simple_flat_world.SimpleFlatWorld.spawn">(SimpleFlatWorld method)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#ariel.simulation.environments.simple_tilted_world.TiltedFlatWorld.spawn">(TiltedFlatWorld method)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.AmphitheatreTerrainWorld.spec">spec (AmphitheatreTerrainWorld attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#ariel.simulation.environments.boxy_heightmap.BoxyRugged.spec">(BoxyRugged attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.BrickModule.spec">(BrickModule attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.CoreModule.spec">(CoreModule attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.CraterTerrainWorld.spec">(CraterTerrainWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.HingeModule.spec">(HingeModule attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/index.html#ariel.simulation.environments.OlympicArena.spec">(OlympicArena attribute)</a>, <a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.OlympicArena.spec">[1]</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.spec">(PyramidWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.RuggedTerrainWorld.spec">(RuggedTerrainWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_flat_world/index.html#ariel.simulation.environments.simple_flat_world.SimpleFlatWorld.spec">(SimpleFlatWorld attribute)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#ariel.simulation.environments.simple_tilted_world.TiltedFlatWorld.spec">(TiltedFlatWorld attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.SQUARE_LENGTH">SQUARE_LENGTH (PyramidWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.STATOR_DIMENSIONS">STATOR_DIMENSIONS (in module ariel.body_phenotypes.robogen_lite.modules.hinge)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.STATOR_MASS">STATOR_MASS (in module ariel.body_phenotypes.robogen_lite.modules.hinge)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.step">step() (CPGSensoryFeedback method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.step">(EA method)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.step">(HopfCPG method)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.survivor_func">survivor_func (BasicEA attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.BasicEA.survivor_selection">survivor_selection() (BasicEA method)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.survivor_selection">(in module ariel.ec.a004)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a003/index.html#ariel.ec.a003.EASettings.survivors_are_new_generation">survivors_are_new_generation (EASettings attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.tags">tags (Individual property)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.tags_">tags_ (Individual attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EA.target_population_size">target_population_size (EA attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/ec/a004/index.html#ariel.ec.a004.EASettings.target_population_size">(EASettings attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/tasks/index.html#ariel.simulation.tasks.tasks">tasks (in module ariel.simulation.tasks)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.TERRAIN_COLOR">TERRAIN_COLOR (in module ariel.simulation.environments.amphitheatre_heightmap)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.TERRAIN_COLOR">(in module ariel.simulation.environments.crater_heightmap)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.TERRAIN_COLOR">(in module ariel.simulation.environments.olympic_arena)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.TERRAIN_COLOR">(in module ariel.simulation.environments.rugged_heightmap)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.test_evaluate_mechanics">test_evaluate_mechanics() (in module ariel.ec.a002)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.test_fetch_logic">test_fetch_logic() (in module ariel.ec.a002)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a002/index.html#ariel.ec.a002.test_kill_mechanics">test_kill_mechanics() (in module ariel.ec.a002)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#ariel.simulation.environments.simple_tilted_world.TiltedFlatWorld.tilt_degrees">tilt_degrees (TiltedFlatWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#ariel.simulation.environments.simple_tilted_world.TiltedFlatWorld">TiltedFlatWorld (class in ariel.simulation.environments.simple_tilted_world)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.time_of_birth">time_of_birth (Individual attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/a001/index.html#ariel.ec.a001.Individual.time_of_death">time_of_death (Individual attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#ariel.simulation.controllers.controller.Controller.time_steps_per_ctrl_step">time_steps_per_ctrl_step (Controller attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#ariel.simulation.controllers.controller.Controller.time_steps_per_save">time_steps_per_save (Controller attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleFaces.TOP">TOP (ModuleFaces attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor.track_core_geoms">track_core_geoms() (RoboGenCoreExtractor method)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/tracker/index.html#ariel.utils.tracker.Tracker">Tracker (class in ariel.utils.tracker)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/controllers/controller/index.html#ariel.simulation.controllers.controller.Controller.tracker">tracker (Controller attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/renderers/index.html#ariel.utils.renderers.tracking_video_renderer">tracking_video_renderer() (in module ariel.utils.renderers)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/tasks/index.html#ariel.simulation.tasks.turning_in_place">turning_in_place() (in module ariel.simulation.tasks)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/turning_in_place/index.html#ariel.simulation.tasks.turning_in_place.turning_in_place">(in module ariel.simulation.tasks.turning_in_place)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/config/index.html#ariel.body_phenotypes.robogen_lite.config.ModuleInstance.type">type (ModuleInstance attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.type_p_out">type_p_out (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.type_p_out">[1]</a>
+</li>
+      <li><a href="autoapi/ariel/ec/genotypes/nde/index.html#ariel.ec.genotypes.nde.NeuralDevelopmentalEncoding.type_p_shape">type_p_shape (NeuralDevelopmentalEncoding attribute)</a>, <a href="autoapi/ariel/ec/genotypes/nde/nde/index.html#ariel.ec.genotypes.nde.nde.NeuralDevelopmentalEncoding.type_p_shape">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/utils/tracker/index.html#ariel.utils.tracker.Tracker.update">update() (Tracker method)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/amphitheatre_heightmap/index.html#ariel.simulation.environments.amphitheatre_heightmap.USE_DEGREES">USE_DEGREES (in module ariel.simulation.environments.amphitheatre_heightmap)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/environments/boxy_heightmap/index.html#ariel.simulation.environments.boxy_heightmap.USE_DEGREES">(in module ariel.simulation.environments.boxy_heightmap)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/crater_heightmap/index.html#ariel.simulation.environments.crater_heightmap.USE_DEGREES">(in module ariel.simulation.environments.crater_heightmap)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.USE_DEGREES">(in module ariel.simulation.environments.djoser_pyramid)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/olympic_arena/index.html#ariel.simulation.environments.olympic_arena.USE_DEGREES">(in module ariel.simulation.environments.olympic_arena)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/rugged_heightmap/index.html#ariel.simulation.environments.rugged_heightmap.USE_DEGREES">(in module ariel.simulation.environments.rugged_heightmap)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_flat_world/index.html#ariel.simulation.environments.simple_flat_world.USE_DEGREES">(in module ariel.simulation.environments.simple_flat_world)</a>
+</li>
+        <li><a href="autoapi/ariel/simulation/environments/simple_tilted_world/index.html#ariel.simulation.environments.simple_tilted_world.USE_DEGREES">(in module ariel.simulation.environments.simple_tilted_world)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.V_SIZE">V_SIZE (PyramidWorld attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/simulation/environments/djoser_pyramid/index.html#ariel.simulation.environments.djoser_pyramid.PyramidWorld.V_STEP">V_STEP (PyramidWorld attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/utils/renderers/index.html#ariel.utils.renderers.video_renderer">video_renderer() (in module ariel.utils.renderers)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/video_recorder/index.html#ariel.utils.video_recorder.VideoRecorder.video_writer">video_writer (VideoRecorder attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/video_recorder/index.html#ariel.utils.video_recorder.VideoRecorder">VideoRecorder (class in ariel.utils.video_recorder)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html#ariel.body_phenotypes.robogen_lite.modules.brick.WeightType">WeightType (in module ariel.body_phenotypes.robogen_lite.modules.brick)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html#ariel.body_phenotypes.robogen_lite.modules.core.WeightType">(in module ariel.body_phenotypes.robogen_lite.modules.core)</a>
+</li>
+        <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html#ariel.body_phenotypes.robogen_lite.modules.hinge.WeightType">(in module ariel.body_phenotypes.robogen_lite.modules.hinge)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/utils/video_recorder/index.html#ariel.utils.video_recorder.VideoRecorder.width">width (VideoRecorder attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor.world">world (RoboGenCoreExtractor attribute)</a>
+</li>
+      <li><a href="autoapi/ariel/utils/video_recorder/index.html#ariel.utils.video_recorder.VideoRecorder.write">write() (VideoRecorder method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.x">x (CPGSensoryFeedback attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.x">(HopfCPG attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/simulation/tasks/index.html#ariel.simulation.tasks.x_speed">x_speed() (in module ariel.simulation.tasks)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/gate_learning/index.html#ariel.simulation.tasks.gate_learning.x_speed">(in module ariel.simulation.tasks.gate_learning)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/tasks/index.html#ariel.simulation.tasks.xy_displacement">xy_displacement() (in module ariel.simulation.tasks)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/gate_learning/index.html#ariel.simulation.tasks.gate_learning.xy_displacement">(in module ariel.simulation.tasks.gate_learning)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor.xy_displacement_extractor">xy_displacement_extractor() (RoboGenCoreExtractor method)</a>
+</li>
+      <li><a href="autoapi/ariel/body_phenotypes/robogen_lite/extractor/index.html#ariel.body_phenotypes.robogen_lite.extractor.RoboGenCoreExtractor.xyz_displacement_extractor">xyz_displacement_extractor() (RoboGenCoreExtractor method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Y">Y</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/controllers/cpg_with_sensory_feedback/index.html#ariel.simulation.controllers.cpg_with_sensory_feedback.CPGSensoryFeedback.y">y (CPGSensoryFeedback attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/controllers/hopfs_cpg/index.html#ariel.simulation.controllers.hopfs_cpg.HopfCPG.y">(HopfCPG attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/ariel/simulation/tasks/index.html#ariel.simulation.tasks.y_speed">y_speed() (in module ariel.simulation.tasks)</a>
+
+      <ul>
+        <li><a href="autoapi/ariel/simulation/tasks/gate_learning/index.html#ariel.simulation.tasks.gate_learning.y_speed">(in module ariel.simulation.tasks.gate_learning)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+
+
+      </article>
+      
+    </main>
+  </div><footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/thebelab-helper.js"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="_static/shibuya.js?v=e730760c"></script></body>
+</html>

@@ -1,0 +1,56 @@
+:py:mod:`mjspec_ops`
+================================
+
+.. py:module:: ariel.utils.mjspec_ops
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.mjspec_ops.compute_geom_bounding_box
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.mjspec_ops.SCRIPT_NAME
+   ariel.utils.mjspec_ops.CWD
+   ariel.utils.mjspec_ops.DATA
+   ariel.utils.mjspec_ops.console
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: console
+
+.. py:function:: compute_geom_bounding_box(model: mujoco.MjModel, data: mujoco.MjData) -> tuple[numpy.typing.NDArray, numpy.typing.NDArray]
+
+   Compute the axis-aligned bounding box (AABB) for all geoms in a MuJoCo model.
+
+   :param model: The MuJoCo model to compute the bounding box for.
+   :type model: :class:`mujoco.MjModel`
+   :param data: The MuJoCo data to compute the bounding box for.
+   :type data: :class:`mujoco.MjData`
+
+   :returns: The minimum and maximum corners of the bounding box.
+   :rtype: :class:`tuple[npt.NDArray`, :class:`npt.NDArray]`
+
+

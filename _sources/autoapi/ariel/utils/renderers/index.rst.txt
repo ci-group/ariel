@@ -1,0 +1,77 @@
+:py:mod:`renderers`
+===============================
+
+.. py:module:: ariel.utils.renderers
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   Todo:
+   ----
+       [ ] ".rotate" as superclass method?
+       [ ] Better documentation
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.renderers.single_frame_renderer
+   ariel.utils.renderers.video_renderer
+   ariel.utils.renderers.tracking_video_renderer
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.renderers.console
+
+
+.. py:data:: console
+
+.. py:function:: single_frame_renderer(model: mujoco.MjModel, data: mujoco.MjData, steps: int = 10, *, save: bool = False, show: bool = False, save_path: str | pathlib.Path | None = None, camera: mujoco.MjvCamera | None = None, width: int = 480, height: int = 640) -> PIL.Image.Image
+
+.. py:function:: video_renderer(model: mujoco.MjModel, data: mujoco.MjData, duration: float = 10.0, video_recorder: ariel.utils.video_recorder.VideoRecorder | None = None) -> None
+
+   Render a video of the simulation using MuJoCo's rendering engine.
+
+   :param model: The MuJoCo model to render.
+   :type model: :class:`mujoco.MjModel`
+   :param data: The MuJoCo data to render.
+   :type data: :class:`mujoco.MjData`
+   :param duration: The duration of the video in seconds, by default 10.0
+   :type duration: :class:`float`, *optional*
+   :param video_recorder: The video recorder to use, by default None
+   :type video_recorder: :class:`VideoRecorder | None`, *optional*
+
+
+.. py:function:: tracking_video_renderer(model: mujoco.MjModel, data: mujoco.MjData, duration: float = 10.0, video_recorder: ariel.utils.video_recorder.VideoRecorder | None = None, tracking_distance: float = 1.5, tracking_angle: float = 135) -> None
+
+   Render a video of the simulation with camera tracking the "core" module.
+
+   :param model: The MuJoCo model to render.
+   :type model: :class:`mujoco.MjModel`
+   :param data: The MuJoCo data to render.
+   :type data: :class:`mujoco.MjData`
+   :param duration: The duration of the video in seconds, by default 10.0
+   :type duration: :class:`float`, *optional*
+   :param video_recorder: The video recorder to use, by default None
+   :type video_recorder: :class:`VideoRecorder | None`, *optional*
+   :param tracking_distance: Distance from the core module for camera positioning, by default 1.5
+   :type tracking_distance: :class:`float`, *optional*
+   :param tracking_angle: Angle relative to the robot that the camera will be recording from.
+                          By default 135, meaning the robot will walk to the left. If set to 0
+                          the robot will walk towards the camera.
+   :type tracking_angle: :class:`float`, *optional*
+
+

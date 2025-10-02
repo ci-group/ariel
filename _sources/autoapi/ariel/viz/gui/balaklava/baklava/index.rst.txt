@@ -1,0 +1,32 @@
+:py:mod:`baklava`
+=========================================
+
+.. py:module:: ariel.viz.gui.balaklava.baklava
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.viz.gui.balaklava.baklava.Editor
+
+
+
+
+.. py:class:: Editor(options: Optional[Dict] = None)
+
+   Bases: :py:obj:`nicegui.ui.element`
+
+   .. autoapi-inheritance-diagram:: ariel.viz.gui.balaklava.baklava.Editor
+      :parts: 1
+
+
