@@ -67,7 +67,7 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
                 mutation+=' - remove_gene'
                 # Only remove one gene
                 while i<len(axiom_tokens):
-                    if axiom_tolens[i] == '[' or axiom_tokens[i] ==']':
+                    if axiom_tokens[i] == '[' or axiom_tokens[i] ==']':
                        i+=1
                     else: 
                           break 
@@ -138,7 +138,6 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
                         axiom_tokens[k] = ''
                     i = j
             i += 1
-
     else:
         # Only mutate one gene/branch in the axiom per call, and only if random < mutation_rate
         mutation='Mutate rule'
@@ -147,7 +146,7 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
         deleted_gene = None
         if random.random() < mutation_rate:
             i = random.choice(range(0,len(mutated_rules)))
-            mod_element=random.choice(['key','rule'])
+            mod_element=random.choice(['key','rule','new','remove'])
             if mod_element =='key':
                 mutation+=' - modify key'
                 old_gene=list(mutated_rules.keys())[i]
@@ -160,7 +159,7 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
                 for k in range(0,len(axiom_tokens)):
                     if axiom_tokens[k] == old_gene:
                         axiom_tokens[k] = new_gene
-            else:
+            elif mod_element == 'rule':
                 mutation+=' - modify rule'
                 rule=list(mutated_rules.values())[i]
                 rule_tokens = [m.group(0) for m in gene_pattern.finditer(rule)]
@@ -222,7 +221,27 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
                         new_gene = f"{letter}({number},{face})"
                         rule_tokens[pos] = new_gene
                         # Update rule key
-                    mutated_rules[list(mutated_rules.keys())[i]] = ''.join(rule_tokens)                
+                    mutated_rules[list(mutated_rules.keys())[i]] = ''.join(rule_tokens)
+            elif mod_element =='new':
+                tokens_tmp = axiom_tokens.copy()
+                for l in range(0,len(mutated_rules)):
+                    rule_tokens = [m.group(0) for m in gene_pattern.finditer(list(mutated_rules.values())[l])]
+                    tokens_tmp.extend(rule_tokens)   
+                token_to_chose = []
+                for t in tokens_tmp:
+                    if t not in ['[', ']', 'C']:
+                        token_to_chose.append(t)           
+                mutation+=' - add new rule'
+                new_key = random.choice(token_to_chose)
+                letter = random.choice(['B', 'H'])
+                number = random.choice(allowed_numbers)
+                face = random.choice(faces)
+                new_rule = f"{letter}({number},{face})"                
+                mutated_rules[new_key] = new_rule    
+            else:            
+                mutation+=' - remove rule'
+                delete_gene=random.choice(list(mutated_rules.keys()))
+                del mutated_rules[delete_gene]
     # Ensure axiom contains exactly one C (no parameters) at the start
     mutated_axiom = ''.join(axiom_tokens)
     if not mutated_axiom.startswith('C'):
