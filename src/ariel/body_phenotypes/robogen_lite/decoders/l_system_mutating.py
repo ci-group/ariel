@@ -1,8 +1,8 @@
 """
-L-system genotype mutation and crossover utilities for modular robots.
+L-system genotype mutation utilities for modular robots.
 
-Author: omn (with help from GitHub Copilot)
-Date: 2025-09-27
+Author: omn
+Date: 2025-10-07
 """
 
 import random
@@ -82,13 +82,13 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
                 if i > 0:
                     j = i
                     while j>0:
-                        if axiom_tokens[j] !='[':
+                        if axiom_tokens[j] =='[':
                             break
                         j-=1
                     axiom_tokens[j]=''
                     j = i
-                    while axiom_tokens[j] !=']': 
-                        if j<len(axiom_tokens):
+                    while j<len(axiom_tokens):
+                        if axiom_tokens[j] ==']': 
                             break
                         j+=1
                     axiom_tokens[j]=''
@@ -224,12 +224,13 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
                     mutated_rules[list(mutated_rules.keys())[i]] = ''.join(rule_tokens)
             elif mod_element =='new':
                 tokens_tmp = axiom_tokens.copy()
+                token_keys = list(mutated_rules.keys())
                 for l in range(0,len(mutated_rules)):
                     rule_tokens = [m.group(0) for m in gene_pattern.finditer(list(mutated_rules.values())[l])]
                     tokens_tmp.extend(rule_tokens)   
                 token_to_chose = []
                 for t in tokens_tmp:
-                    if t not in ['[', ']', 'C']:
+                    if t not in ['[', ']', 'C'] and t not in token_keys:
                         token_to_chose.append(t)           
                 mutation+=' - add new rule'
                 new_key = random.choice(token_to_chose)

@@ -175,6 +175,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "ipykernel" },
     { name = "opencv-stubs" },
     { name = "types-networkx" },
 ]
@@ -221,6 +222,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "ipykernel", specifier = ">=6.30.1" },
     { name = "opencv-stubs", specifier = ">=0.1.0" },
     { name = "types-networkx", specifier = ">=3.5.0.20250918" },
 ]

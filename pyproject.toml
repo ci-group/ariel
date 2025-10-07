@@ -37,7 +37,11 @@ Documentation = "https://ariel.readthedocs.io"
 Changelog = "https://github.com/ci-group/ariel/releases"
 
 [dependency-groups]
-dev = ["opencv-stubs>=0.1.0", "types-networkx>=3.5.0.20250918"]
+dev = [
+    "ipykernel>=6.30.1",
+    "opencv-stubs>=0.1.0",
+    "types-networkx>=3.5.0.20250918",
+]
 docs = [
   "jupyter-sphinx>=0.5.3",
   "linkify-it-py>=2.0.3",

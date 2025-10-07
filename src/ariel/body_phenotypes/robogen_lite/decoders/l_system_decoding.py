@@ -1,6 +1,6 @@
 """Example of L-system-based decoding for modular robot graphs.
 
-Author:     omn (with help from GitHub Copilot)
+Author:     omn
 Date:       2025-09-26
 Py Ver:     3.12
 OS:         macOS Tahoe 26
@@ -160,10 +160,11 @@ class LSystemDecoder:
 
         def build_graph(tree, parent=None):
             nonlocal core_count
+            current_parent = parent
             for node in tree:
                 if isinstance(node, list):
-                    # This is a branch, attach to the same parent
-                    build_graph(node, parent)
+                    # This is a branch, attach to the same parent (do not update current_parent)
+                    build_graph(node, current_parent)
                 else:
                     m = token_pattern.match(node)
                     if m:
@@ -203,11 +204,11 @@ class LSystemDecoder:
                             rotation=rotation_enum,
                             face=face,
                         ) #create and add the node to the graph
-                        if parent is not None: # if there is a parent, create a link in the graph
-                            self.graph.add_edge(parent, node_label)
+                        if current_parent is not None: # if there is a parent, create a link in the graph
+                            self.graph.add_edge(current_parent, node_label)
                         idx_counter[0] += 1
-                        parent = node_label
-            return parent
+                        current_parent = node_label  # Only update parent after a single node, not after a branch
+            return current_parent
 
         tree = parse_tokens(s)
         build_graph(tree)
