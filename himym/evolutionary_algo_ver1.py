@@ -17,6 +17,9 @@ from ariel.ec.a001 import Individual
 from ariel.ec.a005 import Crossover
 from ariel.ec.a000 import IntegerMutator
 
+# Import configuration
+from ea_config import config
+
 # Keep track of data / history
 HISTORY = []
 
@@ -24,9 +27,6 @@ HISTORY = []
 CURRENT_INDIVIDUAL = None
 POPULATION = []
 GENERATION = 0
-POPULATION_SIZE = 25
-NUM_GENERATIONS = 400
-SIMULATION_TIME = 50.0  # seconds per evaluation
 
 
 def create_individual(num_joints):
@@ -35,9 +35,9 @@ def create_individual(num_joints):
 
     genotype = []
     for _ in range(num_joints):
-        amplitude = np.random.uniform(0.1, np.pi/3)  # Joint amplitude
-        frequency = np.random.uniform(0.5, 3.0)     # Oscillation frequency
-        phase = np.random.uniform(0, 2*np.pi)       # Phase offset
+        amplitude = np.random.uniform(config.amplitude_init_min, config.amplitude_init_max)
+        frequency = np.random.uniform(config.frequency_init_min, config.frequency_init_max)
+        phase = np.random.uniform(config.phase_min, config.phase_max)
         genotype.extend([amplitude, frequency, phase])
     
     individual.genotype = genotype
@@ -63,7 +63,7 @@ def sinusoidal_controller(model, data, to_track):
             
             # Generate sinusoidal control signal
             control_value = amplitude * np.sin(frequency * data.time + phase)
-            data.ctrl[i] = np.clip(control_value, -np.pi/4, np.pi/4)
+            data.ctrl[i] = np.clip(control_value, config.control_clip_min, config.control_clip_max)
     
     # Save movement to history
     HISTORY.append(to_track[0].xpos.copy())
@@ -75,55 +75,11 @@ def evaluate_fitness(individual, start_pos, end_pos):
     individual.fitness = distance
     return distance
 
-
-def evaluate_individual(individual, model, world):
-    """Evaluate a single individual - designed for parallel execution."""
-    # Reset simulation
-    data = mujoco.MjData(model)
-    geoms = world.spec.worldbody.find_all(mujoco.mjtObj.mjOBJ_GEOM)
-    to_track = [data.bind(geom) for geom in geoms if "core" in geom.name]
-    
-    # Create local history for this individual
-    local_history = []
-    
-    def local_sinusoidal_controller(model, data, to_track):
-        num_joints = model.nu
-        genotype = individual.genotype
-        
-        # Apply sinusoidal control based on genotype
-        for i in range(num_joints):
-            if i * 3 + 2 < len(genotype):  # Ensure we have all 3 parameters
-                amplitude = genotype[i * 3]
-                frequency = genotype[i * 3 + 1] 
-                phase = genotype[i * 3 + 2]
-                
-                # Generate sinusoidal control signal
-                control_value = amplitude * np.sin(frequency * data.time + phase)
-                data.ctrl[i] = np.clip(control_value, -np.pi/2, np.pi/2)
-        
-        # Save movement to local history
-        local_history.append(to_track[0].xpos.copy())
-    
-    # Setup simulation
-    mujoco.set_mjcb_control(lambda m, d: local_sinusoidal_controller(m, d, to_track))
-    
-    start_pos = to_track[0].xpos.copy()
-    
-    # Run simulation
-    sim_steps = int(SIMULATION_TIME / model.opt.timestep)
-    for _ in range(sim_steps):
-        mujoco.mj_step(model, data)
-    
-    end_pos = to_track[0].xpos.copy()
-    
-    # Calculate fitness
-    fitness = evaluate_fitness(individual, start_pos, end_pos)
-    
-    return individual, fitness, local_history
-
-
-def tournament_selection(population, tournament_size=3):
+def tournament_selection(population, tournament_size=None):
     """Select parents using tournament selection."""
+    if tournament_size is None:
+        tournament_size = config.tournament_size
+    
     selected = []
     for _ in range(len(population)):
         tournament = np.random.choice(population, tournament_size, replace=False)
@@ -147,7 +103,13 @@ def crossover(parent1, parent2):
     return child1, child2
 
 
-def mutate(individual, mutation_rate=0.1, mutation_strength=0.1):
+def mutate(individual, mutation_rate=None, mutation_strength=None):
+    """Apply Gaussian mutation to individual's genotype."""
+    if mutation_rate is None:
+        mutation_rate = config.mutation_rate
+    if mutation_strength is None:
+        mutation_strength = config.mutation_strength
+    
     mutated = Individual()
     mutated.genotype = individual.genotype.copy()
     
@@ -159,11 +121,11 @@ def mutate(individual, mutation_rate=0.1, mutation_strength=0.1):
             # Clamp values to reasonable ranges
             param_type = i % 3
             if param_type == 0:  # amplitude
-                mutated.genotype[i] = np.clip(mutated.genotype[i], 0.01, np.pi/2)
+                mutated.genotype[i] = np.clip(mutated.genotype[i], config.amplitude_min, config.amplitude_max)
             elif param_type == 1:  # frequency
-                mutated.genotype[i] = np.clip(mutated.genotype[i], 0.1, 5.0)
+                mutated.genotype[i] = np.clip(mutated.genotype[i], config.frequency_min, config.frequency_max)
             else:  # phase
-                mutated.genotype[i] = mutated.genotype[i] % (2 * np.pi)
+                mutated.genotype[i] = mutated.genotype[i] % config.phase_max
     
     return mutated
 
@@ -197,8 +159,7 @@ def show_qpos_history(history):
     plt.ylim(-max_range, max_range)
 
     plt.show()
-    PATH_TO_FIGS = "./__figures__"
-    plt.savefig(f"{PATH_TO_FIGS}/robot_trajectory.png")
+    plt.savefig(f"{config.figures_folder}/robot_trajectory.png")
 
 
 def show_fitness_evolution(fitness_history):
@@ -218,12 +179,11 @@ def main():
     global CURRENT_INDIVIDUAL, POPULATION, GENERATION, HISTORY
     
     print("Starting Evolutionary Algorithm for Robot Movement Learning")
-    print(f"Population size: {POPULATION_SIZE}, Generations: {NUM_GENERATIONS}")
+    print(f"Population size: {config.population_size}, Generations: {config.num_generations}")
     
     # Initialize world and robot
     mujoco.set_mjcb_control(None)
-    # Initialize world and robot - SINGLE ROBOT FOR EA TRAINING
-    mujoco.set_mjcb_control(None)
+
     world = SimpleFlatWorld()
     gecko_core = gecko()
     world.spawn(gecko_core.spec, spawn_position=[0, 0, 0])
@@ -235,14 +195,14 @@ def main():
     print("Training with SINGLE robot for optimal EA performance...")
     
     # Create initial population
-    POPULATION = [create_individual(num_joints) for _ in range(POPULATION_SIZE)]
+    POPULATION = [create_individual(num_joints) for _ in range(config.population_size)]
     
     best_fitness_history = []
     
     # Evolution loop
-    for gen in range(NUM_GENERATIONS):
+    for gen in range(config.num_generations):
         GENERATION = gen
-        print(f"\n=== Generation {gen + 1}/{NUM_GENERATIONS} ===")
+        print(f"\n=== Generation {gen + 1}/{config.num_generations} ===")
         
         # Evaluate each individual
         generation_fitness = []
@@ -262,7 +222,7 @@ def main():
             start_pos = to_track[0].xpos.copy()
             
             # RUN SIMULATION
-            sim_steps = int(SIMULATION_TIME / model.opt.timestep)
+            sim_steps = int(config.simulation_time / model.opt.timestep)
             for _ in range(sim_steps):
                 mujoco.mj_step(model, data)
             
@@ -272,18 +232,20 @@ def main():
             fitness = evaluate_fitness(individual, start_pos, end_pos)
             generation_fitness.append(fitness)
             
-            print(f"  Individual {i+1}: fitness = {fitness:.4f}")
+            if config.print_individual_fitness:
+                print(f"  Individual {i+1}: fitness = {fitness:.4f}")
         
         # Track best fitness
         best_fitness = max(generation_fitness)
         best_fitness_history.append(best_fitness)
         best_individual = max(POPULATION, key=lambda ind: ind.fitness)
         
-        print(f"  Best fitness this generation: {best_fitness:.4f}")
-        print(f"  Average fitness: {np.mean(generation_fitness):.4f}")
+        if config.print_generation_stats:
+            print(f"  Best fitness this generation: {best_fitness:.4f}")
+            print(f"  Average fitness: {np.mean(generation_fitness):.4f}")
         
         # Create next generation (except for last generation)
-        if gen < NUM_GENERATIONS - 1:
+        if gen < config.num_generations - 1:
             # SELECTION
             parents = tournament_selection(POPULATION)
             
@@ -298,8 +260,9 @@ def main():
                     new_population.append(mutate(parents[i]))
             
             # Keep best individual (elitism)
-            new_population[0] = best_individual
-            POPULATION = new_population[:POPULATION_SIZE]
+            if config.elitism:
+                new_population[0] = best_individual
+            POPULATION = new_population[:config.population_size]
     
     # Final evaluation with best individual
     print(f"\n~~~ Final Evaluation ~~~")
@@ -307,12 +270,13 @@ def main():
     CURRENT_INDIVIDUAL = best_individual
     
     print(f"Best evolved fitness: {best_individual.fitness:.4f}")
-    print("Best genotype (amplitude, frequency, phase for each joint):")
-    genotype = best_individual.genotype
-    for j in range(num_joints):
-        if j * 3 + 2 < len(genotype):
-            amp, freq, phase = genotype[j*3:(j+1)*3]
-            print(f"  Joint {j}: amp={amp:.3f}, freq={freq:.3f}, phase={phase:.3f}")
+    if config.print_final_genotype:
+        print("Best genotype (amplitude, frequency, phase for each joint):")
+        genotype = best_individual.genotype
+        for j in range(num_joints):
+            if j * 3 + 2 < len(genotype):
+                amp, freq, phase = genotype[j*3], genotype[j*3+1], genotype[j*3+2]
+                print(f"  Joint {j}: amp={amp:.3f}, freq={freq:.3f}, phase={phase:.3f}")
     
     # Run final simulation with video recording
     data = mujoco.MjData(model)
@@ -325,13 +289,12 @@ def main():
     mujoco.set_mjcb_control(lambda m, d: sinusoidal_controller(m, d, to_track))
     
     # Record video of best individual
-    PATH_TO_VIDEO_FOLDER = "./__videos__"
-    video_recorder = VideoRecorder(output_folder=PATH_TO_VIDEO_FOLDER)
+    video_recorder = VideoRecorder(output_folder=config.video_folder)
     
     video_renderer(
         model,
         data,
-        duration=15,  # Longer video to see the evolved behavior
+        duration=config.final_demo_time,
         video_recorder=video_recorder,
     )
     
@@ -356,21 +319,22 @@ def multi_robot_controller(model, data, individuals, to_track):
                 data.ctrl[ctrl_idx] = np.clip(control_value, -np.pi/2, np.pi/2)
 
 def demonstrate_multiple_robots(individuals):
+    """Demonstrate multiple robots with evolved genotypes."""
     num_robots = len(individuals)
     print(f"\n~~~ Multi-Robot Demonstration ~~~")
     print(f"Deploying {num_robots} robots with evolved genotypes...")
 
     # Create world for multiple robots
     mujoco.set_mjcb_control(None)
-    multi_world = SimpleFlatWorld([5, 5, 0.1])
+    multi_world = SimpleFlatWorld(config.world_size)
 
     # Spawn multiple robots at random positions
     robots = []
     positions = []
     for _ in range(num_robots):
-        x = np.random.uniform(0.1, 4.9)
-        y = np.random.uniform(0.1, 4.9)
-        z = 0.05
+        x = np.random.uniform(config.spawn_x_min, config.spawn_x_max)
+        y = np.random.uniform(config.spawn_y_min, config.spawn_y_max)
+        z = config.spawn_z
         positions.append([x, y, z])
 
     for i in range(num_robots):
@@ -393,14 +357,13 @@ def demonstrate_multiple_robots(individuals):
     mujoco.set_mjcb_control(lambda m, d: multi_robot_controller(m, d, individuals, multi_to_track))
 
     # Record video of multiple robots
-    PATH_TO_VIDEO_FOLDER = "./__videos__"
-    video_recorder = VideoRecorder(output_folder=PATH_TO_VIDEO_FOLDER)
+    video_recorder = VideoRecorder(output_folder=config.video_folder)
 
     print(f"Recording {num_robots} robots performing evolved behavior...")
     video_renderer(
         multi_model,
         multi_data,
-        duration=20,  # Longer video to see multiple robots
+        duration=config.multi_robot_demo_time,
         video_recorder=video_recorder,
     )
 
@@ -410,7 +373,7 @@ def demonstrate_multiple_robots(individuals):
 if __name__ == "__main__":
     main()
     
-    num_robots = 5  # Or any number <= POPULATION_SIZE
+    num_robots = config.num_demo_robots
     top_best = sorted(POPULATION, key=lambda ind: ind.fitness, reverse=True)[:num_robots]
     print(f"Top {len(top_best)} individuals selected for multi-robot demonstration.")
     print("Genotypes of top individuals:")
