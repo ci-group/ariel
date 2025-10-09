@@ -160,10 +160,10 @@ class TreeNode:
         raise ValueError("ID cannot be changed once set.")
     
     @classmethod
-    def random_tree_node(cls, max_depth: int = 2, branch_prob: float = 0.5) -> 'TreeNode':
+    def random_tree_node(cls, max_depth: int = 1, branch_prob: float = 0.5) -> 'TreeNode' | None:
         """Create a random tree node with random children up to max_depth."""
         if max_depth < 0:
-            raise ValueError("max_depth must be non-negative")
+            return None
 
         # Exclude CORE and NONE from random selection
         module_type = RNG.choice([mt for mt in config.ModuleType if mt not in {config.ModuleType.CORE, config.ModuleType.NONE}])
@@ -182,7 +182,8 @@ class TreeNode:
                 continue  # Skip adding a child based on branch probability
             # Recursively create child nodes with reduced depth
             child_node = cls.random_tree_node(max_depth - 1)
-            node._set_face(face, child_node)
+            if child_node is not None:
+                node._set_face(face, child_node)
 
         return node
 
@@ -483,7 +484,7 @@ class TreeNode:
 
 
 
-def lukas():
+def test():
     genome = TreeGenome()
     genome.root = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
     genome.root.front = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
@@ -499,4 +500,5 @@ def lukas():
     print(genome.root.get_all_nodes("dfs", True))
 
 
-#lukas()
+if __name__ == "__main__":
+    test()

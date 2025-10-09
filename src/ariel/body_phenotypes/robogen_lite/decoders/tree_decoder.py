@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, dict, Callable
+from typing import Optional, Dict, Callable
 import networkx as nx
 from ariel.ec.genotypes.tree.tree_genome import TreeNode, TreeGenome
 from ariel.body_phenotypes.robogen_lite import config
@@ -53,7 +53,7 @@ def to_digraph(genome: TreeGenome, use_node_ids: bool = True) -> nx.DiGraph:
         node_key = lambda n: n.id
     else:
         # Assign 0..N-1 in first-seen (DFS) order
-        seen: dict[int, int] = {}
+        seen: Dict[int, int] = {}
         next_id = 0
         def node_key(n: TreeNode) -> int:
             nonlocal next_id
@@ -82,3 +82,26 @@ def to_digraph(genome: TreeGenome, use_node_ids: bool = True) -> nx.DiGraph:
 
     dfs(None, root, None)
     return g
+
+def test():
+    # Create a simple tree genome for testing
+    genome = TreeGenome()
+    genome.root = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_90, links={}))
+    genome.root.front = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
+    genome.root.left = TreeNode(config.ModuleInstance(type=config.ModuleType.BRICK, rotation=config.ModuleRotationsIdx.DEG_45, links={}))
+
+    # Convert to directed graph
+    digraph = to_digraph(genome, use_node_ids=False)
+
+    # Print the graph nodes and edges with attributes
+    print("Nodes:")
+    for node, attrs in digraph.nodes(data=True):
+        print(f"  {node}: {attrs}")
+
+    print("\nEdges:")
+    for u, v, attrs in digraph.edges(data=True):
+        print(f"  {u} -> {v}: {attrs}")
+
+# Test code
+if __name__ == "__main__":
+    test()

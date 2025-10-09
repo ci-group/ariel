@@ -8,10 +8,9 @@ from typing import cast
 # Third-party libraries
 import numpy as np
 from pydantic_settings import BaseSettings
-from collections import deque
 from rich.console import Console
 from rich.traceback import install
-
+import copy
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome, TreeNode
 import ariel.body_phenotypes.robogen_lite.config as pheno_config
 
@@ -272,29 +271,32 @@ class TreeMutator:
     @staticmethod
     def random_subtree_replacement(
         individual: TreeGenome,
-        max_subtree_depth: int = 2,
+        max_subtree_depth: int = 1,
     ) -> TreeGenome:
         """Replace a random subtree with a new random subtree."""
         if individual.root is None:
             return individual
 
+        new_individual = copy.copy(individual)
+
         # Collect all nodes in the tree
-        all_nodes = individual.root.get_all_nodes(exclude_root=True)
+        all_nodes = new_individual.root.get_all_nodes(exclude_root=True)
 
         # Select a random node to replace (excluding root)
         if len(all_nodes) <= 1:
-            return individual  # No replacement possible
+            return new_individual
 
         node_to_replace = RNG.choice(all_nodes[1:])  # Avoid replacing root
 
         # Generate a new random subtree
         new_subtree = TreeNode.random_tree_node(max_depth=max_subtree_depth)
 
-        individual.root.replace_node(node_to_replace, new_subtree)
+        with new_individual.root.enable_replacement():
+            new_individual.root.replace_node(node_to_replace, new_subtree)
 
-        return individual
+        return new_individual
 
-def main() -> None:
+def test() -> None:
     """Entry point."""
     console.log(IntegersGenerator.integers(-5, 5, 5))
     example = IntegersGenerator.choice([1, 3, 4], (2, 5))
@@ -308,14 +310,17 @@ def main() -> None:
 
     console.rule("[bold blue]Tree Generator Examples")
 
-    # Show different tree types
-    console.log("Linear chain:", TreeGenerator.linear_chain(4))
-    console.log("Star shape:", TreeGenerator.star_shape(3))
-    console.log("Binary tree:", TreeGenerator.binary_tree(3))
-    console.log("Random tree:", TreeGenerator.random_tree(3, 0.6))
+    genome = TreeGenome()
+    genome.root = TreeNode(pheno_config.ModuleInstance(type=pheno_config.ModuleType.BRICK, rotation=pheno_config.ModuleRotationsIdx.DEG_90, links={}))
+    genome.root.front = TreeNode(pheno_config.ModuleInstance(type=pheno_config.ModuleType.BRICK, rotation=pheno_config.ModuleRotationsIdx.DEG_45, links={}))
+    genome.root.left = TreeNode(pheno_config.ModuleInstance(type=pheno_config.ModuleType.BRICK, rotation=pheno_config.ModuleRotationsIdx.DEG_45, links={}))
+    tree_mutator = TreeMutator()
+    mutated_genome = tree_mutator.random_subtree_replacement(genome, max_subtree_depth=1)
+    console.log("Original Genome:", genome)
+    console.log("Mutated Genome:", mutated_genome)
 
 
 
 
 if __name__ == "__main__":
-    main()
+    test()
