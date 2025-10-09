@@ -87,6 +87,9 @@ class TreeCrossover:
 
         parent_j_all_nodes = parent_j_root.get_all_nodes()
         node_b = RNG.choice(parent_j_all_nodes)
+        if node_a is None or node_b is None:
+            # If either tree is just a root, return copies of parents
+            return parent_i.copy(), parent_j.copy()
 
         parent_i_old = parent_i.copy()
         parent_j_old = parent_j.copy()
@@ -98,6 +101,46 @@ class TreeCrossover:
         with child2.root.enable_replacement():
             child2.root.replace_node(node_b, node_a)
 
+        parent_i = parent_i_old
+        parent_j = parent_j_old
+        return child1, child2
+    
+    @staticmethod
+    def normal(
+        parent_i: TreeGenome,
+        parent_j: TreeGenome,
+    ) -> tuple[TreeGenome, TreeGenome]:
+        """
+        Normal tree crossover:
+            - Pick a random node from Parent A (uniform over all nodes).
+            - Pick a random node from Parent B (uniform over all nodes).
+            - Swap the selected subtrees.
+
+        Returns two children produced by swapping the chosen subtrees.
+        """
+        parent_i_root, parent_j_root = parent_i.root, parent_j.root
+
+        # Uniformly choose any node (root, internal, or leaf)
+        node_a = RNG.choice(parent_i_root.get_all_nodes(exclude_root=True))
+        node_b = RNG.choice(parent_j_root.get_all_nodes(exclude_root=True))
+
+        if not node_a or not node_b:
+            # If either tree is just a root, return copies of parents
+            return parent_i.copy(), parent_j.copy()
+
+        # Preserve originals (same pattern as in koza_default)
+        parent_i_old = parent_i.copy()
+        parent_j_old = parent_j.copy()
+        child1 = parent_i
+        child2 = parent_j
+
+        # Perform the swap
+        with child1.root.enable_replacement():
+            child1.root.replace_node(node_a, node_b)
+        with child2.root.enable_replacement():
+            child2.root.replace_node(node_b, node_a)
+
+        # Restore parent handles for caller (as in your koza_default)
         parent_i = parent_i_old
         parent_j = parent_j_old
         return child1, child2
