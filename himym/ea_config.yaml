@@ -60,7 +60,8 @@ multi_robot:
     y_min: 0.1                # Minimum y spawn position
     y_max: 4.9                # Maximum y spawn position
     z: 0.05                   # Z spawn position
-  min_spawn_distance: 0.6     # Minimum distance between robot centers to avoid overlap
+  min_spawn_distance: 1.0     # Minimum distance between robot centers to avoid overlap
+  robot_size: 0.4             # Approximate robot size/diameter for visualization (meters)
 
 # Output Paths
 output:

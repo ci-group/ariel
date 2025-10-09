@@ -173,6 +173,11 @@ class EAConfig:
     def min_spawn_distance(self) -> float:
         return self._config['multi_robot'].get('min_spawn_distance', 0.6)
     
+    @property
+    def robot_size(self) -> float:
+        """Approximate robot size/diameter for visualization purposes (meters)."""
+        return self._config['multi_robot'].get('robot_size', 0.4)
+    
     # Output Paths
     @property
     def video_folder(self) -> str:

@@ -44,8 +44,8 @@ class SpatialIndividual:
         self.end_position = None
         self.spawn_position = None
         self.robot_index = None
-        self.unique_id = unique_id  # Persistent ID across generations
-        self.parent_ids = []  # Track lineage (parent unique_ids)
+        self.unique_id = unique_id  
+        self.parent_ids = []
 
 
 class SpatialEA:
@@ -114,15 +114,13 @@ class SpatialEA:
         
         ######### Determine spawn positions #########
         if len(self.current_positions) == self.population_size:
-            # Use positions from previous generation (deep copy to avoid reference issues)
             print(f"  Using positions from previous generation")
             positions = [pos.copy() for pos in self.current_positions]
-            print(f"    Sample positions: {positions[0][:2]}, {positions[1][:2]}, {positions[2][:2]}")
         else:
             # Generate new non-overlapping spawn positions for all robots
             print(f"  Generating new random spawn positions")
             positions = []
-            min_distance = config.min_spawn_distance  # Get from config
+            min_distance = config.min_spawn_distance 
             max_attempts = 1000  # Maximum attempts to find a valid position
             
             for i in range(self.population_size):
@@ -192,10 +190,11 @@ class SpatialEA:
         model : mujoco.MjModel, 
         data : mujoco.MjData
     ):
+        """
+        Controller that applies sinusoidal joint controls based on each robot's genotype.
+        """
         num_joints_per_robot = self.num_joints
         
-        # Only control robots that are actually spawned in the simulation
-        # self.population may be larger than the number of spawned robots
         num_spawned_robots = len(self.tracked_geoms)
         
         for robot_idx in range(min(num_spawned_robots, len(self.population))):
@@ -217,6 +216,9 @@ class SpatialEA:
                     )
     
     def evaluate_population(self) -> list[float]:
+        """
+        Evaluate each individual in isolation and assign fitness based on distance traveled.
+        """
         print(f"  Evaluating generation {self.generation + 1}")
         print(f"  Testing each robot in isolated environment...")
         
@@ -346,7 +348,8 @@ class SpatialEA:
     def mating_movement_phase(
         self, 
         duration : float = 60.0, 
-        save_trajectories : bool = True
+        save_trajectories : bool = True,
+        record_video : bool = False
     ):
         print(f"  Mating movement phase ({duration}s)...")
         
@@ -358,11 +361,16 @@ class SpatialEA:
         attractiveness = [f / max_fitness for f in fitness_values]
         
         # Track trajectories for visualization
-        trajectories = [[] for _ in range(self.population_size)]
+        # Only track robots that are actually spawned
+        num_spawned = len(self.tracked_geoms)
+        trajectories = [[] for _ in range(num_spawned)]
         sample_interval = max(1, int(duration / self.model.opt.timestep) // 100) 
         
+        print(f"  Tracking trajectories for {num_spawned} spawned robots")
+        print(f"  Sample interval: {sample_interval} steps")
+        
         # Record initial positions
-        for i in range(self.population_size):
+        for i in range(num_spawned):
             pos = self.tracked_geoms[i].xpos.copy()
             trajectories[i].append(pos[:2])  # Store x, y only
         
@@ -426,6 +434,31 @@ class SpatialEA:
                             config.control_clip_max
                         )
         
+        # Set up video recording if requested
+        video_recorder = None
+        renderer = None
+        if record_video:
+            from ariel.utils.video_recorder import VideoRecorder
+            video_name = f"generation_{self.generation + 1:03d}_mating_movement"
+            video_recorder = VideoRecorder(
+                file_name=video_name,
+                output_folder=config.video_folder
+            )
+            
+            # Create renderer for video
+            scene_option = mujoco.MjvOption()
+            scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = True
+            renderer = mujoco.Renderer(
+                self.model,
+                width=video_recorder.width,
+                height=video_recorder.height
+            )
+            
+            # Calculate steps per frame for smooth video
+            steps_per_frame = max(1, int(self.model.opt.timestep * duration * video_recorder.fps / duration))
+            print(f"  Recording video: {video_name}")
+            print(f"  Steps per frame: {steps_per_frame}")
+        
         # Run mating movement simulation and track positions
         mujoco.set_mjcb_control(lambda m, d: mating_controller(m, d))
         sim_steps = int(duration / self.model.opt.timestep)
@@ -435,27 +468,69 @@ class SpatialEA:
             
             # Sample positions periodically
             if step % sample_interval == 0:
-                for i in range(self.population_size):
+                for i in range(num_spawned):
                     pos = self.tracked_geoms[i].xpos.copy()
                     trajectories[i].append(pos[:2])
+            print(f"    Mating step {step + 1}/{sim_steps}", end='\r')
+            # Record video frame if enabled
+            if record_video and renderer is not None and video_recorder is not None:
+                if step % steps_per_frame == 0:
+                    renderer.update_scene(self.data, scene_option=scene_option)
+                    video_recorder.write(frame=renderer.render())
         
         # Record final positions
-        for i in range(self.population_size):
+        for i in range(num_spawned):
             pos = self.tracked_geoms[i].xpos.copy()
             trajectories[i].append(pos[:2])
         
         print(f"  Mating movement complete!")
+        print(f"  Trajectory points per robot: ~{len(trajectories[0])} samples")
+        
+        # Clean up video recording
+        if record_video and video_recorder is not None:
+            video_recorder.release()
+            print(f"  Video saved: {video_recorder.frame_count} frames")
+            if renderer is not None:
+                renderer.close()
                 
         self.current_positions = []
-        for i in range(self.population_size):
+        for i in range(num_spawned):
             pos = self.tracked_geoms[i].xpos.copy()
             self.current_positions.append(pos)
         print(f"  Updated positions for next generation")
-        print(f"    New sample positions: {self.current_positions[0][:2]}, {self.current_positions[1][:2]}, {self.current_positions[2][:2]}")
+        print(f"    Tracked {len(self.current_positions)} positions")
+        if len(self.current_positions) >= 3:
+            print(f"    Sample positions: {self.current_positions[0][:2]}, {self.current_positions[1][:2]}, {self.current_positions[2][:2]}")
     
         # Save trajectory visualization
         if save_trajectories:
             self._save_mating_trajectories(trajectories, fitness_values, attractiveness)
+    
+    def _calculate_marker_size(self, robot_size_meters, ax, fig):
+        # Get axis bounds in data coordinates
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
+        
+        # Get figure size in inches
+        fig_width, fig_height = fig.get_size_inches()
+        
+        # Calculate data units per inch
+        data_width = xlim[1] - xlim[0]
+        data_height = ylim[1] - ylim[0]
+        data_per_inch_x = data_width / fig_width
+        data_per_inch_y = data_height / fig_height
+        
+        # Use average to account for aspect ratio
+        data_per_inch = (data_per_inch_x + data_per_inch_y) / 2
+        
+        # Convert robot size from data units (meters) to inches
+        robot_size_inches = robot_size_meters / data_per_inch
+        
+        # Convert inches to points (1 inch = 72 points)
+        # For circular markers, markersize is the diameter in points
+        marker_size_points = robot_size_inches * 72
+        
+        return marker_size_points
     
     def _save_mating_trajectories(self, 
         trajectories : list[list[np.ndarray]], 
@@ -463,6 +538,14 @@ class SpatialEA:
         attractiveness : list[float]
     ):
         fig, ax = plt.subplots(figsize=(12, 12))
+        
+        # Set axis limits first (needed for marker size calculation)
+        ax.set_xlim(-0.2, config.world_size[0] + 0.2)
+        ax.set_ylim(-0.2, config.world_size[1] + 0.2)
+        ax.set_aspect('equal')
+        
+        # Calculate marker size to match robot size (from config)
+        marker_size = self._calculate_marker_size(config.robot_size, ax, fig)
         
         # Draw world boundaries
         world_rect = patches.Rectangle(
@@ -480,10 +563,9 @@ class SpatialEA:
         unique_ids = [ind.unique_id for ind in self.population]
         
         # Create color mapping based on unique_id
-        # Use modulo to wrap colors for large ID ranges
         id_colors = [plt.cm.tab20(uid % 20 / 20) for uid in unique_ids]
         
-        # Also show fitness values for context
+        # Fitness range for context
         min_fitness = min(fitness_values)
         max_fitness = max(fitness_values) if max(fitness_values) > 0 else 1.0
         
@@ -496,15 +578,15 @@ class SpatialEA:
             ax.plot(trajectory[:, 0], trajectory[:, 1], 
                    color=color, alpha=0.6, linewidth=2, zorder=1)
             
-            # Mark start position
+            # Mark start position (circle) - size matches robot
             ax.plot(trajectory[0, 0], trajectory[0, 1], 
-                   'o', color=color, markersize=10, 
+                   'o', color=color, markersize=marker_size, 
                    markeredgecolor='black', markeredgewidth=1.5, 
                    alpha=0.8, zorder=2)
             
-            # Mark end position
+            # Mark end position (square) - size matches robot
             ax.plot(trajectory[-1, 0], trajectory[-1, 1], 
-                   's', color=color, markersize=12,
+                   's', color=color, markersize=marker_size,
                    markeredgecolor='black', markeredgewidth=2,
                    alpha=0.9, zorder=3)
             
@@ -520,10 +602,7 @@ class SpatialEA:
                    color='black', alpha=0.7, zorder=4)
         
         
-        # Plot settings
-        ax.set_xlim(-0.2, config.world_size[0] + 0.2)
-        ax.set_ylim(-0.2, config.world_size[1] + 0.2)
-        ax.set_aspect('equal')
+        # Plot settings (axis limits already set above for marker size calculation)
         ax.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
         ax.set_xlabel('X Position (m)', fontsize=12, fontweight='bold')
         ax.set_ylabel('Y Position (m)', fontsize=12, fontweight='bold')
@@ -534,16 +613,16 @@ class SpatialEA:
         title += f'Colors: Unique Individual IDs | Numbers: Individual IDs | Small text: Fitness'
         ax.set_title(title, fontsize=14, fontweight='bold', pad=20)
         
-        # Add legend
+        # Add legend with matching marker sizes
         legend_elements = [
             Line2D([0], [0], marker='o', color='w', 
-                      markerfacecolor='gray', markersize=10,
+                      markerfacecolor='gray', markersize=marker_size,
                       markeredgecolor='black', markeredgewidth=1.5,
-                      label='Start Position'),
+                      label='Start Position (robot size)'),
             Line2D([0], [0], marker='s', color='w',
-                      markerfacecolor='gray', markersize=12,
+                      markerfacecolor='gray', markersize=marker_size,
                       markeredgecolor='black', markeredgewidth=2,
-                      label='End Position (with ID)'),
+                      label='End Position (robot size, with ID)'),
             Line2D([0], [0], color='gray', linewidth=2,
                       label='Trajectory (colored by individual)'),
         ]
@@ -558,30 +637,22 @@ class SpatialEA:
         print(f"  Saved mating trajectories to {save_path}")
         plt.close()
 
-    def create_next_generation(self):
+    def create_next_generation(self, record_video: bool = False):
         print(f"  Creating next generation with movement-based selection...")
         
         # Allow robots to move towards partners
-        self.mating_movement_phase(duration=config.simulation_time, save_trajectories=True)
+        self.mating_movement_phase(
+            duration=config.simulation_time, 
+            save_trajectories=True,
+            record_video=record_video
+        )
         
         new_population = []
         new_positions = []  # Track which position each offspring inherits
         
         # Sort population by fitness for potential elitism
         sorted_pop = sorted(self.population, key=lambda ind: ind.fitness, reverse=True)
-        
-        # Note: With population extension, parents are automatically preserved
-        # No need for explicit elitism since best individual remains in population
-        # if config.elitism:
-        #     best = SpatialIndividual(unique_id=self.next_unique_id)
-        #     self.next_unique_id += 1
-        #     best.genotype = sorted_pop[0].genotype.copy()
-        #     best.parent_ids = [sorted_pop[0].unique_id]
-        #     best_idx = self.population.index(sorted_pop[0])
-        #     new_population.append(best)
-        #     new_positions.append(self.current_positions[best_idx].copy())
 
-        # Pair up robots based on proximity and fitness
         # Find best fitness partner within pairing radius
         pairs = []
         pair_positions = []  # Track positions for each pair
@@ -718,13 +789,15 @@ class SpatialEA:
         print(f"  Paired individuals: {len(paired_indices)} out of {old_size}")
 
     
-    def run_evolution(self):
+    def run_evolution(self, record_generation_videos: bool = False):
         print("=" * 60)
         print("SPATIAL EVOLUTIONARY ALGORITHM")
         print("=" * 60)
         print(f"Population size: {self.population_size}")
         print(f"Generations: {self.num_generations}")
         print(f"Robot joints: {self.num_joints}")
+        if record_generation_videos:
+            print(f"Video recording: ENABLED (one video per generation)")
         print("=" * 60)
         
         # Initialize
@@ -758,10 +831,14 @@ class SpatialEA:
             
             # Create next generation (except for last generation)
             if gen < self.num_generations - 1:
-                self.create_next_generation()
+                self.create_next_generation(record_video=record_generation_videos)
             else:
                 # Run mating movement to capture final positions
-                self.mating_movement_phase(duration=config.simulation_time, save_trajectories=True)
+                self.mating_movement_phase(
+                    duration=config.simulation_time, 
+                    save_trajectories=True,
+                    record_video=record_generation_videos
+                )
 
         
         print(f"\n{'='*60}")
@@ -878,7 +955,6 @@ class SpatialEA:
 
 
 def main():
-    # Initialize world to get robot specs
     print("Initializing robot specifications...")
     temp_world = SimpleFlatWorld(config.world_size)
     temp_robot = gecko()
@@ -894,7 +970,9 @@ def main():
         num_joints=num_joints
     )
     
-    spatial_ea.run_evolution()
+    # Run evolution with optional video recording for each generation
+    # Set to True to record video for each generation's mating movement phase
+    spatial_ea.run_evolution(record_generation_videos=False)
     
     # Demonstrate results
     spatial_ea.demonstrate_best()
