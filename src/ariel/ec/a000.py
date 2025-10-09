@@ -235,36 +235,11 @@ class TreeGenerator:
     @staticmethod
     def random_tree(max_depth: int = 4, branching_prob: float = 0.7) -> TreeGenome:
         """Generate a random tree with pheno_configurable branching probability."""
-        def build_random_subtree(current_depth: int) -> TreeNode | None:
-            if current_depth >= max_depth:
-                return None
-
-            module_type = RNG.choice([pheno_config.ModuleType.BRICK, pheno_config.ModuleType.HINGE])
-            rotation = RNG.choice(list(pheno_config.ModuleRotationsIdx))
-            module = pheno_config.ModuleInstance(type=module_type, rotation=rotation, links={})
-
-            node = TreeNode(module, depth=current_depth)
-            available_faces = node.available_faces()
-
-            # Randomly decide to add children
-            for face in available_faces:
-                if RNG.random() < branching_prob:
-                    child = build_random_subtree(current_depth + 1)
-                    if child:
-                        node._set_face(face, child)
-
-            return node
-
-        genome = TreeGenome.default_init()
-
-        # Add children to root
-        available_faces = genome.root.available_faces()
-        for face in available_faces:
-            if RNG.random() < branching_prob:
-                child = build_random_subtree(1)
-                if child:
-                    genome.root._set_face(face, child)
-
+        genome = TreeGenome.default_init()  # Start with CORE
+        face = RNG.choice(genome.root.available_faces())
+        subtree = TreeNode.random_tree_node(max_depth=max_depth - 1, branch_prob=branching_prob)
+        if subtree:
+            genome.root._set_face(face, subtree)
         return genome
 
 class TreeMutator:
@@ -309,6 +284,10 @@ def test() -> None:
     console.log(example2)
 
     console.rule("[bold blue]Tree Generator Examples")
+
+    treeGenerator = TreeGenerator()
+    random_tree = treeGenerator.random_tree(max_depth=3, branching_prob=0.7)
+    console.log("Random Tree:", random_tree)
 
     genome = TreeGenome()
     genome.root = TreeNode(pheno_config.ModuleInstance(type=pheno_config.ModuleType.BRICK, rotation=pheno_config.ModuleRotationsIdx.DEG_90, links={}))
