@@ -438,7 +438,6 @@ class SpatialEA:
         video_recorder = None
         renderer = None
         if record_video:
-            from ariel.utils.video_recorder import VideoRecorder
             video_name = f"generation_{self.generation + 1:03d}_mating_movement"
             video_recorder = VideoRecorder(
                 file_name=video_name,
