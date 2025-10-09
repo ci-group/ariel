@@ -712,12 +712,6 @@ class SpatialEA:
                 ])
                 child2_pos = parent2_pos + child2_offset
                 
-                # Clamp to world bounds
-                child1_pos[0] = np.clip(child1_pos[0], 0, config.world_size[0])
-                child1_pos[1] = np.clip(child1_pos[1], 0, config.world_size[1])
-                child2_pos[0] = np.clip(child2_pos[0], 0, config.world_size[0])
-                child2_pos[1] = np.clip(child2_pos[1], 0, config.world_size[1])
-                
                 pair_positions.append((child1_pos, child2_pos))
         
         print(f"  Created {len(pairs)} pairs from {self.population_size} robots")
@@ -752,23 +746,7 @@ class SpatialEA:
             
             new_population.append(child2)
             new_positions.append(pair_positions[pair_idx][1])
-        
-        # # Fill remaining slots with mutations of best individuals
-        # while len(new_population) < self.population_size:
-        #     parent = np.random.choice(sorted_pop[:5])  # Top 5
-        #     parent_idx = self.population.index(parent)
-        #     child = self.mutate(parent)  # mutate() already creates new individual with unique_id
-        #     new_population.append(child)
-            
-    #         # Inherit parent's position with small random offset to avoid exact overlap
-    #         offset = np.random.normal(0, 0.1, size=3)
-    #         offset[2] = 0  # Keep z coordinate unchanged
-    #         new_pos = self.current_positions[parent_idx].copy() + offset
-    #         # Clamp to world bounds
-    #         new_pos[0] = np.clip(new_pos[0], 0, config.world_size[0])
-    #         new_pos[1] = np.clip(new_pos[1], 0, config.world_size[1])
-    #         new_positions.append(new_pos)
-        
+
         # Extend population with offspring
         self.population.extend(new_population)
         self.current_positions.extend(new_positions)
