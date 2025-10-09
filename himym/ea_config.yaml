@@ -4,7 +4,8 @@
 # Population and Evolution Parameters
 population:
   size: 25                    # Number of individuals in the population
-  num_generations: 100        # Total number of generations to evolve
+  num_generations: 5        # Total number of generations to evolve
+  maintain_positions: true    # Whether to maintain robot positions across generations
 
 # Selection Parameters
 selection:
@@ -14,7 +15,7 @@ selection:
 # Crossover Parameters
 crossover:
   rate: 1.0                   # Probability of crossover (1.0 = always crossover)
-  type: "one_point"           # Type of crossover: "one_point", "two_point", "uniform"
+  type: "one_point"           # Type of crossover: "one_point"
 
 # Mutation Parameters
 mutation:

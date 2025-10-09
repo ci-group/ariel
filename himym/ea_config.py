@@ -37,6 +37,10 @@ class EAConfig:
     def num_generations(self) -> int:
         return self._config['population']['num_generations']
     
+    @property
+    def maintain_positions(self) -> bool:
+        return self._config['population'].get('maintain_positions', True)
+    
     # Selection Parameters
     @property
     def tournament_size(self) -> int:

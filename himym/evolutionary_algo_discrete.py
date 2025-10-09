@@ -51,11 +51,13 @@ class SpatialEA:
         self, 
         population_size : int = None, 
         num_generations : int = None, 
-        num_joints : int = None
+        num_joints : int = None,
+        maintain_positions : bool = None
     ):
         self.population_size = population_size or config.population_size
         self.num_generations = num_generations or config.num_generations
         self.num_joints = num_joints
+        self.maintain_positions = maintain_positions if maintain_positions is not None else config.maintain_positions
         
         self.population = []
         self.generation = 0
@@ -71,6 +73,9 @@ class SpatialEA:
         
         # For tracking positions during simulation
         self.position_histories = []
+        
+        # Store current positions for cross-generation persistence
+        self.current_positions = []
         
     def create_individual(self):
         individual = SpatialIndividual()
@@ -97,43 +102,50 @@ class SpatialEA:
         self.world = SimpleFlatWorld(config.world_size)
         self.robots = []
         
-        ######### Generate non-overlapping spawn positions for all robots #########
-        positions = []
-        min_distance = config.min_spawn_distance  # Get from config
-        max_attempts = 1000  # Maximum attempts to find a valid position
-        
-        for i in range(self.population_size):
-            attempts = 0
-            position_found = False
+        ######### Determine spawn positions #########
+        if self.maintain_positions and len(self.current_positions) == self.population_size:
+            # Use positions from previous generation
+            print(f"  Using positions from previous generation")
+            positions = self.current_positions.copy()
+        else:
+            # Generate new non-overlapping spawn positions for all robots
+            print(f"  Generating new random spawn positions")
+            positions = []
+            min_distance = config.min_spawn_distance  # Get from config
+            max_attempts = 1000  # Maximum attempts to find a valid position
             
-            while not position_found and attempts < max_attempts:
-                # Generate random position
-                x = np.random.uniform(config.spawn_x_min, config.spawn_x_max)
-                y = np.random.uniform(config.spawn_y_min, config.spawn_y_max)
-                z = config.spawn_z
-                new_pos = np.array([x, y, z])
+            for i in range(self.population_size):
+                attempts = 0
+                position_found = False
                 
-                # Check distance to all existing positions
-                valid = True
-                for existing_pos in positions:
-                    distance = np.linalg.norm(new_pos[:2] - existing_pos[:2])  # Only check x,y
-                    if distance < min_distance:
-                        valid = False
-                        break
+                while not position_found and attempts < max_attempts:
+                    # Generate random position
+                    x = np.random.uniform(config.spawn_x_min, config.spawn_x_max)
+                    y = np.random.uniform(config.spawn_y_min, config.spawn_y_max)
+                    z = config.spawn_z
+                    new_pos = np.array([x, y, z])
+                    
+                    # Check distance to all existing positions
+                    valid = True
+                    for existing_pos in positions:
+                        distance = np.linalg.norm(new_pos[:2] - existing_pos[:2])  # Only check x,y
+                        if distance < min_distance:
+                            valid = False
+                            break
+                    
+                    if valid:
+                        positions.append(new_pos)
+                        position_found = True
+                    else:
+                        attempts += 1
                 
-                if valid:
-                    positions.append(new_pos)
-                    position_found = True
-                else:
-                    attempts += 1
-            
-            if not position_found:
-                # If we couldn't find a non-overlapping position, use grid placement
-                print(f"  Warning: Could not find non-overlapping position for robot {i}, using grid fallback")
-                grid_size = int(np.ceil(np.sqrt(self.population_size)))
-                grid_x = (i % grid_size) * min_distance + config.spawn_x_min
-                grid_y = (i // grid_size) * min_distance + config.spawn_y_min
-                positions.append(np.array([grid_x, grid_y, config.spawn_z]))
+                if not position_found:
+                    # If we couldn't find a non-overlapping position, use grid placement
+                    print(f"  Warning: Could not find non-overlapping position for robot {i}, using grid fallback")
+                    grid_size = int(np.ceil(np.sqrt(self.population_size)))
+                    grid_x = (i % grid_size) * min_distance + config.spawn_x_min
+                    grid_y = (i // grid_size) * min_distance + config.spawn_y_min
+                    positions.append(np.array([grid_x, grid_y, config.spawn_z]))
         
         ######### Spawn robots #########
         for i, individual in enumerate(self.population):
@@ -163,6 +175,10 @@ class SpatialEA:
         
         print(f"Spawned {len(self.population)} robots successfully")
         print(f"Tracking {len(self.tracked_geoms)} core geoms")
+        
+        # Store initial positions for this generation
+        if self.generation == 0 or not self.maintain_positions:
+            self.current_positions = [pos.copy() for pos in positions]
     
     def spatial_controller(
         self, 
@@ -362,6 +378,14 @@ class SpatialEA:
         
         print(f"  Mating movement complete!")
         
+        # Update current positions for next generation if maintaining positions
+        if self.maintain_positions:
+            self.current_positions = []
+            for i in range(self.population_size):
+                pos = self.tracked_geoms[i].xpos.copy()
+                self.current_positions.append(pos)
+            print(f"  Updated positions for next generation")
+        
         # Save trajectory visualization
         if save_trajectories:
             self._save_mating_trajectories(trajectories, fitness_values, attractiveness)
@@ -466,18 +490,24 @@ class SpatialEA:
         self.mating_movement_phase(duration=60.0, save_trajectories=True)
         
         new_population = []
+        new_positions = []  # Track which position each offspring inherits
         
         # Sort population by fitness for potential elitism
         sorted_pop = sorted(self.population, key=lambda ind: ind.fitness, reverse=True)
         
-        # Elitism: keep best individual
+        # Elitism: keep best individual at their current position
         if config.elitism:
             best = SpatialIndividual()
             best.genotype = sorted_pop[0].genotype.copy()
+            best_idx = self.population.index(sorted_pop[0])
             new_population.append(best)
+            if self.maintain_positions:
+                new_positions.append(self.current_positions[best_idx].copy())
 
         # Pair up robots based on final proximity after movement
         pairs = []
+        pair_positions = []  # Track positions for each pair
+        
         for i, individual in enumerate(self.population):
             current_pos = self.tracked_geoms[i].xpos.copy()
             closest_idx = None
@@ -493,9 +523,15 @@ class SpatialEA:
             
             if closest_idx is not None:
                 pairs.append((i, closest_idx))
+                # Store the midpoint position between the two parents for offspring
+                if self.maintain_positions:
+                    parent1_pos = self.current_positions[i]
+                    parent2_pos = self.current_positions[closest_idx]
+                    midpoint = (parent1_pos + parent2_pos) / 2.0
+                    pair_positions.append((parent1_pos.copy(), parent2_pos.copy(), midpoint))
         
         # Create offspring from pairs
-        for parent1_idx, parent2_idx in pairs:
+        for pair_idx, (parent1_idx, parent2_idx) in enumerate(pairs):
             parent1 = self.population[parent1_idx]
             parent2 = self.population[parent2_idx]
             
@@ -513,18 +549,41 @@ class SpatialEA:
             child2 = self.mutate(child2)
             
             new_population.append(child1)
+            if self.maintain_positions and pair_idx < len(pair_positions):
+                # Child1 inherits parent1's position
+                new_positions.append(pair_positions[pair_idx][0])
+            
             if len(new_population) < self.population_size:
                 new_population.append(child2)
+                if self.maintain_positions and pair_idx < len(pair_positions):
+                    # Child2 inherits parent2's position
+                    new_positions.append(pair_positions[pair_idx][1])
         
         # Fill remaining slots with mutations of best individuals
         while len(new_population) < self.population_size:
             parent = np.random.choice(sorted_pop[:5])  # Top 5
+            parent_idx = self.population.index(parent)
             child = SpatialIndividual()
             child.genotype = parent.genotype.copy()
             child = self.mutate(child)
             new_population.append(child)
+            
+            if self.maintain_positions:
+                # Inherit parent's position with small random offset to avoid exact overlap
+                offset = np.random.normal(0, 0.1, size=3)
+                offset[2] = 0  # Keep z coordinate unchanged
+                new_pos = self.current_positions[parent_idx].copy() + offset
+                # Clamp to world bounds
+                new_pos[0] = np.clip(new_pos[0], 0, config.world_size[0])
+                new_pos[1] = np.clip(new_pos[1], 0, config.world_size[1])
+                new_positions.append(new_pos)
         
         self.population = new_population[:self.population_size]
+        
+        # Update position tracking
+        if self.maintain_positions:
+            self.current_positions = new_positions[:self.population_size]
+            print(f"  Maintained {len(self.current_positions)} positions for next generation")
     
     def run_evolution(self):
         print("=" * 60)
@@ -601,11 +660,19 @@ class SpatialEA:
         demo_model = demo_world.spec.compile()
         demo_data = mujoco.MjData(demo_model)
         
+        # Diagnostic: Check model consistency
+        print(f"\nDiagnostics:")
+        print(f"  Evolution num_joints (self.num_joints): {self.num_joints}")
+        print(f"  Demo model actuators (demo_model.nu): {demo_model.nu}")
+        print(f"  Best genotype length: {len(best.genotype)}")
+        print(f"  Expected genotype length: {self.num_joints * 3}")
+        
         # Controller for single robot
         def demo_controller(model, data):
             genotype = best.genotype
-            for j in range(self.num_joints):
-                if j < model.nu and j * 3 + 2 < len(genotype):
+            # Use demo_model.nu instead of self.num_joints to match actual model
+            for j in range(min(demo_model.nu, len(genotype) // 3)):
+                if j * 3 + 2 < len(genotype):
                     amplitude = genotype[j * 3]
                     frequency = genotype[j * 3 + 1]
                     phase = genotype[j * 3 + 2]
