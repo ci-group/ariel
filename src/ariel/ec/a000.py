@@ -247,6 +247,7 @@ class TreeMutator:
     def random_subtree_replacement(
         individual: TreeGenome,
         max_subtree_depth: int = 1,
+        branching_prob: float = 0.5,
     ) -> TreeGenome:
         """Replace a random subtree with a new random subtree."""
         if individual.root is None:
@@ -264,7 +265,7 @@ class TreeMutator:
         node_to_replace = RNG.choice(all_nodes[1:])  # Avoid replacing root
 
         # Generate a new random subtree
-        new_subtree = TreeNode.random_tree_node(max_depth=max_subtree_depth)
+        new_subtree = TreeNode.random_tree_node(max_depth=max_subtree_depth, branch_prob=branching_prob)
 
         with new_individual.root.enable_replacement():
             new_individual.root.replace_node(node_to_replace, new_subtree)
