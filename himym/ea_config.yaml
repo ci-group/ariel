@@ -3,7 +3,7 @@
 
 # Population and Evolution Parameters
 population:
-  size: 25                    # Number of individuals in the population
+  size: 10                    # Number of individuals in the population
   num_generations: 5        # Total number of generations to evolve
   maintain_positions: true    # Whether to maintain robot positions across generations
 
@@ -11,6 +11,8 @@ population:
 selection:
   tournament_size: 3          # Number of individuals competing in tournament selection
   elitism: true               # Whether to keep the best individual in next generation
+  pairing_radius: 1.0      # Maximum distance for pairing robots (meters)
+  offspring_radius: 0.3      # Radius around parents where offspring spawn (meters)
 
 # Crossover Parameters
 crossover:
@@ -42,7 +44,7 @@ genotype:
 
 # Simulation Parameters
 simulation:
-  time: 50.0                  # Duration of each fitness evaluation (seconds)
+  time: 30.0                  # Duration of each fitness evaluation (seconds)
   final_demo_time: 15.0       # Duration of final best individual demonstration
   multi_robot_demo_time: 300.0  # Duration of multi-robot demonstration
   control_clip_min: -0.7854   # Minimum control value (-pi/4 radians)

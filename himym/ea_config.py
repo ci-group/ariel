@@ -50,6 +50,14 @@ class EAConfig:
     def elitism(self) -> bool:
         return self._config['selection']['elitism']
     
+    @property
+    def pairing_radius(self) -> float:
+        return self._config['selection'].get('pairing_radius', 2.0)
+    
+    @property
+    def offspring_radius(self) -> float:
+        return self._config['selection'].get('offspring_radius', 0.3)
+    
     # Crossover Parameters
     @property
     def crossover_rate(self) -> float:
