@@ -43,10 +43,17 @@
 	"mounts": [
 		// "type=bind,source=${localEnv:HOME}/.ssh,target=/vscode/.ssh,readonly"
 	],
+	"runArgs": [
+	"--device=/dev/dri",
+	"-e", "DISPLAY=:0",
+	"-e", "QT_X11_NO_MITSHM=1",
+	"-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+	],
 	"containerEnv": {
 		"PYTHONDONTWRITEBYTECODE": "True",
 		"PYTHONUNBUFFERED": "True",
-		"UV_LINK_MODE": "copy"
+		"UV_LINK_MODE": "copy",
+		"MUJOCO_GL": "glfw"
 	},
 	"postCreateCommand": "zsh .devcontainer/scripts/postCreateCommand.sh"
 }

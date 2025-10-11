@@ -39,3 +39,27 @@ def simple_runner(
 
     while data.time < duration:
         mujoco.mj_step(model, data, nstep=steps_per_loop)
+        
+def continue_simple_runner(
+    model: mujoco.MjModel,
+    data: mujoco.MjData,
+    duration: float = 10.0,
+    steps_per_loop: int = 100,
+) -> None:
+    """
+    Continue a simple headless simulation for a given duration.
+    
+    Parameters
+    ----------
+    model : mujoco.MjModel
+        The MuJoCo model to simulate.
+    data : mujoco.MjData
+        The MuJoCo data to simulate.
+    duration : float, optional
+        The duration of the simulation in seconds, by default 10.0
+    steps_per_loop : int, optional
+        The number of simulation steps to take in each loop, by default 100
+    """
+    
+    while data.time < duration:
+        mujoco.mj_step(model, data, nstep=steps_per_loop)

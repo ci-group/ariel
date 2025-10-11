@@ -1,0 +1,42 @@
+# Brain EA
+    ea_brain_config = EABrainConfig(
+        # General EA parameters
+        runs_brain =            1,
+        ngen_brain =            50,
+        pop_size_brain =        50,
+        cxpb_brain =            0.7,
+        mutpb_brain =           0.5,
+        elites_brain =          1,
+        # Network structure
+        hidden_size=            128,
+        no_hidden_layers=       3,
+        # Initialization function for brain genotype
+        init_func=              partial(np.random.uniform, -1, 1),
+        # Mutation parameters
+        gauss_mut_mu=           0.0,
+        gauss_mut_sigma=        0.2,
+        gauss_mut_indpb=        0.2,
+        # Crossover parameters
+        wa_alpha=               0.4,
+        # Selection parameters
+        tourn_size=             3
+    )
+    ea_body_config = EABodyConfig(
+        # General EA parameters
+        runs_body=              1,
+        ngen_body=              1,
+        pop_size_body=          10,
+        cxpb_body=              0.5,
+        mutpb_body=             0.5,
+        elites_body=            1, # PLEASE note: If no elites, the final generation 
+                                   #              of a run might not contain the best
+                                   #              individual over the whole run!
+        # Mutation parameters 
+        gauss_mut_mu=           0.0,
+        gauss_mut_sigma=        0.1,
+        gauss_mut_indpb=        0.3,
+        # Crossover parameters
+        wa_alpha=               0.4,
+        # Selection parameters
+        tourn_size=             3,
+        )
