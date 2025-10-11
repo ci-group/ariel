@@ -1,0 +1,212 @@
+:py:mod:`na_cpg`
+=============================================
+
+.. py:module:: ariel.simulation.controllers.na_cpg
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   .. admonition:: Notes
+
+      *
+
+   .. admonition:: References
+
+      [1] https://www.sciencedirect.com/science/article/pii/S2667379722000353
+
+   .. todo::
+
+      [ ] Fix constraint function:
+          This requires experimental validation to find the mapping from angular
+          velocity to maximum allowed change in the CPG state space.
+          The paper determines this information empirically.
+      [ ] Implement matrix formulation
+      [ ] What should the initial values be???
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.na_cpg.NaCPG
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.na_cpg.create_fully_connected_adjacency
+   ariel.simulation.controllers.na_cpg.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.na_cpg.E
+   ariel.simulation.controllers.na_cpg.SCRIPT_NAME
+   ariel.simulation.controllers.na_cpg.CWD
+   ariel.simulation.controllers.na_cpg.DATA
+   ariel.simulation.controllers.na_cpg.console
+
+
+.. py:data:: E
+   :value: 1e-09
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: console
+
+.. py:function:: create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]
+
+.. py:class:: NaCPG(adjacency_dict: dict[int, list[int]], alpha: float = 0.1, dt: float = 0.01, hard_bounds: tuple[float, float] | None = (-torch.pi / 2, torch.pi / 2), *, angle_tracking: bool = False, seed: int | None = None)
+
+   Bases: :py:obj:`torch.nn.Module`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.controllers.na_cpg.NaCPG
+      :parts: 1
+
+
+   Implements the Normalized Asymmetric CPG (NA-CPG).
+
+
+   .. py:attribute:: xy
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: xy_dot_old
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: angles
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: adjacency_dict
+
+
+   .. py:attribute:: n
+
+
+   .. py:attribute:: angle_tracking
+      :value: False
+
+
+
+   .. py:attribute:: hard_bounds
+
+
+   .. py:attribute:: clamping_error
+      :value: 0.0
+
+
+
+   .. py:attribute:: alpha
+      :value: 0.1
+
+
+
+   .. py:attribute:: dt
+      :value: 0.01
+
+
+
+   .. py:attribute:: phase
+
+
+   .. py:attribute:: amplitudes
+
+
+   .. py:attribute:: w
+
+
+   .. py:attribute:: ha
+
+
+   .. py:attribute:: b
+
+
+   .. py:attribute:: parameter_groups
+
+
+   .. py:attribute:: num_of_parameters
+
+
+   .. py:attribute:: num_of_parameter_groups
+      :value: 5
+
+
+
+   .. py:attribute:: angle_history
+      :value: []
+
+
+
+   .. py:attribute:: initial_state
+
+
+   .. py:method:: param_type_converter(params: list[float] | numpy.ndarray | torch.Tensor) -> torch.Tensor
+
+
+   .. py:method:: set_flat_params(params: torch.Tensor) -> None
+
+
+   .. py:method:: set_param_with_dict(params: dict[str, torch.Tensor]) -> None
+
+
+   .. py:method:: set_params_by_group(group_name: str, params: torch.Tensor) -> None
+
+
+   .. py:method:: get_flat_params() -> torch.Tensor
+
+
+   .. py:method:: term_a(alpha: float, r2i: float) -> float
+      :staticmethod:
+
+
+
+   .. py:method:: term_b(zeta_i: float, w_i: float) -> float
+      :staticmethod:
+
+
+
+   .. py:method:: zeta(ha_i: float, x_dot_old: float) -> float
+      :staticmethod:
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: forward(time: float | None = None) -> torch.Tensor
+
+
+   .. py:method:: save(path: str | pathlib.Path) -> None
+
+      Save learnable parameters to file.
+
+
+
+   .. py:method:: load(path: str | pathlib.Path) -> None
+
+      Load learnable parameters from file.
+
+
+
+.. py:function:: main() -> None
+

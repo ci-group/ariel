@@ -1,0 +1,169 @@
+:py:mod:`controllers`
+======================================
+
+.. py:module:: ariel.simulation.controllers
+
+.. autoapi-nested-parse::
+
+   Types of robotic controllers.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   controller/index.rst
+   na_cpg/index.rst
+   norm_cpg/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.NaCPG
+
+
+
+
+.. py:class:: NaCPG(adjacency_dict: dict[int, list[int]], alpha: float = 0.1, dt: float = 0.01, hard_bounds: tuple[float, float] | None = (-torch.pi / 2, torch.pi / 2), *, angle_tracking: bool = False, seed: int | None = None)
+
+   Bases: :py:obj:`torch.nn.Module`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.controllers.NaCPG
+      :parts: 1
+
+
+   Implements the Normalized Asymmetric CPG (NA-CPG).
+
+
+   .. py:attribute:: xy
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: xy_dot_old
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: angles
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: adjacency_dict
+
+
+   .. py:attribute:: n
+
+
+   .. py:attribute:: angle_tracking
+      :value: False
+
+
+
+   .. py:attribute:: hard_bounds
+
+
+   .. py:attribute:: clamping_error
+      :value: 0.0
+
+
+
+   .. py:attribute:: alpha
+      :value: 0.1
+
+
+
+   .. py:attribute:: dt
+      :value: 0.01
+
+
+
+   .. py:attribute:: phase
+
+
+   .. py:attribute:: amplitudes
+
+
+   .. py:attribute:: w
+
+
+   .. py:attribute:: ha
+
+
+   .. py:attribute:: b
+
+
+   .. py:attribute:: parameter_groups
+
+
+   .. py:attribute:: num_of_parameters
+
+
+   .. py:attribute:: num_of_parameter_groups
+      :value: 5
+
+
+
+   .. py:attribute:: angle_history
+      :value: []
+
+
+
+   .. py:attribute:: initial_state
+
+
+   .. py:method:: param_type_converter(params: list[float] | numpy.ndarray | torch.Tensor) -> torch.Tensor
+
+
+   .. py:method:: set_flat_params(params: torch.Tensor) -> None
+
+
+   .. py:method:: set_param_with_dict(params: dict[str, torch.Tensor]) -> None
+
+
+   .. py:method:: set_params_by_group(group_name: str, params: torch.Tensor) -> None
+
+
+   .. py:method:: get_flat_params() -> torch.Tensor
+
+
+   .. py:method:: term_a(alpha: float, r2i: float) -> float
+      :staticmethod:
+
+
+
+   .. py:method:: term_b(zeta_i: float, w_i: float) -> float
+      :staticmethod:
+
+
+
+   .. py:method:: zeta(ha_i: float, x_dot_old: float) -> float
+      :staticmethod:
+
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: forward(time: float | None = None) -> torch.Tensor
+
+
+   .. py:method:: save(path: str | pathlib.Path) -> None
+
+      Save learnable parameters to file.
+
+
+
+   .. py:method:: load(path: str | pathlib.Path) -> None
+
+      Load learnable parameters from file.
+
+
+

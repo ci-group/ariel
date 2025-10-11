@@ -1,0 +1,20 @@
+:py:mod:`genotypes`
+============================
+
+.. py:module:: ariel.ec.genotypes
+
+.. autoapi-nested-parse::
+
+   Genotypes and their operators.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   nde/index.rst
+
+

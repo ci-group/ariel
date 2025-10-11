@@ -1,0 +1,69 @@
+:py:mod:`noise_gen`
+===============================
+
+.. py:module:: ariel.utils.noise_gen
+
+.. autoapi-nested-parse::
+
+   Module for generating Perlin noise using NumPy.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.noise_gen.PerlinNoise
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.noise_gen.NormMethod
+
+
+.. py:type:: NormMethod
+   :canonical: Literal['linear', 'clip', 'none']
+
+
+.. py:class:: PerlinNoise
+
+   Vectorized Perlin noise (2D) using NumPy only.
+
+   .. admonition:: Examples
+
+      >>> noise = PerlinNoise(seed=1234)
+      >>> width, height = 256, 256
+      >>> scale = 50.0
+      >>> grid = noise.as_grid(width, height, scale=scale, normalize=True)
+
+
+   .. py:attribute:: seed
+      :type:  int | None
+      :value: None
+
+
+
+   .. py:attribute:: norm_methods
+      :type:  NormMethod
+      :value: 'linear'
+
+
+
+   .. py:method:: __post_init__() -> None
+
+      Initialize the Perlin noise generator.
+
+
+
+   .. py:method:: as_grid(width: int, height: int, scale: float = 64.0, normalize: NormMethod = 'none') -> ariel.parameters.ariel_types.FloatArray
+
+
