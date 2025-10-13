@@ -9,10 +9,51 @@ import random
 from typing import Tuple, Dict
 import re
 
-def crossover_lsystem(axiom1: str, rules1: Dict[str, str],axiom2: str, rules2: Dict[str, str], crossover_rate: float = 0.1):
-    offspring1_axiom = axiom1
-    offspring2_axiom = axiom2
-    offspring1_rules = rules1.copy()
-    offspring2_rules = rules2.copy()
+def crossover_lsystem(axiom1: str, rules1: Dict[str, str],axiom2: str, rules2: Dict[str, str], crossover_rate: float = 0.3):
+    crossover_len = int(1+(6*crossover_rate/2))
+    crossover_point = random.randint(0,6)
+    if crossover_len+crossover_point>=6:
+        crossover_point = 6-crossover_len-1
+    gene_pattern = re.compile(r"([CBHN]\((0|90|180|270),(FRONT|LEFT|RIGHT|BACK|TOP|BOTTOM)\))||\[|\]|C")
+    axiom_tokens_tmp = [m.group(0) for m in gene_pattern.finditer(axiom1)]
+    axiom_tokens1 = [token for i, token in enumerate(axiom_tokens_tmp) if token not in ['[',']','C','']]
+    axiom_tokens_tmp = [m.group(0) for m in gene_pattern.finditer(axiom2)]
+    axiom_tokens2 = [token for i, token in enumerate(axiom_tokens_tmp) if token not in ['[',']','C','']]
+    print("crossover position:",crossover_point)
+    print("crossover length:",crossover_len)
+    offspring1_axiom = 'C'
+    offspring2_axiom = 'C'
+    rules1_keys = list(rules1.keys())
+    rules2_keys = list(rules2.keys())   
+    rules1_values = list(rules1.values())
+    rules2_values = list(rules2.values())
+    offspring1_rules = {}
+    offspring2_rules = {}
+    for i in range(0,crossover_point):
+        offspring1_axiom+=f"[{axiom_tokens1[i]}]"
+        offspring2_axiom+=f"[{axiom_tokens2[i]}]"
+        for j in range(0,len(rules1_keys)):
+            if axiom_tokens1[i]==rules1_keys[j]: 
+                offspring1_rules[rules1_keys[j]]=rules1_values[j]
+        for j in range(0,len(rules2_keys)):
+            if axiom_tokens2[i]==rules2_keys[j]: 
+                offspring2_rules[rules2_keys[j]]=rules2_values[j]
+    for i in range(crossover_point,crossover_point+crossover_len):  
+        offspring1_axiom+=f"[{axiom_tokens2[i]}]"
+        offspring2_axiom+=f"[{axiom_tokens1[i]}]"   
+        for j in range(0,len(rules1_keys)):
+            if axiom_tokens1[i]==rules1_keys[j]: 
+                offspring2_rules[rules1_keys[j]]=rules1_values[j]
+        for j in range(0,len(rules2_keys)):
+            if axiom_tokens2[i]==rules2_keys[j]: 
+                offspring1_rules[rules2_keys[j]]=rules2_values[j]
+    for i in range(crossover_point+crossover_len,len(axiom_tokens1)): 
+        offspring1_axiom+=f"[{axiom_tokens1[i]}]"
+        offspring2_axiom+=f"[{axiom_tokens2[i]}]"
+        for j in range(0,len(rules1_keys)):
+            if axiom_tokens1[i]==rules1_keys[j]: 
+                offspring1_rules[rules1_keys[j]]=rules1_values[j]
+        for j in range(0,len(rules2_keys)):
+            if axiom_tokens1[i]==rules2_keys[j]: 
+                offspring2_rules[rules2_keys[j]]=rules2_values[j]
     return offspring1_axiom, offspring1_rules, offspring2_axiom, offspring2_rules
-    

@@ -11,11 +11,11 @@ import re
 
 def random_lsystem():
     rules = {}
-    axiom = ''
+    axiom = 'C'
     allowed_numbers = [0, 90, 180, 270]
     for face in ['FRONT', 'LEFT', 'RIGHT', 'BACK', 'TOP', 'BOTTOM']:
         letter = random.choice(['B', 'H','N'])
         number = random.choice(allowed_numbers)
-        axiom+=f"{letter}({number},{face})"
+        axiom+=f"[{letter}({number},{face})]"
     return axiom, rules
 
