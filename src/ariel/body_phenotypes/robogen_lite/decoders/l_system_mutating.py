@@ -15,6 +15,7 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
     - Randomly changes, adds, or removes symbols in the axiom.
     - Randomly mutates rule replacements.
     Returns mutated (axiom, rules).
+
     """
     # Tokenize axiom using regex to preserve gene and bracket structure
     gene_pattern = re.compile(r"([CBHN]\((0|90|180|270),(FRONT|LEFT|RIGHT|BACK|TOP|BOTTOM)\))||\[|\]|C")
