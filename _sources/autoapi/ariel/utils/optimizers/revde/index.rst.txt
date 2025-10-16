@@ -1,0 +1,85 @@
+:py:mod:`revde`
+======================================
+
+.. py:module:: ariel.utils.optimizers.revde
+
+.. autoapi-nested-parse::
+
+   Reversible Differential Evolution (RevDE) optimizer.
+
+   .. admonition:: Notes
+
+      *
+
+   .. admonition:: References
+
+      [1] https://dl.acm.org/doi/abs/10.1145/3377929.3389972
+
+   .. todo:: [ ]
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.optimizers.revde.RevDE
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.optimizers.revde.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.optimizers.revde.ArrayGenotype
+   ariel.utils.optimizers.revde.SCRIPT_NAME
+   ariel.utils.optimizers.revde.CWD
+   ariel.utils.optimizers.revde.DATA
+   ariel.utils.optimizers.revde.SEED
+   ariel.utils.optimizers.revde.RNG
+   ariel.utils.optimizers.revde.console
+
+
+.. py:data:: ArrayGenotype
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: RNG
+
+.. py:data:: console
+
+.. py:class:: RevDE(scaling_factor: float)
+
+   .. py:attribute:: r_matrix
+
+
+   .. py:method:: mutate(parent_a: ArrayGenotype, parent_b: ArrayGenotype, parent_c: ArrayGenotype) -> list[ArrayGenotype]
+
+
+.. py:function:: main() -> None
+
+   Entry point.
+
+

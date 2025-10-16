@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>na_cpg_norm - ARIEL documentation</title><link rel="shortcut icon" href="../../../../../_static/ariel_favicon.ico"/><link rel="index" title="Index" href="../../../../../genindex.html" /><link rel="search" title="Search" href="../../../../../search.html" /><link rel="next" title="environments" href="../../environments/index.html" /><link rel="prev" title="na_cpg_beta" href="../na_cpg_beta/index.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b1a1f93b" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/shibuya.css?v=bb284d7b" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../../../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto+Slab:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+    rel="stylesheet">
+
+<style>
+    :root {
+        /* --------- FONTS --------- */
+        --sy-f-heading: 'Bree Serif', 'Roboto Slab', 'Georgia', 'Arial', serif;
+        --sy-f-text: 'Verdana', 'Ubuntu', 'Lato', 'Helvetica', 'Arial', var(--sy-f-sys), sans-serif;
+        --sy-f-mono: 'Monaco', monospace;
+
+        /* --------- NAVBAR --------- */
+        /* --sy-s-banner-height: 40px; */
+        /* --sy-s-navbar-height: 50px; */
+
+        /* --------- COLORS --------- */
+        /*  Text */
+        /* --header-foreground: #FFFFFF; */
+        --header-foreground: #ECEEED;
+
+        --text-foreground: #F1F3F2;
+        --text-foreground-light: #1A211E;
+
+        --muted-text: #8A8A8A;
+        --inline-code: #e74c3c;
+
+        /* Window */
+        --main-window: #111113;
+        --side-bar: #111113;
+        --border-color: #303036;
+        --code-border: #8A8A8A;
+
+        --main-window-light: #FFFFFF;
+        --side-bar-light: #FFFFFF;
+        --border-color-light: #FFFFFF;
+        --code-border-light: #8A8A8A;
+
+        /* Links */
+        --unvisited: #4D8BFF;
+        --unvisited-hover: #99BDFF;
+        --visited: #E61986;
+        --visited-hover: #F075B7;
+
+        --unvisited-light: #1A6AFF;
+        --unvisited-hover-light: #003EB3;
+        --visited-light: #CF1779;
+        --visited-hover-light: #A1125E;
+
+        /* Theme */
+        --accent-a2: #29AB8711;
+        --accent-a25: #29AB8722;
+        --accent-a3: #29AB8733;
+        --accent-a4: #29AB8755;
+        --accent-9: #29AB87EE;
+        --accent-a11: #29AB87FF;
+        --color-surface-accent: var(--accent-a2);
+        --sy-c-light: var(--muted-text);
+        --sy-c-border: var(--accent-a4);
+
+        /* --- Code --- */
+        /* highlight */
+        --syntax-highlight-bg: var(--accent-a25);
+        /* background */
+        --syntax-pre-bg: #8A8A8A11;
+        /* header */
+        --syntax-cap-bg: var(--accent-a4);
+
+    }
+
+    html.dark {
+        /* Background */
+        --sy-c-background: var(--side-bar);
+        --sy-c-foot-background: var(--side-bar);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground);
+        --yue-c-code-background: var(--main-window);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #FFA400;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--header-foreground);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-a4); */
+        --sy-c-foot-divider: var(--border-color);
+
+    }
+
+    html.light {
+        /* Background */
+        --sy-c-background: var(--side-bar-light);
+        --sy-c-foot-background: var(--side-bar-light);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground-light);
+        --yue-c-code-background: var(--main-window-light);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #F17300;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--text-foreground-light);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-9); */
+        --sy-c-foot-divider: var(--border-color-light);
+    }
+
+
+    /* --------- CORRECT "BOLD" CHANGES HEADER --------- */
+    .sy-head-brand strong {
+        color: light-dark(var(--text-foreground-light), var(--text-foreground));
+    }
+
+    /* --------- UNDERLINE HEADERS --------- */
+    :is(h1, h2, h3, h4) {
+        font-weight: bold;
+    }
+
+    :is(h1, h2):not(:has(code)) {
+        text-decoration: underline;
+    }
+
+    /* --------- CODE BORDERS --------- */
+    /* .literal {
+        border: 1px solid;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    } */
+
+    .docutils.literal.notranslate {
+        font-weight: bold;
+    }
+
+    .literal-block-wrapper {
+        font-weight: bold;
+        border: 1px solid;
+        border-radius: 0.45em;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    }
+
+    /* --------- EXTERNAL LINKS --------- */
+    /* unseen passive */
+    .reference.external {
+        border-color: light-dark(var(--unvisited-light), var(--unvisited));
+        color: light-dark(var(--unvisited-light), var(--unvisited));
+    }
+
+    /* unseen hover */
+    .reference.external:hover {
+        border-color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+        color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+    }
+
+    /* visited passive */
+    .reference.external:visited {
+        border-color: light-dark(var(--visited-light), var(--visited));
+        color: light-dark(var(--visited-light), var(--visited));
+    }
+
+    /* visited hover */
+    .reference.external:visited:hover {
+        border-color: light-dark(var(--visited-hover-light), var(--visited-hover));
+        color: light-dark(var(--visited-hover-light), var(--visited-hover));
+    }
+
+    /* --------- MAIN WINDOW COLORS --------- */
+    .sy-main {
+        border-left: 1px solid;
+        border-right: 1px solid;
+        border-color: light-dark(var(--border-color-light), var(--border-color));
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Ensure breadcrumb is the same color as the main window */
+    .sy-breadcrumbs {
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Add a little bit of space to right side-bar */
+    .sy-scrollbar {
+        padding-left: 1em;
+    }
+
+    /* --------- API COLORS --------- */
+    .sig {
+        background-color: var(--accent-a2);
+        border-top: 3px solid var(--accent-a4);
+    }
+
+    .k {
+        font-style: italic;
+    }
+
+    /* Flow diagrams */
+    .inheritance.graphviz {
+        background-color: #92A0A077;
+        border-radius: 5px;
+    }
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="na_cpg_norm"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../../../../index.html">
+      
+      
+      <strong>ARIEL</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/introduction_to_modular_robots/index.html">Introduction to modular robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/contributing_guide/index.html">Contributing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/ec_course_docs.html">Evolutionary Computing Course Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/ea_intro/ea_example.html">Your first EA with ARIEL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../source/Mujoco_docs/mujoco_docs.html">MuJoCo Data Variables Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../../body_phenotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">body_phenotypes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../body_phenotypes/robogen_lite/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">robogen_lite</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ec/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/genotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genotypes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a000/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a001/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a001</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a002/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a002</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a003/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a003</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a004/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../ec/a005/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../parameters/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">parameters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../parameters/ariel_modules/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_modules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../parameters/ariel_types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../parameters/mujoco_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_params</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../environments/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../tasks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tasks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/optimizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/file_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">file_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/mujoco_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/noise_gen/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">noise_gen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/renderers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">renderers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/runners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runners</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/tracker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../utils/video_recorder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">video_recorder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../visualisation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualisation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../visualisation/analysis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.E"><code class="docutils literal notranslate"><span class="pre">E</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.SCRIPT_NAME"><code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.CWD"><code class="docutils literal notranslate"><span class="pre">CWD</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.DATA"><code class="docutils literal notranslate"><span class="pre">DATA</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.console"><code class="docutils literal notranslate"><span class="pre">console</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.create_fully_connected_adjacency"><code class="docutils literal notranslate"><span class="pre">create_fully_connected_adjacency()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm"><code class="docutils literal notranslate"><span class="pre">NaCPG_Norm</span></code></a><ul>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.xy"><code class="docutils literal notranslate">xy</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.xy_dot_old"><code class="docutils literal notranslate">xy_dot_old</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angles"><code class="docutils literal notranslate">angles</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.adjacency_dict"><code class="docutils literal notranslate">adjacency_dict</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.n"><code class="docutils literal notranslate">n</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angle_tracking"><code class="docutils literal notranslate">angle_tracking</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.hard_bounds"><code class="docutils literal notranslate">hard_bounds</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.clamping_error"><code class="docutils literal notranslate">clamping_error</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.normalize"><code class="docutils literal notranslate">normalize</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.duration"><code class="docutils literal notranslate">duration</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.alpha"><code class="docutils literal notranslate">alpha</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.dt"><code class="docutils literal notranslate">dt</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.current_step"><code class="docutils literal notranslate">current_step</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.phase"><code class="docutils literal notranslate">phase</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.amplitudes"><code class="docutils literal notranslate">amplitudes</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.w"><code class="docutils literal notranslate">w</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.ha"><code class="docutils literal notranslate">ha</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.b"><code class="docutils literal notranslate">b</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.parameter_groups"><code class="docutils literal notranslate">parameter_groups</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.num_of_parameters"><code class="docutils literal notranslate">num_of_parameters</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.num_of_parameter_groups"><code class="docutils literal notranslate">num_of_parameter_groups</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.initial_state"><code class="docutils literal notranslate">initial_state</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angle_history"><code class="docutils literal notranslate">angle_history</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.is_normalized"><code class="docutils literal notranslate">is_normalized</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.init_angle_history"><code class="docutils literal notranslate">init_angle_history()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.param_type_converter"><code class="docutils literal notranslate">param_type_converter()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_flat_params"><code class="docutils literal notranslate">set_flat_params()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_param_with_dict"><code class="docutils literal notranslate">set_param_with_dict()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_params_by_group"><code class="docutils literal notranslate">set_params_by_group()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.get_flat_params"><code class="docutils literal notranslate">get_flat_params()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.term_a"><code class="docutils literal notranslate">term_a()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.term_b"><code class="docutils literal notranslate">term_b()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.zeta"><code class="docutils literal notranslate">zeta()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.reset"><code class="docutils literal notranslate">reset()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.step"><code class="docutils literal notranslate">step()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.forward"><code class="docutils literal notranslate">forward()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.save"><code class="docutils literal notranslate">save()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.load"><code class="docutils literal notranslate">load()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.plot_all_runs"><code class="docutils literal notranslate"><span class="pre">plot_all_runs()</span></code></a></li>
+<li><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.histories"><code class="docutils literal notranslate"><span class="pre">histories</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../../../index.html"><span itemprop="name">ARIEL</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../../index.html"><span itemprop="name">API Reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></span></a>
+        <span>/</span>
+        <meta itemprop="position" content="4" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></span></a>
+        <span>/</span>
+        <meta itemprop="position" content="5" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_norm</span></code></strong>
+        <meta itemprop="position" content="6" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="module-ariel.simulation.controllers.na_cpg_norm">
+<span id="na-cpg-norm"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_norm</span></code><a class="headerlink" href="#module-ariel.simulation.controllers.na_cpg_norm" title="Link to this heading">¶</a></h1>
+<p>TODO(jmdm): description of script.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<ul class="simple">
+<li></li>
+</ul>
+</div>
+<div class="admonition-references admonition">
+<p class="admonition-title">References</p>
+<p>[1] <a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S2667379722000353">https://www.sciencedirect.com/science/article/pii/S2667379722000353</a></p>
+</div>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm" title="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NaCPG_Norm</span></code></a></p></td>
+<td><p>Implements the Normalized Asymmetric CPG (NA-CPG).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.create_fully_connected_adjacency" title="ariel.simulation.controllers.na_cpg_norm.create_fully_connected_adjacency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_fully_connected_adjacency</span></code></a>(→ dict[int, list[int]])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.main" title="ariel.simulation.controllers.na_cpg_norm.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(→ torch.Tensor)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.plot_all_runs" title="ariel.simulation.controllers.na_cpg_norm.plot_all_runs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_all_runs</span></code></a>(→ None)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.E" title="ariel.simulation.controllers.na_cpg_norm.E"><code class="xref py py-obj docutils literal notranslate"><span class="pre">E</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.SCRIPT_NAME" title="ariel.simulation.controllers.na_cpg_norm.SCRIPT_NAME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.CWD" title="ariel.simulation.controllers.na_cpg_norm.CWD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CWD</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.DATA" title="ariel.simulation.controllers.na_cpg_norm.DATA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DATA</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.console" title="ariel.simulation.controllers.na_cpg_norm.console"><code class="xref py py-obj docutils literal notranslate"><span class="pre">console</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.simulation.controllers.na_cpg_norm.histories" title="ariel.simulation.controllers.na_cpg_norm.histories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">histories</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.E">
+<span class="sig-name descname"><span class="pre">E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-09</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.E" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.SCRIPT_NAME">
+<span class="sig-name descname"><span class="pre">SCRIPT_NAME</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.SCRIPT_NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.CWD">
+<span class="sig-name descname"><span class="pre">CWD</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.CWD" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.DATA">
+<span class="sig-name descname"><span class="pre">DATA</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.DATA" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.console">
+<span class="sig-name descname"><span class="pre">console</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.console" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.create_fully_connected_adjacency">
+<span class="sig-name descname"><span class="pre">create_fully_connected_adjacency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.create_fully_connected_adjacency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NaCPG_Norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-torch.pi</span> <span class="pre">/</span> <span class="pre">2,</span> <span class="pre">torch.pi</span> <span class="pre">/</span> <span class="pre">2)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_tracking</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></p>
+digraph inheritance1ebd025b36 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;Module&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Base class for all neural network modules.&quot;];
+  &quot;NaCPG_Norm&quot; [URL=&quot;#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Implements the Normalized Asymmetric CPG (NA-CPG).&quot;];
+  &quot;Module&quot; -&gt; &quot;NaCPG_Norm&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<p>Implements the Normalized Asymmetric CPG (NA-CPG).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.xy">
+<span class="sig-name descname"><span class="pre">xy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.xy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.xy_dot_old">
+<span class="sig-name descname"><span class="pre">xy_dot_old</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.xy_dot_old" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angles">
+<span class="sig-name descname"><span class="pre">angles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angles" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.adjacency_dict">
+<span class="sig-name descname"><span class="pre">adjacency_dict</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.adjacency_dict" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.n">
+<span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.n" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angle_tracking">
+<span class="sig-name descname"><span class="pre">angle_tracking</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angle_tracking" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.hard_bounds">
+<span class="sig-name descname"><span class="pre">hard_bounds</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.hard_bounds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.clamping_error">
+<span class="sig-name descname"><span class="pre">clamping_error</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.clamping_error" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.normalize">
+<span class="sig-name descname"><span class="pre">normalize</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.normalize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.duration">
+<span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">200</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.1</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.alpha" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.02</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.dt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.current_step">
+<span class="sig-name descname"><span class="pre">current_step</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.current_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.phase">
+<span class="sig-name descname"><span class="pre">phase</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.phase" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.amplitudes">
+<span class="sig-name descname"><span class="pre">amplitudes</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.amplitudes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.w">
+<span class="sig-name descname"><span class="pre">w</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.w" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.ha">
+<span class="sig-name descname"><span class="pre">ha</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.ha" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.b">
+<span class="sig-name descname"><span class="pre">b</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.b" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.parameter_groups">
+<span class="sig-name descname"><span class="pre">parameter_groups</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.parameter_groups" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.num_of_parameters">
+<span class="sig-name descname"><span class="pre">num_of_parameters</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.num_of_parameters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.num_of_parameter_groups">
+<span class="sig-name descname"><span class="pre">num_of_parameter_groups</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.num_of_parameter_groups" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.initial_state">
+<span class="sig-name descname"><span class="pre">initial_state</span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.initial_state" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angle_history">
+<span class="sig-name descname"><span class="pre">angle_history</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.angle_history" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.is_normalized">
+<span class="sig-name descname"><span class="pre">is_normalized</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.is_normalized" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.init_angle_history">
+<span class="sig-name descname"><span class="pre">init_angle_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.init_angle_history" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.param_type_converter">
+<span class="sig-name descname"><span class="pre">param_type_converter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.param_type_converter" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_flat_params">
+<span class="sig-name descname"><span class="pre">set_flat_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_flat_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_param_with_dict">
+<span class="sig-name descname"><span class="pre">set_param_with_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_param_with_dict" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_params_by_group">
+<span class="sig-name descname"><span class="pre">set_params_by_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.set_params_by_group" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.get_flat_params">
+<span class="sig-name descname"><span class="pre">get_flat_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.get_flat_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.term_a">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">term_a</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.term_a" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.term_b">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">term_b</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zeta_i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.term_b" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.zeta">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ha_i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_dot_old</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.zeta" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.reset" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.forward" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.save" title="Link to this definition">¶</a></dt>
+<dd><p>Save learnable parameters to file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.NaCPG_Norm.load" title="Link to this definition">¶</a></dt>
+<dd><p>Load learnable parameters from file.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.main" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.plot_all_runs">
+<span class="sig-name descname"><span class="pre">plot_all_runs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">histories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.plot_all_runs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.simulation.controllers.na_cpg_norm.histories">
+<span class="sig-name descname"><span class="pre">histories</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#ariel.simulation.controllers.na_cpg_norm.histories" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../na_cpg_beta/index.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_beta</span></code></div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../../environments/index.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/thebelab-helper.js"></script>
+      <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../../../../../_static/shibuya.js?v=e730760c"></script></body>
+</html>
