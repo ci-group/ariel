@@ -1,7 +1,7 @@
 """
 L-system genotype random initialization utility for modular robots.
 
-Author: omn 
+Author: omn
 Date: 2025-10-07
 """
 

@@ -9,7 +9,7 @@ import random
 from typing import Tuple, Dict
 import re
 
-def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1) -> Tuple[str, Dict[str, str]]:
+def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1,axiom_temperature=0.2,add_temperature=0.5):
     """
     Mutate the axiom and/or rules of an L-system genotype.
     - Randomly changes, adds, or removes symbols in the axiom.
@@ -35,8 +35,8 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
         num_genes = random.randint(1, 3)
         genes = [random_gene() for _ in range(num_genes)]
         return '[' + ''.join(genes) + ']'
-    
-    mod_gene=random.choice(['axiom','rules'])
+
+    mod_gene=random.choices(['axiom','rules'],weights=[axiom_temperature,1-axiom_temperature])[0]
     if mod_gene=='axiom':
         mutation+='Mutate axiom'
         # Only mutate one gene/branch in the axiom per call, and only if random < mutation_rate
@@ -44,10 +44,10 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
         modified_gene = None
         new_gene = None
         deleted_gene = None
-        if gene_indices and random.random() < mutation_rate: 
+        if gene_indices and random.random() < mutation_rate:
             i = random.choice(gene_indices)
             while axiom_tokens[i] in ['[',']','C','']:
-                i = random.choice(gene_indices) 
+                i = random.choice(gene_indices)
             token = axiom_tokens[i]
             #print ('token : ',token)
 
@@ -88,14 +88,14 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
         if random.random() < mutation_rate:
             if len(mutated_rules)==0:
                 i=0
-                mod_element='new'   
+                mod_element='rule'
             else:
                 i = random.choice(range(0,len(mutated_rules)))
-                mod_element=random.choice(['key','rule','new','remove'])
+                mod_element=random.choice(['key','rule'])
             if mod_element =='key':
                 mutation+=' - modify key'
                 old_gene=list(mutated_rules.keys())[i]
-                old_rules=list(mutated_rules.values())[i] 
+                old_rules=list(mutated_rules.values())[i]
                 letter = random.choice(['B', 'H','N'])
                 number = random.choice(allowed_numbers)
                 face = random.choice(faces)
@@ -110,88 +110,122 @@ def mutate_lsystem(axiom: str, rules: Dict[str, str], mutation_rate: float = 0.1
                 #print('axiom token - ',axiom_tokens)
             elif mod_element == 'rule':
                 mutation+=' - modify rule'
-                rule=list(mutated_rules.values())[i]
-                rule_tokens = [m.group(0) for m in gene_pattern.finditer(rule)]
-                gene_indices = [j for j, token in enumerate(rule_tokens) if re.fullmatch(r"([BHN]\((0|90|180|270),(FRONT|LEFT|RIGHT|BACK|TOP|BOTTOM)\))", token)]
-                if gene_indices:
-                    pos = random.choice(gene_indices)
-                    is_branch = False
-                    nb_open = 0
-                    for j in range(0,pos+1):
-                        if rule_tokens[j] =='[':
-                            nb_open+=1
-                        elif rule_tokens[j] ==']': 
-                            nb_open-=1
-                    if nb_open>0:
-                        is_branch = True    
-                    token = rule_tokens[pos]
-                    if is_branch==True:
-                        op = random.choice(['add_gene', 'remove_gene', 'create_branch', 'remove_branch', 'modify_gene'])
-                    else:
-                        op = random.choice(['add_gene', 'remove_gene', 'create_branch', 'modify_gene'])    
-                    if op == 'add_gene':
-                        mutation+=' - add_gene'
+                op = ""
+                if i==0:
+                    op = 'new_rule'
+                else:
+                    rule=list(mutated_rules.values())[i]
+                    rule_tokens = [m.group(0) for m in gene_pattern.finditer(rule)]
+                    gene_indices = [j for j, token in enumerate(rule_tokens) if re.fullmatch(r"([BHN]\((0|90|180|270),(FRONT|LEFT|RIGHT|BACK|TOP|BOTTOM)\))", token)]
+                    if gene_indices:
+                        pos = random.choice(gene_indices)
+                        is_branch = False
+                        nb_open = 0
+                        for j in range(0,pos+1):
+                            if rule_tokens[j] =='[':
+                                nb_open+=1
+                            elif rule_tokens[j] ==']':
+                                nb_open-=1
+                        if nb_open>0:
+                            is_branch = True
+                        token = rule_tokens[pos]
+                        if is_branch==True:
+                            w = [add_temperature,(1-add_temperature),add_temperature,(1-add_temperature),add_temperature,(1-add_temperature),add_temperature]
+                            wd = (add_temperature*4+(1-add_temperature)*3)
+                            for l in range(0,len(w)):
+                                w[l]=w[l]/wd
+                            op = random.choices(['new_rule','remove_rule','add_gene', 'remove_gene', 'create_branch', 'remove_branch', 'modify_gene'],weights=w)[0]
+                        else:
+                            w = [add_temperature,(1-add_temperature),add_temperature,(1-add_temperature),add_temperature,add_temperature]
+                            wd= (add_temperature*4+(1-add_temperature)*2)
+                            for l in range(0,len(w)):
+                                w[l]=w[l]/wd
+                            op = random.choices(['new_rule','remove_rule','add_gene', 'remove_gene', 'create_branch', 'modify_gene'],weights=w)[0]
+                if op == 'add_gene':
+                    mutation+=' - add_gene'
                         # Only add one gene
+                    while pos>0:
+                        if rule_tokens[pos][0]=="N":
+                            pos-=1
+                        else:
+                            break
+                    if pos==0:
+                        rule_tokens.insert(pos, random_gene())
+                    else:
                         rule_tokens.insert(pos+1, random_gene())
-                    elif op == 'remove_gene':
-                        mutation+=' - remove_gene'
+                    mutated_rules[list(mutated_rules.keys())[i]] = ''.join(rule_tokens)
+                elif op == 'remove_gene':
+                    mutation+=' - remove_gene'
                         # Only remove one gene
-                        while i<len(rule_tokens):
-                            if rule_tokens[pos] == '[' or rule_tokens[pos] ==']':
-                               pos+=1
-                            else: 
-                                  break 
-                        if i<len(rule_tokens):
-                            deleted_gene=rule_tokens[pos]
-                            rule_tokens[pos] = ''
-                    elif op == 'create_branch':
-                        mutation+=' - create_branch'
+                    while i<len(rule_tokens):
+                        if rule_tokens[pos] == '[' or rule_tokens[pos] ==']':
+                            pos+=1
+                        else:
+                            break
+                    if i<len(rule_tokens):
+                        deleted_gene=rule_tokens[pos]
+                        rule_tokens[pos] = ''
+                    is_empty=True
+                    for l in range(0,len(rule_tokens)):
+                        if rule_tokens[l] not in ['[',']','']:
+                            is_empty=False
+                            break
+                    if is_empty==True:
+                        delete_gene = list(mutated_rules.keys())[i]
+                        del mutated_rules[delete_gene]
+                    else:
+                        mutated_rules[list(mutated_rules.keys())[i]] = ''.join(rule_tokens)
+                elif op == 'create_branch':
+                    mutation+=' - create_branch'
+                    if rule_tokens[pos] not in ['[',']','']:
                         rule_tokens[pos] = '[' + rule_tokens[pos] + ']'
-                    elif op == 'remove_branch':
-                        mutation+=' - remove_branch'
-                        if pos > 0:
-                            j = pos
-                            while j>0:
-                                if rule_tokens[j] !='[':
-                                    break
-                                j-=1
-                            rule_tokens[j]=''
-                            j = pos
-                            while j<len(rule_tokens):
-                                if rule_tokens[j] !=']':
-                                    break
-                                j+=1
-                            rule_tokens[j]=''
-                    elif op == 'modify_gene':
-                        mutation+=' - modify_gene'
-                        letter = random.choice(['B', 'H','N'])
-                        number = random.choice(allowed_numbers)
-                        face = random.choice(faces)
-                        new_gene = f"{letter}({number},{face})"
-                        rule_tokens[pos] = new_gene
+                        mutated_rules[list(mutated_rules.keys())[i]] = ''.join(rule_tokens)
+                elif op == 'remove_branch':
+                    mutation+=' - remove_branch'
+                    if pos > 0:
+                        j = pos
+                        while j>0:
+                            if rule_tokens[j] !='[':
+                                break
+                            j-=1
+                        rule_tokens[j]=''
+                        j = pos
+                        while j<len(rule_tokens):
+                            if rule_tokens[j] !=']':
+                                break
+                            j+=1
+                        rule_tokens[j]=''
+                    mutated_rules[list(mutated_rules.keys())[i]] = ''.join(rule_tokens)
+                elif op == 'modify_gene':
+                    mutation+=' - modify_gene'
+                    letter = random.choice(['B', 'H','N'])
+                    number = random.choice(allowed_numbers)
+                    face = random.choice(faces)
+                    new_gene = f"{letter}({number},{face})"
+                    rule_tokens[pos] = new_gene
                         # Update rule key
                     mutated_rules[list(mutated_rules.keys())[i]] = ''.join(rule_tokens)
-            elif mod_element =='new':
-                tokens_tmp = axiom_tokens.copy()
-                token_keys = list(mutated_rules.keys())
-                for l in range(0,len(mutated_rules)):
-                    rule_tokens = [m.group(0) for m in gene_pattern.finditer(list(mutated_rules.values())[l])]
-                    tokens_tmp.extend(rule_tokens)   
-                token_to_chose = []
-                for t in tokens_tmp:
-                    if t not in ['[', ']', 'C',''] and t not in token_keys:
-                        token_to_chose.append(t)           
-                mutation+=' - add new rule'
-                new_key = random.choice(token_to_chose)
-                letter = random.choice(['B', 'H'])
-                number = random.choice(allowed_numbers)
-                face = random.choice(faces)
-                new_rule = f"{letter}({number},{face})"                
-                mutated_rules[new_key] = new_rule    
-            else:            
-                mutation+=' - remove rule'
-                delete_gene=random.choice(list(mutated_rules.keys()))
-                del mutated_rules[delete_gene]
+                elif op =='new_rule':
+                    tokens_tmp = axiom_tokens.copy()
+                    token_keys = list(mutated_rules.keys())
+                    for l in range(0,len(mutated_rules)):
+                        rule_tokens = [m.group(0) for m in gene_pattern.finditer(list(mutated_rules.values())[l])]
+                        tokens_tmp.extend(rule_tokens)
+                    token_to_chose = []
+                    for t in tokens_tmp:
+                        if t not in ['[', ']', 'C',''] and t not in token_keys:
+                            token_to_chose.append(t)
+                    mutation+=' - add new rule'
+                    new_key = random.choice(token_to_chose)
+                    letter = random.choice(['B', 'H'])
+                    number = random.choice(allowed_numbers)
+                    face = random.choice(faces)
+                    new_rule = f"{letter}({number},{face})"
+                    mutated_rules[new_key] = new_rule
+                elif op == 'remove_rule':
+                    mutation+=' - remove rule'
+                    delete_gene=random.choice(list(mutated_rules.keys()))
+                    del mutated_rules[delete_gene]
     # Ensure axiom contains exactly one C (no parameters) at the start
     mutated_axiom = ''.join(axiom_tokens)
     if not mutated_axiom.startswith('C'):

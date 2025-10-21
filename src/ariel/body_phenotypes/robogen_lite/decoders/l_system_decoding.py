@@ -64,8 +64,8 @@ class LSystemDecoder:
         self.rules = rules
         self.iterations = iterations
         self.graph = nx.DiGraph()
-        self.lsystem_string = self.expand_lsystem() # first we expand the string applying recursively all the rules 
-        self.build_graph_from_string(self.lsystem_string) # we create the graph with networkx from a fully expanded L-system string 
+        self.lsystem_string = self.expand_lsystem() # first we expand the string applying recursively all the rules
+        self.build_graph_from_string(self.lsystem_string) # we create the graph with networkx from a fully expanded L-system string
 
     def expand_lsystem(self, axiom: str = None, rules: Dict[str, str] = None, iterations: int = None) -> str:
         """
@@ -202,10 +202,9 @@ class LSystemDecoder:
                             node_label,
                             type=node_type,
                             rotation=rotation_enum,
-                            face=face,
                         ) #create and add the node to the graph
                         if current_parent is not None: # if there is a parent, create a link in the graph
-                            self.graph.add_edge(current_parent, node_label)
+                            self.graph.add_edge(current_parent, node_label,face=face_str)
                         idx_counter[0] += 1
                         current_parent = node_label  # Only update parent after a single node, not after a branch
             return current_parent
@@ -242,7 +241,27 @@ class LSystemDecoder:
             "font_size": 8,
             "width": 0.5,
         }
-        nx.draw(self.graph, pos, **options)
+        nx.draw(
+            self.graph,
+            pos,
+            with_labels=True,
+            node_size=150,
+            node_color="#FFFFFF00",
+            edgecolors="blue",
+            font_size=8,
+            width=0.5,
+        )
+
+        edge_labels = nx.get_edge_attributes(self.graph, "face")
+
+        nx.draw_networkx_edge_labels(
+            self.graph,
+            pos,
+            edge_labels=edge_labels,
+            font_color="red",
+            font_size=8,
+        )
+
         plt.title(title)
         if save_file:
             plt.savefig(save_file, dpi=DPI)
