@@ -146,7 +146,7 @@ class lsystem_none(lsystem_element):
         self.rotation=0
         self.back = None
         self.allowed_connection=['BACK']
-        self.anme='N'
+        self.name='N'
 
 class lsystem_core(lsystem_element):
 
@@ -410,7 +410,127 @@ class LSystemDecoder:
     def print_lsystem_structure(self):
         self.print_lsystem_element(self.structure,0)
 
+    def generate_lsystem_graph_element(self,element,id):
+        if id==0:
+            self.graph.add_node(
+                element.name+"-"+str(id),
+                type=ModuleType.CORE.value,
+                rotation=0,
+            )
+        id_tmp = id
+        if element.has_element('FRONT')==True:
+            eltype = ModuleType.NONE.value
+            match element.front.name:
+                case 'B':
+                    eltype = ModuleType.BRICK.value
+                case 'H':
+                    eltype = ModuleType.HINGE.value
+            self.graph.add_node(element.front.name+"-"+str(id_tmp+1),type=eltype,rotation=element.front.rotation)
+            self.graph.add_edge(element.name+"-"+str(id),element.front.name+"-"+str(id_tmp+1),face='FRONT')
+            id_tmp=self.generate_lsystem_graph_element(element.front,id_tmp+1)
+        if element.name=="C":
+            if element.has_element('BACK')==True:
+                eltype = ModuleType.NONE.value
+                match element.back.name:
+                    case 'B':
+                        eltype = ModuleType.BRICK.value
+                    case 'H':
+                        eltype = ModuleType.HINGE.value
+                self.graph.add_node(element.back.name+"-"+str(id_tmp+1),type=eltype,rotation=element.back.rotation)
+                self.graph.add_edge(element.name+"-"+str(id),element.back.name+"-"+str(id_tmp+1),face='BACK')
+                id_tmp=self.generate_lsystem_graph_element(element.back,id_tmp+1)
+        if element.has_element('RIGHT')==True:
+            eltype = ModuleType.NONE.value
+            match element.right.name:
+                case 'B':
+                    eltype = ModuleType.BRICK.value
+                case 'H':
+                    eltype = ModuleType.HINGE.value
+            self.graph.add_node(element.right.name+"-"+str(id_tmp+1),type=eltype,rotation=element.right.rotation)
+            self.graph.add_edge(element.name+"-"+str(id),element.right.name+"-"+str(id_tmp+1),face='RIGHT')
+            id_tmp=self.generate_lsystem_graph_element(element.right,id_tmp+1)
+        if element.has_element('LEFT')==True:
+            eltype = ModuleType.NONE.value
+            match element.left.name:
+                case 'B':
+                    eltype = ModuleType.BRICK.value
+                case 'H':
+                    eltype = ModuleType.HINGE.value
+            self.graph.add_node(element.left.name+"-"+str(id_tmp+1),type=eltype,rotation=element.left.rotation)
+            self.graph.add_edge(element.name+"-"+str(id),element.left.name+"-"+str(id_tmp+1),face='LEFT')
+            id_tmp=self.generate_lsystem_graph_element(element.left,id_tmp+1)
+        if element.has_element('TOP')==True:
+            eltype = ModuleType.NONE.value
+            match element.top.name:
+                case 'B':
+                    eltype = ModuleType.BRICK.value
+                case 'H':
+                    eltype = ModuleType.HINGE.value
+            self.graph.add_node(element.top.name+"-"+str(id_tmp+1),type=eltype,rotation=element.top.rotation)
+            self.graph.add_edge(element.name+"-"+str(id),element.top.name+"-"+str(id_tmp+1),face='TOP')
+            id_tmp=self.generate_lsystem_graph_element(element.top,id_tmp+1)
+        if element.has_element('BOTTOM')==True:
+            eltype = ModuleType.NONE.value
+            match element.bottom.name:
+                case 'B':
+                    eltype = ModuleType.BRICK.value
+                case 'H':
+                    eltype = ModuleType.HINGE.value
+            self.graph.add_node(element.bottom.name+"-"+str(id_tmp+1),type=eltype,rotation=element.bottom.rotation)
+            self.graph.add_edge(element.name+"-"+str(id),element.bottom.name+"-"+str(id_tmp+1),face='BOTTOM')
+            id_tmp=self.generate_lsystem_graph_element(element.bottom,id_tmp+1)
+        return id_tmp
+
+
+    def generate_lsystem_graph(self):
+        self.graph = nx.DiGraph()
+        self.generate_lsystem_graph_element(self.structure,0)
+
     def print_lsystem_expanded(self):
         print(self.expanded_token)
+
+    def save_graph_as_json(self,save_file):
+        if save_file is None:
+            return
+        data = json_graph.node_link_data(self.graph, edges="edges")
+        json_string = json.dumps(data, indent=4)
+        with Path(save_file).open("w", encoding="utf-8") as f:
+            f.write(json_string)
+
+    def draw_graph(self, title = "L-System Decoded Graph",save_file = None):
+        """Draw the decoded graph using matplotlib and networkx."""
+        plt.figure()
+        pos = nx.spring_layout(self.graph, seed=SEED)
+        options = {
+            "with_labels": True,
+            "node_size": 200,
+            "node_color": "#FFFFFF00",
+            "edgecolors": "blue",
+            "font_size": 8,
+            "width": 0.5,
+        }
+        nx.draw(
+            self.graph,
+            pos,
+            with_labels=True,
+            node_size=150,
+            node_color="#FFFFFF00",
+            edgecolors="blue",
+            font_size=8,
+            width=0.5,
+        )
+        edge_labels = nx.get_edge_attributes(self.graph, "face")
+        nx.draw_networkx_edge_labels(
+            self.graph,
+            pos,
+            edge_labels=edge_labels,
+            font_color="red",
+            font_size=8,
+        )
+        plt.title(title)
+        if save_file!=None:
+            plt.savefig(save_file, dpi=DPI)
+        else:
+            plt.show()
 
 
