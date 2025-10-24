@@ -205,212 +205,263 @@ class LSystemDecoder:
         return int(rotation)
 
 
-    def build_lsystem_structure(self):
+    def build_lsystem_structure(self,verbose=0):
         if self.expanded_token!=None and self.expanded_token[0]=='C':
             self.structure=lsystem_core()
             turtle = self.structure
             tk=1
             while tk < len(self.expanded_token):
-                print("token : ",tk)
+                if verbose==1:
+                    print("token : ",tk)
                 match self.expanded_token[tk][:4]:
                     case 'addf':
-                        print("add FRONT")
+                        if verbose==1:
+                            print("add FRONT")
                         rotation = self.get_rotation(self.expanded_token[tk])
                         if tk+1<len(self.expanded_token):
                             if self.expanded_token[tk+1] in ['H','B','N']:
                                 tk+=1
                                 match self.expanded_token[tk]:
                                     case 'H':
-                                        print(" with ",rotation,"degree a HINGE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a HINGE")
                                         new_hinge = lsystem_hinge()
                                         new_hinge.connect_to('FRONT',turtle, rotation)
                                     case 'B':
-                                        print(" with ",rotation,"degree a BLOCK")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a BLOCK")
                                         new_block = lsystem_block()
                                         new_block.connect_to('FRONT',turtle, rotation)
                                     case 'N':
-                                        print(" with ",rotation,"degree a NONE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a NONE")
                                         new_none = lsystem_none()
                                         new_none.connect_to('FRONT',turtle, rotation)
                             else:
-                                print("ERROR, unsupported token following ADD, ignored")
+                                if verbose==1:
+                                    print("ERROR, unsupported token following ADD, ignored")
                     case 'addk':
-                        print("add BACK")
+                        if verbose==1:
+                            print("add BACK")
                         rotation = self.get_rotation(self.expanded_token[tk])
                         if tk+1<len(self.expanded_token):
                             if self.expanded_token[tk+1] in ['H','B','N']:
                                 tk+=1
                                 match self.expanded_token[tk]:
                                     case 'H':
-                                        print(" with ",rotation,"degree a HINGE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a HINGE")
                                         new_hinge = lsystem_hinge()
                                         new_hinge.connect_to('BACK',turtle, rotation)
                                     case 'B':
-                                        print(" with ",rotation,"degree a BLOCK")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a BLOCK")
                                         new_block = lsystem_block()
                                         new_block.connect_to('BACK',turtle, rotation)
                                     case 'N':
-                                        print(" with ",rotation,"degree a NONE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a NONE")
                                         new_none = lsystem_none()
                                         new_none.connect_to('BACK',turtle, rotation)
                             else:
-                                print("ERROR, unsupported token following ADD, ignored")
+                                if verbose==1:
+                                    print("ERROR, unsupported token following ADD, ignored")
                     case 'addl':
-                        print("add LEFT")
+                        if verbose==1:
+                            print("add LEFT")
                         rotation = self.get_rotation(self.expanded_token[tk])
                         if tk+1<len(self.expanded_token):
                             if self.expanded_token[tk+1] in ['H','B','N']:
                                 tk+=1
                                 match self.expanded_token[tk]:
                                     case 'H':
-                                        print(" with ",rotation,"degree a HINGE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a HINGE")
                                         new_hinge = lsystem_hinge()
                                         new_hinge.connect_to('LEFT',turtle, rotation)
                                     case 'B':
-                                        print(" with ",rotation,"degree a BLOCK")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a BLOCK")
                                         new_block = lsystem_block()
                                         new_block.connect_to('LEFT',turtle, rotation)
                                     case 'N':
-                                        print(" with ",rotation,"degree a NONE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a NONE")
                                         new_none = lsystem_none()
                                         new_none.connect_to('LEFT',turtle, rotation)
                             else:
-                                print("ERROR, unsupported token following ADD, ignored")
+                                if verbose==1:
+                                    print("ERROR, unsupported token following ADD, ignored")
                     case 'addr':
-                        print("add RIGHT")
+                        if verbose==1:
+                            print("add RIGHT")
                         rotation = self.get_rotation(self.expanded_token[tk])
                         if tk+1<len(self.expanded_token):
                             if self.expanded_token[tk+1] in ['H','B','N']:
                                 tk+=1
                                 match self.expanded_token[tk]:
                                     case 'H':
-                                        print(" with ",rotation,"degree a HINGE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a HINGE")
                                         new_hinge = lsystem_hinge()
                                         new_hinge.connect_to('RIGHT',turtle, rotation)
                                     case 'B':
-                                        print(" with ",rotation,"degree a BLOCK")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a BLOCK")
                                         new_block = lsystem_block()
                                         new_block.connect_to('RIGHT',turtle, rotation)
                                     case 'N':
-                                        print(" with ",rotation,"degree a NONE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a NONE")
                                         new_none = lsystem_none()
                                         new_none.connect_to('RIGHT',turtle, rotation)
                             else:
-                                print("ERROR, unsupported token following ADD, ignored")
+                                if verbose==1:
+                                    print("ERROR, unsupported token following ADD, ignored")
                     case 'addt':
-                        print("add TOP")
+                        if verbose==1:
+                            print("add TOP")
                         rotation = self.get_rotation(self.expanded_token[tk])
                         if tk+1<len(self.expanded_token):
                             if self.expanded_token[tk+1] in ['H','B','N']:
                                 tk+=1
                                 match self.expanded_token[tk]:
                                     case 'H':
-                                        print(" with ",rotation,"degree a HINGE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a HINGE")
                                         new_hinge = lsystem_hinge()
                                         new_hinge.connect_to('TOP',turtle, rotation)
                                     case 'B':
-                                        print(" with ",rotation,"degree a BLOCK")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a BLOCK")
                                         new_block = lsystem_block()
                                         new_block.connect_to('TOP',turtle, rotation)
                                     case 'N':
-                                        print(" with ",rotation,"degree a NONE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a NONE")
                                         new_none = lsystem_none()
                                         new_none.connect_to('TOP',turtle, rotation)
                             else:
-                                print("ERROR, unsupported token following ADD, ignored")
+                                if verbose==1:
+                                    print("ERROR, unsupported token following ADD, ignored")
                     case 'addb':
-                        print("add BOTTOM")
+                        if verbose==1:
+                            print("add BOTTOM")
                         rotation = self.get_rotation(self.expanded_token[tk])
                         if tk+1<len(self.expanded_token):
                             if self.expanded_token[tk+1] in ['H','B','N']:
                                 tk+=1
                                 match self.expanded_token[tk]:
                                     case 'H':
-                                        print(" with ",rotation,"degree a HINGE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a HINGE")
                                         new_hinge = lsystem_hinge()
                                         new_hinge.connect_to('BOTTOM',turtle, rotation)
                                     case 'B':
-                                        print(" with ",rotation,"degree a BLOCK")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a BLOCK")
                                         new_block = lsystem_block()
                                         new_block.connect_to('BOTTOM',turtle, rotation)
                                     case 'N':
-                                        print(" with ",rotation,"degree a NONE")
+                                        if verbose==1:
+                                            print(" with ",rotation,"degree a NONE")
                                         new_none = lsystem_none()
                                         new_none.connect_to('BOTTOM',turtle, rotation)
                             else:
-                                print("ERROR, unsupported token following ADD, ignored")
+                                if verbose==1:
+                                    print("ERROR, unsupported token following ADD, ignored")
                     case 'movf':
                         if turtle.has_element('FRONT')==True:
-                            print("move FRONT")
+                            if verbose==1:
+                                print("move FRONT")
                             turtle=turtle.front
                         else:
-                            print("ERROR - Cannot move FRONT, ignored")
+                            if verbose==1:
+                                print("ERROR - Cannot move FRONT, ignored")
                     case 'movk':
                         if turtle.has_element('BACK')==True:
-                            print("move BACK")
+                            if verbose==1:
+                                print("move BACK")
                             turtle=turtle.back
                         else:
-                            print("ERROR - Cannot move BACK, ignored")
+                            if verbose==1:
+                                print("ERROR - Cannot move BACK, ignored")
                     case 'movl':
                         if turtle.has_element('LEFT')==True:
-                            print("move LEFT")
+                            if verbose==1:
+                                print("move LEFT")
                             turtle=turtle.left
                         else:
-                            print("ERROR - Cannot move LEFT, ignored")
+                            if verbose==1:
+                                print("ERROR - Cannot move LEFT, ignored")
                     case 'movr':
                         if turtle.has_element('RIGHT')==True:
-                            print("move RIGHT")
+                            if verbose==1:
+                                print("move RIGHT")
                             turtle=turtle.right
                         else:
-                            print("ERROR - Cannot move RIGHT, ignored")
+                            if verbose==1:
+                                print("ERROR - Cannot move RIGHT, ignored")
                     case 'movt':
                         if turtle.has_element('TOP')==True:
-                            print("move TOP")
+                            if verbose==1:
+                                print("move TOP")
                             turtle=turtle.top
                         else:
-                            print("ERROR - Cannot move TOP, ignored")
+                            if verbose==1:
+                                print("ERROR - Cannot move TOP, ignored")
                     case 'movb':
                         if turtle.has_element('BOTTOM')==True:
-                            print("move BOTTOM")
+                            if verbose==1:
+                                print("move BOTTOM")
                             turtle=turtle.bottom
                         else:
-                            print("ERROR - Cannot move BOTTOM, ignored")
+                            if verbose==1:
+                                print("ERROR - Cannot move BOTTOM, ignored")
                     case _:
-                        print("ERROR - Unknown command, ignored")
+                        if verbose==1:
+                            print("ERROR - Unknown command, ignored")
                 tk+=1
 
-    def print_lsystem_element(self,element,id):
+    def print_lsystem_element(self,element,id,verbose=0):
         connection_map = []
         for j in ['FRONT','BACK','RIGHT','LEFT','TOP','BOTTOM']:
             connection_map.append(element.has_element(j))
-        print(element.name,"-",id," - ",connection_map)
+        if verbose==1:
+            print(element.name,"-",id," - ",connection_map)
         id_tmp = id
         if element.has_element('FRONT')==True:
-            print(element.name,"-",id," links FRONT / ",element.front.rotation," degree to ",element.front.name,"-",id_tmp+1)
-            id_tmp=self.print_lsystem_element(element.front,id_tmp+1)
+            if verbose==1:
+                print(element.name,"-",id," links FRONT / ",element.front.rotation," degree to ",element.front.name,"-",id_tmp+1)
+            id_tmp=self.print_lsystem_element(element.front,id_tmp+1,verbose)
         if element.name=="C":
             if element.has_element('BACK')==True:
-                print(element.name,"-",id," links BACK / ",element.back.rotation," degree to ",element.back.name,"-",id_tmp+1)
-                id_tmp=self.print_lsystem_element(element.back,id_tmp+1)
+                if verbose==1:
+                    print(element.name,"-",id," links BACK / ",element.back.rotation," degree to ",element.back.name,"-",id_tmp+1)
+                id_tmp=self.print_lsystem_element(element.back,id_tmp+1,verbose)
         if element.has_element('LEFT')==True:
-            print(element.name,"-",id," links LEFT / ",element.left.rotation," degree to ",element.left.name,"-",id_tmp+1)
-            id_tmp=self.print_lsystem_element(element.left,id_tmp+1)
+            if verbose==1:
+                print(element.name,"-",id," links LEFT / ",element.left.rotation," degree to ",element.left.name,"-",id_tmp+1)
+            id_tmp=self.print_lsystem_element(element.left,id_tmp+1,verbose)
         if element.has_element('RIGHT')==True:
-            print(element.name,"-",id," links RIGHT / ",element.right.rotation," degree to ",element.right.name,"-",id_tmp+1)
-            id_tmp=self.print_lsystem_element(element.right,id_tmp+1)
+            if verbose==1:
+                print(element.name,"-",id," links RIGHT / ",element.right.rotation," degree to ",element.right.name,"-",id_tmp+1)
+            id_tmp=self.print_lsystem_element(element.right,id_tmp+1,verbose)
         if element.has_element('TOP')==True:
-            print(element.name,"-",id," links TOP / ",element.top.rotation," degree to ",element.top.name,"-",id_tmp+1)
-            id_tmp=self.print_lsystem_element(element.top,id_tmp+1)
+            if verbose==1:
+                print(element.name,"-",id," links TOP / ",element.top.rotation," degree to ",element.top.name,"-",id_tmp+1)
+            id_tmp=self.print_lsystem_element(element.top,id_tmp+1,verbose)
         if element.has_element('BOTTOM')==True:
-            print(element.name,"-",id," links BOTTOM / ",element.bottom.rotation," degree to ",element.bottom.name,"-",id_tmp+1)
-            id_tmp=self.print_lsystem_element(element.bottom,id_tmp+1)
+            if verbose==1:
+                print(element.name,"-",id," links BOTTOM / ",element.bottom.rotation," degree to ",element.bottom.name,"-",id_tmp+1)
+            id_tmp=self.print_lsystem_element(element.bottom,id_tmp+1,verbose)
         return id_tmp
 
 
-    def print_lsystem_structure(self):
-        self.print_lsystem_element(self.structure,0)
+    def print_lsystem_structure(self,verbose=0):
+        self.print_lsystem_element(self.structure,0,verbose)
 
-    def generate_lsystem_graph_element(self,element,id):
+    def generate_lsystem_graph_element(self,element,id,verbose=0):
         if id==0:
             self.graph.add_node(
                 element.name+"-"+str(id),
@@ -427,7 +478,7 @@ class LSystemDecoder:
                     eltype = ModuleType.HINGE.value
             self.graph.add_node(element.front.name+"-"+str(id_tmp+1),type=eltype,rotation=element.front.rotation)
             self.graph.add_edge(element.name+"-"+str(id),element.front.name+"-"+str(id_tmp+1),face='FRONT')
-            id_tmp=self.generate_lsystem_graph_element(element.front,id_tmp+1)
+            id_tmp=self.generate_lsystem_graph_element(element.front,id_tmp+1,verbose)
         if element.name=="C":
             if element.has_element('BACK')==True:
                 eltype = ModuleType.NONE.value
@@ -438,7 +489,7 @@ class LSystemDecoder:
                         eltype = ModuleType.HINGE.value
                 self.graph.add_node(element.back.name+"-"+str(id_tmp+1),type=eltype,rotation=element.back.rotation)
                 self.graph.add_edge(element.name+"-"+str(id),element.back.name+"-"+str(id_tmp+1),face='BACK')
-                id_tmp=self.generate_lsystem_graph_element(element.back,id_tmp+1)
+                id_tmp=self.generate_lsystem_graph_element(element.back,id_tmp+1,verbose)
         if element.has_element('RIGHT')==True:
             eltype = ModuleType.NONE.value
             match element.right.name:
@@ -448,7 +499,7 @@ class LSystemDecoder:
                     eltype = ModuleType.HINGE.value
             self.graph.add_node(element.right.name+"-"+str(id_tmp+1),type=eltype,rotation=element.right.rotation)
             self.graph.add_edge(element.name+"-"+str(id),element.right.name+"-"+str(id_tmp+1),face='RIGHT')
-            id_tmp=self.generate_lsystem_graph_element(element.right,id_tmp+1)
+            id_tmp=self.generate_lsystem_graph_element(element.right,id_tmp+1,verbose)
         if element.has_element('LEFT')==True:
             eltype = ModuleType.NONE.value
             match element.left.name:
@@ -458,7 +509,7 @@ class LSystemDecoder:
                     eltype = ModuleType.HINGE.value
             self.graph.add_node(element.left.name+"-"+str(id_tmp+1),type=eltype,rotation=element.left.rotation)
             self.graph.add_edge(element.name+"-"+str(id),element.left.name+"-"+str(id_tmp+1),face='LEFT')
-            id_tmp=self.generate_lsystem_graph_element(element.left,id_tmp+1)
+            id_tmp=self.generate_lsystem_graph_element(element.left,id_tmp+1,verbose)
         if element.has_element('TOP')==True:
             eltype = ModuleType.NONE.value
             match element.top.name:
@@ -468,7 +519,7 @@ class LSystemDecoder:
                     eltype = ModuleType.HINGE.value
             self.graph.add_node(element.top.name+"-"+str(id_tmp+1),type=eltype,rotation=element.top.rotation)
             self.graph.add_edge(element.name+"-"+str(id),element.top.name+"-"+str(id_tmp+1),face='TOP')
-            id_tmp=self.generate_lsystem_graph_element(element.top,id_tmp+1)
+            id_tmp=self.generate_lsystem_graph_element(element.top,id_tmp+1,verbose)
         if element.has_element('BOTTOM')==True:
             eltype = ModuleType.NONE.value
             match element.bottom.name:
@@ -478,13 +529,13 @@ class LSystemDecoder:
                     eltype = ModuleType.HINGE.value
             self.graph.add_node(element.bottom.name+"-"+str(id_tmp+1),type=eltype,rotation=element.bottom.rotation)
             self.graph.add_edge(element.name+"-"+str(id),element.bottom.name+"-"+str(id_tmp+1),face='BOTTOM')
-            id_tmp=self.generate_lsystem_graph_element(element.bottom,id_tmp+1)
+            id_tmp=self.generate_lsystem_graph_element(element.bottom,id_tmp+1,verbose)
         return id_tmp
 
 
-    def generate_lsystem_graph(self):
+    def generate_lsystem_graph(self,verbose=0):
         self.graph = nx.DiGraph()
-        self.generate_lsystem_graph_element(self.structure,0)
+        self.generate_lsystem_graph_element(self.structure,0,verbose)
 
     def print_lsystem_expanded(self):
         print(self.expanded_token)
