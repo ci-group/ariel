@@ -9,18 +9,18 @@
             "id": 0
         },
         {
-            "type": "HINGE",
-            "rotation": "DEG_90",
+            "type": "NONE",
+            "rotation": "DEG_180",
             "id": 1
         },
         {
-            "type": "HINGE",
-            "rotation": "DEG_135",
+            "type": "BRICK",
+            "rotation": "DEG_180",
             "id": 2
         },
         {
-            "type": "HINGE",
-            "rotation": "DEG_45",
+            "type": "BRICK",
+            "rotation": "DEG_180",
             "id": 3
         },
         {
@@ -31,23 +31,23 @@
     ],
     "edges": [
         {
-            "face": "BACK",
+            "face": "RIGHT",
             "source": 0,
             "target": 1
         },
         {
-            "face": "RIGHT",
+            "face": "TOP",
             "source": 0,
             "target": 2
         },
         {
             "face": "TOP",
-            "source": 0,
+            "source": 2,
             "target": 3
         },
         {
-            "face": "TOP",
-            "source": 0,
+            "face": "BOTTOM",
+            "source": 2,
             "target": 4
         }
     ]

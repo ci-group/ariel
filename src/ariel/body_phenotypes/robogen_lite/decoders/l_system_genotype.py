@@ -627,17 +627,6 @@ class LSystemDecoder:
             self.graph.add_node(id_tmp+1,type=eltype,rotation=rotation)
             self.graph.add_edge(id,id_tmp+1,face='TOP')
             id_tmp=self.generate_lsystem_graph_element(element.top,id_tmp+1,depth+1)
-        if element.should_i_explore('TOP')==True:
-            eltype = ModuleType.NONE.name
-            match element.top.name:
-                case 'B':
-                    eltype = ModuleType.BRICK.name
-                case 'H':
-                    eltype = ModuleType.HINGE.name
-            rotation="DEG_"+str(element.top.rotation)
-            self.graph.add_node(id_tmp+1,type=eltype,rotation=rotation)
-            self.graph.add_edge(id,id_tmp+1,face='TOP')
-            id_tmp=self.generate_lsystem_graph_element(element.top,id_tmp+1,depth+1)
         if element.should_i_explore('BOTTOM')==True:
             eltype = ModuleType.NONE.name
             match element.bottom.name:

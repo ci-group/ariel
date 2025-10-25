@@ -61,6 +61,8 @@ def main() -> None:
     graph_parent2_mutated = load_graph_from_json("parent2-mutated.json")
     graph_offspring1 = load_graph_from_json("offspring1.json")
     graph_offspring2 = load_graph_from_json("offspring2.json")
+    graph_offspring3 = load_graph_from_json("offspring3.json")
+    graph_offspring4 = load_graph_from_json("offspring4.json")
 
     # Construct the robot from the graph
     core_parent1 = construct_mjspec_from_graph(graph_parent1)
@@ -69,6 +71,8 @@ def main() -> None:
     core_parent2_mutated = construct_mjspec_from_graph(graph_parent2_mutated)
     core_offspring1 = construct_mjspec_from_graph(graph_offspring1)
     core_offspring2 = construct_mjspec_from_graph(graph_offspring2)
+    core_offspring3 = construct_mjspec_from_graph(graph_offspring3)
+    core_offspring4 = construct_mjspec_from_graph(graph_offspring4)
     # Simulate the robot
     run(core_parent1, with_viewer=True)
     run(core_parent2, with_viewer=True)
@@ -76,6 +80,8 @@ def main() -> None:
     run(core_parent2_mutated, with_viewer=True)
     run(core_offspring1, with_viewer=True)
     run(core_offspring2, with_viewer=True)
+    run(core_offspring3, with_viewer=True)
+    run(core_offspring4, with_viewer=True)
 
 def run(
     robot: CoreModule,
