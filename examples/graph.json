@@ -1,0 +1,94 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "type": "CORE",
+            "rotation": "DEG_0",
+            "id": 0
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_270",
+            "id": 1
+        },
+        {
+            "type": "BRICK",
+            "rotation": "DEG_0",
+            "id": 2
+        },
+        {
+            "type": "BRICK",
+            "rotation": "DEG_0",
+            "id": 3
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_45",
+            "id": 4
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_45",
+            "id": 5
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_45",
+            "id": 6
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_45",
+            "id": 7
+        },
+        {
+            "type": "BRICK",
+            "rotation": "DEG_180",
+            "id": 8
+        }
+    ],
+    "edges": [
+        {
+            "face": "BACK",
+            "source": 0,
+            "target": 1
+        },
+        {
+            "face": "RIGHT",
+            "source": 0,
+            "target": 2
+        },
+        {
+            "face": "TOP",
+            "source": 0,
+            "target": 6
+        },
+        {
+            "face": "TOP",
+            "source": 0,
+            "target": 7
+        },
+        {
+            "face": "BOTTOM",
+            "source": 0,
+            "target": 8
+        },
+        {
+            "face": "RIGHT",
+            "source": 2,
+            "target": 3
+        },
+        {
+            "face": "TOP",
+            "source": 2,
+            "target": 4
+        },
+        {
+            "face": "TOP",
+            "source": 2,
+            "target": 5
+        }
+    ]
+}

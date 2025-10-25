@@ -146,11 +146,11 @@ def crossover_lsystem(lsystem_parent1,lsystem_parent2,mutation_rate):
         iter_offspring2+=lsystem_parent2.iterations
     iteration_offspring1=int(iter_offspring1/4)
     iteration_offspring2=int(iter_offspring2/4)
-    offspring1=LSystemDecoder(axiom_offspring1,rules_offspring1,iter_offspring1)
-    offspring2=LSystemDecoder(axiom_offspring2,rules_offspring2,iter_offspring2)
+    offspring1=LSystemDecoder(axiom_offspring1,rules_offspring1,iter_offspring1,lsystem_parent1.max_elements,lsystem_parent1.max_depth,lsystem_parent1.verbose)
+    offspring2=LSystemDecoder(axiom_offspring2,rules_offspring2,iter_offspring2,lsystem_parent2.max_elements,lsystem_parent2.max_depth,lsystem_parent2.verbose)
     return offspring1,offspring2
 
-def initialization_lsystem():
+def initialization_lsystem(max_elements=32,max_depth=8,add_temperature=0.5,none_temperature=0.2,verbose=0):
     axiom = "C"
     rules = {}
     nb_item_C=random.choice(range(6,10))
@@ -159,13 +159,13 @@ def initialization_lsystem():
     nb_item_N=random.choice(range(2,10))
     rule_string_C = "C"
     for i in range(0,nb_item_C):
-        what_to_add = random.choice(['add','mov'])
+        what_to_add = random.choices(['add','mov'],weights=[add_temperature,1-add_temperature])[0]  
         match what_to_add:
             case 'add':
                 operator = random.choice(['addf','addk','addl','addr','addb','addt'])
                 rotation = random.choice([0,45,90,135,180,225,270])
                 op_to_add=operator+"("+str(rotation)+")"
-                item_to_add=random.choice(['B','H','N'])
+                item_to_add=random.choices(['B','H','N'],weights=[(1-none_temperature)/2,(1-none_temperature)/2,none_temperature])[0]
                 rule_string_C+=" "+op_to_add+" "+item_to_add
             case 'mov':
                 operator = random.choice(['movf','movk','movl','movr','movb','movt'])
@@ -178,7 +178,7 @@ def initialization_lsystem():
                 operator = random.choice(['addf','addk','addl','addr','addb','addt'])
                 rotation = random.choice([0,45,90,135,180,225,270])
                 op_to_add=operator+"("+str(rotation)+")"
-                item_to_add=random.choice(['B','H','N'])
+                item_to_add=random.choices(['B','H','N'],weights=[(1-none_temperature)/2,(1-none_temperature)/2,none_temperature])[0]
                 rule_string_B+=" "+op_to_add+" "+item_to_add
             case 'mov':
                 operator = random.choice(['movf','movk','movl','movr','movb','movt'])
@@ -191,7 +191,7 @@ def initialization_lsystem():
                 operator = random.choice(['addf','addk','addl','addr','addb','addt'])
                 rotation = random.choice([0,45,90,135,180,225,270])
                 op_to_add=operator+"("+str(rotation)+")"
-                item_to_add=random.choice(['B','H','N'])
+                item_to_add=random.choices(['B','H','N'],weights=[(1-none_temperature)/2,(1-none_temperature)/2,none_temperature])[0]
                 rule_string_H+=" "+op_to_add+" "+item_to_add
             case 'mov':
                 operator = random.choice(['movf','movk','movl','movr','movb','movt'])
@@ -204,7 +204,7 @@ def initialization_lsystem():
                 operator = random.choice(['addf','addk','addl','addr','addb','addt'])
                 rotation = random.choice([0,45,90,135,180,225,270])
                 op_to_add=operator+"("+str(rotation)+")"
-                item_to_add=random.choice(['B','H','N'])
+                item_to_add=random.choices(['B','H','N'],weights=[(1-none_temperature)/2,(1-none_temperature)/2,none_temperature])[0]
                 rule_string_N+=" "+op_to_add+" "+item_to_add
             case 'mov':
                 operator = random.choice(['movf','movk','movl','movr','movb','movt'])
@@ -213,6 +213,6 @@ def initialization_lsystem():
     rules['B']=rule_string_B
     rules['H']=rule_string_H
     rules['N']=rule_string_N
-    iterations = random.choice(range(0,4))
-    ls = LSystemDecoder(axiom,rules,iterations)
+    iterations = random.choice(range(1,3))
+    ls = LSystemDecoder(axiom,rules,iterations,max_elements=max_elements,max_depth=max_depth,verbose=verbose)
     return ls

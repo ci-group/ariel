@@ -1,0 +1,131 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "type": "CORE",
+            "rotation": 0,
+            "id": "C0"
+        },
+        {
+            "type": "HINGE",
+            "rotation": 45,
+            "id": "H1"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 45,
+            "id": "B2"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 0,
+            "id": "B3"
+        },
+        {
+            "type": "HINGE",
+            "rotation": 45,
+            "id": "H4"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 0,
+            "id": "B5"
+        },
+        {
+            "type": "HINGE",
+            "rotation": 45,
+            "id": "H6"
+        },
+        {
+            "type": "HINGE",
+            "rotation": 45,
+            "id": "H7"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 45,
+            "id": "B8"
+        },
+        {
+            "type": "HINGE",
+            "rotation": 45,
+            "id": "H9"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 45,
+            "id": "B10"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 0,
+            "id": "B11"
+        },
+        {
+            "type": "HINGE",
+            "rotation": 45,
+            "id": "H12"
+        },
+        {
+            "type": "N",
+            "rotation": 0,
+            "id": "N13"
+        }
+    ],
+    "edges": [
+        {
+            "source": "C0",
+            "target": "H1"
+        },
+        {
+            "source": "C0",
+            "target": "B5"
+        },
+        {
+            "source": "C0",
+            "target": "H9"
+        },
+        {
+            "source": "C0",
+            "target": "N13"
+        },
+        {
+            "source": "H1",
+            "target": "B2"
+        },
+        {
+            "source": "B2",
+            "target": "B3"
+        },
+        {
+            "source": "B3",
+            "target": "H4"
+        },
+        {
+            "source": "B5",
+            "target": "H6"
+        },
+        {
+            "source": "H6",
+            "target": "H7"
+        },
+        {
+            "source": "H7",
+            "target": "B8"
+        },
+        {
+            "source": "H9",
+            "target": "B10"
+        },
+        {
+            "source": "B10",
+            "target": "B11"
+        },
+        {
+            "source": "B11",
+            "target": "H12"
+        }
+    ]
+}

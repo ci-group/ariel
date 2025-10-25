@@ -1,0 +1,54 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "type": 0,
+            "rotation": 0,
+            "id": "C-0"
+        },
+        {
+            "type": "HINGE",
+            "rotation": 135,
+            "id": "H-1"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 270,
+            "id": "B-2"
+        },
+        {
+            "type": 3,
+            "rotation": 45,
+            "id": "N-3"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 225,
+            "id": "B-4"
+        }
+    ],
+    "edges": [
+        {
+            "face": "FRONT",
+            "source": "C-0",
+            "target": "H-1"
+        },
+        {
+            "face": "RIGHT",
+            "source": "C-0",
+            "target": "B-2"
+        },
+        {
+            "face": "TOP",
+            "source": "C-0",
+            "target": "N-3"
+        },
+        {
+            "face": "BOTTOM",
+            "source": "C-0",
+            "target": "B-4"
+        }
+    ]
+}

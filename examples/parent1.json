@@ -1,0 +1,104 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "type": "CORE",
+            "rotation": "DEG_0",
+            "id": 0
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_45",
+            "id": 1
+        },
+        {
+            "type": "BRICK",
+            "rotation": "DEG_180",
+            "id": 2
+        },
+        {
+            "type": "BRICK",
+            "rotation": "DEG_45",
+            "id": 3
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_135",
+            "id": 4
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_225",
+            "id": 5
+        },
+        {
+            "type": "BRICK",
+            "rotation": "DEG_45",
+            "id": 6
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_135",
+            "id": 7
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_225",
+            "id": 8
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_270",
+            "id": 9
+        }
+    ],
+    "edges": [
+        {
+            "face": "FRONT",
+            "source": 0,
+            "target": 1
+        },
+        {
+            "face": "RIGHT",
+            "source": 0,
+            "target": 2
+        },
+        {
+            "face": "TOP",
+            "source": 0,
+            "target": 3
+        },
+        {
+            "face": "TOP",
+            "source": 0,
+            "target": 6
+        },
+        {
+            "face": "BOTTOM",
+            "source": 0,
+            "target": 9
+        },
+        {
+            "face": "FRONT",
+            "source": 3,
+            "target": 4
+        },
+        {
+            "face": "BOTTOM",
+            "source": 3,
+            "target": 5
+        },
+        {
+            "face": "FRONT",
+            "source": 6,
+            "target": 7
+        },
+        {
+            "face": "BOTTOM",
+            "source": 6,
+            "target": 8
+        }
+    ]
+}

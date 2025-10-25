@@ -1,0 +1,44 @@
+{
+    "directed": true,
+    "multigraph": false,
+    "graph": {},
+    "nodes": [
+        {
+            "type": 0,
+            "rotation": 0,
+            "id": "C-0"
+        },
+        {
+            "type": 3,
+            "rotation": 90,
+            "id": "N-1"
+        },
+        {
+            "type": 3,
+            "rotation": 270,
+            "id": "N-2"
+        },
+        {
+            "type": "BRICK",
+            "rotation": 270,
+            "id": "B-3"
+        }
+    ],
+    "edges": [
+        {
+            "face": "RIGHT",
+            "source": "C-0",
+            "target": "N-1"
+        },
+        {
+            "face": "LEFT",
+            "source": "C-0",
+            "target": "N-2"
+        },
+        {
+            "face": "TOP",
+            "source": "C-0",
+            "target": "B-3"
+        }
+    ]
+}
