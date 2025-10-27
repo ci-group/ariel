@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Optional, Dict, Callable
 import networkx as nx
-from ariel.ec.genotypes.tree.tree_genome import TreeNode, TreeGenome
-from ariel.body_phenotypes.robogen_lite import config
+from ....ec.genotypes.tree.tree_genome import TreeNode, TreeGenome
+from ...robogen_lite import config
 
-def to_digraph(genome: TreeGenome, use_node_ids: bool = True) -> nx.DiGraph:
+def to_digraph(genome: TreeGenome, use_node_ids: bool = False) -> nx.DiGraph:
     """
     Convert this genome (rooted at `genome.root`) to a NetworkX directed graph.
 

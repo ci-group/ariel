@@ -149,6 +149,9 @@ cython_debug/
 ### VSCODE ######################################################################
 .vscode
 .vscode/*
+.idea/*
+.idea
+.idea*
 # Local History for Visual Studio Code
 .history/
 # Built Visual Studio Code Extensions
@@ -263,3 +266,6 @@ RECYCLE.BIN/
 *.msp
 # Windows shortcuts
 *.lnk
+
+
+CLAUDE.md

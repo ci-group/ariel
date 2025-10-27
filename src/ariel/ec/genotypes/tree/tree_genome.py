@@ -19,7 +19,7 @@ class TreeGenome:
     def default_init(cls, *args, **kwargs):
         """Default instantiation with a core root."""
         return cls(root=TreeNode(config.ModuleInstance(type=config.ModuleType.CORE,
-                                              rotation=config.ModuleRotationsIdx.DEG_90,
+                                              rotation=config.ModuleRotationsIdx.DEG_0,
                                               links={})))
 
     @property
