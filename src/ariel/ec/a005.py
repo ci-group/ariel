@@ -1,6 +1,7 @@
 """TODO(jmdm): description of script."""
 
 # Standard library
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 # Third-party libraries
@@ -9,6 +10,7 @@ from rich.console import Console
 from rich.traceback import install
 
 # Local libraries
+from ariel.ec.genotypes.genotype import Genotype
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from ariel.ec.a000 import IntegersGenerator
 from ariel.ec.a001 import JSONIterable
@@ -27,13 +29,52 @@ install(width=180)
 console = Console()
 RNG = np.random.default_rng(SEED)
 
+class Crossover(ABC):
+    which_crossover: str = ""
 
-class Crossover:
+    @abstractmethod
+    @classmethod
+    def __call__(
+        cls,
+        parent_i: Genotype,
+        parent_j: Genotype,
+        **kwargs: dict,
+    ) -> tuple[Genotype, Genotype]:
+        """Perform crossover on two genotypes.
+
+        Parameters
+        ----------
+        parent_i : Genotype
+            The first parent genotype (list or nested list of integers).
+        parent_j : Genotype
+            The second parent genotype (list or nested list of integers).
+
+        Returns
+        -------
+        tuple[Genotype, Genotype]
+            Two child genotypes resulting from the crossover.
+        """
+        pass
+
+class IntegerCrossover(Crossover):
+    @classmethod
+    def __call__(
+        cls,
+        parent_i: Genotype,
+        parent_j: Genotype,
+        **kwargs: dict,
+    ) -> tuple[Genotype, Genotype]:
+        if cls.which_crossover == "one_point":
+            return cls.one_point(parent_i, parent_j, **kwargs)
+        else:
+            msg = f"Crossover type '{cls.which_crossover}' not recognized."
+            raise ValueError(msg)
+
     @staticmethod
     def one_point(
-        parent_i: JSONIterable,
-        parent_j: JSONIterable,
-    ) -> tuple[JSONIterable, JSONIterable]:
+        parent_i: Genotype,
+        parent_j: Genotype,
+    ) -> tuple[Genotype, Genotype]:
         # Prep
         parent_i_arr_shape = np.array(parent_i).shape
         parent_j_arr_shape = np.array(parent_j).shape
@@ -61,13 +102,28 @@ class Crossover:
         child2 = child2.reshape(parent_j_arr_shape).astype(int).tolist()
         return child1, child2
 
-class TreeCrossover:
+class TreeCrossover(Crossover):
+    @classmethod
+    def __call__(
+        cls,
+        parent_i: Genotype,
+        parent_j: Genotype,
+        **kwargs: dict,
+    ) -> tuple[Genotype, Genotype]:
+        if cls.which_crossover == "koza_default":
+            return cls.koza_default(parent_i, parent_j, **kwargs)
+        elif cls.which_crossover == "normal":
+            return cls.normal(parent_i, parent_j, **kwargs)
+        else:
+            msg = f"Crossover type '{cls.which_crossover}' not recognized."
+            raise ValueError(msg)
+
     @staticmethod
     def koza_default(
-        parent_i: TreeGenome,
-        parent_j: TreeGenome,
+        parent_i: Genotype,
+        parent_j: Genotype,
         koza_internal_node_prob: float = 0.9,
-    ) -> tuple[TreeGenome, TreeGenome]:
+    ) -> tuple[Genotype, Genotype]:
         """
         Koza default:
             -   In Parent A: choose an internal node with high probability (e.g., 90%) excluding root.
@@ -107,9 +163,9 @@ class TreeCrossover:
     
     @staticmethod
     def normal(
-        parent_i: TreeGenome,
-        parent_j: TreeGenome,
-    ) -> tuple[TreeGenome, TreeGenome]:
+        parent_i: Genotype,
+        parent_j: Genotype,
+    ) -> tuple[Genotype, Genotype]:
         """
         Normal tree crossover:
             - Pick a random node from Parent A (uniform over all nodes).

@@ -1,0 +1,55 @@
+# =========================
+# Evolutionary Algorithm — config.toml
+# =========================
+
+[run]
+# Choose which genotype profile to use for this run.
+# One of: "integers", "tree", "lsystem", "cppn"
+genotype = "tree"
+
+# (Optional) Override the selected profile's default operators here.
+# If omitted, the defaults under [genotypes.<name>.defaults] are used.
+# mutation = "swap_mutation"
+# crossover = "pmx"
+
+# =========================
+# Global EC settings (match EASettings fields)
+# =========================
+[ec]
+quiet = false
+is_maximisation = true
+first_generation_id = 0
+num_of_generations = 100
+target_population_size = 100
+
+# =========================
+# Data config
+# =========================
+[data]
+# Paths can be absolute or relative to the working directory
+output_folder = "__data__"
+db_file_name = "database.db"
+# db_handling modes: "delete" | "reuse" | "migrate" (adjust to your app’s enum)
+db_handling = "delete"
+
+# =========================
+# Genotype registry
+# Each genotype declares:
+# - allowed_mutations / allowed_crossovers: for validation/help
+# - defaults: operators used if not overridden in [run]
+# - (Optional) operator params (e.g., rates, alphas)
+# =========================
+
+[genotypes.tree]
+allowed_mutations  = ["random_subtree_replacement"]
+allowed_crossovers = ["koza_default", "normal"]
+
+[genotypes.tree.defaults]
+mutation = "random_subtree_replacement"
+crossover = "koza_default"
+
+[genotypes.tree.params]
+max_depth = 8
+mutation_rate = 0.1
+crossover_rate = 0.9
+

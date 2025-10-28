@@ -1,6 +1,7 @@
 """TODO(jmdm): description of script."""
 
 # Standard library
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
 from typing import cast
@@ -11,6 +12,7 @@ from pydantic_settings import BaseSettings
 from rich.console import Console
 from rich.traceback import install
 import copy
+from ariel.ec.genotypes.genotype import Genotype
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome, TreeNode
 import ariel.body_phenotypes.robogen_lite.config as pheno_config
 
@@ -84,15 +86,59 @@ class IntegersGenerator:
         )
         return cast("Integers", generated_values.astype(int).tolist())
 
+class Mutation(ABC):
+    which_mutation: str = ""
 
-class IntegerMutator:
+    @abstractmethod
+    @classmethod
+    def __call__(
+        cls,
+        individual: Genotype,
+        **kwargs: dict,
+    ) -> Genotype:
+        """Perform crossover on two genotypes.
+
+        Parameters
+        ----------
+        parent_i : Genotype
+            The first parent genotype (list or nested list of integers).
+        parent_j : Genotype
+            The second parent genotype (list or nested list of integers).
+
+        Returns
+        -------
+        tuple[Genotype, Genotype]
+            Two child genotypes resulting from the crossover.
+        """
+        pass
+
+class IntegerMutator(Mutation):
+    @classmethod
+    def __call__(
+        cls,
+        individual: Genotype,
+        **kwargs: dict,
+    ) -> Genotype:
+        if cls.which_mutation == "random_swap":
+            return cls.random_swap(
+                individual=individual,
+                **kwargs,
+            )
+        elif cls.which_mutation == "integer_creep":
+            return cls.integer_creep(
+                individual=individual,
+                **kwargs,
+            )
+        else:
+            raise ValueError(f"Unknown mutation type: {cls.which_mutation}")
+            
     @staticmethod
     def random_swap(
-        individual: Integers,
+        individual: Genotype,
         low: int,
         high: int,
         mutation_probability: float,
-    ) -> Integers:
+    ) -> Genotype:
         shape = np.asarray(individual).shape
         mutator = RNG.integers(
             low=low,
@@ -110,10 +156,10 @@ class IntegerMutator:
 
     @staticmethod
     def integer_creep(
-        individual: Integers,
+        individual: Genotype,
         span: int,
         mutation_probability: float,
-    ) -> Integers:
+    ) -> Genotype:
         # Prep
         ind_arr = np.array(individual)
         shape = ind_arr.shape
@@ -242,13 +288,27 @@ class TreeGenerator:
             genome.root._set_face(face, subtree)
         return genome
 
-class TreeMutator:
+class TreeMutator(Mutation):
+    @classmethod
+    def __call__(
+        cls,
+        individual: Genotype,
+        **kwargs: dict,
+    ) -> Genotype:
+        if cls.which_mutation == "random_subtree_replacement":
+            return cls.random_subtree_replacement(
+                individual=individual,
+                **kwargs,
+            )
+        else:
+            raise ValueError(f"Unknown mutation type: {cls.which_mutation}")
+
     @staticmethod
     def random_subtree_replacement(
-        individual: TreeGenome,
+        individual: Genotype,
         max_subtree_depth: int = 1,
         branching_prob: float = 0.5,
-    ) -> TreeGenome:
+    ) -> Genotype:
         """Replace a random subtree with a new random subtree."""
         if individual.root is None:
             return individual

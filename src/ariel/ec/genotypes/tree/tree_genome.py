@@ -3,6 +3,8 @@ import ariel.body_phenotypes.robogen_lite.config as config
 import contextlib
 from collections import deque
 import copy
+from ariel.ec.a000 import TreeMutator
+from ariel.ec.a005 import TreeCrossover
 
 from jedi.inference.gradual.typing import Callable
 from functools import reduce
@@ -14,6 +16,21 @@ RNG = np.random.default_rng(SEED)
 class TreeGenome:
     def __init__(self, root: TreeNode | None = None):
         self._root = root
+
+    @staticmethod
+    def get_crossover_object() -> TreeCrossover:
+        """Return the crossover operator for tree genomes."""
+        return TreeCrossover()
+    
+    @staticmethod
+    def get_mutator_object() -> TreeMutator:
+        """Return the mutator operator for tree genomes."""
+        return TreeMutator()
+    
+    @staticmethod
+    def create_individual() -> TreeGenome:
+        """Generate a new TreeGenome individual."""
+        return TreeGenome.default_init()
 
     @classmethod
     def default_init(cls, *args, **kwargs):
