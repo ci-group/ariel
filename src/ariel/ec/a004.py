@@ -24,7 +24,6 @@ from sqlmodel import Session, SQLModel, col, select
 # Local libraries
 from ariel.ec.a000 import IntegerMutator, IntegersGenerator
 from ariel.ec.a001 import Individual
-from ariel.ec.a005 import Crossover
 
 # Global constants
 SEED = 42

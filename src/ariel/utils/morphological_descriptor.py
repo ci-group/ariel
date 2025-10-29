@@ -727,11 +727,9 @@ class MorphologicalMeasures(Generic[TModule]):
         return self.length_of_limbs
 
     @property
-    def J(self):
-        """Joints J = j / j_max."""
-        return self.joints
-
-    @property
-    def S(self):
-        """Symmetry S = s."""
-        return self.size
+    def P(self) -> float:
+        """Proportion P = p_s / p_l (only valid for 2D morphologies)."""
+        if self.is_2d:
+            return self.proportion_2d
+        else:
+            return 0.0  # Return 0 for 3D robots where proportion is not defined

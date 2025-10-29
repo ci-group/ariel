@@ -1,27 +1,26 @@
 # Standard library
+from __future__ import annotations
 import random
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 import tomllib
-from typing import Literal, cast
-from argparse import ArgumentParser
+from typing import Literal, cast, TYPE_CHECKING
+from functools import partial
 
 # Third-party libraries
 import numpy as np
 from pydantic_settings import BaseSettings
 from rich.console import Console
-from rich.progress import track
 from rich.traceback import install
-from sqlalchemy import create_engine
-from sqlmodel import Session, SQLModel, col, select
 
 # Local libraries
-from ariel.ec.a000 import IntegerMutator, IntegersGenerator, Mutation, TreeMutator
 from ariel.ec.a001 import Individual
 from ariel.ec.a004 import EAStep, EA
-from ariel.ec.a005 import Crossover, IntegerCrossover, TreeCrossover
+from ariel.ec.a000 import Mutation
+from ariel.ec.a005 import Crossover
 from ariel.ec.genotypes.genotype import GenotypeEnum
+from morphology_fitness_analysis import compute_6d_descriptor, load_target_robot, compute_fitness_scores
 
 # Global constants
 SEED = 42
@@ -48,11 +47,14 @@ class EASettings(BaseSettings):
     mutation: Mutation
     crossover: Crossover
 
+    task: str = "evolve_to_copy"
+    target_robot_file_path: Path | None = Path("examples/target_robots/small_robot_8.json")
+
     # Data config
     output_folder: Path = Path.cwd() / "__data__"
     db_file_name: str = "database.db"
     db_file_path: Path = output_folder / db_file_name
-    db_handling: DB_HANDLING_MODES = "delete" 
+    db_handling: DB_HANDLING_MODES = "delete"
 
 # ------------------------ EA STEPS ------------------------ #
 def parent_selection(population: Population, config: EASettings) -> Population:
@@ -77,19 +79,19 @@ def crossover(population: Population, config: EASettings) -> Population:
         parent_i = parents[idx]
         parent_j = parents[idx]
         genotype_i, genotype_j = config.crossover(
-            parent_i.genotype,
-            parent_j.genotype,
+            config.genotype.value.from_json(parent_i.genotype),
+            config.genotype.value.from_json(parent_j.genotype),
         )
 
         # First child
         child_i = Individual()
-        child_i.genotype = genotype_i
+        child_i.genotype = genotype_i.to_json()
         child_i.tags = {"mut": True}
         child_i.requires_eval = True
 
         # Second child
         child_j = Individual()
-        child_j.genotype = genotype_j
+        child_j.genotype = genotype_j.to_json()
         child_j.tags = {"mut": True}
         child_j.requires_eval = True
 
@@ -100,19 +102,30 @@ def crossover(population: Population, config: EASettings) -> Population:
 def mutation(population: Population, config: EASettings) -> Population:
     for ind in population:
         if ind.tags.get("mut", False):
-            genes = ind.genotype
+            genes = config.genotype.value.from_json(ind.genotype)
             mutated = config.mutation(
                 individual=genes,
-                span=1,
-                mutation_probability=0.5,
+                # span=1,
+                # mutation_probability=0.5,
             )
-            ind.genotype = mutated
+            ind.genotype = mutated.to_json()
             ind.requires_eval = True
     return population
 
 
-def evaluate(population: Population) -> Population:
-    pass
+def evaluate(population: Population, config: EASettings) -> Population:
+    if config.task == "evolve_to_copy":
+        target_descriptor = load_target_robot(Path("examples/target_robots/" + str(config.target_robot_file_path)))
+
+        for ind in population:
+            genotype = config.genotype.value.from_json(ind.genotype)
+            # Convert to digraph
+            ind_digraph = genotype.to_digraph(genotype)
+            # Compute the morphological descriptors
+            measures = compute_6d_descriptor(ind_digraph)
+            fitness = compute_fitness_scores(target_descriptor, measures)
+            ind.fitness = fitness
+    return population
 
 
 def survivor_selection(population: Population, config: EASettings) -> Population:
@@ -137,26 +150,32 @@ def survivor_selection(population: Population, config: EASettings) -> Population
 
 def create_individual(config: EASettings) -> Individual:
     ind = Individual()
-    ind.genotype = config.genotype.value.create_individual()
+    ind.genotype = config.genotype.value.create_individual().to_json()
     return ind
 
 def read_config_file() -> EASettings:
-    cfg = tomllib.loads(Path("config.toml").read_text())
+    cfg = tomllib.loads(Path("examples/config.toml").read_text())
 
     # Resolve the active operators from the chosen genotype profile
     gname = cfg["run"]["genotype"]
     gblock = cfg["genotypes"][gname]
     mutation_name = cfg["run"].get("mutation", gblock["defaults"]["mutation"])
     crossover_name = cfg["run"].get("crossover", gblock["defaults"]["crossover"])
+    task = cfg["run"]["task"]
+    
+    target_robot_path = cfg["task"]["evolve_to_copy"]["target_robot_path"] if task == "evolve_to_copy" else None
 
     if gname == 'tree':
         genotype = GenotypeEnum.TREE
-        mutation = TreeMutator()
-        mutation.which_mutation = mutation_name
-        crossover = TreeCrossover()
-        crossover.which_crossover = crossover_name
+    elif gname == 'lsystem':
+        pass
     elif gname == 'integers':
         pass
+
+    mutation = genotype.value.get_mutator_object()
+    mutation.set_which_mutation(mutation_name)
+    crossover = genotype.value.get_crossover_object()
+    crossover.set_which_crossover(crossover_name)
 
     settings = EASettings(
         quiet=cfg["ec"]["quiet"],
@@ -167,6 +186,8 @@ def read_config_file() -> EASettings:
         genotype=genotype,
         mutation=mutation,
         crossover=crossover,
+        task=task,
+        target_robot_file_path=Path(target_robot_path),
         output_folder=Path(cfg["data"]["output_folder"]),
         db_file_name=cfg["data"]["db_file_name"],
         db_handling=cfg["data"]["db_handling"],
@@ -180,15 +201,16 @@ def main() -> None:
     config = read_config_file()
     # Create initial population
     population_list = [create_individual(config) for _ in range(10)]
-    population_list = evaluate(population_list)
+    population_list = evaluate(population_list, config)
 
     # Create EA steps
+    
     ops = [
-        EAStep("parent_selection", parent_selection),
-        EAStep("crossover", crossover),
-        EAStep("mutation", mutation),
-        EAStep("evaluation", evaluate),
-        EAStep("survivor_selection", survivor_selection),
+        EAStep("parent_selection", partial(parent_selection, config=config)),
+        EAStep("crossover",        partial(crossover,        config=config)),
+        EAStep("mutation",         partial(mutation,         config=config)),
+        EAStep("evaluation",       partial(evaluate,         config=config)),
+        EAStep("survivor_selection", partial(survivor_selection, config=config)),
     ]
 
     # Initialize EA

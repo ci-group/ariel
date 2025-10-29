@@ -7,10 +7,10 @@
 # One of: "integers", "tree", "lsystem", "cppn"
 genotype = "tree"
 
-# (Optional) Override the selected profile's default operators here.
-# If omitted, the defaults under [genotypes.<name>.defaults] are used.
-# mutation = "swap_mutation"
-# crossover = "pmx"
+task = "evolve_to_copy"
+
+[task.evolve_to_copy]
+target_robot_path = "small_robot_8.json"
 
 # =========================
 # Global EC settings (match EASettings fields)

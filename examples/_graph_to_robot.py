@@ -31,6 +31,7 @@ from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
     HighProbabilityDecoder,
     save_graph_as_json,
 )
+#from ariel.body_phenotypes.robogen_lite.morphology import Morphology
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.renderers import single_frame_renderer

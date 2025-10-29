@@ -1,4 +1,5 @@
 """TODO(jmdm): description of script."""
+from __future__ import annotations
 
 # Standard library
 from abc import ABC, abstractmethod
@@ -9,11 +10,12 @@ import numpy as np
 from rich.console import Console
 from rich.traceback import install
 
+from typing import TYPE_CHECKING
+
 # Local libraries
-from ariel.ec.genotypes.genotype import Genotype
-from ariel.ec.genotypes.tree.tree_genome import TreeGenome
+if TYPE_CHECKING:
+    from ariel.ec.genotypes.genotype import Genotype
 from ariel.ec.a000 import IntegersGenerator
-from ariel.ec.a001 import JSONIterable
 
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
@@ -32,8 +34,12 @@ RNG = np.random.default_rng(SEED)
 class Crossover(ABC):
     which_crossover: str = ""
 
-    @abstractmethod
     @classmethod
+    def set_which_crossover(cls, crossover_type: str) -> None:
+        cls.which_crossover = crossover_type
+
+    @classmethod
+    @abstractmethod
     def __call__(
         cls,
         parent_i: Genotype,
@@ -134,6 +140,14 @@ class TreeCrossover(Crossover):
         (not just swapping a leaf for a leaf), while letting the other parent be unrestricted adds variety.
         """
         parent_i_root, parent_j_root = parent_i.root, parent_j.root
+
+        nodes_a = parent_i_root.get_all_nodes(exclude_root=True)
+        nodes_b = parent_j_root.get_all_nodes(exclude_root=True)
+
+        # If either tree is just a root, return copies of parents
+        if not nodes_a or not nodes_b:
+            return parent_i.copy(), parent_j.copy()
+
         parent_i_internal_nodes = parent_i_root.get_internal_nodes(mode="dfs", exclude_root=True)
 
         if RNG.random() > koza_internal_node_prob and parent_i_internal_nodes:
@@ -176,13 +190,16 @@ class TreeCrossover(Crossover):
         """
         parent_i_root, parent_j_root = parent_i.root, parent_j.root
 
-        # Uniformly choose any node (root, internal, or leaf)
-        node_a = RNG.choice(parent_i_root.get_all_nodes(exclude_root=True))
-        node_b = RNG.choice(parent_j_root.get_all_nodes(exclude_root=True))
+        nodes_a = parent_i_root.get_all_nodes(exclude_root=True)
+        nodes_b = parent_j_root.get_all_nodes(exclude_root=True)
 
-        if not node_a or not node_b:
-            # If either tree is just a root, return copies of parents
+        # If either tree is just a root, return copies of parents
+        if not nodes_a or not nodes_b:
             return parent_i.copy(), parent_j.copy()
+
+        # Uniformly choose any node (root, internal, or leaf)
+        node_a = RNG.choice(nodes_a)
+        node_b = RNG.choice(nodes_b)
 
         # Preserve originals (same pattern as in koza_default)
         parent_i_old = parent_i.copy()

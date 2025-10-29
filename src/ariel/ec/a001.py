@@ -12,7 +12,6 @@ from sqlalchemy import JSON, Column, Engine
 from sqlmodel import Field, Session, SQLModel, create_engine
 
 # Local libraries
-from ariel.ec.a000 import IntegersGenerator
 
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
@@ -121,29 +120,30 @@ class Individual(SQLModel, table=True):
 
 
 def main() -> None:
-    """Entry point."""
-    # Initialize the database
-    engine = init_database()
+    # """Entry point."""
+    # # Initialize the database
+    # engine = init_database()
 
-    # Save data
-    with Session(engine) as session:
-        ind = Individual()
+    # # Save data
+    # with Session(engine) as session:
+    #     ind = Individual()
 
-        # Generators
-        ind.genotype = IntegersGenerator.integers(low=0, high=10, size=5)
+    #     # Generators
+    #     ind.genotype = IntegersGenerator.integers(low=0, high=10, size=5)
 
-        # Tags
-        ind.tags = {"a": ["1", 2, 3]}
-        ind.tags = {"b": ("1", 2, 3)}
-        ind.tags = {"c": 1}
-        ind.tags = {"d": True}
+    #     # Tags
+    #     ind.tags = {"a": ["1", 2, 3]}
+    #     ind.tags = {"b": ("1", 2, 3)}
+    #     ind.tags = {"c": 1}
+    #     ind.tags = {"d": True}
 
-        prnt(ind)
-        session.add(ind)
-        session.commit()
-        prnt(ind)
-        session.refresh(ind)
-        prnt(ind)
+    #     prnt(ind)
+    #     session.add(ind)
+    #     session.commit()
+    #     prnt(ind)
+    #     session.refresh(ind)
+    #     prnt(ind)
+    pass
 
 
 if __name__ == "__main__":

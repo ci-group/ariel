@@ -39,7 +39,7 @@ from ariel.utils.runners import simple_runner
 from ariel.utils.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
-
+from ariel.utils.graph_ops import robot_json_to_digraph, load_robot_json_file
 
 # Type Checking
 if TYPE_CHECKING:
@@ -330,6 +330,8 @@ def morph_descriptors(robot_graph: Any):
     print(f"  Is 2D: {measures.is_2d}")
     print(f" Size: {measures.size:.3f}")
 
+    return np.array([measures.B, measures.L, measures.E, measures.S, measures.P, measures.J])
+
 
 def simple_controller(model: mj.MjModel, data: mj.MjData) -> np.ndarray:
     """Simple oscillating controller for robot movement."""
@@ -434,15 +436,15 @@ def main() -> None:
     tree_genome = TreeGenerator.binary_tree(10)
 
     robot_graph = to_digraph(tree_genome)
-
+    robot_graph = load_robot_json_file("examples/target_robots/large_robot_25.json")
     morph_descriptors(robot_graph)
 
     # ? ------------------------------------------------------------------ #
     # Save the graph to a file
-    save_graph_as_json(
-        robot_graph,
-        DATA / "robot_graph.json",
-    )
+    #save_graph_as_json(
+    #    robot_graph,
+    #    DATA / "robot_graph.json",
+    #)
 
     # ? ------------------------------------------------------------------ #
     # Print all nodes

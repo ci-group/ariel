@@ -1,12 +1,13 @@
 from __future__ import annotations
+import json
 import ariel.body_phenotypes.robogen_lite.config as config
 import contextlib
 from collections import deque
-import copy
 from ariel.ec.a000 import TreeMutator
 from ariel.ec.a005 import TreeCrossover
+import networkx as nx
 
-from jedi.inference.gradual.typing import Callable
+from collections.abc import Callable
 from functools import reduce
 import numpy as np
 
@@ -31,6 +32,48 @@ class TreeGenome:
     def create_individual() -> TreeGenome:
         """Generate a new TreeGenome individual."""
         return TreeGenome.default_init()
+    
+    @staticmethod
+    def to_digraph(robot_genotype: TreeGenome, use_node_ids: bool = False) -> nx.DiGraph:
+        g = nx.DiGraph()
+        root = robot_genotype.root
+        if root is None:
+            return g
+
+        # Stable mapping: either identity (node.id) or contiguous DFS ids.
+        if use_node_ids:
+            node_key = lambda n: n.id
+        else:
+            # Assign 0..N-1 in first-seen (DFS) order
+            seen: dict[int, int] = {}
+            next_id = 0
+            def node_key(n: TreeNode) -> int:
+                nonlocal next_id
+                if n.id not in seen:
+                    seen[n.id] = next_id
+                    next_id += 1
+                return seen[n.id]
+
+        def dfs(parent: TreeNode | None, child: TreeNode, via_face: config.ModuleFaces | None) -> None:
+            cid = node_key(child)
+            # Add/update child node with attributes (use enum names for JSON-friendliness)
+            g.add_node(
+                cid,
+                type=child.module_type.name,
+                rotation=child.rotation.name,
+                raw_id=child.id,
+            )
+
+            if parent is not None:
+                pid = node_key(parent)
+                g.add_edge(pid, cid, face=via_face.name if via_face is not None else None)
+
+            # Recurse over children (face -> subnode)
+            for face, sub in child.children.items():
+                dfs(child, sub, face)
+
+        dfs(None, root, None)
+        return g
 
     @classmethod
     def default_init(cls, *args, **kwargs):
@@ -38,6 +81,18 @@ class TreeGenome:
         return cls(root=TreeNode(config.ModuleInstance(type=config.ModuleType.CORE,
                                               rotation=config.ModuleRotationsIdx.DEG_0,
                                               links={})))
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "TreeGenome":
+        """Deserialize a genome from a dict produced by to_dict()."""
+        root_data = data.get("root")
+        root = None if root_data is None else TreeNode.from_dict(root_data)
+        return cls(root=root)
+
+    @classmethod
+    def from_json(cls, s: str) -> "TreeGenome":
+        """Deserialize from a JSON string."""
+        return cls.from_dict(json.loads(s))
 
     @property
     def root(self) -> TreeNode | None:
@@ -134,6 +189,17 @@ class TreeGenome:
     def __copy__(self) -> 'TreeGenome':
         """Support for copy.copy()."""
         return self.copy()
+    
+    # ---------- JSON / dict serialization ----------
+    def to_dict(self) -> dict:
+        """Serialize the genome into a pure-Python dict (JSON-friendly)."""
+        return {
+            "root": None if self._root is None else self._root.to_dict()
+        }
+
+    def to_json(self, *, indent: int | None = 2) -> str:
+        """Serialize to a JSON string."""
+        return json.dumps(self.to_dict(), indent=indent)
 
     # TODO: Implement this
     # def __deepcopy__(self, memo) -> 'TreeGenome':
@@ -470,6 +536,7 @@ class TreeNode:
         """
         predicate_is_parent = lambda x: node_to_remove in set(x.children.values())
         parent = self.find_all_nodes_dfs(predicate=predicate_is_parent)
+        # print("PARENTS LENGTH",len(parent))
         if not parent or len(parent) > 1:
             raise RuntimeError("Father not found, are you sure node_to_remove is in subtree?")
         # We expect a list of len 1 in which there is the parent
@@ -498,6 +565,52 @@ class TreeNode:
     def __copy__(self) -> 'TreeNode':
         """Support for copy.copy() - creates deep copy for tree structures."""
         return self.copy()
+    
+    # ---------- JSON / dict serialization ----------
+    def to_dict(self) -> dict:
+        """
+        Serialize this node recursively.
+        Enums are stored by name (string). Children are a mapping face->child.
+        """
+        # Children as {face_name: child_dict}
+        children_dict = {
+            face.name: child.to_dict()
+            for face, child in self.children.items()
+        }
+        return {
+            "id": self._id,
+            "depth": self._depth,
+            "module_type": self.module_type.name,
+            "rotation": self.rotation.name,
+            "children": children_dict,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "TreeNode":
+        """
+        Rebuild a TreeNode (and its subtree) from dict.
+        Uses _set_face so that ModuleInstance.links remains consistent.
+        """
+        node_id = data["id"]
+        depth = data["depth"]
+        module_type = config.ModuleType[data["module_type"]]
+        rotation = config.ModuleRotationsIdx[data["rotation"]]
+
+        # Create the node with a fresh ModuleInstance and the preserved id/depth
+        node = cls(
+            module=config.ModuleInstance(type=module_type, rotation=rotation, links={}),
+            depth=depth,
+            node_id=node_id,
+        )
+
+        # Rebuild children through _set_face so links are updated properly.
+        children = data.get("children", {}) or {}
+        for face_name, child_payload in children.items():
+            face = config.ModuleFaces[face_name]
+            child_node = cls.from_dict(child_payload)
+            node._set_face(face, child_node)
+
+        return node
 
 
 
