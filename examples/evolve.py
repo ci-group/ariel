@@ -7,6 +7,7 @@ from pathlib import Path
 import tomllib
 from typing import Literal, cast, TYPE_CHECKING
 from functools import partial
+import matplotlib.pyplot as plt
 
 # Third-party libraries
 import numpy as np
@@ -75,9 +76,9 @@ def parent_selection(population: Population, config: EASettings) -> Population:
 
 def crossover(population: Population, config: EASettings) -> Population:
     parents = [ind for ind in population if ind.tags.get("ps", False)]
-    for idx in range(0, len(parents), 2):
+    for idx in range(0, len(parents)-1, 2):
         parent_i = parents[idx]
-        parent_j = parents[idx]
+        parent_j = parents[idx + 1]
         genotype_i, genotype_j = config.crossover(
             config.genotype.value.from_json(parent_i.genotype),
             config.genotype.value.from_json(parent_j.genotype),
@@ -231,6 +232,22 @@ def main() -> None:
     worst = ea.get_solution("worst", only_alive=False)
     console.log(worst)
 
+    fitnesses = []
+
+    for i in range(100):
+        ea.fetch_population(only_alive=False, best_comes=None, custom_logic=[Individual.time_of_birth==i])
+        individuals = ea.population
+        avg_fitness = sum(ind.fitness for ind in individuals) / len(individuals) if individuals else 0
+        console.log(f"Generation {i}: Avg Fitness = {avg_fitness}")
+        fitnesses.append(avg_fitness)
+
+    # Line plot of the fitness
+    plt.plot(range(100), fitnesses, marker='o')
+    plt.title('Average Fitness Over Generations')
+    plt.xlabel('Generation')
+    plt.ylabel('Average Fitness')
+    plt.savefig('average_fitness_over_generations.png')
+    plt.show()
 
 if __name__ == "__main__":
     main()

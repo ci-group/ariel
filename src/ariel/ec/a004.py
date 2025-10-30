@@ -209,7 +209,7 @@ class EA(AbstractEA):
                 (Individual.requires_eval != already_evaluated),
             )
         if custom_logic is not None:
-            statement.where(
+            statement = statement.where(
                 *custom_logic,
             )
 

@@ -212,7 +212,7 @@ class TreeGenome:
 
 class TreeNode:
 
-    def __init__(self, module: config.ModuleInstance | None = None, depth: int = 0, node_id: int | None = None,
+    def __init__(self, module: config.ModuleInstance | None = None, depth: int = 0,
                  module_type: config.ModuleType | None = None, module_rotation: config.ModuleRotationsIdx | None = None):
         if module is None:
             assert module_type is not None, "Module type cannot be None if module is not specified"
@@ -232,7 +232,7 @@ class TreeNode:
 
         self._enable_replacement: bool = False
 
-        self._id = id(self) if node_id is None else node_id
+        self._id = id(self)# if node_id is None else node_id
 
     @property
     def id(self) -> int:
@@ -553,7 +553,7 @@ class TreeNode:
         )
 
         # Create new node
-        new_node = TreeNode(new_module, depth=self._depth, node_id=self._id)
+        new_node = TreeNode(new_module, depth=self._depth,)
 
         # Recursively copy children
         for face, child in self.children.items():
@@ -591,7 +591,7 @@ class TreeNode:
         Rebuild a TreeNode (and its subtree) from dict.
         Uses _set_face so that ModuleInstance.links remains consistent.
         """
-        node_id = data["id"]
+        #node_id = data["id"]
         depth = data["depth"]
         module_type = config.ModuleType[data["module_type"]]
         rotation = config.ModuleRotationsIdx[data["rotation"]]
@@ -600,7 +600,7 @@ class TreeNode:
         node = cls(
             module=config.ModuleInstance(type=module_type, rotation=rotation, links={}),
             depth=depth,
-            node_id=node_id,
+            #node_id=node_id,
         )
 
         # Rebuild children through _set_face so links are updated properly.
