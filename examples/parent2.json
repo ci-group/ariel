@@ -9,46 +9,56 @@
             "id": 0
         },
         {
-            "type": "NONE",
-            "rotation": "DEG_180",
+            "type": "BRICK",
+            "rotation": "DEG_45",
             "id": 1
         },
         {
             "type": "BRICK",
-            "rotation": "DEG_180",
+            "rotation": "DEG_135",
             "id": 2
         },
         {
             "type": "BRICK",
-            "rotation": "DEG_180",
+            "rotation": "DEG_135",
             "id": 3
         },
         {
             "type": "HINGE",
             "rotation": "DEG_45",
             "id": 4
+        },
+        {
+            "type": "HINGE",
+            "rotation": "DEG_135",
+            "id": 5
         }
     ],
     "edges": [
         {
-            "face": "RIGHT",
+            "face": "BACK",
             "source": 0,
             "target": 1
         },
         {
-            "face": "TOP",
+            "face": "RIGHT",
             "source": 0,
             "target": 2
         },
         {
-            "face": "TOP",
-            "source": 2,
+            "face": "LEFT",
+            "source": 0,
             "target": 3
         },
         {
             "face": "BOTTOM",
-            "source": 2,
+            "source": 0,
             "target": 4
+        },
+        {
+            "face": "FRONT",
+            "source": 4,
+            "target": 5
         }
     ]
 }
