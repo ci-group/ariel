@@ -172,9 +172,7 @@ class lsystem_core(lsystem_element):
         self.back = None
         self.left = None
         self.right = None
-        self.top = None
-        self.bottom = None
-        self.allowed_connection=['TOP','BOTTOM','LEFT','RIGHT','FRONT','BACK']
+        self.allowed_connection=['LEFT','RIGHT','FRONT','BACK']
         self.name='C'
 
 class LSystemDecoder:
