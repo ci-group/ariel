@@ -38,7 +38,7 @@ def main() -> None:
     data = mujoco.MjData(model)
 
     # Render a single frame
-    single_frame_renderer(model, data, steps=10_000)
+    single_frame_renderer(model, data, steps=10_000, save=True)
 
 
 if __name__ == "__main__":

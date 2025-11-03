@@ -24,7 +24,6 @@ from sqlmodel import Session, SQLModel, col, select
 # Local libraries
 from ariel.ec.a000 import IntegerMutator, IntegersGenerator
 from ariel.ec.a001 import Individual
-from ariel.ec.a005 import Crossover
 
 # Global constants
 SEED = 42
@@ -210,7 +209,7 @@ class EA(AbstractEA):
                 (Individual.requires_eval != already_evaluated),
             )
         if custom_logic is not None:
-            statement.where(
+            statement = statement.where(
                 *custom_logic,
             )
 

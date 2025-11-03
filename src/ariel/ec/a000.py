@@ -1,15 +1,20 @@
 """TODO(jmdm): description of script."""
-
+from __future__ import annotations
 # Standard library
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import cast
+from typing import cast, TYPE_CHECKING
 
 # Third-party libraries
 import numpy as np
 from pydantic_settings import BaseSettings
 from rich.console import Console
 from rich.traceback import install
+import copy
+if TYPE_CHECKING:
+    from ariel.ec.genotypes.genotype import Genotype
+import ariel.body_phenotypes.robogen_lite.config as pheno_config
 
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
@@ -81,15 +86,64 @@ class IntegersGenerator:
         )
         return cast("Integers", generated_values.astype(int).tolist())
 
+class Mutation(ABC):
+    which_mutation: str = ""
 
-class IntegerMutator:
+    @classmethod
+    def set_which_mutation(cls, mutation_type: str) -> None:
+        cls.which_mutation = mutation_type
+
+    @classmethod
+    @abstractmethod
+    def __call__(
+        cls,
+        individual: Genotype,
+        **kwargs: dict,
+    ) -> Genotype:
+        """Perform crossover on two genotypes.
+
+        Parameters
+        ----------
+        parent_i : Genotype
+            The first parent genotype (list or nested list of integers).
+        parent_j : Genotype
+            The second parent genotype (list or nested list of integers).
+
+        Returns
+        -------
+        tuple[Genotype, Genotype]
+            Two child genotypes resulting from the crossover.
+        """
+        pass
+
+class IntegerMutator(Mutation):
+    @classmethod
+    def __call__(
+        cls,
+        individual: Genotype,
+        **kwargs: dict,
+    ) -> Genotype:
+        if cls.which_mutation == "random_swap":
+            return cls.random_swap(
+                individual=individual,
+                **kwargs,
+            )
+        elif cls.which_mutation == "integer_creep":
+            return cls.integer_creep(
+                individual=individual,
+                **kwargs,
+            )
+        else:
+            msg = f"Mutation type '{cls.which_mutation}' not recognized."
+            raise ValueError(msg)
+
     @staticmethod
     def random_swap(
-        individual: Integers,
+        individual: Genotype,
         low: int,
         high: int,
         mutation_probability: float,
-    ) -> Integers:
+    ) -> Genotype:
         shape = np.asarray(individual).shape
         mutator = RNG.integers(
             low=low,
@@ -107,10 +161,10 @@ class IntegerMutator:
 
     @staticmethod
     def integer_creep(
-        individual: Integers,
+        individual: Genotype,
         span: int,
         mutation_probability: float,
-    ) -> Integers:
+    ) -> Genotype:
         # Prep
         ind_arr = np.array(individual)
         shape = ind_arr.shape
@@ -138,8 +192,163 @@ class IntegerMutator:
         mutation_mask = mutator * sub_mask * do_mask
         new_genotype = ind_arr + mutation_mask
         return cast("Integers", new_genotype.astype(int).tolist())
-                    
-def main() -> None:
+
+
+# class TreeGenerator:
+#     @staticmethod
+#     def __call__(*args, **kwargs) -> TreeGenome:
+#         return TreeGenome.default_init()
+
+#     @staticmethod
+#     def default():
+#         return TreeGenome.default_init()
+
+#     @staticmethod
+#     def linear_chain(length: int = 3) -> TreeGenome:
+#         """Generate a linear chain of modules (snake-like)."""
+#         genome = TreeGenome.default_init()  # Start with CORE
+#         current_node = genome.root
+
+#         for i in range(length):
+#             module_type = RNG.choice([pheno_config.ModuleType.BRICK, pheno_config.ModuleType.HINGE])
+#             rotation = RNG.choice(list(pheno_config.ModuleRotationsIdx))
+#             module = pheno_config.ModuleInstance(type=module_type, rotation=rotation, links={})
+
+#             # Always attach to FRONT face for linear chain
+#             if pheno_config.ModuleFaces.FRONT in current_node.available_faces():
+#                 child = TreeNode(module, depth=current_node._depth + 1)
+#                 current_node._set_face(pheno_config.ModuleFaces.FRONT, child)
+#                 current_node = child
+
+#         return genome
+
+#     @staticmethod
+#     def star_shape(num_arms: int = 3) -> TreeGenome:
+#         """Generate a star-shaped tree with arms radiating from center."""
+#         genome = TreeGenome.default_init()  # Start with CORE
+#         available_faces = genome.root.available_faces()
+
+#         # Limit arms to available faces
+#         actual_arms = min(num_arms, len(available_faces))
+#         selected_faces = RNG.choice(available_faces, size=actual_arms, replace=False)
+
+#         for face in selected_faces:
+#             module_type = RNG.choice([pheno_config.ModuleType.BRICK, pheno_config.ModuleType.HINGE])
+#             rotation = RNG.choice(list(pheno_config.ModuleRotationsIdx))
+#             module = pheno_config.ModuleInstance(type=module_type, rotation=rotation, links={})
+
+#             child = TreeNode(module, depth=1)
+#             genome.root._set_face(face, child)
+
+#         return genome
+
+#     @staticmethod
+#     def binary_tree(depth: int = 2) -> TreeGenome:
+#         """Generate a binary-like tree structure."""
+#         def build_subtree(current_depth: int, max_depth: int) -> TreeNode | None:
+#             if current_depth >= max_depth:
+#                 return None
+
+#             module_type = RNG.choice([pheno_config.ModuleType.BRICK, pheno_config.ModuleType.HINGE])
+#             rotation = RNG.choice(list(pheno_config.ModuleRotationsIdx))
+#             module = pheno_config.ModuleInstance(type=module_type, rotation=rotation, links={})
+
+#             node = TreeNode(module, depth=current_depth)
+#             available_faces = node.available_faces()
+
+#             # Add 1-2 children randomly
+#             if available_faces and current_depth < max_depth - 1:
+#                 num_children = RNG.integers(1, min(3, len(available_faces) + 1))
+#                 selected_faces = RNG.choice(available_faces, size=num_children, replace=False)
+
+#                 for face in selected_faces:
+#                     child = build_subtree(current_depth + 1, max_depth)
+#                     if child:
+#                         node._set_face(face, child)
+
+#             return node
+
+#         genome = TreeGenome.default_init()
+
+#         # Add children to root
+#         available_faces = genome.root.available_faces()
+#         if available_faces:
+#             num_children = RNG.integers(1, min(3, len(available_faces) + 1))
+#             selected_faces = RNG.choice(available_faces, size=num_children, replace=False)
+
+#             for face in selected_faces:
+#                 child = build_subtree(1, depth)
+#                 if child:
+#                     genome.root._set_face(face, child)
+
+#         return genome
+
+#     @staticmethod
+#     def random_tree(max_depth: int = 4, branching_prob: float = 0.7) -> TreeGenome:
+#         """Generate a random tree with pheno_configurable branching probability."""
+#         genome = TreeGenome.default_init()  # Start with CORE
+#         face = RNG.choice(genome.root.available_faces())
+#         subtree = TreeNode.random_tree_node(max_depth=max_depth - 1, branch_prob=branching_prob)
+#         if subtree:
+#             genome.root._set_face(face, subtree)
+#         return genome
+
+class TreeMutator(Mutation):
+    
+    @classmethod
+    def __call__(
+        cls,
+        individual: Genotype,
+        **kwargs: dict,
+    ) -> Genotype:
+        if cls.which_mutation == "random_subtree_replacement":
+            return cls.random_subtree_replacement(
+                individual=individual,
+                **kwargs,
+            )
+        else:
+            msg = f"Mutation type '{cls.which_mutation}' not recognized."
+            raise ValueError(msg)
+        
+    @staticmethod
+    def _random_tree(max_depth: int = 2, branching_prob: float = 0.5) -> Genotype:
+        """Generate a random tree with pheno_configurable branching probability."""
+        from ariel.ec.genotypes.tree.tree_genome import TreeGenome, TreeNode
+        genome = TreeGenome.default_init()  # Start with CORE
+        face = RNG.choice(genome.root.available_faces())
+        subtree = TreeNode.random_tree_node(max_depth=max_depth - 1, branch_prob=branching_prob)
+        if subtree:
+            genome.root._set_face(face, subtree)
+        return genome
+
+    @staticmethod
+    def random_subtree_replacement(
+        individual: Genotype,
+        max_subtree_depth: int = 2,
+        branching_prob: float = 0.5,
+    ) -> Genotype:
+        """Replace a random subtree with a new random subtree."""
+        from ariel.ec.genotypes.tree.tree_genome import TreeNode
+        new_individual = copy.copy(individual)
+
+        # Collect all nodes in the tree
+        all_nodes = new_individual.root.get_all_nodes(exclude_root=True)
+
+        if not all_nodes:
+            # print("Tree has no nodes to replace; generating a new random tree.")
+            return TreeMutator._random_tree(max_depth=max_subtree_depth, branching_prob=branching_prob)
+
+        # Generate a new random subtree
+        new_subtree = TreeNode.random_tree_node(max_depth=max_subtree_depth, branch_prob=branching_prob)
+
+        node_to_replace = RNG.choice(all_nodes)
+
+        with new_individual.root.enable_replacement():
+            new_individual.root.replace_node(node_to_replace, new_subtree)
+
+        return new_individual
+
+def test() -> None:
     """Entry point."""
     console.log(IntegersGenerator.integers(-5, 5, 5))
     example = IntegersGenerator.choice([1, 3, 4], (2, 5))
@@ -151,6 +360,23 @@ def main() -> None:
     )
     console.log(example2)
 
+    console.rule("[bold blue]Tree Generator Examples")
+
+    treeGenerator = TreeGenerator()
+    random_tree = treeGenerator.random_tree(max_depth=3, branching_prob=0.7)
+    console.log("Random Tree:", random_tree)
+
+    genome = TreeGenome()
+    genome.root = TreeNode(pheno_config.ModuleInstance(type=pheno_config.ModuleType.BRICK, rotation=pheno_config.ModuleRotationsIdx.DEG_90, links={}))
+    genome.root.front = TreeNode(pheno_config.ModuleInstance(type=pheno_config.ModuleType.BRICK, rotation=pheno_config.ModuleRotationsIdx.DEG_45, links={}))
+    genome.root.left = TreeNode(pheno_config.ModuleInstance(type=pheno_config.ModuleType.BRICK, rotation=pheno_config.ModuleRotationsIdx.DEG_45, links={}))
+    tree_mutator = TreeMutator()
+    mutated_genome = tree_mutator.random_subtree_replacement(genome, max_subtree_depth=1)
+    console.log("Original Genome:", genome)
+    console.log("Mutated Genome:", mutated_genome)
+
+
+
 
 if __name__ == "__main__":
-    main()
+    test()
