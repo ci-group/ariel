@@ -3,8 +3,6 @@ import json
 import ariel.body_phenotypes.robogen_lite.config as config
 import contextlib
 from collections import deque
-from ariel.ec.a000 import TreeMutator
-from ariel.ec.a005 import TreeCrossover
 import networkx as nx
 from collections.abc import Callable
 from functools import reduce
@@ -13,6 +11,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ariel.ec.genotypes.genotype import Genotype
+    from ariel.ec.a005 import TreeCrossover
+    from ariel.ec.a000 import TreeMutator
 
 SEED = 42
 RNG = np.random.default_rng(SEED)
@@ -23,11 +23,13 @@ class TreeGenome(Genotype):
 
     @staticmethod
     def get_crossover_object() -> TreeCrossover:
+        from ariel.ec.a005 import TreeCrossover
         """Return the crossover operator for tree genomes."""
         return TreeCrossover()
     
     @staticmethod
     def get_mutator_object() -> TreeMutator:
+        from ariel.ec.a000 import TreeMutator
         """Return the mutator operator for tree genomes."""
         return TreeMutator()
     

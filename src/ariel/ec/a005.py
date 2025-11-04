@@ -14,12 +14,11 @@ from rich.traceback import install
 from typing import TYPE_CHECKING
 
 # Local libraries
+from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
 if TYPE_CHECKING:
     from ariel.ec.genotypes.genotype import Genotype
     from ariel.ec.genotypes.tree.tree_genome import TreeGenome
-    from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
 from ariel.ec.a000 import IntegersGenerator
-
 
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
@@ -213,7 +212,6 @@ class TreeCrossover(Crossover):
 class LSystemCrossover(Crossover):
     @staticmethod
     def crossover_uniform_rules_lsystem(lsystem_parent1,lsystem_parent2,mutation_rate):
-        from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
         axiom_offspring1="C"
         axiom_offspring2="C"
         rules_offspring1={}
@@ -268,7 +266,6 @@ class LSystemCrossover(Crossover):
 
     @staticmethod
     def crossover_uniform_genes_lsystem(lsystem_parent1,lsystem_parent2,mutation_rate):
-        from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
         axiom_offspring1="C"
         axiom_offspring2="C"
         rules_offspring1={}

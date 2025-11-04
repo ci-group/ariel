@@ -35,11 +35,11 @@ from networkx.readwrite import json_graph
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleRotationsTheta, ModuleType, ModuleInstance,ModuleRotationsIdx
-from ariel.ec.a000 import LSystemMutator
-from ariel.ec.a005 import LSystemCrossover
 
 if TYPE_CHECKING:
     from ariel.ec.genotypes.genotype import Genotype
+    from ariel.ec.a000 import LSystemMutator
+    from ariel.ec.a005 import LSystemCrossover
 
 SEED = 42
 DPI = 300
@@ -208,10 +208,12 @@ class LSystemDecoder(Genotype):
 
     @staticmethod
     def get_crossover_object() -> LSystemCrossover:
+        from ariel.ec.a005 import LSystemCrossover
         return LSystemCrossover()
     
     @staticmethod
     def get_mutator_object() -> LSystemMutator:
+        from ariel.ec.a000 import LSystemMutator
         return LSystemMutator()
     
     @staticmethod
