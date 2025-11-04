@@ -20,7 +20,7 @@ from ariel.ec.a001 import Individual
 from ariel.ec.a004 import EAStep, EA
 from ariel.ec.a000 import Mutation
 from ariel.ec.a005 import Crossover
-from ariel.ec.genotypes.genotype import GenotypeEnum
+from ariel.ec.genotypes.genotype_mapping import GENOTYPES_MAPPING
 from morphology_fitness_analysis import compute_6d_descriptor, load_target_robot, compute_fitness_scores
 
 # Global constants
@@ -166,12 +166,7 @@ def read_config_file() -> EASettings:
     
     target_robot_path = cfg["task"]["evolve_to_copy"]["target_robot_path"] if task == "evolve_to_copy" else None
 
-    if gname == 'tree':
-        genotype = GenotypeEnum.TREE
-    elif gname == 'lsystem':
-        pass
-    elif gname == 'integers':
-        pass
+    genotype = GENOTYPES_MAPPING[gname]
 
     mutation = genotype.value.get_mutator_object()
     mutation.set_which_mutation(mutation_name)

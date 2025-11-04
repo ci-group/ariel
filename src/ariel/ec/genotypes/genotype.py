@@ -2,16 +2,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from ariel.ec.a000 import Mutation
     from ariel.ec.a005 import Crossover
-from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 import networkx as nx
-
-
-class GenotypeEnum(Enum):
-    TREE = TreeGenome
-    #LSYSTEM = LSystemGenome  # Future implementation
 
 class Genotype(ABC):
     """Interface for different genotype types."""

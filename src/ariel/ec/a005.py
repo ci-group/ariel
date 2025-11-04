@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
 from ariel.ec.a000 import IntegersGenerator
 
+
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()

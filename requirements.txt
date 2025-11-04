@@ -1,0 +1,15 @@
+matplotlib==3.10.7
+mypyc==0.1.0
+networkx==3.5
+nicegui==3.2.0
+noise==1.2.2
+nox==2025.10.16
+numpy==2.3.4
+Pillow==12.0.0
+pydantic==2.12.3
+pydantic_settings==2.11.0
+rich==14.2.0
+scikit_learn==1.7.2
+setuptools==80.9.0
+SQLAlchemy==2.0.44
+sqlmodel==0.0.27
