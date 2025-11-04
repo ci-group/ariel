@@ -25,8 +25,7 @@ import random
 
 
 # Local libraries
-from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleRotationsTheta, ModuleType
-from ariel.body_phenotypes.robogen_lite.decoders.l_system_genotype import LSystemDecoder
+from ariel.src.ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
 
 SEED = 42
 DPI = 300

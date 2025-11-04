@@ -19,11 +19,11 @@ References
 """
 
 # Standard library
-
+from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, TYPE_CHECKING
 from enum import Enum
 
 # Third-party libraries
@@ -35,6 +35,11 @@ from networkx.readwrite import json_graph
 
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleRotationsTheta, ModuleType, ModuleInstance,ModuleRotationsIdx
+from ariel.ec.a000 import LSystemMutator
+from ariel.ec.a005 import LSystemCrossover
+
+if TYPE_CHECKING:
+    from ariel.ec.genotypes.genotype import Genotype
 
 SEED = 42
 DPI = 300
@@ -175,7 +180,7 @@ class lsystem_core(lsystem_element):
         self.allowed_connection=['LEFT','RIGHT','FRONT','BACK']
         self.name='C'
 
-class LSystemDecoder:
+class LSystemDecoder(Genotype):
     """Implements an L-system-based decoder for modular robot graphs."""
 
     def __init__(
@@ -200,6 +205,23 @@ class LSystemDecoder:
         self.max_elements = max_elements
         self.max_depth = max_depth
         self.verbose=verbose
+
+    @staticmethod
+    def get_crossover_object() -> LSystemCrossover:
+        return LSystemCrossover()
+    
+    @staticmethod
+    def get_mutator_object() -> LSystemMutator:
+        return LSystemMutator()
+    
+    @staticmethod
+    def create_individual():
+        pass  # Implementation
+
+    @staticmethod
+    def to_digraph(robot: LSystemDecoder):
+        robot.generate_lsystem_graph()
+        return robot.graph
 
     def expand_lsystem(self):
         expanded_token = []

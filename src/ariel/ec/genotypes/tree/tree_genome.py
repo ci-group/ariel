@@ -6,15 +6,18 @@ from collections import deque
 from ariel.ec.a000 import TreeMutator
 from ariel.ec.a005 import TreeCrossover
 import networkx as nx
-
 from collections.abc import Callable
 from functools import reduce
 import numpy as np
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ariel.ec.genotypes.genotype import Genotype
 
 SEED = 42
 RNG = np.random.default_rng(SEED)
 
-class TreeGenome:
+class TreeGenome(Genotype):
     def __init__(self, root: TreeNode | None = None):
         self._root = root
 

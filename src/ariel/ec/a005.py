@@ -4,6 +4,7 @@ from __future__ import annotations
 # Standard library
 from abc import ABC, abstractmethod
 from pathlib import Path
+import random
 
 # Third-party libraries
 import numpy as np
@@ -15,6 +16,8 @@ from typing import TYPE_CHECKING
 # Local libraries
 if TYPE_CHECKING:
     from ariel.ec.genotypes.genotype import Genotype
+    from ariel.ec.genotypes.tree.tree_genome import TreeGenome
+    from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
 from ariel.ec.a000 import IntegersGenerator
 
 # Global constants
@@ -32,14 +35,22 @@ console = Console()
 RNG = np.random.default_rng(SEED)
 
 class Crossover(ABC):
+    crossovers_mapping: dict[str, function] = NotImplemented
     which_crossover: str = ""
 
     @classmethod
     def set_which_crossover(cls, crossover_type: str) -> None:
         cls.which_crossover = crossover_type
 
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        cls.crossovers_mapping = {
+            name: getattr(cls, name)
+            for name, val in cls.__dict__.items()
+            if isinstance(val, staticmethod)
+        }
+
     @classmethod
-    @abstractmethod
     def __call__(
         cls,
         parent_i: Genotype,
@@ -60,22 +71,17 @@ class Crossover(ABC):
         tuple[Genotype, Genotype]
             Two child genotypes resulting from the crossover.
         """
-        pass
-
-class IntegerCrossover(Crossover):
-    @classmethod
-    def __call__(
-        cls,
-        parent_i: Genotype,
-        parent_j: Genotype,
-        **kwargs: dict,
-    ) -> tuple[Genotype, Genotype]:
-        if cls.which_crossover == "one_point":
-            return cls.one_point(parent_i, parent_j, **kwargs)
+        if cls.which_crossover in cls.crossovers_mapping:
+            return cls.crossovers_mapping[cls.which_crossover](
+                parent_i,
+                parent_j,
+                **kwargs
+            )
         else:
             msg = f"Crossover type '{cls.which_crossover}' not recognized."
             raise ValueError(msg)
 
+class IntegerCrossover(Crossover):
     @staticmethod
     def one_point(
         parent_i: Genotype,
@@ -109,27 +115,12 @@ class IntegerCrossover(Crossover):
         return child1, child2
 
 class TreeCrossover(Crossover):
-    @classmethod
-    def __call__(
-        cls,
-        parent_i: Genotype,
-        parent_j: Genotype,
-        **kwargs: dict,
-    ) -> tuple[Genotype, Genotype]:
-        if cls.which_crossover == "koza_default":
-            return cls.koza_default(parent_i, parent_j, **kwargs)
-        elif cls.which_crossover == "normal":
-            return cls.normal(parent_i, parent_j, **kwargs)
-        else:
-            msg = f"Crossover type '{cls.which_crossover}' not recognized."
-            raise ValueError(msg)
-
     @staticmethod
     def koza_default(
-        parent_i: Genotype,
-        parent_j: Genotype,
+        parent_i: TreeGenome,
+        parent_j: TreeGenome,
         koza_internal_node_prob: float = 0.9,
-    ) -> tuple[Genotype, Genotype]:
+    ) -> tuple[TreeGenome, TreeGenome]:
         """
         Koza default:
             -   In Parent A: choose an internal node with high probability (e.g., 90%) excluding root.
@@ -177,9 +168,9 @@ class TreeCrossover(Crossover):
     
     @staticmethod
     def normal(
-        parent_i: Genotype,
-        parent_j: Genotype,
-    ) -> tuple[Genotype, Genotype]:
+        parent_i: TreeGenome,
+        parent_j: TreeGenome,
+    ) -> tuple[TreeGenome, TreeGenome]:
         """
         Normal tree crossover:
             - Pick a random node from Parent A (uniform over all nodes).
@@ -217,6 +208,282 @@ class TreeCrossover(Crossover):
         parent_i = parent_i_old
         parent_j = parent_j_old
         return child1, child2
+    
+class LSystemCrossover(Crossover):
+    @staticmethod
+    def crossover_uniform_rules_lsystem(lsystem_parent1,lsystem_parent2,mutation_rate):
+        from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
+        axiom_offspring1="C"
+        axiom_offspring2="C"
+        rules_offspring1={}
+        rules_offspring2={}
+        iter_offspring1=0
+        iter_offspring2=0
+        if random.random()>mutation_rate:
+            rules_offspring1['C']=lsystem_parent2.rules['C']
+            rules_offspring2['C']=lsystem_parent1.rules['C']
+            iter_offspring1+=lsystem_parent2.iterations
+            iter_offspring2+=lsystem_parent1.iterations
+        else:
+            rules_offspring1['C']=lsystem_parent1.rules['C']
+            rules_offspring2['C']=lsystem_parent2.rules['C']
+            iter_offspring1+=lsystem_parent1.iterations
+            iter_offspring2+=lsystem_parent2.iterations
+        if random.random()>mutation_rate:
+            rules_offspring1['B']=lsystem_parent2.rules['B']
+            rules_offspring2['B']=lsystem_parent1.rules['B']
+            iter_offspring1+=lsystem_parent2.iterations
+            iter_offspring2+=lsystem_parent1.iterations
+        else:
+            rules_offspring1['B']=lsystem_parent1.rules['B']
+            rules_offspring2['B']=lsystem_parent2.rules['B']
+            iter_offspring1+=lsystem_parent1.iterations
+            iter_offspring2+=lsystem_parent2.iterations
+        if random.random()>mutation_rate:
+            rules_offspring1['H']=lsystem_parent2.rules['H']
+            rules_offspring2['H']=lsystem_parent1.rules['H']
+            iter_offspring1+=lsystem_parent2.iterations
+            iter_offspring2+=lsystem_parent1.iterations
+        else:
+            rules_offspring1['H']=lsystem_parent1.rules['H']
+            rules_offspring2['H']=lsystem_parent2.rules['H']
+            iter_offspring1+=lsystem_parent1.iterations
+            iter_offspring2+=lsystem_parent2.iterations
+        if random.random()>mutation_rate:
+            rules_offspring1['N']=lsystem_parent2.rules['N']
+            rules_offspring2['N']=lsystem_parent1.rules['N']
+            iter_offspring1+=lsystem_parent2.iterations
+            iter_offspring2+=lsystem_parent1.iterations
+        else:
+            rules_offspring1['N']=lsystem_parent1.rules['N']
+            rules_offspring2['N']=lsystem_parent2.rules['N']
+            iter_offspring1+=lsystem_parent1.iterations
+            iter_offspring2+=lsystem_parent2.iterations
+        iteration_offspring1=int(iter_offspring1/4)
+        iteration_offspring2=int(iter_offspring2/4)
+        offspring1=LSystemDecoder(axiom_offspring1,rules_offspring1,iteration_offspring1,lsystem_parent1.max_elements,lsystem_parent1.max_depth,lsystem_parent1.verbose)
+        offspring2=LSystemDecoder(axiom_offspring2,rules_offspring2,iteration_offspring2,lsystem_parent2.max_elements,lsystem_parent2.max_depth,lsystem_parent2.verbose)
+        return offspring1,offspring2
+
+    @staticmethod
+    def crossover_uniform_genes_lsystem(lsystem_parent1,lsystem_parent2,mutation_rate):
+        from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
+        axiom_offspring1="C"
+        axiom_offspring2="C"
+        rules_offspring1={}
+        rules_offspring2={}
+        iter_offspring1=0
+        iter_offspring2=0
+
+        rules_parent1 = lsystem_parent1.rules["C"].split()
+        rules_parent2 = lsystem_parent2.rules["C"].split()
+        enh_parent1 = []
+        enh_parent2 = []
+        i = 0
+        while i < len(rules_parent1):
+            if rules_parent1[i][:4] in ['addf','addk','addl','addr','addb','addt']:
+                new_token= rules_parent1[i] + " " + rules_parent1[i+1]
+                enh_parent1.append(new_token)
+                i+=1
+            if rules_parent1[i][:4] in ['movf','movk','movl','movr','movb','movt']:
+                enh_parent1.append(rules_parent1[i])
+            if rules_parent1[i]=='C':
+                enh_parent1.append(rules_parent1[i])
+            i+=1 
+        i = 0
+        while i < len(rules_parent2):
+            if rules_parent2[i][:4] in ['addf','addk','addl','addr','addb','addt']:
+                new_token= rules_parent2[i] + " " + rules_parent2[i+1]
+                enh_parent2.append(new_token)
+                i+=1
+            if rules_parent2[i][:4] in ['movf','movk','movl','movr','movb','movt']:
+                enh_parent2.append(rules_parent2[i])
+            if rules_parent2[i]=='C':
+                enh_parent2.append(rules_parent2[i])
+            i+=1 
+        r_offspring1=""
+        r_offspring2=""
+        le_common = min(len(enh_parent1),len(enh_parent2))
+        for i in range(0,le_common):
+            if random.random()>mutation_rate:
+                r_offspring1+=enh_parent2[i]+" "
+                r_offspring2+=enh_parent1[i]+" "
+            else:
+                r_offspring1+=enh_parent1[i]+" "
+                r_offspring2+=enh_parent2[i]+" "
+        if len(enh_parent1)>le_common:
+            for j in range(le_common,len(enh_parent1)):
+                if random.random()>mutation_rate:
+                    r_offspring1+=enh_parent1[j]+" "
+                else:   
+                    r_offspring2+=enh_parent1[j]+" "
+        if len(enh_parent2)>le_common:
+            for j in range(le_common,len(enh_parent2)):
+                if random.random()>mutation_rate:
+                    r_offspring1+=enh_parent2[j]+" "
+                else:
+                    r_offspring2+=enh_parent2[j]+" "
+        rules_offspring1['C']=r_offspring1
+        rules_offspring2['C']=r_offspring2
+
+        rules_parent1 = lsystem_parent1.rules["B"].split()
+        rules_parent2 = lsystem_parent2.rules["B"].split()
+        enh_parent1 = []
+        enh_parent2 = []
+        i = 0
+        while i < len(rules_parent1):
+            if rules_parent1[i][:4] in ['addf','addk','addl','addr','addb','addt']:
+                new_token= rules_parent1[i] + " " + rules_parent1[i+1]
+                enh_parent1.append(new_token)
+                i+=1
+            if rules_parent1[i][:4] in ['movf','movk','movl','movr','movb','movt']:
+                enh_parent1.append(rules_parent1[i])
+            if rules_parent1[i]=='B':
+                enh_parent1.append(rules_parent1[i])
+            i+=1 
+        i = 0
+        while i < len(rules_parent2):
+            if rules_parent2[i][:4] in ['addf','addk','addl','addr','addb','addt']:
+                new_token= rules_parent2[i] + " " + rules_parent2[i+1]
+                enh_parent2.append(new_token)
+                i+=1
+            if rules_parent2[i][:4] in ['movf','movk','movl','movr','movb','movt']:
+                enh_parent2.append(rules_parent2[i])
+            if rules_parent2[i]=='B':
+                enh_parent2.append(rules_parent2[i])
+            i+=1 
+        r_offspring1=""
+        r_offspring2=""
+        le_common = min(len(enh_parent1),len(enh_parent2))
+        for i in range(0,le_common):
+            if random.random()>mutation_rate:
+                r_offspring1+=enh_parent2[i]+" "
+                r_offspring2+=enh_parent1[i]+" "
+            else:
+                r_offspring1+=enh_parent1[i]+" "
+                r_offspring2+=enh_parent2[i]+" "
+        if len(enh_parent1)>le_common:
+            for j in range(le_common,len(enh_parent1)):
+                if random.random()>mutation_rate:
+                    r_offspring1+=enh_parent1[j]+" "
+                else:   
+                    r_offspring2+=enh_parent1[j]+" "
+        if len(enh_parent2)>le_common:
+            for j in range(le_common,len(enh_parent2)):
+                if random.random()>mutation_rate:
+                    r_offspring1+=enh_parent2[j]+" "
+                else:
+                    r_offspring2+=enh_parent2[j]+" "
+        rules_offspring1['B']=r_offspring1
+        rules_offspring2['B']=r_offspring2
+
+        rules_parent1 = lsystem_parent1.rules["H"].split()
+        rules_parent2 = lsystem_parent2.rules["H"].split()
+        enh_parent1 = []
+        enh_parent2 = []
+        i = 0
+        while i < len(rules_parent1):
+            if rules_parent1[i][:4] in ['addf','addk','addl','addr','addb','addt']:
+                new_token= rules_parent1[i] + " " + rules_parent1[i+1]
+                enh_parent1.append(new_token)
+                i+=1
+            if rules_parent1[i][:4] in ['movf','movk','movl','movr','movb','movt']:
+                enh_parent1.append(rules_parent1[i])
+            if rules_parent1[i]=='H':
+                enh_parent1.append(rules_parent1[i])
+            i+=1 
+        i = 0
+        while i < len(rules_parent2):
+            if rules_parent2[i][:4] in ['addf','addk','addl','addr','addb','addt']:
+                new_token= rules_parent2[i] + " " + rules_parent2[i+1]
+                enh_parent2.append(new_token)
+                i+=1
+            if rules_parent2[i][:4] in ['movf','movk','movl','movr','movb','movt']:
+                enh_parent2.append(rules_parent2[i])
+            if rules_parent2[i]=='H':
+                enh_parent2.append(rules_parent2[i])
+            i+=1 
+        r_offspring1=""
+        r_offspring2=""
+        le_common = min(len(enh_parent1),len(enh_parent2))
+        for i in range(0,le_common):
+            if random.random()>mutation_rate:
+                r_offspring1+=enh_parent2[i]+" "
+                r_offspring2+=enh_parent1[i]+" "
+            else:
+                r_offspring1+=enh_parent1[i]+" "
+                r_offspring2+=enh_parent2[i]+" "
+        if len(enh_parent1)>le_common:
+            for j in range(le_common,len(enh_parent1)):
+                if random.random()>mutation_rate:
+                    r_offspring1+=enh_parent1[j]+" "
+                else:   
+                    r_offspring2+=enh_parent1[j]+" "
+        if len(enh_parent2)>le_common:
+            for j in range(le_common,len(enh_parent2)):
+                if random.random()>mutation_rate:
+                    r_offspring1+=enh_parent2[j]+" "
+                else:
+                    r_offspring2+=enh_parent2[j]+" "
+        rules_offspring1['H']=r_offspring1
+        rules_offspring2['H']=r_offspring2
+
+        rules_parent1 = lsystem_parent1.rules["N"].split()
+        rules_parent2 = lsystem_parent2.rules["N"].split()
+        enh_parent1 = []
+        enh_parent2 = []
+        i = 0
+        while i < len(rules_parent1):
+            if rules_parent1[i][:4] in ['addf','addk','addl','addr','addb','addt']:
+                new_token= rules_parent1[i] + " " + rules_parent1[i+1]
+                enh_parent1.append(new_token)
+                i+=1
+            if rules_parent1[i][:4] in ['movf','movk','movl','movr','movb','movt']:
+                enh_parent1.append(rules_parent1[i])
+            if rules_parent1[i]=='N':
+                enh_parent1.append(rules_parent1[i])
+            i+=1 
+        i = 0
+        while i < len(rules_parent2):
+            if rules_parent2[i][:4] in ['addf','addk','addl','addr','addb','addt']:
+                new_token= rules_parent2[i] + " " + rules_parent2[i+1]
+                enh_parent2.append(new_token)
+                i+=1
+            if rules_parent2[i][:4] in ['movf','movk','movl','movr','movb','movt']:
+                enh_parent2.append(rules_parent2[i])
+            if rules_parent2[i]=='N':
+                enh_parent2.append(rules_parent2[i])
+            i+=1 
+        r_offspring1=""
+        r_offspring2=""
+        le_common = min(len(enh_parent1),len(enh_parent2))
+        for i in range(0,le_common):
+            if random.random()>mutation_rate:
+                r_offspring1+=enh_parent2[i]+" "
+                r_offspring2+=enh_parent1[i]+" "
+            else:
+                r_offspring1+=enh_parent1[i]+" "
+                r_offspring2+=enh_parent2[i]+" "
+        if len(enh_parent1)>le_common:
+            for j in range(le_common,len(enh_parent1)):
+                if random.random()>mutation_rate:
+                    r_offspring1+=enh_parent1[j]+" "
+                else:   
+                    r_offspring2+=enh_parent1[j]+" "
+        if len(enh_parent2)>le_common:
+            for j in range(le_common,len(enh_parent2)):
+                if random.random()>mutation_rate:
+                    r_offspring1+=enh_parent2[j]+" "
+                else:
+                    r_offspring2+=enh_parent2[j]+" "
+        rules_offspring1['N']=r_offspring1
+        rules_offspring2['N']=r_offspring2
+
+        iter_offspring1+=lsystem_parent2.iterations
+        iter_offspring2+=lsystem_parent1.iterations
+        offspring1=LSystemDecoder(axiom_offspring1,rules_offspring1,iter_offspring1,lsystem_parent1.max_elements,lsystem_parent1.max_depth,lsystem_parent1.verbose)
+        offspring2=LSystemDecoder(axiom_offspring2,rules_offspring2,iter_offspring2,lsystem_parent2.max_elements,lsystem_parent2.max_depth,lsystem_parent2.verbose)
+        return offspring1,offspring2
 
 
 def tree_main():

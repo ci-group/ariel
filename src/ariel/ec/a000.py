@@ -4,7 +4,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
-from typing import cast, TYPE_CHECKING
+from typing import cast, TYPE_CHECKING, List
+import random
 
 # Third-party libraries
 import numpy as np
@@ -87,14 +88,22 @@ class IntegersGenerator:
         return cast("Integers", generated_values.astype(int).tolist())
 
 class Mutation(ABC):
+    mutations_mapping: dict[str, function] = NotImplemented
     which_mutation: str = ""
 
     @classmethod
     def set_which_mutation(cls, mutation_type: str) -> None:
         cls.which_mutation = mutation_type
 
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        cls.mutations_mapping = {
+            name: getattr(cls, name)
+            for name, val in cls.__dict__.items()
+            if isinstance(val, staticmethod)
+        }
+
     @classmethod
-    @abstractmethod
     def __call__(
         cls,
         individual: Genotype,
@@ -114,28 +123,16 @@ class Mutation(ABC):
         tuple[Genotype, Genotype]
             Two child genotypes resulting from the crossover.
         """
-        pass
-
-class IntegerMutator(Mutation):
-    @classmethod
-    def __call__(
-        cls,
-        individual: Genotype,
-        **kwargs: dict,
-    ) -> Genotype:
-        if cls.which_mutation == "random_swap":
-            return cls.random_swap(
-                individual=individual,
-                **kwargs,
-            )
-        elif cls.which_mutation == "integer_creep":
-            return cls.integer_creep(
-                individual=individual,
-                **kwargs,
+        if cls.which_mutation in cls.mutations_mapping:
+            return cls.mutations_mapping[cls.which_mutation](
+                individual,
+                **kwargs
             )
         else:
             msg = f"Mutation type '{cls.which_mutation}' not recognized."
             raise ValueError(msg)
+
+class IntegerMutator(Mutation):
 
     @staticmethod
     def random_swap(
@@ -294,21 +291,6 @@ class IntegerMutator(Mutation):
 #         return genome
 
 class TreeMutator(Mutation):
-    
-    @classmethod
-    def __call__(
-        cls,
-        individual: Genotype,
-        **kwargs: dict,
-    ) -> Genotype:
-        if cls.which_mutation == "random_subtree_replacement":
-            return cls.random_subtree_replacement(
-                individual=individual,
-                **kwargs,
-            )
-        else:
-            msg = f"Mutation type '{cls.which_mutation}' not recognized."
-            raise ValueError(msg)
         
     @staticmethod
     def _random_tree(max_depth: int = 2, branching_prob: float = 0.5) -> Genotype:
@@ -347,6 +329,76 @@ class TreeMutator(Mutation):
             new_individual.root.replace_node(node_to_replace, new_subtree)
 
         return new_individual
+    
+class LSystemMutator(Mutation):
+
+    @staticmethod
+    def mutate_one_point_lsystem(lsystem,mut_rate,add_temperature=0.5):
+        op_completed = ""
+        if random.random()<mut_rate:
+            action=random.choices(['add_rule','rm_rule'],weights=[add_temperature,1-add_temperature])[0]
+            rules = lsystem.rules
+            rule_to_change=random.choice(range(0,len(rules)))
+            rl_tmp = list(rules.values())[rule_to_change]
+            splitted_rules=rl_tmp.split()
+            gene_to_change=random.choice(range(0,len(splitted_rules)))
+            match action:
+                case 'add_rule':
+                    operator=random.choice(['addf','addk','addl','addr','addb','addt','movf','movk','movl','movr','movt','movb'])
+                    if operator in ['addf','addk','addl','addr','addb','addt']:
+                        if splitted_rules[gene_to_change][:4] in ['addf','addk','addl','addr','addb','addt']:
+                            rotation = random.choice([0,45,90,135,180,225,270])
+                            op_to_add=operator+"("+str(rotation)+")"
+                            item_to_add=random.choice(['B','H','N'])
+                            splitted_rules.insert(gene_to_change+2,item_to_add)
+                            splitted_rules.insert(gene_to_change+2,op_to_add)
+                            op_completed="ADDED : "+op_to_add+" "+item_to_add
+                        elif splitted_rules[gene_to_change][:4] in ['movf','movk','movl','movr','movb','movt']:
+                            rotation = random.choice([0,45,90,135,180,225,270])
+                            op_to_add=operator+"("+str(rotation)+")"
+                            item_to_add=random.choice(['B','H','N'])
+                            splitted_rules.insert(gene_to_change,item_to_add)
+                            splitted_rules.insert(gene_to_change,op_to_add)
+                            op_completed="ADDED : "+op_to_add+" "+item_to_add
+                        elif splitted_rules[gene_to_change] in ['C','B','H','N']:
+                            rotation = random.choice([0,45,90,135,180,225,270])
+                            op_to_add=operator+"("+str(rotation)+")"
+                            item_to_add=random.choice(['B','H','N'])
+                            splitted_rules.insert(gene_to_change+1,item_to_add)
+                            splitted_rules.insert(gene_to_change+1,op_to_add)
+                            op_completed="ADDED : "+op_to_add+" "+item_to_add
+                    if operator in ['movf','movk','movl','movr','movb','movt']:
+                        if splitted_rules[gene_to_change][:4] in ['addf','addk','addl','addr','addb','addt']:
+                            splitted_rules.insert(gene_to_change+2,operator)
+                            op_completed="ADDED : "+operator
+                        elif splitted_rules[gene_to_change][:4] in ['movf','movk','movl','movr','movb','movt']:
+                            splitted_rules.insert(gene_to_change,operator)
+                            op_completed="ADDED : "+operator
+                        elif splitted_rules[gene_to_change] in ['C','B','H','N']:
+                            splitted_rules.insert(gene_to_change+1,operator)
+                            op_completed="ADDED : "+operator
+                case 'rm_rule':
+                    if splitted_rules[gene_to_change][:4] in ['addf','addk','addl','addr','addb','addt']:
+                        op_completed="REMOVED : "+splitted_rules[gene_to_change]+" "+splitted_rules[gene_to_change+1]
+                        splitted_rules.pop(gene_to_change)
+                        splitted_rules.pop(gene_to_change)
+                    elif splitted_rules[gene_to_change] in ['H','B','N']:
+                        op_completed="REMOVED : "+splitted_rules[gene_to_change-1]+" "+splitted_rules[gene_to_change]
+                        if gene_to_change-1>=0:
+                            splitted_rules.pop(gene_to_change-1)
+                            splitted_rules.pop(gene_to_change-1)
+                    elif splitted_rules[gene_to_change][:4] in ['movf','movk','movl','movr','movt','movb']:
+                        op_completed="REMOVED : "+splitted_rules[gene_to_change]
+                        splitted_rules.pop(gene_to_change)
+            new_rule = ""
+            for j in range(0,len(splitted_rules)):
+                new_rule+=splitted_rules[j]+" "
+            if new_rule!="":
+                lsystem.rules[list(rules.keys())[rule_to_change]]=new_rule
+            else:
+                lsystem.rules[list(rules.keys())[rule_to_change]]=lsystem.rules[list(rules.keys())[rule_to_change]]
+        return op_completed
+
 
 def test() -> None:
     """Entry point."""
