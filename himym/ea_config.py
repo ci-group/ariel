@@ -58,6 +58,14 @@ class EAConfig:
     def offspring_radius(self) -> float:
         return self._config['selection'].get('offspring_radius', 0.3)
     
+    @property
+    def max_population_size(self) -> int:
+        return self._config['selection'].get('max_population_size', 20)
+    
+    @property
+    def selection_method(self) -> str:
+        return self._config['selection'].get('selection_method', 'parents_die')
+    
     # Crossover Parameters
     @property
     def crossover_rate(self) -> float:

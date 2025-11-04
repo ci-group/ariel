@@ -37,7 +37,7 @@ from ea_config import config
 
 
 class SpatialIndividual:
-    def __init__(self, unique_id: int = None):
+    def __init__(self, unique_id: int = None, generation: int = 0):
         self.genotype = []
         self.fitness = 0.0
         self.start_position = None
@@ -46,6 +46,7 @@ class SpatialIndividual:
         self.robot_index = None
         self.unique_id = unique_id  
         self.parent_ids = []
+        self.generation = generation  # Track which generation this individual was created
 
 
 class SpatialEA:
@@ -81,7 +82,7 @@ class SpatialEA:
         self.next_unique_id = 0
         
     def create_individual(self):
-        individual = SpatialIndividual(unique_id=self.next_unique_id)
+        individual = SpatialIndividual(unique_id=self.next_unique_id, generation=self.generation)
         self.next_unique_id += 1
         
         genotype = []
@@ -294,11 +295,11 @@ class SpatialEA:
         parent2 : SpatialIndividual
     ):
         """One-point crossover between two parents."""
-        child1 = SpatialIndividual(unique_id=self.next_unique_id)
+        child1 = SpatialIndividual(unique_id=self.next_unique_id, generation=self.generation + 1)
         self.next_unique_id += 1
         child1.parent_ids = [parent1.unique_id, parent2.unique_id]
         
-        child2 = SpatialIndividual(unique_id=self.next_unique_id)
+        child2 = SpatialIndividual(unique_id=self.next_unique_id, generation=self.generation + 1)
         self.next_unique_id += 1
         child2.parent_ids = [parent1.unique_id, parent2.unique_id]
         
@@ -316,7 +317,7 @@ class SpatialEA:
         individual : SpatialIndividual
     ):
         """Apply Gaussian mutation to individual's genotype."""
-        mutated = SpatialIndividual(unique_id=self.next_unique_id)
+        mutated = SpatialIndividual(unique_id=self.next_unique_id, generation=individual.generation)
         self.next_unique_id += 1
         mutated.parent_ids = [individual.unique_id]  # Track parent for mutations
         mutated.genotype = individual.genotype.copy()
@@ -504,6 +505,99 @@ class SpatialEA:
         # Save trajectory visualization
         if save_trajectories:
             self._save_mating_trajectories(trajectories, fitness_values, attractiveness)
+    
+    def apply_selection(
+        self,
+        method: str = None,
+        target_size: int = None
+    ):
+        if method is None:
+            method = config.selection_method
+        
+        if target_size is None:
+            target_size = config.max_population_size
+        
+        initial_size = len(self.population)
+        
+        # If population is already at or below target, no selection needed
+        if initial_size <= target_size:
+            print(f"  Selection: Population size ({initial_size}) <= target ({target_size}), no selection needed")
+            return
+        
+        print(f"  Applying {method} selection: {initial_size} → {target_size}")
+        
+        # Create list of indices to keep
+        indices_to_keep = []
+        
+        if method == "parents_die":
+            # Keep only offspring (current generation)
+            # Parents are from generation self.generation, offspring from self.generation + 1
+            offspring_indices = []
+            parent_indices = []
+            
+            for i, ind in enumerate(self.population):
+                if ind.generation > self.generation:
+                    offspring_indices.append(i)
+                else:
+                    parent_indices.append(i)
+            
+            # If we have enough offspring, keep only offspring
+            if len(offspring_indices) >= target_size:
+                print(f"    Enough offspring ({len(offspring_indices)}), removing all parents")
+                # If too many offspring, apply fitness-based selection among them
+                if len(offspring_indices) > target_size:
+                    offspring_fitness = [(i, self.population[i].fitness) for i in offspring_indices]
+                    offspring_fitness.sort(key=lambda x: x[1], reverse=True)
+                    indices_to_keep = [i for i, _ in offspring_fitness[:target_size]]
+                else:
+                    indices_to_keep = offspring_indices
+            else:
+                # Not enough offspring, keep all offspring plus best parents
+                print(f"    Only {len(offspring_indices)} offspring, keeping best parents too")
+                indices_to_keep = offspring_indices.copy()
+                needed_parents = target_size - len(offspring_indices)
+                
+                # Select best parents by fitness
+                parent_fitness = [(i, self.population[i].fitness) for i in parent_indices]
+                parent_fitness.sort(key=lambda x: x[1], reverse=True)
+                indices_to_keep.extend([i for i, _ in parent_fitness[:needed_parents]])
+        
+        elif method == "fitness_based":
+            # Keep top N fittest individuals regardless of age
+            fitness_ranking = [(i, ind.fitness) for i, ind in enumerate(self.population)]
+            fitness_ranking.sort(key=lambda x: x[1], reverse=True)
+            indices_to_keep = [i for i, _ in fitness_ranking[:target_size]]
+        
+        elif method == "age_based":
+            # Remove oldest individuals (lowest generation number)
+            age_ranking = [(i, ind.generation) for i, ind in enumerate(self.population)]
+            age_ranking.sort(key=lambda x: x[1], reverse=True)  # Higher generation = younger
+            indices_to_keep = [i for i, _ in age_ranking[:target_size]]
+        
+        else:
+            print(f"    Warning: Unknown selection method '{method}', using fitness_based")
+            fitness_ranking = [(i, ind.fitness) for i, ind in enumerate(self.population)]
+            fitness_ranking.sort(key=lambda x: x[1], reverse=True)
+            indices_to_keep = [i for i, _ in fitness_ranking[:target_size]]
+        
+        # Sort indices to maintain order
+        indices_to_keep.sort()
+        
+        # Create new population and positions
+        new_population = [self.population[i] for i in indices_to_keep]
+        new_positions = [self.current_positions[i] for i in indices_to_keep]
+        
+        # Update population and positions
+        self.population = new_population
+        self.current_positions = new_positions
+        self.population_size = len(self.population)
+        
+        print(f"  Selection complete: {initial_size} → {self.population_size}")
+        if method == "parents_die":
+            parent_count = sum(1 for ind in new_population if ind.generation == self.generation)
+            offspring_count = sum(1 for ind in new_population if ind.generation > self.generation)
+            print(f"    Survivors: {parent_count} parents, {offspring_count} offspring")
+
     
     def _calculate_marker_size(self, robot_size_meters, ax, fig):
         # Get axis bounds in data coordinates
@@ -727,12 +821,12 @@ class SpatialEA:
                 child1, child2 = self.crossover(parent1, parent2)
             else:
                 # No crossover - clone parents with new unique IDs
-                child1 = SpatialIndividual(unique_id=self.next_unique_id)
+                child1 = SpatialIndividual(unique_id=self.next_unique_id, generation=self.generation + 1)
                 self.next_unique_id += 1
                 child1.genotype = parent1.genotype.copy()
                 child1.parent_ids = [parent1.unique_id]
                 
-                child2 = SpatialIndividual(unique_id=self.next_unique_id)
+                child2 = SpatialIndividual(unique_id=self.next_unique_id, generation=self.generation + 1)
                 self.next_unique_id += 1
                 child2.genotype = parent2.genotype.copy()
                 child2.parent_ids = [parent2.unique_id]
@@ -756,7 +850,7 @@ class SpatialEA:
             print(f"  ERROR: Population size ({len(self.population)}) != Position count ({len(self.current_positions)})")
             raise RuntimeError("Population and position arrays out of sync!")
         
-        # Update population size
+        # Update population size before selection
         old_size = self.population_size
         self.population_size = len(self.population)
         
@@ -764,6 +858,12 @@ class SpatialEA:
         print(f"  Added {len(new_population)} offspring")
         print(f"  Position tracking updated: {len(self.current_positions)} positions")
         print(f"  Paired individuals: {len(paired_indices)} out of {old_size}")
+        
+        # Apply selection to manage population size
+        self.apply_selection(
+            method=config.selection_method,
+            target_size=config.max_population_size
+        )
 
     
     def run_evolution(self, record_generation_videos: bool = False):

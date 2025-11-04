@@ -4,15 +4,17 @@
 # Population and Evolution Parameters
 population:
   size: 10                    # Number of individuals in the population
-  num_generations: 5        # Total number of generations to evolve
+  num_generations: 50        # Total number of generations to evolve
   maintain_positions: true    # Whether to maintain robot positions across generations
 
 # Selection Parameters
 selection:
   tournament_size: 3          # Number of individuals competing in tournament selection
   elitism: true               # Whether to keep the best individual in next generation
-  pairing_radius: 1.0      # Maximum distance for pairing robots (meters)
-  offspring_radius: 0.3      # Radius around parents where offspring spawn (meters)
+  pairing_radius: 25.0      # Maximum distance for pairing robots (meters)
+  offspring_radius: 1.5      # Radius around parents where offspring spawn (meters)
+  max_population_size: 20     # Maximum population size before selection occurs
+  selection_method: "parents_die"  # Selection method: "parents_die", "fitness_based", "age_based", "spatial_density"
 
 # Crossover Parameters
 crossover:
@@ -53,12 +55,12 @@ simulation:
 # Multi-Robot Demonstration
 multi_robot:
   num_robots: 5               # Number of top individuals to demonstrate
-  world_size: [5, 5, 0.1]     # World dimensions [x, y, z]
+  world_size: [25, 25, 0.1]     # World dimensions [x, y, z]
   spawn_area:
     x_min: 0.1                # Minimum x spawn position
-    x_max: 4.9                # Maximum x spawn position
+    x_max: 24.9                # Maximum x spawn position
     y_min: 0.1                # Minimum y spawn position
-    y_max: 4.9                # Maximum y spawn position
+    y_max: 24.9                # Maximum y spawn position
     z: 0.05                   # Z spawn position
   min_spawn_distance: 1.0     # Minimum distance between robot centers to avoid overlap
   robot_size: 0.4             # Approximate robot size/diameter for visualization (meters)
