@@ -1,0 +1,78 @@
+# Evolutionary Algorithm Configuration File
+# Parameters for evolutionary_algo_prototype.py
+
+# Population and Evolution Parameters
+population:
+  size: 10                    # Number of individuals in the population
+  num_generations: 50        # Total number of generations to evolve
+  maintain_positions: true    # Whether to maintain robot positions across generations
+
+# Selection Parameters
+selection:
+  tournament_size: 3          # Number of individuals competing in tournament selection
+  elitism: true               # Whether to keep the best individual in next generation
+  pairing_radius: 25.0      # Maximum distance for pairing robots (meters)
+  offspring_radius: 1.5      # Radius around parents where offspring spawn (meters)
+  max_population_size: 20     # Maximum population size before selection occurs
+  selection_method: "parents_die"  # Selection method: "parents_die", "fitness_based", "age_based", "spatial_density"
+
+# Crossover Parameters
+crossover:
+  rate: 1.0                   # Probability of crossover (1.0 = always crossover)
+  type: "one_point"           # Type of crossover: "one_point"
+
+# Mutation Parameters
+mutation:
+  rate: 0.1                   # Probability of mutating each gene
+  strength: 0.1               # Standard deviation of Gaussian mutation noise
+
+# Genotype Parameters (Sinusoidal Controller)
+genotype:
+  amplitude:
+    min: 0.01                 # Minimum joint amplitude
+    max: 1.5708               # Maximum joint amplitude (pi/2 radians)
+    init_min: 0.01            # Minimum amplitude for initialization (use full range)
+    init_max: 1.5708          # Maximum amplitude for initialization (pi/2 radians, full range)
+  
+  frequency:
+    min: 0.1                  # Minimum oscillation frequency
+    max: 5.0                  # Maximum oscillation frequency
+    init_min: 0.1             # Minimum frequency for initialization (use full range)
+    init_max: 5.0             # Maximum frequency for initialization (full range)
+  
+  phase:
+    min: 0.0                  # Minimum phase offset
+    max: 6.2832               # Maximum phase offset (2*pi radians)
+
+# Simulation Parameters
+simulation:
+  time: 30.0                  # Duration of each fitness evaluation (seconds)
+  final_demo_time: 15.0       # Duration of final best individual demonstration
+  multi_robot_demo_time: 300.0  # Duration of multi-robot demonstration
+  control_clip_min: -0.7854   # Minimum control value (-pi/4 radians)
+  control_clip_max: 0.7854    # Maximum control value (pi/4 radians)
+
+# Multi-Robot Demonstration
+multi_robot:
+  num_robots: 5               # Number of top individuals to demonstrate
+  world_size: [25, 25, 0.1]     # World dimensions [x, y, z]
+  spawn_area:
+    x_min: 0.1                # Minimum x spawn position
+    x_max: 24.9                # Maximum x spawn position
+    y_min: 0.1                # Minimum y spawn position
+    y_max: 24.9                # Maximum y spawn position
+    z: 0.05                   # Z spawn position
+  min_spawn_distance: 1.0     # Minimum distance between robot centers to avoid overlap
+  robot_size: 0.4             # Approximate robot size/diameter for visualization (meters)
+
+# Output Paths
+output:
+  video_folder: "./__videos__"      # Path to save video recordings
+  figures_folder: "./__figures__"   # Path to save plots and figures
+  results_folder: "./__results__"       # Path to save evolution results and data
+
+# Logging
+logging:
+  print_individual_fitness: true    # Print fitness of each individual during evaluation
+  print_generation_stats: true      # Print generation statistics (best, average)
+  print_final_genotype: true        # Print the best evolved genotype at the end
