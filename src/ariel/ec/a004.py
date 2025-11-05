@@ -22,7 +22,7 @@ from sqlalchemy import create_engine
 from sqlmodel import Session, SQLModel, col, select
 
 # Local libraries
-from ariel.src.ariel.ec.mutations import IntegerMutator, IntegersGenerator
+from ariel.ec.mutations import IntegerMutator
 from ariel.ec.a001 import Individual
 
 # Global constants

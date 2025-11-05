@@ -36,10 +36,10 @@ from networkx.readwrite import json_graph
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleRotationsTheta, ModuleType, ModuleInstance,ModuleRotationsIdx
 
+from ariel.ec.genotypes.genotype import Genotype
 if TYPE_CHECKING:
-    from ariel.ec.genotypes.genotype import Genotype
-    from ariel.src.ariel.ec.mutations import LSystemMutator
-    from ariel.src.ariel.ec.crossovers import LSystemCrossover
+    from ariel.ec.mutations import LSystemMutator
+    from ariel.ec.crossovers import LSystemCrossover
 
 SEED = 42
 DPI = 300
@@ -208,12 +208,12 @@ class LSystemDecoder(Genotype):
 
     @staticmethod
     def get_crossover_object() -> LSystemCrossover:
-        from ariel.src.ariel.ec.crossovers import LSystemCrossover
+        from ariel.ec.crossovers import LSystemCrossover
         return LSystemCrossover()
     
     @staticmethod
     def get_mutator_object() -> LSystemMutator:
-        from ariel.src.ariel.ec.mutations import LSystemMutator
+        from ariel.ec.mutations import LSystemMutator
         return LSystemMutator()
     
     @staticmethod
@@ -221,7 +221,8 @@ class LSystemDecoder(Genotype):
         iterations: int = 2,
         max_elements: int = 32,
         max_depth: int = 8,
-        verbose: int = 0
+        verbose: int = 0,
+        **kwargs: dict
     ) -> LSystemDecoder:
         indiv = LSystemDecoder(
             axiom="C",
@@ -230,6 +231,32 @@ class LSystemDecoder(Genotype):
             max_elements=max_elements,
             max_depth=max_depth,
             verbose=verbose,
+        )
+        # Materialize expanded_token, structure, and graph
+        indiv.refresh()
+        return indiv
+    
+    @staticmethod
+    def to_json(robot_genotype: LSystemDecoder, *, indent: int = 2) -> str:
+        return json.dumps({
+            "axiom": robot_genotype.axiom,
+            "rules": robot_genotype.rules,
+            "iterations": robot_genotype.iterations,
+            "max_elements": robot_genotype.max_elements,
+            "max_depth": robot_genotype.max_depth,
+            "verbose": robot_genotype.verbose,
+        }, indent=indent)
+    
+    @staticmethod
+    def from_json(json_data: str) -> LSystemDecoder:
+        data = json.loads(json_data)
+        indiv = LSystemDecoder(
+            axiom=data["axiom"],
+            rules=data["rules"],
+            iterations=data["iterations"],
+            max_elements=data["max_elements"],
+            max_depth=data["max_depth"],
+            verbose=data.get("verbose", 0),
         )
         # Materialize expanded_token, structure, and graph
         indiv.refresh()

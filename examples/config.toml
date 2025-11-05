@@ -5,7 +5,7 @@
 [run]
 # Choose which genotype profile to use for this run.
 # One of: "integers", "tree", "lsystem", "cppn"
-genotype = "tree"
+genotype = "lsystem"
 
 task = "evolve_to_copy"
 
@@ -48,15 +48,23 @@ allowed_crossovers = ["koza_default", "normal"]
 mutation = "random_subtree_replacement"
 crossover = "koza_default"
 
-[genotypes.tree.params]
-max_depth = 8
-mutation_rate = 0.1
-crossover_rate = 0.9
+[genotypes.tree.mutation.params]
+max_subtree_depth = 2
+branching_prob = 0.5
+
+[genotypes.tree.crossover.params]
+koza_internal_node_prob = 0.9
 
 [genotypes.lsystem]
 allowed_mutations   = ["mutate_one_point_lsystem"]
 allowed_crossovers  = ["crossover_uniform_rules_lsystem", "crossover_uniform_genes_lsystem"]
 
-[genotypes.tree.defaults]
+[genotypes.lsystem.defaults]
 mutation = "mutate_one_point_lsystem"
 crossover = "crossover_uniform_rules_lsystem"
+
+[genotypes.lsystem.mutation.params]
+mutation_rate = 0.5
+
+[genotypes.lsystem.crossover.params]
+mutation_rate = 0.5

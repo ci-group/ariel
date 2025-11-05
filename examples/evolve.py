@@ -23,6 +23,8 @@ from ariel.ec.crossovers import Crossover
 from ariel.ec.genotypes.genotype_mapping import GENOTYPES_MAPPING
 from morphology_fitness_analysis import compute_6d_descriptor, load_target_robot, compute_fitness_scores
 
+from ariel.ec.genotypes.genotype import Genotype
+
 # Global constants
 SEED = 42
 DB_HANDLING_MODES = Literal["delete", "halt"]
@@ -44,9 +46,11 @@ class EASettings(BaseSettings):
     first_generation_id: int = 0
     num_of_generations: int = 100
     target_population_size: int = 100
-    genotype: GenotypeEnum
+    genotype: type[Genotype]
     mutation: Mutation
+    mutation_params: dict = {}
     crossover: Crossover
+    crossover_params: dict = {}
 
     task: str = "evolve_to_copy"
     target_robot_file_path: Path | None = Path("examples/target_robots/small_robot_8.json")
@@ -80,19 +84,20 @@ def crossover(population: Population, config: EASettings) -> Population:
         parent_i = parents[idx]
         parent_j = parents[idx + 1]
         genotype_i, genotype_j = config.crossover(
-            config.genotype.value.from_json(parent_i.genotype),
-            config.genotype.value.from_json(parent_j.genotype),
+            config.genotype.from_json(parent_i.genotype),
+            config.genotype.from_json(parent_j.genotype),
+            **config.crossover_params,
         )
 
         # First child
         child_i = Individual()
-        child_i.genotype = genotype_i.to_json()
+        child_i.genotype = config.genotype.to_json(genotype_i)
         child_i.tags = {"mut": True}
         child_i.requires_eval = True
 
         # Second child
         child_j = Individual()
-        child_j.genotype = genotype_j.to_json()
+        child_j.genotype = config.genotype.to_json(genotype_j)
         child_j.tags = {"mut": True}
         child_j.requires_eval = True
 
@@ -103,13 +108,12 @@ def crossover(population: Population, config: EASettings) -> Population:
 def mutation(population: Population, config: EASettings) -> Population:
     for ind in population:
         if ind.tags.get("mut", False):
-            genes = config.genotype.value.from_json(ind.genotype)
+            genes = config.genotype.from_json(ind.genotype)
             mutated = config.mutation(
                 individual=genes,
-                # span=1,
-                # mutation_probability=0.5,
+                **config.mutation_params,
             )
-            ind.genotype = mutated.to_json()
+            ind.genotype = config.genotype.to_json(mutated)
             ind.requires_eval = True
     return population
 
@@ -119,7 +123,7 @@ def evaluate(population: Population, config: EASettings) -> Population:
         target_descriptor = load_target_robot(Path("examples/target_robots/" + str(config.target_robot_file_path)))
 
         for ind in population:
-            genotype = config.genotype.value.from_json(ind.genotype)
+            genotype = config.genotype.from_json(ind.genotype)
             # Convert to digraph
             ind_digraph = genotype.to_digraph(genotype)
             # Compute the morphological descriptors
@@ -151,7 +155,7 @@ def survivor_selection(population: Population, config: EASettings) -> Population
 
 def create_individual(config: EASettings) -> Individual:
     ind = Individual()
-    ind.genotype = config.genotype.value.create_individual().to_json()
+    ind.genotype = config.genotype.to_json(config.genotype.create_individual())
     return ind
 
 def read_config_file() -> EASettings:
@@ -163,14 +167,16 @@ def read_config_file() -> EASettings:
     mutation_name = cfg["run"].get("mutation", gblock["defaults"]["mutation"])
     crossover_name = cfg["run"].get("crossover", gblock["defaults"]["crossover"])
     task = cfg["run"]["task"]
+    mutation_params = gblock.get("mutation", {}).get("params", {})
+    crossover_params = gblock.get("crossover", {}).get("params", {})
     
     target_robot_path = cfg["task"]["evolve_to_copy"]["target_robot_path"] if task == "evolve_to_copy" else None
 
     genotype = GENOTYPES_MAPPING[gname]
 
-    mutation = genotype.value.get_mutator_object()
+    mutation = genotype.get_mutator_object()
     mutation.set_which_mutation(mutation_name)
-    crossover = genotype.value.get_crossover_object()
+    crossover = genotype.get_crossover_object()
     crossover.set_which_crossover(crossover_name)
 
     settings = EASettings(
@@ -181,7 +187,9 @@ def read_config_file() -> EASettings:
         target_population_size=cfg["ec"]["target_population_size"],
         genotype=genotype,
         mutation=mutation,
+        mutation_params=mutation_params,
         crossover=crossover,
+        crossover_params=crossover_params,
         task=task,
         target_robot_file_path=Path(target_robot_path),
         output_folder=Path(cfg["data"]["output_folder"]),

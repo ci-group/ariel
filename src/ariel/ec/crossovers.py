@@ -18,7 +18,6 @@ from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
 if TYPE_CHECKING:
     from ariel.ec.genotypes.genotype import Genotype
     from ariel.ec.genotypes.tree.tree_genome import TreeGenome
-from ariel.src.ariel.ec.mutations import IntegersGenerator
 
 # Global constants
 SCRIPT_NAME = __file__.split("/")[-1][:-3]

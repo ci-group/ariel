@@ -277,9 +277,9 @@ class TreeMutator(Mutation):
 class LSystemMutator(Mutation):
 
     @staticmethod
-    def mutate_one_point_lsystem(lsystem,mut_rate,add_temperature=0.5):
+    def mutate_one_point_lsystem(lsystem,mutation_rate,add_temperature=0.5):
         op_completed = ""
-        if random.random()<mut_rate:
+        if random.random()<mutation_rate:
             action=random.choices(['add_rule','rm_rule'],weights=[add_temperature,1-add_temperature])[0]
             rules = lsystem.rules
             rule_to_change=random.choice(range(0,len(rules)))

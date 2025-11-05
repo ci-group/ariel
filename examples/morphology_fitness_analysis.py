@@ -22,7 +22,6 @@ from pathlib import Path
 from ariel.utils.graph_ops import load_robot_json_file
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome, TreeNode
-from ariel.body_phenotypes.robogen_lite.decoders.tree_decoder import to_digraph
 import ariel.body_phenotypes.robogen_lite.config as config
 
 # Set random seed for reproducibility
@@ -184,7 +183,7 @@ class MorphologyAnalyzer:
                 genome = self.generate_random_robot()
 
                 # Decode to graph
-                robot_graph = to_digraph(genome)
+                robot_graph = genome.to_digraph() #! THIS DOES NOT WORK, to_digraph is a static method that needs a genome as an argument
 
                 # Compute descriptor
                 descriptor = self.compute_6d_descriptor(robot_graph)

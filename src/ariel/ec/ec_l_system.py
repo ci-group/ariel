@@ -25,7 +25,7 @@ import random
 
 
 # Local libraries
-from ariel.src.ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
+from ariel.ec.genotypes.lsystem.l_system_genotype import LSystemDecoder
 
 SEED = 42
 DPI = 300

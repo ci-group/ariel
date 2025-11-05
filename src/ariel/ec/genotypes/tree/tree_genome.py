@@ -9,10 +9,10 @@ from functools import reduce
 import numpy as np
 from typing import TYPE_CHECKING
 
+from ariel.ec.genotypes.genotype import Genotype
 if TYPE_CHECKING:
-    from ariel.ec.genotypes.genotype import Genotype
-    from ariel.src.ariel.ec.crossovers import TreeCrossover
-    from ariel.src.ariel.ec.mutations import TreeMutator
+    from ariel.ec.crossovers import TreeCrossover
+    from ariel.ec.mutations import TreeMutator
 
 SEED = 42
 RNG = np.random.default_rng(SEED)
@@ -23,13 +23,13 @@ class TreeGenome(Genotype):
 
     @staticmethod
     def get_crossover_object() -> TreeCrossover:
-        from ariel.src.ariel.ec.crossovers import TreeCrossover
+        from ariel.ec.crossovers import TreeCrossover
         """Return the crossover operator for tree genomes."""
         return TreeCrossover()
     
     @staticmethod
     def get_mutator_object() -> TreeMutator:
-        from ariel.src.ariel.ec.mutations import TreeMutator
+        from ariel.ec.mutations import TreeMutator
         """Return the mutator operator for tree genomes."""
         return TreeMutator()
     
@@ -86,18 +86,6 @@ class TreeGenome(Genotype):
         return cls(root=TreeNode(config.ModuleInstance(type=config.ModuleType.CORE,
                                               rotation=config.ModuleRotationsIdx.DEG_0,
                                               links={})))
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "TreeGenome":
-        """Deserialize a genome from a dict produced by to_dict()."""
-        root_data = data.get("root")
-        root = None if root_data is None else TreeNode.from_dict(root_data)
-        return cls(root=root)
-
-    @classmethod
-    def from_json(cls, s: str) -> "TreeGenome":
-        """Deserialize from a JSON string."""
-        return cls.from_dict(json.loads(s))
 
     @property
     def root(self) -> TreeNode | None:
@@ -195,16 +183,31 @@ class TreeGenome(Genotype):
         """Support for copy.copy()."""
         return self.copy()
     
-    # ---------- JSON / dict serialization ----------
-    def to_dict(self) -> dict:
+    # ---------- JSON serialization ----------
+
+    @staticmethod
+    def from_dict(data: dict) -> "TreeGenome":
+        """Deserialize a genome from a dict produced by to_dict()."""
+        root_data = data.get("root")
+        root = None if root_data is None else TreeNode.from_dict(root_data)
+        return TreeGenome(root=root)
+
+    @staticmethod
+    def from_json(json_str: str, **kwargs) -> "TreeGenome":
+        """Deserialize from a JSON string."""
+        return TreeGenome.from_dict(json.loads(json_str))
+    
+    @staticmethod
+    def to_dict(robot_genome: "TreeGenome") -> dict:
         """Serialize the genome into a pure-Python dict (JSON-friendly)."""
         return {
-            "root": None if self._root is None else self._root.to_dict()
+            "root": None if robot_genome._root is None else robot_genome._root.to_dict()
         }
 
-    def to_json(self, *, indent: int | None = 2) -> str:
+    @staticmethod
+    def to_json(robot_genome: "TreeGenome", *, indent: int | None = 2) -> str:
         """Serialize to a JSON string."""
-        return json.dumps(self.to_dict(), indent=indent)
+        return json.dumps(TreeGenome.to_dict(robot_genome), indent=indent)
 
     # TODO: Implement this
     # def __deepcopy__(self, memo) -> 'TreeGenome':

@@ -4,8 +4,8 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ariel.src.ariel.ec.mutations import Mutation
-    from ariel.src.ariel.ec.crossovers import Crossover
+    from ariel.ec.mutations import Mutation
+    from ariel.ec.crossovers import Crossover
 import networkx as nx
 
 class Genotype(ABC):
@@ -34,4 +34,16 @@ class Genotype(ABC):
     def to_digraph(robot_genotype: "Genotype", **kwargs: dict) -> nx.DiGraph:
         """Convert the genotype to a directed graph representation."""
         raise NotImplementedError("Conversion to directed graph not implemented for this genotype type.")
+    
+    @staticmethod
+    @abstractmethod
+    def to_json(robot_genotype: "Genotype", **kwargs: dict) -> str:
+        """Convert the genotype to a JSON-serializable dictionary."""
+        raise NotImplementedError("Conversion to JSON not implemented for this genotype type.")
+    
+    @staticmethod
+    @abstractmethod
+    def from_json(json_data: str, **kwargs: dict) -> "Genotype":
+        """Create a genotype instance from a JSON-serializable dictionary."""
+        raise NotImplementedError("Creation from JSON not implemented for this genotype type.")
     
