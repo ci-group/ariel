@@ -1,0 +1,462 @@
+================================================================================
+SPATIAL EVOLUTIONARY ALGORITHM FOR ROBOT LOCOMOTION
+================================================================================
+
+OVERVIEW
+--------
+This module implements a spatial evolutionary algorithm (EA) that evolves robot
+locomotion controllers using physical proximity-based mate selection. Unlike
+traditional genetic algorithms where selection is purely fitness-based, this
+approach simulates a more realistic evolutionary scenario where robots must
+physically move toward attractive (high-fitness) partners to reproduce.
+
+The algorithm evolves sinusoidal control parameters (amplitude, frequency, phase)
+for each robot joint to optimize movement distance.
+
+
+CORE CONCEPTS
+-------------
+
+1. SPATIAL EVOLUTION
+   - Robots exist in a 2D physical space during the mating phase
+   - Selection is influenced by both fitness AND physical proximity
+   - Robots move toward more attractive (higher fitness) neighbors
+   - Only robots within a pairing radius can mate
+   - This creates emergent clustering and spatial population structure
+
+2. GENOTYPE REPRESENTATION
+   - Each robot's controller is encoded as a list of parameters
+   - For each joint: [amplitude, frequency, phase]
+   - Total genotype length = num_joints × 3
+   - These parameters control sinusoidal joint movements
+
+3. FITNESS EVALUATION
+   - Each robot is evaluated in isolation (no interference)
+   - Fitness = Euclidean distance traveled in fixed time
+   - Higher fitness = better locomotion controller
+
+4. MATE SELECTION
+   - Fitness-based attractiveness: normalized fitness scores (0-1)
+   - Reciprocal attraction: all robots move toward most attractive neighbor
+   - Proximity-based pairing: only nearby robots can mate
+   - Best-fitness pairing: prioritizes highest fitness partners within radius
+
+
+MAIN CLASSES
+------------
+
+SpatialIndividual
+-----------------
+Represents a single robot in the population.
+
+Attributes:
+  - genotype: List of floats encoding controller parameters
+  - fitness: Float representing locomotion performance
+  - start_position: 3D numpy array of evaluation start position
+  - end_position: 3D numpy array of evaluation end position
+  - spawn_position: 3D numpy array of initial spawn location
+  - robot_index: Integer index in current population
+  - unique_id: Unique identifier across all generations
+  - parent_ids: List of parent unique_ids for lineage tracking
+
+Methods:
+  - __init__(unique_id): Creates new individual with empty genotype
+
+
+SpatialEA
+---------
+Main evolutionary algorithm orchestrator.
+
+Attributes:
+  - population_size: Number of robots per generation
+  - num_generations: Number of evolutionary cycles
+  - num_joints: Number of controllable joints per robot
+  - population: List of SpatialIndividual objects
+  - generation: Current generation counter
+  - fitness_history: Best fitness per generation
+  - best_individual_history: Best individual per generation
+  - world: SimpleFlatWorld simulation environment
+  - model: MuJoCo physics model
+  - data: MuJoCo simulation data
+  - robots: List of robot specifications
+  - tracked_geoms: List of tracked robot geometries
+  - position_histories: Trajectory data during simulation
+  - current_positions: Persistent positions across generations
+  - next_unique_id: Counter for assigning unique IDs
+
+Methods:
+  See detailed method descriptions below.
+
+
+ALGORITHM WORKFLOW
+------------------
+
+1. INITIALIZATION
+   initialize_population()
+   - Creates initial population with random genotypes
+   - Each parameter initialized within configured ranges
+   - Assigns unique IDs to each individual
+
+2. GENERATION LOOP (repeated for num_generations)
+
+   a. SPAWNING
+      spawn_population()
+      - Creates MuJoCo simulation environment
+      - Places robots at non-overlapping positions
+      - Uses previous generation positions if available
+      - Falls back to random/grid placement if needed
+      - Tracks robot core geometries for position monitoring
+
+   b. FITNESS EVALUATION
+      evaluate_population()
+      - Tests each robot individually in isolated environment
+      - Records start and end positions
+      - Calculates fitness = distance traveled
+      - Reuses same environment for efficiency
+      - Returns list of fitness values
+
+   c. MATING MOVEMENT PHASE
+      mating_movement_phase(duration, save_trajectories, record_video)
+      - Calculates attractiveness from fitness scores
+      - Runs physics simulation with attraction-based controller
+      - Each robot moves toward most attractive nearby neighbor
+      - Records trajectories at regular intervals
+      - Updates current_positions for next generation
+      - Optionally records video of movement
+      - Optionally saves trajectory visualization
+
+   d. NEXT GENERATION CREATION
+      create_next_generation(record_video)
+      - Sorts population by fitness (descending)
+      - Finds pairs within pairing radius
+      - Prioritizes high-fitness partners
+      - Performs crossover and mutation
+      - Places offspring near parents (on circle perimeter)
+      - Extends population with new individuals
+      - Tracks parent-child relationships via unique IDs
+
+3. DEMONSTRATION
+   - demonstrate_best(): Shows best individual in action
+   - demonstrate_final_population(): Shows entire final population
+   - plot_fitness_evolution(): Visualizes fitness progression
+
+
+DETAILED METHOD DESCRIPTIONS
+-----------------------------
+
+create_individual()
+  Purpose: Create a new random individual
+  Returns: SpatialIndividual with random genotype
+  Details:
+    - Assigns unique ID
+    - Randomizes amplitude, frequency, phase per joint
+    - Uses config ranges for initialization
+
+initialize_population()
+  Purpose: Create initial random population
+  Effects: Populates self.population list
+  Details:
+    - Creates population_size individuals
+    - All start with fitness = 0
+
+spawn_population()
+  Purpose: Place robots in simulation environment
+  Effects: Creates world, model, data, tracked_geoms
+  Details:
+    - Reuses positions from previous generation if available
+    - Generates non-overlapping positions otherwise
+    - Uses minimum distance constraint
+    - Falls back to grid placement if random fails
+    - Compiles MuJoCo model after all robots spawned
+    - Tracks core geom for each robot
+
+spatial_controller(model, data)
+  Purpose: Apply sinusoidal control to all robot joints
+  Parameters:
+    - model: MuJoCo model
+    - data: MuJoCo data
+  Effects: Updates data.ctrl with computed control values
+  Details:
+    - Iterates over all spawned robots
+    - For each joint: control = amplitude × sin(frequency × time + phase)
+    - Clips control values to valid range
+
+evaluate_population()
+  Purpose: Measure fitness of all individuals
+  Returns: List of fitness values
+  Details:
+    - Creates single isolated environment
+    - Tests each robot individually (no interference)
+    - Records start/end positions
+    - Calculates distance traveled
+    - Updates individual.fitness
+    - Reuses environment for efficiency
+
+crossover(parent1, parent2)
+  Purpose: Create two offspring from two parents
+  Parameters:
+    - parent1: SpatialIndividual
+    - parent2: SpatialIndividual
+  Returns: Tuple of (child1, child2)
+  Details:
+    - One-point crossover
+    - Random crossover point in genotype
+    - Creates two complementary offspring
+    - Assigns new unique IDs
+    - Tracks parent IDs
+
+mutate(individual)
+  Purpose: Apply random mutations to individual
+  Parameters:
+    - individual: SpatialIndividual to mutate
+  Returns: New mutated SpatialIndividual
+  Details:
+    - Creates new individual with new unique ID
+    - Copies genotype from input
+    - Each parameter mutated with probability = mutation_rate
+    - Adds Gaussian noise (mean=0, std=mutation_strength)
+    - Clamps values to valid ranges per parameter type
+    - Tracks parent ID
+
+mating_movement_phase(duration, save_trajectories, record_video)
+  Purpose: Simulate robots moving toward attractive partners
+  Parameters:
+    - duration: Simulation time in seconds
+    - save_trajectories: Whether to save trajectory plot
+    - record_video: Whether to record video
+  Effects: Updates current_positions
+  Details:
+    - Calculates normalized attractiveness from fitness
+    - Defines mating_controller that biases movement
+    - Each robot moves toward most attractive neighbor
+    - Attraction strength proportional to neighbor fitness
+    - Records trajectories at intervals
+    - Updates persistent position tracking
+    - Optionally saves visualization and video
+
+create_next_generation(record_video)
+  Purpose: Create offspring population from current population
+  Effects: Extends population and current_positions
+  Details:
+    - Runs mating_movement_phase first
+    - Sorts population by fitness (descending)
+    - Finds pairs within pairing_radius
+    - For each pair:
+      * Performs crossover (with probability)
+      * Applies mutation to offspring
+      * Places offspring on circle around each parent
+    - Extends population with offspring
+    - Extends positions with offspring positions
+    - Verifies population-position consistency
+    - Updates population_size
+
+run_evolution(record_generation_videos)
+  Purpose: Execute complete evolutionary algorithm
+  Parameters:
+    - record_generation_videos: Whether to record each generation
+  Returns: Best individual from final generation
+  Details:
+    - Initializes population
+    - Loops through generations:
+      * Spawn population
+      * Evaluate fitness
+      * Track statistics
+      * Create next generation (except last)
+    - Final generation runs mating movement only
+    - Returns best individual
+
+get_best_individual()
+  Purpose: Find highest fitness individual
+  Returns: SpatialIndividual with max fitness
+
+demonstrate_best()
+  Purpose: Show best individual in action
+  Effects: Records video of best robot
+  Details:
+    - Creates isolated demo environment
+    - Spawns single robot with best genotype
+    - Applies evolved controller
+    - Records video for configured duration
+
+demonstrate_final_population()
+  Purpose: Show entire final population
+  Effects: Records video of all robots
+  Details:
+    - Spawns full final population
+    - Applies controllers to all robots
+    - Records multi-robot video
+
+plot_fitness_evolution()
+  Purpose: Visualize fitness progression
+  Effects: Saves fitness plot to file
+  Details:
+    - Plots best fitness per generation
+    - Saves to figures folder
+
+
+TRAJECTORY VISUALIZATION
+-------------------------
+
+_save_mating_trajectories(trajectories, fitness_values, attractiveness)
+  Purpose: Create detailed visualization of mating movement
+  Parameters:
+    - trajectories: List of position lists per robot
+    - fitness_values: Fitness score per robot
+    - attractiveness: Normalized fitness per robot
+  Effects: Saves PNG image to figures folder
+  Details:
+    - Plots trajectory lines colored by unique ID
+    - Start positions: circles (size matches robot)
+    - End positions: squares with ID labels
+    - Fitness values shown near start positions
+    - World boundaries shown as rectangle
+    - Legend explains marker meanings
+    - Filename includes generation number
+
+_calculate_marker_size(robot_size_meters, ax, fig)
+  Purpose: Convert robot size to matplotlib marker points
+  Parameters:
+    - robot_size_meters: Physical robot size
+    - ax: Matplotlib axis
+    - fig: Matplotlib figure
+  Returns: Marker size in points
+  Details:
+    - Calculates data units per inch
+    - Converts meters to inches to points
+    - Ensures markers match actual robot size in plot
+
+
+CONFIGURATION PARAMETERS (from ea_config.py)
+---------------------------------------------
+
+Population & Evolution:
+  - population_size: Number of robots per generation
+  - num_generations: Number of evolutionary cycles
+
+Genotype Initialization:
+  - amplitude_init_min/max: Initial amplitude range
+  - frequency_init_min/max: Initial frequency range
+  - phase_min/max: Phase range (0 to 2π)
+
+Genotype Bounds:
+  - amplitude_min/max: Amplitude constraints
+  - frequency_min/max: Frequency constraints
+  - control_clip_min/max: Control signal limits
+
+Genetic Operators:
+  - mutation_rate: Probability of mutating each parameter
+  - mutation_strength: Standard deviation of Gaussian noise
+  - crossover_rate: Probability of crossover vs cloning
+
+Spatial Parameters:
+  - world_size: [width, height] of simulation arena
+  - spawn_x_min/max: X-axis spawn range
+  - spawn_y_min/max: Y-axis spawn range
+  - spawn_z: Z-axis spawn height
+  - min_spawn_distance: Minimum distance between robots
+  - pairing_radius: Maximum distance for mating
+  - offspring_radius: Distance offspring spawn from parents
+  - robot_size: Physical robot diameter
+
+Simulation:
+  - simulation_time: Duration for fitness evaluation
+  - final_demo_time: Duration for best individual demo
+  - multi_robot_demo_time: Duration for population demo
+
+Output:
+  - video_folder: Directory for video files
+  - figures_folder: Directory for plots
+  - print_generation_stats: Whether to print stats
+  - print_final_genotype: Whether to print best genotype
+
+
+KEY FEATURES
+------------
+
+1. POSITION PERSISTENCE
+   - Robots maintain positions across generations
+   - Offspring spawn near parents (spatial structure)
+   - Positions stored in current_positions array
+   - Synchronized with population array
+
+2. UNIQUE ID TRACKING
+   - Every individual gets unique ID (never reused)
+   - Enables lineage tracking across generations
+   - Parent IDs stored in parent_ids list
+   - Used for trajectory visualization coloring
+
+3. FITNESS-BASED ATTRACTION
+   - Attractiveness = normalized fitness (0-1)
+   - Higher fitness = stronger attraction
+   - Reciprocal: all robots move toward best neighbor
+   - Creates emergent spatial clustering
+
+4. ISOLATED EVALUATION
+   - Each robot tested individually
+   - Prevents interference between robots
+   - Fair fitness comparison
+   - Reuses environment for efficiency
+
+5. VISUALIZATION
+   - Trajectory plots show movement patterns
+   - Color-coded by unique ID (consistent across generations)
+   - Marker sizes match actual robot size
+   - Fitness values annotated
+   - Videos capture full simulations
+
+6. POPULATION GROWTH
+   - Population expands each generation
+   - Each pair produces 2 offspring
+   - No explicit selection/culling
+   - Growth reflects successful pairings
+
+
+USAGE EXAMPLE
+-------------
+
+from himym.evolutionary_algo_discrete import SpatialEA
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
+from ariel.simulation.environments.simple_flat_world import SimpleFlatWorld
+from ea_config import config
+
+# Determine robot joint count
+temp_world = SimpleFlatWorld(config.world_size)
+temp_robot = gecko()
+temp_world.spawn(temp_robot.spec, spawn_position=[0, 0, 0])
+temp_model = temp_world.spec.compile()
+num_joints = temp_model.nu
+
+# Create EA instance
+spatial_ea = SpatialEA(
+    population_size=20,
+    num_generations=10,
+    num_joints=num_joints
+)
+
+# Run evolution
+best_individual = spatial_ea.run_evolution(record_generation_videos=True)
+
+# Demonstrate results
+spatial_ea.demonstrate_best()
+spatial_ea.demonstrate_final_population()
+spatial_ea.plot_fitness_evolution()
+
+
+OUTPUTS
+-------
+
+Videos (in video_folder):
+  - best_individual_demo.mp4: Best robot demonstration
+  - final_population_demo.mp4: Full population demonstration
+  - generation_XXX_mating_movement.mp4: Per-generation mating (optional)
+
+Plots (in figures_folder):
+  - spatial_ea_fitness_evolution.png: Fitness over generations
+  - mating_trajectories_gen_XXX.png: Movement trajectories per generation
+
+Console Output:
+  - Initialization information
+  - Per-generation statistics
+  - Best/average/worst fitness
+  - Population size changes
+  - Pairing information
