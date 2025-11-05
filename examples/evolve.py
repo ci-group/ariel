@@ -249,7 +249,7 @@ def main() -> None:
     plt.title('Average Fitness Over Generations')
     plt.xlabel('Generation')
     plt.ylabel('Average Fitness')
-    plt.savefig('average_fitness_over_generations.png')
+    plt.savefig('average_fitness_over_generations_lsystem.png')
     plt.show()
 
 if __name__ == "__main__":

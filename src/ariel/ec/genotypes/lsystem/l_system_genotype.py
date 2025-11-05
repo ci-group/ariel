@@ -224,9 +224,11 @@ class LSystemDecoder(Genotype):
         verbose: int = 0,
         **kwargs: dict
     ) -> LSystemDecoder:
+        base_rules = {"C": "C", "B": "B", "H": "H", "N": "N"}
+
         indiv = LSystemDecoder(
             axiom="C",
-            rules={},
+            rules=base_rules,
             iterations=iterations,
             max_elements=max_elements,
             max_depth=max_depth,

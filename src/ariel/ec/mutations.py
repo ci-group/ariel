@@ -278,7 +278,7 @@ class LSystemMutator(Mutation):
 
     @staticmethod
     def mutate_one_point_lsystem(lsystem,mutation_rate,add_temperature=0.5):
-        op_completed = ""
+        # op_completed = ""
         if random.random()<mutation_rate:
             action=random.choices(['add_rule','rm_rule'],weights=[add_temperature,1-add_temperature])[0]
             rules = lsystem.rules
@@ -296,43 +296,43 @@ class LSystemMutator(Mutation):
                             item_to_add=random.choice(['B','H','N'])
                             splitted_rules.insert(gene_to_change+2,item_to_add)
                             splitted_rules.insert(gene_to_change+2,op_to_add)
-                            op_completed="ADDED : "+op_to_add+" "+item_to_add
+                            # op_completed="ADDED : "+op_to_add+" "+item_to_add
                         elif splitted_rules[gene_to_change][:4] in ['movf','movk','movl','movr','movb','movt']:
                             rotation = random.choice([0,45,90,135,180,225,270])
                             op_to_add=operator+"("+str(rotation)+")"
                             item_to_add=random.choice(['B','H','N'])
                             splitted_rules.insert(gene_to_change,item_to_add)
                             splitted_rules.insert(gene_to_change,op_to_add)
-                            op_completed="ADDED : "+op_to_add+" "+item_to_add
+                            # op_completed="ADDED : "+op_to_add+" "+item_to_add
                         elif splitted_rules[gene_to_change] in ['C','B','H','N']:
                             rotation = random.choice([0,45,90,135,180,225,270])
                             op_to_add=operator+"("+str(rotation)+")"
                             item_to_add=random.choice(['B','H','N'])
                             splitted_rules.insert(gene_to_change+1,item_to_add)
                             splitted_rules.insert(gene_to_change+1,op_to_add)
-                            op_completed="ADDED : "+op_to_add+" "+item_to_add
+                            # op_completed="ADDED : "+op_to_add+" "+item_to_add
                     if operator in ['movf','movk','movl','movr','movb','movt']:
                         if splitted_rules[gene_to_change][:4] in ['addf','addk','addl','addr','addb','addt']:
                             splitted_rules.insert(gene_to_change+2,operator)
-                            op_completed="ADDED : "+operator
+                            # op_completed="ADDED : "+operator
                         elif splitted_rules[gene_to_change][:4] in ['movf','movk','movl','movr','movb','movt']:
                             splitted_rules.insert(gene_to_change,operator)
-                            op_completed="ADDED : "+operator
+                            # op_completed="ADDED : "+operator
                         elif splitted_rules[gene_to_change] in ['C','B','H','N']:
                             splitted_rules.insert(gene_to_change+1,operator)
-                            op_completed="ADDED : "+operator
+                            # op_completed="ADDED : "+operator
                 case 'rm_rule':
                     if splitted_rules[gene_to_change][:4] in ['addf','addk','addl','addr','addb','addt']:
-                        op_completed="REMOVED : "+splitted_rules[gene_to_change]+" "+splitted_rules[gene_to_change+1]
+                        # op_completed="REMOVED : "+splitted_rules[gene_to_change]+" "+splitted_rules[gene_to_change+1]
                         splitted_rules.pop(gene_to_change)
                         splitted_rules.pop(gene_to_change)
                     elif splitted_rules[gene_to_change] in ['H','B','N']:
-                        op_completed="REMOVED : "+splitted_rules[gene_to_change-1]+" "+splitted_rules[gene_to_change]
+                        # op_completed="REMOVED : "+splitted_rules[gene_to_change-1]+" "+splitted_rules[gene_to_change]
                         if gene_to_change-1>=0:
                             splitted_rules.pop(gene_to_change-1)
                             splitted_rules.pop(gene_to_change-1)
                     elif splitted_rules[gene_to_change][:4] in ['movf','movk','movl','movr','movt','movb']:
-                        op_completed="REMOVED : "+splitted_rules[gene_to_change]
+                        # op_completed="REMOVED : "+splitted_rules[gene_to_change]
                         splitted_rules.pop(gene_to_change)
             new_rule = ""
             for j in range(0,len(splitted_rules)):
@@ -341,7 +341,7 @@ class LSystemMutator(Mutation):
                 lsystem.rules[list(rules.keys())[rule_to_change]]=new_rule
             else:
                 lsystem.rules[list(rules.keys())[rule_to_change]]=lsystem.rules[list(rules.keys())[rule_to_change]]
-        return op_completed
+        return lsystem
 
 
 def test() -> None:
