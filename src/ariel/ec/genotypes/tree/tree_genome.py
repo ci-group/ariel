@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ariel.ec.genotypes.genotype import Genotype
-    from ariel.ec.a005 import TreeCrossover
-    from ariel.ec.a000 import TreeMutator
+    from ariel.src.ariel.ec.crossovers import TreeCrossover
+    from ariel.src.ariel.ec.mutations import TreeMutator
 
 SEED = 42
 RNG = np.random.default_rng(SEED)
@@ -23,18 +23,18 @@ class TreeGenome(Genotype):
 
     @staticmethod
     def get_crossover_object() -> TreeCrossover:
-        from ariel.ec.a005 import TreeCrossover
+        from ariel.src.ariel.ec.crossovers import TreeCrossover
         """Return the crossover operator for tree genomes."""
         return TreeCrossover()
     
     @staticmethod
     def get_mutator_object() -> TreeMutator:
-        from ariel.ec.a000 import TreeMutator
+        from ariel.src.ariel.ec.mutations import TreeMutator
         """Return the mutator operator for tree genomes."""
         return TreeMutator()
     
     @staticmethod
-    def create_individual() -> TreeGenome:
+    def create_individual(**kwargs: dict) -> TreeGenome:
         """Generate a new TreeGenome individual."""
         return TreeGenome.default_init()
     

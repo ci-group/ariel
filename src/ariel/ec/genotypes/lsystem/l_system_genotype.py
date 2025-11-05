@@ -38,8 +38,8 @@ from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleRotatio
 
 if TYPE_CHECKING:
     from ariel.ec.genotypes.genotype import Genotype
-    from ariel.ec.a000 import LSystemMutator
-    from ariel.ec.a005 import LSystemCrossover
+    from ariel.src.ariel.ec.mutations import LSystemMutator
+    from ariel.src.ariel.ec.crossovers import LSystemCrossover
 
 SEED = 42
 DPI = 300
@@ -208,17 +208,32 @@ class LSystemDecoder(Genotype):
 
     @staticmethod
     def get_crossover_object() -> LSystemCrossover:
-        from ariel.ec.a005 import LSystemCrossover
+        from ariel.src.ariel.ec.crossovers import LSystemCrossover
         return LSystemCrossover()
     
     @staticmethod
     def get_mutator_object() -> LSystemMutator:
-        from ariel.ec.a000 import LSystemMutator
+        from ariel.src.ariel.ec.mutations import LSystemMutator
         return LSystemMutator()
     
     @staticmethod
-    def create_individual():
-        pass  # Implementation
+    def create_individual(
+        iterations: int = 2,
+        max_elements: int = 32,
+        max_depth: int = 8,
+        verbose: int = 0
+    ) -> LSystemDecoder:
+        indiv = LSystemDecoder(
+            axiom="C",
+            rules={},
+            iterations=iterations,
+            max_elements=max_elements,
+            max_depth=max_depth,
+            verbose=verbose,
+        )
+        # Materialize expanded_token, structure, and graph
+        indiv.refresh()
+        return indiv
 
     @staticmethod
     def to_digraph(robot: LSystemDecoder):

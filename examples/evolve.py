@@ -18,8 +18,8 @@ from rich.traceback import install
 # Local libraries
 from ariel.ec.a001 import Individual
 from ariel.ec.a004 import EAStep, EA
-from ariel.ec.a000 import Mutation
-from ariel.ec.a005 import Crossover
+from ariel.ec.mutations import Mutation
+from ariel.ec.crossovers import Crossover
 from ariel.ec.genotypes.genotype_mapping import GENOTYPES_MAPPING
 from morphology_fitness_analysis import compute_6d_descriptor, load_target_robot, compute_fitness_scores
 

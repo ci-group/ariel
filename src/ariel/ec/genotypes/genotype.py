@@ -4,8 +4,8 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ariel.ec.a000 import Mutation
-    from ariel.ec.a005 import Crossover
+    from ariel.src.ariel.ec.mutations import Mutation
+    from ariel.src.ariel.ec.crossovers import Crossover
 import networkx as nx
 
 class Genotype(ABC):
@@ -25,7 +25,7 @@ class Genotype(ABC):
     
     @staticmethod
     @abstractmethod
-    def create_individual() -> "Genotype":
+    def create_individual(**kwargs: dict) -> "Genotype":
         """Generate a new individual of this genotype type."""
         raise NotImplementedError("Individual generation not implemented for this genotype type.")
 

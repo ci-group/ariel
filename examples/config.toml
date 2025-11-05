@@ -53,3 +53,10 @@ max_depth = 8
 mutation_rate = 0.1
 crossover_rate = 0.9
 
+[genotypes.lsystem]
+allowed_mutations   = ["mutate_one_point_lsystem"]
+allowed_crossovers  = ["crossover_uniform_rules_lsystem", "crossover_uniform_genes_lsystem"]
+
+[genotypes.tree.defaults]
+mutation = "mutate_one_point_lsystem"
+crossover = "crossover_uniform_rules_lsystem"

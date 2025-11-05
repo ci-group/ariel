@@ -31,62 +31,6 @@ install(width=180)
 console = Console()
 RNG = np.random.default_rng(SEED)
 
-# Type Aliases
-type Integers = Sequence[int]
-type Floats = Sequence[float]
-
-
-class IntegersGeneratorSettings(BaseSettings):
-    integers_endpoint: bool = True
-    choice_replace: bool = True
-    choice_shuffle: bool = False
-
-
-config = IntegersGeneratorSettings()
-
-
-class IntegersGenerator:
-    @staticmethod
-    def integers(
-        low: int,
-        high: int,
-        size: int | Sequence[int] | None = 1,
-        *,
-        endpoint: bool | None = None,
-    ) -> Integers:
-        endpoint = endpoint or config.integers_endpoint
-        generated_values = RNG.integers(
-            low=low,
-            high=high,
-            size=size,
-            endpoint=endpoint,
-        )
-        return cast("Integers", generated_values.astype(int).tolist())
-
-    @staticmethod
-    def choice(
-        value_set: int | Integers,
-        size: int | Sequence[int] | None = 1,
-        probabilities: Sequence[float] | None = None,
-        axis: int = 0,
-        *,
-        replace: bool | None = None,
-        shuffle: bool | None = None,
-    ) -> Integers:
-        replace = replace or config.choice_replace
-        shuffle = shuffle or config.choice_shuffle
-        generated_values = np.array(
-            RNG.choice(
-                a=value_set,
-                size=size,
-                replace=replace,
-                p=probabilities,
-                axis=axis,
-                shuffle=shuffle,
-            ),
-        )
-        return cast("Integers", generated_values.astype(int).tolist())
-
 class Mutation(ABC):
     mutations_mapping: dict[str, function] = NotImplemented
     which_mutation: str = ""
