@@ -112,7 +112,6 @@ class SimpleFlatWorld:
             data = mujoco.MjData(model)
             mujoco.mj_step(model, data, nstep=10)
             min_corner, _ = compute_geom_bounding_box(model, data)
-            print(compute_geom_bounding_box(model, data))
             spawn_position[2] -= min_corner[2]
 
         # If small_gap is True, add a small gap to the spawn position
