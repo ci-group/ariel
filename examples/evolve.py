@@ -21,7 +21,8 @@ from ariel.ec.a004 import EAStep, EA
 from ariel.ec.mutations import Mutation
 from ariel.ec.crossovers import Crossover
 from ariel.ec.genotypes.genotype_mapping import GENOTYPES_MAPPING
-from morphology_fitness_analysis import compute_6d_descriptor, load_target_robot, compute_fitness_scores
+from morphology_fitness_analysis import compute_6d_descriptor, load_target_robot, compute_fitness_scores, MorphologyAnalyzer
+from evolution_dashboard import run_dashboard
 
 from ariel.ec.genotypes.genotype import Genotype
 
@@ -120,7 +121,7 @@ def mutation(population: Population, config: EASettings) -> Population:
 
 def evaluate(population: Population, config: EASettings) -> Population:
     if config.task == "evolve_to_copy":
-        target_descriptor = load_target_robot(Path("examples/target_robots/" + str(config.target_robot_file_path)))
+        target_descriptor = load_target_robot(Path(str(config.target_robot_file_path)))
 
         for ind in population:
             genotype = config.genotype.from_json(ind.genotype)
@@ -169,7 +170,7 @@ def read_config_file() -> EASettings:
     task = cfg["run"]["task"]
     mutation_params = gblock.get("mutation", {}).get("params", {})
     crossover_params = gblock.get("crossover", {}).get("params", {})
-    
+
     target_robot_path = cfg["task"]["evolve_to_copy"]["target_robot_path"] if task == "evolve_to_copy" else None
 
     genotype = GENOTYPES_MAPPING[gname]
@@ -198,7 +199,26 @@ def read_config_file() -> EASettings:
         db_file_path=Path(cfg["data"]["output_folder"]) / cfg["data"]["db_file_name"],
     )
     return settings
-    
+
+
+# Example usage
+def analyze_evolution_videos(analyzer, populations, decoder):
+    """Create evolution videos for different visualizations."""
+
+    analyzer.create_evolution_video(
+        populations=populations,
+        decoder=decoder,
+        plot_method_name="plot_fitness_distributions",
+        video_filename="videos/fitness_distributions.mp4"
+    )
+
+    analyzer.create_evolution_video(
+        populations=populations,
+        decoder=decoder,
+        plot_method_name="plot_pairwise_feature_landscapes",
+        video_filename="videos/pairwise_feature_landscapes.mp4"
+    )
+
 
 def main() -> None:
     """Entry point."""
@@ -208,7 +228,7 @@ def main() -> None:
     population_list = evaluate(population_list, config)
 
     # Create EA steps
-    
+
     ops = [
         EAStep("parent_selection", partial(parent_selection, config=config)),
         EAStep("crossover",        partial(crossover,        config=config)),
@@ -237,9 +257,11 @@ def main() -> None:
 
     fitnesses = []
 
+    populations = []
     for i in range(100):
         ea.fetch_population(only_alive=False, best_comes=None, custom_logic=[Individual.time_of_birth==i])
         individuals = ea.population
+        populations.append(individuals)
         avg_fitness = sum(ind.fitness for ind in individuals) / len(individuals) if individuals else 0
         console.log(f"Generation {i}: Avg Fitness = {avg_fitness}")
         fitnesses.append(avg_fitness)
@@ -251,6 +273,24 @@ def main() -> None:
     plt.ylabel('Average Fitness')
     plt.savefig('average_fitness_over_generations_lsystem.png')
     plt.show()
+
+    morphology_analyzer = MorphologyAnalyzer()
+    morphology_analyzer.load_target_robots(config.target_robot_file_path)
+
+    #analyze_evolution_videos(morphology_analyzer, populations, lambda x: config.genotype.to_digraph(config.genotype.from_json(x)))
+
+    # Launch interactive dashboard
+    print("\nLaunching Evolution Dashboard...")
+
+    decoder = lambda individual: config.genotype.to_digraph(config.genotype.from_json(individual.genotype))
+    run_dashboard(populations, decoder, config)
+
+    #morphology_analyzer.load_population(individuals, lambda x: config.genotype.to_digraph(config.genotype.from_json(x))) ##???? why not juse make a method of the tree genome?
+    #morphology_analyzer.compute_fitness_scores()
+    #morphology_analyzer.plot_fitness_distributions()
+    #morphology_analyzer.plot_target_descriptors_pca()
+    #morphology_analyzer.plot_fitness_landscapes()
+    #morphology_analyzer.analyze_morphological_diversity()
 
 if __name__ == "__main__":
     main()

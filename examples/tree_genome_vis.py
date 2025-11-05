@@ -28,8 +28,6 @@ from ariel.utils.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
 from ariel import console
 from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
-from ariel.body_phenotypes.robogen_lite.decoders.tree_decoder import to_digraph
-from ariel.ec.a000 import TreeGenerator
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome, TreeNode
 from ariel.body_phenotypes.robogen_lite import config
 from ariel.simulation.controllers.controller import Controller
@@ -40,6 +38,7 @@ from ariel.utils.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
 from ariel.utils.graph_ops import robot_json_to_digraph, load_robot_json_file
+
 
 # Type Checking
 if TYPE_CHECKING:
@@ -352,6 +351,7 @@ def experiment(
     controller: Controller,
     duration: int = 15,
     mode: ViewerTypes = "viewer",
+    camera_view: str = "default"  # Add camera parameter
 ) -> None:
     """Run the simulation with random movements."""
     # ==================================================================== #
@@ -397,9 +397,36 @@ def experiment(
                 duration=duration,
             )
         case "frame":
-            # Render a single frame (for debugging)
-            save_path = str(DATA / "robot.png")
-            single_frame_renderer(model, data, save=True, save_path=save_path)
+            # Create custom camera based on view type
+            camera = mj.MjvCamera()
+            camera.type = mj.mjtCamera.mjCAMERA_FREE
+
+            if camera_view == "front":
+                camera.lookat = [0, 0, 0.5]
+                camera.distance = 3.0
+                camera.azimuth = 0
+                camera.elevation = -20
+            elif camera_view == "side":
+                camera.lookat = [0, 0, 0.5]
+                camera.distance = 3.0
+                camera.azimuth = 90
+                camera.elevation = -20
+            elif camera_view == "isometric":
+                camera.lookat = [0, 0, 0.5]
+                camera.distance = 4.0
+                camera.azimuth = 45
+                camera.elevation = -30
+            else:  # default
+                camera = None
+
+            save_path = str(DATA / f"robot_{camera_view}.png")
+            single_frame_renderer(
+                model,
+                data,
+                save=True,
+                save_path=save_path,
+                camera=camera
+            )
         case "video":
             # This records a video of the simulation
             path_to_video_folder = str(DATA / "videos")
@@ -433,9 +460,8 @@ def main() -> None:
     # ? ------------------------------------------------------------------ #
 
     tree_genome = create_max_limb_robot()
-    tree_genome = TreeGenerator.binary_tree(10)
 
-    robot_graph = to_digraph(tree_genome)
+    robot_graph = tree_genome.to_digraph(tree_genome)
     robot_graph = load_robot_json_file("examples/target_robots/large_robot_25.json")
     morph_descriptors(robot_graph)
 
@@ -466,7 +492,8 @@ def main() -> None:
         tracker=tracker,
     )
 
-    experiment(robot=core, controller=ctrl, mode="launcher")
+    experiment(robot=core, controller=ctrl, mode="frame",
+               camera_view="isometric")
 
     show_xpos_history(tracker.history["xpos"][0])
 

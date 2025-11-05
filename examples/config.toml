@@ -10,7 +10,7 @@ genotype = "lsystem"
 task = "evolve_to_copy"
 
 [task.evolve_to_copy]
-target_robot_path = "small_robot_8.json"
+target_robot_path = "examples/target_robots/small_robot_8.json"
 
 # =========================
 # Global EC settings (match EASettings fields)

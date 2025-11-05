@@ -235,7 +235,7 @@ class IntegerMutator(Mutation):
 #         return genome
 
 class TreeMutator(Mutation):
-        
+
     @staticmethod
     def _random_tree(max_depth: int = 2, branching_prob: float = 0.5) -> Genotype:
         """Generate a random tree with pheno_configurable branching probability."""
@@ -273,7 +273,7 @@ class TreeMutator(Mutation):
             new_individual.root.replace_node(node_to_replace, new_subtree)
 
         return new_individual
-    
+
 class LSystemMutator(Mutation):
 
     @staticmethod
