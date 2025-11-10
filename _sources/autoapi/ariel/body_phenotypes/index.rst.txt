@@ -1,0 +1,20 @@
+:py:mod:`body_phenotypes`
+===============================
+
+.. py:module:: ariel.body_phenotypes
+
+.. autoapi-nested-parse::
+
+   Phenotype descriptions of different robot systems (based on 'MjSpec').
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   robogen_lite/index.rst
+
+
