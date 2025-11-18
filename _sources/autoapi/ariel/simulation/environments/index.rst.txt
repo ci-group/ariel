@@ -1,0 +1,554 @@
+:py:mod:`environments`
+=======================================
+
+.. py:module:: ariel.simulation.environments
+
+.. autoapi-nested-parse::
+
+   Pre-built MuJoCo environments.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   compile_terrains/index.rst
+   heightmap_functions/index.rst
+   olympic_arena/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.AmphitheatreTerrainWorld
+   ariel.simulation.environments.BaseWorld
+   ariel.simulation.environments.CompoundWorld
+   ariel.simulation.environments.CraterTerrainWorld
+   ariel.simulation.environments.RuggedTerrainWorld
+   ariel.simulation.environments.RuggedTiltedWorld
+   ariel.simulation.environments.SimpleFlatWorld
+   ariel.simulation.environments.SimpleTiltedWorld
+
+
+
+
+.. py:class:: AmphitheatreTerrainWorld(name: str | None = None, floor_size: ariel.parameters.ariel_types.Dimension | None = None, floor_tilt: ariel.parameters.ariel_types.Rotation | None = None, floor_rot_sequence: str | None = None, dims: tuple[int, int] | None = None, floor_heightmap: ariel.parameters.ariel_types.FloatArray | None = None, terrain_color: tuple[float, float, float, float] | None = None, *, checker_floor: bool | None = None, load_precompiled: bool = False)
+
+   Bases: :py:obj:`ariel.simulation.environments._compound_world.CompoundWorld`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.environments.AmphitheatreTerrainWorld
+      :parts: 1
+
+
+   An amphitheatre terrain world with ruggedness (CompoundWorld).
+
+
+   .. py:attribute:: name
+      :type:  str
+      :value: 'amphitheatre-world'
+
+
+
+   .. py:attribute:: floor_size
+      :type:  ariel.parameters.ariel_types.Dimension
+      :value: (10, 10, 2)
+
+
+
+   .. py:attribute:: floor_tilt
+      :type:  ariel.parameters.ariel_types.Rotation
+      :value: (0, 0, 0)
+
+
+
+   .. py:attribute:: floor_rot_sequence
+      :type:  str
+      :value: 'XYZ'
+
+
+
+   .. py:attribute:: checker_floor
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: dims
+      :type:  tuple[int, int]
+      :value: (100, 100)
+
+
+
+   .. py:attribute:: height_of_noise
+      :type:  float
+      :value: 0.3
+
+
+
+   .. py:attribute:: scale_of_noise
+      :type:  int
+      :value: 5
+
+
+
+   .. py:attribute:: normalize
+      :type:  ariel.utils.noise_gen.NormMethod
+      :value: 'none'
+
+
+
+   .. py:attribute:: ring_inner_radius
+      :type:  float
+      :value: 0.2
+
+
+
+   .. py:attribute:: ring_outer_radius
+      :type:  float
+      :value: 0.45
+
+
+
+   .. py:attribute:: load_precompiled
+      :type:  bool
+      :value: True
+
+
+
+   .. py:method:: __post_init__() -> None
+
+
+.. py:class:: BaseWorld(name: str | None = None, mujoco_config: ariel.parameters.mujoco_params.MujocoConfig | None = None, *, load_precompiled: bool = True)
+
+   Base class for MuJoCo world specifications.
+
+
+   .. py:attribute:: name
+      :type:  str
+      :value: 'base-world'
+
+
+
+   .. py:attribute:: spawns
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: spawn_prefix
+      :type:  str
+      :value: 'robot'
+
+
+
+   .. py:attribute:: default_spawn_position
+      :type:  ariel.parameters.ariel_types.Position
+      :value: (0, 0, 0)
+
+
+
+   .. py:attribute:: default_spawn_rotation
+      :type:  ariel.parameters.ariel_types.Rotation
+      :value: (0, 0, 0)
+
+
+
+   .. py:attribute:: is_precompiled
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: spec
+      :type:  mujoco.MjSpec
+
+
+   .. py:method:: spawn(robot_spec: mujoco.MjSpec, position: ariel.parameters.ariel_types.Position | None = None, rotation: ariel.parameters.ariel_types.Rotation | None = None, spawn_prefix: str | None = None, *, correct_collision_with_floor: bool = True, validate_no_collisions: bool = False, rotation_sequence: str = 'XYZ') -> mujoco.MjSpec
+
+      Spawn a robot into the world at a specified position and orientation.
+
+      :param robot_spec: The MuJoCo specification of the robot to be spawned.
+      :type robot_spec: :class:`mj.MjSpec`
+      :param position: The (x, y, z) position to spawn the robot, by default None
+      :type position: :class:`Position`, *optional*
+      :param rotation: The (x, y, z) Euler angles (in degrees) for the robot's orientation, by default None
+      :type rotation: :class:`Rotation`, *optional*
+      :param spawn_prefix: Prefix for naming the spawned robot, by default None
+      :type spawn_prefix: :class:`str`, *optional*
+      :param correct_collision_with_floor: Whether to adjust the spawn position to avoid collisions with the floor, by default True
+      :type correct_collision_with_floor: :class:`bool`, *optional*
+      :param validate_no_collisions: Whether to validate the spawn position for collisions after adjustment, by default False
+      :type validate_no_collisions: :class:`bool`, *optional*
+      :param rotation_sequence: The sequence of axes for Euler to quaternion conversion, by default "XYZ"
+      :type rotation_sequence: :class:`str`, *optional*
+
+      :returns: The updated MuJoCo world specification with the spawned robot.
+      :rtype: :class:`mj.MjSpec`
+
+
+
+   .. py:method:: store_to_xml() -> None
+
+
+   .. py:method:: load_from_xml() -> bool
+
+
+.. py:class:: CompoundWorld(name: str | None = None, floor_size: ariel.parameters.ariel_types.Dimension | None = None, floor_tilt: ariel.parameters.ariel_types.Rotation | None = None, floor_rot_sequence: str | None = None, dims: tuple[int, int] | None = None, floor_heightmap: ariel.parameters.ariel_types.FloatArray | None = None, terrain_color: tuple[float, float, float, float] | None = None, *, checker_floor: bool | None = None, load_precompiled: bool = False)
+
+   Bases: :py:obj:`ariel.simulation.environments._base_world.BaseWorld`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.environments.CompoundWorld
+      :parts: 1
+
+
+   Use CompoundWorld to create worlds with a heightmap and tilt.
+
+
+   .. py:attribute:: name
+      :type:  str
+      :value: 'compound-world'
+
+
+
+   .. py:attribute:: floor_size
+      :type:  ariel.parameters.ariel_types.Dimension
+      :value: (10, 10, 1)
+
+
+
+   .. py:attribute:: floor_tilt
+      :type:  ariel.parameters.ariel_types.Rotation
+      :value: (0, 0, 0)
+
+
+
+   .. py:attribute:: floor_rot_sequence
+      :type:  str
+      :value: 'XYZ'
+
+
+
+   .. py:attribute:: checker_floor
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: dims
+      :type:  tuple[int, int]
+      :value: (100, 100)
+
+
+
+   .. py:attribute:: floor_heightmap
+      :type:  ariel.parameters.ariel_types.FloatArray | None
+      :value: None
+
+
+
+.. py:class:: CraterTerrainWorld(name: str | None = None, floor_size: ariel.parameters.ariel_types.Dimension | None = None, floor_tilt: ariel.parameters.ariel_types.Rotation | None = None, floor_rot_sequence: str | None = None, dims: tuple[int, int] | None = None, floor_heightmap: ariel.parameters.ariel_types.FloatArray | None = None, terrain_color: tuple[float, float, float, float] | None = None, *, checker_floor: bool | None = None, load_precompiled: bool = False)
+
+   Bases: :py:obj:`ariel.simulation.environments._compound_world.CompoundWorld`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.environments.CraterTerrainWorld
+      :parts: 1
+
+
+   A crater terrain world with ruggedness (CompoundWorld).
+
+
+   .. py:attribute:: name
+      :type:  str
+      :value: 'crater-world'
+
+
+
+   .. py:attribute:: floor_size
+      :type:  ariel.parameters.ariel_types.Dimension
+      :value: (10, 10, 2)
+
+
+
+   .. py:attribute:: floor_tilt
+      :type:  ariel.parameters.ariel_types.Rotation
+      :value: (0, 0, 0)
+
+
+
+   .. py:attribute:: floor_rot_sequence
+      :type:  str
+      :value: 'XYZ'
+
+
+
+   .. py:attribute:: checker_floor
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: dims
+      :type:  tuple[int, int]
+      :value: (100, 100)
+
+
+
+   .. py:attribute:: height_of_noise
+      :type:  float
+      :value: 0.3
+
+
+
+   .. py:attribute:: scale_of_noise
+      :type:  int
+      :value: 5
+
+
+
+   .. py:attribute:: normalize
+      :type:  ariel.utils.noise_gen.NormMethod
+      :value: 'none'
+
+
+
+   .. py:attribute:: crater_depth
+      :type:  float
+      :value: 1.0
+
+
+
+   .. py:attribute:: crater_radius
+      :type:  float
+      :value: 0.3
+
+
+
+   .. py:attribute:: load_precompiled
+      :type:  bool
+      :value: True
+
+
+
+   .. py:method:: __post_init__() -> None
+
+
+.. py:class:: RuggedTerrainWorld(name: str | None = None, floor_size: ariel.parameters.ariel_types.Dimension | None = None, floor_tilt: ariel.parameters.ariel_types.Rotation | None = None, floor_rot_sequence: str | None = None, dims: tuple[int, int] | None = None, floor_heightmap: ariel.parameters.ariel_types.FloatArray | None = None, terrain_color: tuple[float, float, float, float] | None = None, *, checker_floor: bool | None = None, load_precompiled: bool = False)
+
+   Bases: :py:obj:`ariel.simulation.environments._compound_world.CompoundWorld`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.environments.RuggedTerrainWorld
+      :parts: 1
+
+
+   A rugged terrain world (CompoundWorld).
+
+
+   .. py:attribute:: name
+      :type:  str
+      :value: 'rugged-world'
+
+
+
+   .. py:attribute:: floor_size
+      :type:  ariel.parameters.ariel_types.Dimension
+      :value: (10, 10, 1)
+
+
+
+   .. py:attribute:: checker_floor
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: dims
+      :type:  tuple[int, int]
+      :value: (100, 100)
+
+
+
+   .. py:attribute:: scale_of_noise
+      :type:  int
+      :value: 4
+
+
+
+   .. py:attribute:: normalize
+      :type:  ariel.utils.noise_gen.NormMethod
+      :value: 'none'
+
+
+
+   .. py:attribute:: load_precompiled
+      :type:  bool
+      :value: True
+
+
+
+   .. py:method:: __post_init__() -> None
+
+
+.. py:class:: RuggedTiltedWorld(name: str | None = None, floor_size: ariel.parameters.ariel_types.Dimension | None = None, floor_tilt: ariel.parameters.ariel_types.Rotation | None = None, floor_rot_sequence: str | None = None, dims: tuple[int, int] | None = None, floor_heightmap: ariel.parameters.ariel_types.FloatArray | None = None, terrain_color: tuple[float, float, float, float] | None = None, *, checker_floor: bool | None = None, load_precompiled: bool = False)
+
+   Bases: :py:obj:`ariel.simulation.environments._compound_world.CompoundWorld`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.environments.RuggedTiltedWorld
+      :parts: 1
+
+
+   A combination of rugged and tilted world (CompoundWorld).
+
+
+   .. py:attribute:: name
+      :type:  str
+      :value: 'rugged-tilted-world'
+
+
+
+   .. py:attribute:: floor_size
+      :type:  ariel.parameters.ariel_types.Dimension
+      :value: (10, 10, 1)
+
+
+
+   .. py:attribute:: floor_tilt
+      :type:  ariel.parameters.ariel_types.Rotation
+      :value: (15, 0, 0)
+
+
+
+   .. py:attribute:: floor_rot_sequence
+      :type:  str
+      :value: 'XYZ'
+
+
+
+   .. py:attribute:: checker_floor
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: dims
+      :type:  tuple[int, int]
+      :value: (100, 100)
+
+
+
+   .. py:attribute:: scale_of_noise
+      :type:  int
+      :value: 4
+
+
+
+   .. py:attribute:: normalize
+      :type:  ariel.utils.noise_gen.NormMethod
+      :value: 'none'
+
+
+
+   .. py:attribute:: load_precompiled
+      :type:  bool
+      :value: True
+
+
+
+   .. py:method:: __post_init__() -> None
+
+
+.. py:class:: SimpleFlatWorld(name: str | None = None, mujoco_config: ariel.parameters.mujoco_params.MujocoConfig | None = None, *, load_precompiled: bool = True)
+
+   Bases: :py:obj:`ariel.simulation.environments._base_world.BaseWorld`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.environments.SimpleFlatWorld
+      :parts: 1
+
+
+   A flat world with a chequerboard floor.
+
+
+   .. py:attribute:: name
+      :type:  str
+      :value: 'simple-flat-world'
+
+
+
+   .. py:attribute:: floor_size
+      :type:  ariel.parameters.ariel_types.Dimension
+      :value: (10, 10, 1)
+
+
+
+   .. py:attribute:: checker_floor
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: load_precompiled
+      :type:  bool
+      :value: True
+
+
+
+   .. py:method:: __post_init__() -> None
+
+
+.. py:class:: SimpleTiltedWorld(name: str | None = None, mujoco_config: ariel.parameters.mujoco_params.MujocoConfig | None = None, *, load_precompiled: bool = True)
+
+   Bases: :py:obj:`ariel.simulation.environments._base_world.BaseWorld`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.environments.SimpleTiltedWorld
+      :parts: 1
+
+
+   Same as `SimpleFlatWorld` but tilted.
+
+
+   .. py:attribute:: name
+      :type:  str
+      :value: 'simple-tilted-world'
+
+
+
+   .. py:attribute:: floor_size
+      :type:  ariel.parameters.ariel_types.Dimension
+      :value: (10, 10, 1)
+
+
+
+   .. py:attribute:: floor_tilt
+      :type:  ariel.parameters.ariel_types.Rotation
+      :value: (15, 0, 0)
+
+
+
+   .. py:attribute:: floor_rot_sequence
+      :type:  str
+      :value: 'XYZ'
+
+
+
+   .. py:attribute:: checker_floor
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: load_precompiled
+      :type:  bool
+      :value: True
+
+
+
+   .. py:method:: __post_init__() -> None
+
+
