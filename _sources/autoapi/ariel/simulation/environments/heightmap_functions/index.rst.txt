@@ -1,0 +1,38 @@
+:py:mod:`heightmap_functions`
+===========================================================
+
+.. py:module:: ariel.simulation.environments.heightmap_functions
+
+.. autoapi-nested-parse::
+
+   Heightmap generation functions for simulation environments.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.heightmap_functions.flat_heightmap
+   ariel.simulation.environments.heightmap_functions.rugged_heightmap
+   ariel.simulation.environments.heightmap_functions.smooth_edges
+   ariel.simulation.environments.heightmap_functions.amphitheater_heightmap
+   ariel.simulation.environments.heightmap_functions.crater_heightmap
+
+
+
+.. py:function:: flat_heightmap(dims: tuple[int, int]) -> ariel.parameters.ariel_types.FloatArray
+
+.. py:function:: rugged_heightmap(dims: tuple[int, int], scale_of_noise: int, normalize: ariel.utils.noise_gen.NormMethod) -> ariel.parameters.ariel_types.FloatArray
+
+.. py:function:: smooth_edges(dims: tuple[int, int], edge_width: float) -> ariel.parameters.ariel_types.FloatArray
+
+.. py:function:: amphitheater_heightmap(dims: tuple[int, int], ring_inner_radius: float, ring_outer_radius: float, cone_height: float) -> ariel.parameters.ariel_types.FloatArray
+
+.. py:function:: crater_heightmap(dims: tuple[int, int], crater_depth: float, crater_radius: float) -> ariel.parameters.ariel_types.FloatArray
+
