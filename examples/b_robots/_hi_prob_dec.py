@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = Path(CWD / "__data__" / SCRIPT_NAME)
-DATA.mkdir(exist_ok=True)
+DATA.mkdir(exist_ok=True, parents=True)
 SEED = 42
 
 # Global functions
