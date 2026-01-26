@@ -59,7 +59,7 @@ class CompoundWorld(BaseWorld):
     ) -> None:
         """
         Initialize a CompoundWorld.
-        
+
         Parameters
         ----------
         name : str, optional

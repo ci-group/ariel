@@ -70,8 +70,8 @@ class OlympicArena(BaseWorld):
         2. Rugged terrain section (middle)
         3. Inclined terrain section (right)
 
-        The arena is surrounded by cliffs on all sides which force the robot to stay in bounds. 
-        The robot can fall off the terrain, which results to a "death". No specific 
+        The arena is surrounded by cliffs on all sides which force the robot to stay in bounds.
+        The robot can fall off the terrain, which results to a "death". No specific
 
         Parameters
         ----------

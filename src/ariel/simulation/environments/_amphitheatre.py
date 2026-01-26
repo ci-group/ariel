@@ -44,6 +44,10 @@ class AmphitheatreTerrainWorld(CompoundWorld):
     load_precompiled: bool = True
 
     def __post_init__(self) -> None:
+        """Post-initialization to set up the amphitheatre terrain world.
+        Combines an amphitheatre heightmap with a rugged heightmap and initializes
+        the CompoundWorld base class."""
+
         # Rugged part of heightmap
         rugged_part = rugged_heightmap(
             self.dims,
@@ -73,6 +77,3 @@ class AmphitheatreTerrainWorld(CompoundWorld):
             floor_heightmap=self.floor_heightmap,
             load_precompiled=self.load_precompiled,
         )
-        """Post-initialization to set up the amphitheatre terrain world.
-        Combines an amphitheatre heightmap with a rugged heightmap and initializes
-        the CompoundWorld base class."""
