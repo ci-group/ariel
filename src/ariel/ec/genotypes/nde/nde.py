@@ -137,7 +137,8 @@ class NeuralDevelopmentalEncoding(nn.Module):
         outputs: list[npt.NDArray[np.float32]] = []
         for idx, chromosome in enumerate(genotype):
             with torch.no_grad():  # double safety
-                x = torch.from_numpy(chromosome).to(torch.float32)
+                np_chromosome = np.array(chromosome)
+                x = torch.from_numpy(np_chromosome).to(torch.float32)
 
                 x = self.fc1(x)
                 x = self.relu(x)
