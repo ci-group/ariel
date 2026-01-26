@@ -105,6 +105,45 @@ class BaseWorld:
         spec.visual.global_.offheight = self.mujoco_config.offheight
         spec.visual.global_.offwidth = self.mujoco_config.offwidth
 
+        # Headlight: diffuse, ambient, specular
+        spec.visual.headlight.diffuse = [0.6, 0.6, 0.6]
+        spec.visual.headlight.ambient = [0.1, 0.1, 0.1]
+        spec.visual.headlight.specular = [0.9, 0.9, 0.9]
+
+        # RGBA and Global
+        spec.visual.rgba.force = [1, 0, 0, 1]
+        spec.visual.rgba.haze = [0.15, 0.25, 0.35, 1]
+        spec.visual.global_.azimuth = 140
+        spec.visual.global_.elevation = -20
+
+        # Map and Scale
+        spec.visual.map.force = 0.01
+        spec.visual.scale.forcewidth = 0.3
+        spec.visual.scale.contactwidth = 0.5
+        spec.visual.scale.contactheight = 0.2
+
+        # Quality
+        spec.visual.quality.shadowsize = 8192
+
+        # --- Assets ---
+        # Skybox Texture
+        spec.add_texture(
+            type=mj.mjtTexture.mjTEXTURE_SKYBOX,
+            builtin=mj.mjtBuiltin.mjBUILTIN_GRADIENT,
+            rgb1=[
+                61 / 255,
+                163 / 255,
+                179 / 255,
+            ],
+            rgb2=[
+                82 / 255,
+                57 / 255,
+                153 / 255,
+            ],
+            width=512,
+            height=3072,
+        )
+
         # Add a default light source
         spec.worldbody.add_light(
             name="light",
@@ -121,6 +160,14 @@ class BaseWorld:
             xyaxes=[0, -1, 0, 0.75, 0, 0.75],
             fovy=5,
         )
+
+        spec.worldbody.add_camera(
+            name="pretty-cam",
+            orthographic=False,
+            pos=[-0.015, -3.003, 1.765],
+            xyaxes=[1.000, -0.005, -0.000, 0.002, 0.507, 0.862],
+            fovy=45,
+        )
         return spec
 
     def _find_lowest_position(
@@ -133,7 +180,7 @@ class BaseWorld:
         ----------
         spawn_name : str
             Prefix name of the spawned robot to identify its geometries.
-        
+
         Returns
         -------
             float
@@ -239,8 +286,8 @@ class BaseWorld:
         """
         Check and correct the spawn position to avoid collisions with the floor.
 
-        
-        Parameters        
+
+        Parameters
         ----------
         spawn_site : mj.MjsBody
             The site where the robot is spawned.
@@ -309,7 +356,7 @@ class BaseWorld:
     ) -> mj.MjSpec:
         """
         Spawn a robot into the world at a specified position and orientation.
-        
+
         Parameters
         ----------
         robot_spec : mj.MjSpec
@@ -326,7 +373,7 @@ class BaseWorld:
             Whether to validate the spawn position for collisions after adjustment, by default False
         rotation_sequence : str, optional
             The sequence of axes for Euler to quaternion conversion, by default "XYZ"
-        
+
         Returns
         -------
             mj.MjSpec

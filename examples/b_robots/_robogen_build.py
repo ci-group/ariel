@@ -161,10 +161,9 @@ def run(
     with_viewer: bool = False,
 ) -> None:
     """Entry point."""
-    # MuJoCo configuration
-    viz_options = mujoco.MjvOption()  # visualization of various elements
-
-    # Visualization of the corresponding model or decoration element
+    # MuJoCo visualisation configuration
+    viz_options = mujoco.MjvOption()
+    viz_options.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = True
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = True
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = True
