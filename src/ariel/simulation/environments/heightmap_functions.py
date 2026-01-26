@@ -36,31 +36,53 @@ def rugged_heightmap(
     )
 
 
-def smooth_edges(
+def smooth_edges_heightmap(
     dims: tuple[int, int],
     edge_width: float,
 ) -> FloatArray:
-    # --- Smooth edge mask (0 at borders -> 1 inside) --- #
-    nrow, ncol = dims
-
-    # Create normalized coordinate grid in [0, 1]
-    y, x = np.mgrid[0:nrow, 0:ncol].astype(ND_FLOAT_PRECISION)
-    x /= max(ncol - 1, 1)
-    y /= max(nrow - 1, 1)
+    # Generate square grid for processing
+    size = np.max(dims)
+    y, x = np.mgrid[0:size, 0:size].astype(ND_FLOAT_PRECISION)
+    x /= size
+    y /= size
 
     # Distance to the nearest border (0 at border, up to 0.5 in center)
-    dist_to_border = np.minimum(np.minimum(x, 1.0 - x), np.minimum(y, 1.0 - y))
+    # Using 1-D projections to calculate the boundary distance
+    dist_to_border = np.minimum(
+        np.minimum(x, 1.0 - x), np.minimum(y, 1.0 - y)
+    ).astype(ND_FLOAT_PRECISION)
 
-    # If edge_width <= 0, treat as hard edge (1 inside, 0 at border)
-    if edge_width <= 0.0:
+    # Unpack parameters
+    w = edge_width
+
+    # Define normalized transition value 't'
+    # If edge_width <= 0: hard step at border
+    # If edge_width > 0: linear ramp from 0 to 1 over width w
+    if w <= 0.0:
         t = (dist_to_border > 0.0).astype(ND_FLOAT_PRECISION)
     else:
-        # edge_width is expected as fraction of the smaller dimension (0..0.5).
-        t = np.clip(dist_to_border / float(edge_width), 0.0, 1.0).astype(
-            ND_FLOAT_PRECISION,
+        t = np.piecewise(
+            dist_to_border,
+            [
+                dist_to_border <= 0.0,
+                (dist_to_border > 0.0) & (dist_to_border < w),
+                dist_to_border >= w,
+            ],
+            [0.0, lambda d: d / w, 1.0],
         )
-    # Smoothstep for a soft transition
-    return t * t * (3.0 - 2.0 * t)
+
+    # Smoothstep interpolation: 3t^2 - 2t^3
+    mask = (t * t * (3.0 - 2.0 * t)).astype(ND_FLOAT_PRECISION)
+
+    # Downsample/resize if the requested dims are not square
+    if dims[0] != dims[1]:
+        mask = cv2.resize(
+            mask,
+            dsize=(dims[1], dims[0]),
+            interpolation=cv2.INTER_CUBIC,
+        )
+
+    return mask.astype(ND_FLOAT_PRECISION)
 
 
 def amphitheater_heightmap(

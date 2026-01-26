@@ -9,7 +9,7 @@ from ariel.parameters.ariel_types import Dimension, Rotation
 from ariel.simulation.environments._compound_world import CompoundWorld
 from ariel.simulation.environments.heightmap_functions import (
     rugged_heightmap,
-    smooth_edges,
+    smooth_edges_heightmap,
 )
 from ariel.utils.noise_gen import NormMethod
 
@@ -40,7 +40,10 @@ class RuggedTiltedWorld(CompoundWorld):
             self.scale_of_noise,
             self.normalize,
         )
-        self.floor_heightmap *= smooth_edges(self.dims, edge_width=0.2)
+        self.floor_heightmap *= smooth_edges_heightmap(
+            self.dims,
+            edge_width=0.2,
+        )
 
         # Initialize base class
         super().__init__(
