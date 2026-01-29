@@ -30,7 +30,7 @@ from evotorch.neuroevolution import NEProblem
 
 # Local libraries
 from ariel.simulation.environments import SimpleFlatWorld
-from new_bodies import body_spider45
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import body_spider45
 from ariel.utils.tracker import Tracker
 from ariel.utils.renderers import VideoRecorder, video_renderer
 
