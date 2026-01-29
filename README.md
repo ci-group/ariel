@@ -15,11 +15,15 @@
 * [vscode containers tut](https://code.visualstudio.com/docs/devcontainers/tutorial)
 
 --- -->
+
+## Documentation
+[ARIEL main documentation page](https://ci-group.github.io/ariel/)
+
 ## Installation and Running
 
 This project uses [uv](https://docs.astral.sh/uv/).
 
-To run the code examples please do
+To run the code examples, please do
 
 ```bash
 uv venv
