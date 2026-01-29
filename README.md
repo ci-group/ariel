@@ -38,7 +38,7 @@ uv sync
 ```
 5. Run an example, in this case, brain evolution (aka learning) using:
 ```bash
-uv run examples/re_book/1_brain_evolution.py.py
+uv run examples/re_book/1_brain_evolution.py
 ```
 
 <!-- ## TODO: Installation
