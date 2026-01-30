@@ -1,0 +1,53 @@
+:py:mod:`runners`
+=============================
+
+.. py:module:: ariel.utils.runners
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.runners.simple_runner
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.runners.SEED
+   ariel.utils.runners.RNG
+
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: RNG
+
+.. py:function:: simple_runner(model: mujoco.MjModel, data: mujoco.MjData, duration: float = 10.0, steps_per_loop: int = 100) -> None
+
+   Run a simple headless simulation for a given duration.
+
+   :param model: The MuJoCo model to simulate.
+   :type model: :class:`mujoco.MjModel`
+   :param data: The MuJoCo data to simulate.
+   :type data: :class:`mujoco.MjData`
+   :param duration: The duration of the simulation in seconds, by default 10.0
+   :type duration: :class:`float`, *optional*
+   :param steps_per_loop: The number of simulation steps to take in each loop, by default 100
+   :type steps_per_loop: :class:`int`, *optional*
+
+

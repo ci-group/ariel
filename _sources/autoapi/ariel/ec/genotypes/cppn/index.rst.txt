@@ -1,0 +1,15 @@
+:py:mod:`cppn`
+=================================
+
+.. py:module:: ariel.ec.genotypes.cppn
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   cppn_decoding/index.rst
+
+

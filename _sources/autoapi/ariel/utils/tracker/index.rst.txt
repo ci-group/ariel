@@ -1,0 +1,68 @@
+:py:mod:`tracker`
+=============================
+
+.. py:module:: ariel.utils.tracker
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.tracker.Tracker
+
+
+
+
+.. py:class:: Tracker(mujoco_obj_to_find: mujoco.mjtObj | None = None, name_to_bind: str | None = None, observable_attributes: list[str] | None = None)
+
+   .. py:attribute:: mujoco_obj_to_find
+      :value: None
+
+
+
+   .. py:attribute:: name_to_bind
+      :value: None
+
+
+
+   .. py:attribute:: observable_attributes
+      :value: None
+
+
+
+   .. py:attribute:: history
+      :type:  dict[str, dict[int, list[Any]]]
+
+
+   .. py:method:: setup(world: mujoco.MjSpec, data: mujoco.MjData) -> None
+
+      Setup the tracker by finding and binding the specified MuJoCo objects.
+
+      :param world: The MuJoCo model specification to search for objects.
+      :type world: :class:`mj.MjSpec`
+      :param data: The MuJoCo data to bind the found objects.
+      :type data: :class:`mj.MjData`
+
+
+
+   .. py:method:: update(data: mujoco.MjData) -> None
+
+      Update the history of tracked attributes for each bound object.
+
+
+
+   .. py:method:: reset() -> None
+
+      Reset the history of tracked attributes.
+
+
+

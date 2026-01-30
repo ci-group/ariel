@@ -1,0 +1,69 @@
+:py:mod:`controller`
+=================================================
+
+.. py:module:: ariel.simulation.controllers.controller
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.controller.Controller
+
+
+
+
+.. py:class:: Controller
+
+   .. py:attribute:: controller_callback_function
+      :type:  collections.abc.Callable[Ellipsis, Any]
+
+
+   .. py:attribute:: time_steps_per_ctrl_step
+      :type:  int
+      :value: 50
+
+
+
+   .. py:attribute:: time_steps_per_save
+      :type:  int
+      :value: 500
+
+
+
+   .. py:attribute:: alpha
+      :type:  float
+      :value: 0.5
+
+
+
+   .. py:attribute:: tracker
+      :type:  ariel.utils.tracker.Tracker
+
+
+   .. py:method:: set_control(model: mujoco.MjModel, data: mujoco.MjData, *args: Any | None, **kwargs: dict[Any, Any] | None) -> None
+
+      Sets the controller callback function and gives additional arguments.
+
+      :param model: The Mujoco model of the simulation. This will be used to access
+                    model parameters, such as the number of actuators.
+      :type model: :class:`mj.MjModel`
+      :param data: The Mujoco data of the simulation. This will be used to access
+                   simulation variables, such as the current time and control values.
+      :type data: :class:`mj.MjData`
+      :param \*args: Additional arguments to pass to the controller callback function.
+      :type \*args: :class:`Any`
+      :param \*\*kwargs: Additional keyword arguments to pass to the controller callback function.
+      :type \*\*kwargs: :class:`dict[Any`, :class:`Any]`
+
+
+

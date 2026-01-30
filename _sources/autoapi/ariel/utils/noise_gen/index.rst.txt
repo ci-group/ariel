@@ -1,0 +1,85 @@
+:py:mod:`noise_gen`
+===============================
+
+.. py:module:: ariel.utils.noise_gen
+
+.. autoapi-nested-parse::
+
+   Module for generating Perlin noise using NumPy.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.noise_gen.PerlinNoise
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.noise_gen.NormMethod
+
+
+.. py:type:: NormMethod
+   :canonical: Literal['linear', 'clip', 'none']
+
+
+.. py:class:: PerlinNoise
+
+   Vectorized Perlin noise (2D) using NumPy only.
+
+   .. admonition:: Examples
+
+      >>> noise = PerlinNoise(seed=1234)
+      >>> width, height = 256, 256
+      >>> scale = 50.0
+      >>> grid = noise.as_grid(width, height, scale=scale, normalize=True)
+
+
+   .. py:attribute:: seed
+      :type:  int | None
+      :value: None
+
+
+
+   .. py:attribute:: norm_methods
+      :type:  NormMethod
+      :value: 'linear'
+
+
+
+   .. py:method:: __post_init__() -> None
+
+      Initialize the Perlin noise generator.
+
+
+
+   .. py:method:: as_grid(width: int, height: int, scale: float = 64.0, normalize: NormMethod = 'none') -> ariel.parameters.ariel_types.FloatArray
+
+      Generate a 2D grid of Perlin noise.
+
+      :param width: Width of the output grid in pixels.
+      :param height: Height of the output grid in pixels.
+      :param scale: Scale factor for the noise frequency. Larger values result in
+                    smoother noise.
+      :param normalize: Normalization method for the output values:
+                        - "linear": Scale to [0, 1] linearly.
+                        - "clip": Clip values to [0, 1].
+                        - "none": No normalization.
+
+      :rtype: :class:`2D array` of :class:`shape (height`, :class:`width) with Perlin noise values.`
+
+      :raises ValueError: If width, height, or scale are not positive.
+
+
+
