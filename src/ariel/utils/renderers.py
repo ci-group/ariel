@@ -191,7 +191,7 @@ def video_renderer(
     # Exit (and save locally) the generated video
     msg = "Finish video rendering"
     num_frames = video_recorder.frame_count
-    log.info(f"--> {msg}: {num_frames=}")
+    log.debug(f"--> {msg}: {num_frames=}")
     video_recorder.release()
 
 
