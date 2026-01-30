@@ -113,7 +113,7 @@ class PerlinNoise:
     ) -> FloatArray:
         """
         Generate a 2D grid of Perlin noise.
-        
+
         Parameters
         ----------
         width
@@ -128,11 +128,11 @@ class PerlinNoise:
             - "linear": Scale to [0, 1] linearly.
             - "clip": Clip values to [0, 1].
             - "none": No normalization.
-       
+
         Returns
         -------
             2D array of shape (height, width) with Perlin noise values.
-        
+
         Raises
         ------
         ValueError

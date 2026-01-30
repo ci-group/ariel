@@ -73,7 +73,7 @@ class SimpleFlatWorldWithTarget(BaseWorld):
             pos=[0, 0, 0],
         )
         floor.add_geom(**self._floor_kwargs)
-        
+
         # Add a target marker cube (for visual feedback)
         target_body = self.spec.worldbody.add_body(
             name="target_marker",

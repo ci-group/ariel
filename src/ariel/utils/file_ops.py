@@ -33,7 +33,7 @@ def generate_save_path(
     Generate a unique file path for saving files.
     The function generates a file path based on the provided parameters.
     If `file_name` is not provided, a timestamp-based name is generated.
-    
+
     Parameters
     ----------
     file_name
@@ -44,12 +44,12 @@ def generate_save_path(
         The file extension (e.g., '.txt', '.csv'). If None, attempts to infer from `file_name` or `file_path`.
     append_date
         Whether to append the current date and time to the file name for uniqueness.
-    
-    Returns 
+
+    Returns
     -------
     Path
         The generated file path.
-    
+
     Raises
     ------
     ValueError

@@ -8,7 +8,7 @@ from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
 def spider() -> CoreModule:
     """Spider robot body.
-    
+
     Body Description
     ---------
     The spider body consists of a core module, 4 legs. Each leg constains two hinges,
@@ -32,7 +32,7 @@ def spider() -> CoreModule:
     l1_2 = HingeModule(
         index=2,
     )
-    l1_2.rotate(90) # Vertical (Pitch)
+    l1_2.rotate(90)  # Vertical (Pitch)
 
     l1_3 = BrickModule(
         index=3,
@@ -47,7 +47,7 @@ def spider() -> CoreModule:
     l2_2 = HingeModule(
         index=5,
     )
-    l2_2.rotate(90) # Vertical (Pitch) 
+    l2_2.rotate(90)  # Vertical (Pitch)
 
     l2_3 = BrickModule(
         index=6,
@@ -62,7 +62,7 @@ def spider() -> CoreModule:
     l3_2 = HingeModule(
         index=8,
     )
-    l3_2.rotate(90) # Vertical (Pitch)
+    l3_2.rotate(90)  # Vertical (Pitch)
 
     l3_3 = BrickModule(
         index=9,
@@ -77,7 +77,7 @@ def spider() -> CoreModule:
     l4_2 = HingeModule(
         index=11,
     )
-    l4_2.rotate(90) # Vertical (Pitch)
+    l4_2.rotate(90)  # Vertical (Pitch)
 
     l4_3 = BrickModule(
         index=12,

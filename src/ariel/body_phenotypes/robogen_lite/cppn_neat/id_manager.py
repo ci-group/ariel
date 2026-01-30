@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from typing import Dict, Union, Optional
+from typing import Dict, Optional, Union
+
 
 class IdManager:
     """
@@ -11,10 +12,12 @@ class IdManager:
     2. In-Memory Mode: Initializes with specified starting IDs, useful for tests.
     """
 
-    def __init__(self,
-                 save_path: Union[str, Path] = "id_state.json",
-                 node_start: Optional[int] = None,
-                 innov_start: Optional[int] = None):
+    def __init__(
+        self,
+        save_path: Union[str, Path] = "id_state.json",
+        node_start: Optional[int] = None,
+        innov_start: Optional[int] = None,
+    ):
         """
         Initializes the IdManager.
 
@@ -56,18 +59,16 @@ class IdManager:
         """
         # Node IDs are 0-indexed. The last used ID is total_nodes - 1.
         self._node_id = num_inputs + num_outputs - 1
-        
+
         # Innovation IDs start after initial connections. Last used ID is total_conns - 1.
         self._innov_id = (num_inputs * num_outputs) - 1
-        print(f"IdManager initialized: Next Node ID starts at {self._node_id + 1}, Next Innov ID starts at {self._innov_id + 1}.")
-
+        print(
+            f"IdManager initialized: Next Node ID starts at {self._node_id + 1}, Next Innov ID starts at {self._innov_id + 1}."
+        )
 
     def save(self):
         """Saves the current ID counters to the specified JSON file."""
-        state = {
-            "next_node_id": self._node_id,
-            "next_innov_id": self._innov_id
-        }
+        state = {"next_node_id": self._node_id, "next_innov_id": self._innov_id}
         try:
             with self.save_path.open("w") as f:
                 json.dump(state, f, indent=4)
