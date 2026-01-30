@@ -11,13 +11,14 @@
                 "run",
                 "${file}"
             ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true,
-                "presentation": {
-                    "reveal": "always",
-                    "panel": "new"
-                }
             },
         },
         {
