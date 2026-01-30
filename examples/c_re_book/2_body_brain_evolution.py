@@ -111,8 +111,6 @@ DATA.mkdir(exist_ok=True, parents=True)
 # ============================================================================ #
 #                            EVOLUTION CLASS                                   #
 # ============================================================================ #
-
-
 class Evolution:
     def __init__(self) -> None:
         self.id_manager = IdManager(
@@ -130,7 +128,6 @@ class Evolution:
     # ------------------------------------------------------------------------ #
     #                          HELPER METHODS                                  #
     # ------------------------------------------------------------------------ #
-
     def map_genotype_to_body(
         self, genome_data: dict | Genome
     ) -> mujoco.MjSpec | None:
@@ -245,7 +242,6 @@ class Evolution:
     # ------------------------------------------------------------------------ #
     #                          EA OPERATORS                                    #
     # ------------------------------------------------------------------------ #
-
     def create_individual(self) -> Individual:
         """Initialization: Ensures valid physical body."""
         while True:
@@ -446,7 +442,6 @@ class Evolution:
     # ------------------------------------------------------------------------ #
     #                          SIMULATION RUNNER                               #
     # ------------------------------------------------------------------------ #
-
     def run_simulation(self, mode: ViewerTypes, ind: Individual) -> float:
         """
         Builds phenotype and runs simulation.
@@ -574,7 +569,6 @@ class Evolution:
     # ------------------------------------------------------------------------ #
     #                          MAIN LOOP                                       #
     # ------------------------------------------------------------------------ #
-
     def evolve(self) -> Individual | None:
         console.log("Initializing population...")
         population = [self.create_individual() for _ in range(POP_SIZE)]
