@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 import mujoco as mj
 import nevergrad as ng
 import numpy as np
+import torch
 from mujoco import viewer
 from rich.console import Console
 from rich.traceback import install
@@ -23,6 +24,11 @@ from rich.traceback import install
 from ariel import console
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
+)
+from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
+from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
+from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
+    MorphologyDecoderBestFirst,
 )
 from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
     HighProbabilityDecoder,
@@ -37,6 +43,7 @@ from ariel.ec.genotypes.nde import NeuralDevelopmentalEncoding
 from ariel.simulation.controllers import NaCPG
 from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.na_cpg import create_fully_connected_adjacency
+from ariel.simulation.controllers.simple_cpg import SimpleCPG
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.renderers import single_frame_renderer, video_renderer
 from ariel.utils.runners import simple_runner
@@ -70,10 +77,7 @@ install()
 console = Console(width=120)
 RNG = np.random.default_rng(SEED)
 config = EASettings()
-
-
-# Same folder imports
-from plot_function import show_xpos_history
+ID_MANAGER = IdManager(node_start=6 + 13 - 1, innov_start=(6 * 13) - 1)
 
 
 # ------------------------------------------------------------------------ #
@@ -165,11 +169,13 @@ def learning(population: Population) -> Population:
     return population
 
 
-def evaluate(population: Population) -> Population:
+def evaluate(
+    population: Population, mode: ViewerTypes = "simple"
+) -> Population:
     for ind in population:
         if ind.requires_eval:
             robot = genotype_to_phenotype(ind)
-            ind.fitness = evaluate_robot(robot)
+            ind.fitness = evaluate_robot(robot, mode=mode)
     return population
 
 
@@ -203,6 +209,13 @@ def learning_robot(
     del model, data
 
     # Setup Nevergrad optimizer
+    # params = ng.p.Instrumentation(
+    #     phase=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-np.pi, np.pi),
+    #     w=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-0.2, 4.0),
+    #     amplitudes=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-0.5, 4.0),
+    #     ha=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-2.0, 2.0),
+    #     b=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-0.5, 0.5),
+    # )
     params = ng.p.Instrumentation(
         phase=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
             -2 * np.pi,
@@ -216,7 +229,6 @@ def learning_robot(
         ha=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-10, 10),
         b=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-100, 100),
     )
-
     optim = ng.optimizers.PSO
     optimizer = optim(
         parametrization=params,
@@ -358,19 +370,26 @@ def evaluate_robot(
     # -------------------------------------------------------------- #
     # CONTROLLER
     # -------------------------------------------------------------- #
-    # Setup the NaCPG controller
+    # Load robot model
     mj.set_mjcb_control(None)  # DO NOT REMOVE
     model = robot.spec.compile()
     data = mj.MjData(model)
-    adj_dict = create_fully_connected_adjacency(len(data.ctrl.copy()))
+    num_of_joints = model.nu
     del model, data
-    na_cpg_mat = NaCPG(adj_dict, angle_tracking=True)
+
+    # SimpleCPG setup
+    adj_dict = create_fully_connected_adjacency(num_of_joints)
+    cpg = SimpleCPG(adj_dict)
+
     if brain is not None:
-        na_cpg_mat.set_param_with_dict(brain)
+        # Map flat parameters to SimpleCPG tensors
+        with torch.no_grad():
+            for key, val in brain.items():
+                getattr(cpg, key).data.copy_(torch.from_numpy(val).float())
 
     # Simulate the robot
     ctrl = Controller(
-        controller_callback_function=lambda _, d: na_cpg_mat.forward(d.time),
+        controller_callback_function=lambda _, d: cpg.forward(d.time),
         tracker=tracker,
     )
 
@@ -384,40 +403,28 @@ def evaluate_robot(
 
 
 def genotype_to_phenotype(individual: Individual) -> CoreModule:
-    # Genotype
-    nde = NeuralDevelopmentalEncoding(number_of_modules=NUM_OF_MODULES)
-    p_matrices = nde.forward(individual.genotype)
-
-    # Decode the high-probability graph
-    hpd = HighProbabilityDecoder(NUM_OF_MODULES)
-    robot_graph: DiGraph[Any] = hpd.probability_matrices_to_graph(
-        p_matrices[0],
-        p_matrices[1],
-        p_matrices[2],
+    """Decode CPPN genome into a MuJoCo robot spec."""
+    genome = Genome.from_dict(individual.genotype["morph"])
+    decoder = MorphologyDecoderBestFirst(
+        cppn_genome=genome, max_modules=NUM_OF_MODULES
     )
-
-    # Construct the robot from the graph
+    robot_graph = decoder.decode()
     return construct_mjspec_from_graph(robot_graph)
 
 
 def create_individual() -> Individual:
+    """Initialize individual with CPPN morphology and flat controller vector."""
+    genome = Genome.random(
+        num_inputs=6,
+        num_outputs=13,
+        next_node_id=ID_MANAGER.get_next_node_id(),
+        next_innov_id=ID_MANAGER.get_next_innov_id(),
+    )
     ind = Individual()
-    scale = 8192
-    genotype_size = 64
-    type_p_genes = RNG.uniform(-scale, scale, genotype_size).astype(
-        np.float32,
-    )
-    conn_p_genes = RNG.uniform(-scale, scale, genotype_size).astype(
-        np.float32,
-    )
-    rot_p_genes = RNG.uniform(-scale, scale, genotype_size).astype(
-        np.float32,
-    )
-    ind.genotype = [
-        type_p_genes.tolist(),
-        conn_p_genes.tolist(),
-        rot_p_genes.tolist(),
-    ]
+    ind.genotype = {
+        "morph": genome.to_dict(),
+        "ctrl": RNG.uniform(-1.0, 1.0, size=150).tolist(),  # Default size
+    }
     return ind
 
 
@@ -427,7 +434,9 @@ def main() -> None:
     pop_size = 10
     n_gens = 100
     population_list = [create_individual() for _ in range(pop_size)]
-    population_list = evaluate(population_list)
+    # population_list = evaluate(population_list, mode="launcher")
+    population_list = learning(population_list)
+    exit()
 
     # Create EA steps
     ops = [
