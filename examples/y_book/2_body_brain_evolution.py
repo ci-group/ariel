@@ -188,23 +188,22 @@ class Evolution:
         mask = RNG.random(size) < 0.5
         child = np.where(mask, arr1, arr2)
         return child.tolist()
+    
+    def crossover_morphologies(self, parent1: Individual, parent2: Individual) -> Genome:
+        """Crossover two parent individual morphologies using NEAT crossover."""
+        # Convert dictionaries to Genome objects
+        morph1 = Genome.from_dict(parent1.genotype['morph'])
+        morph2 = Genome.from_dict(parent2.genotype['morph'])
+        
+        # Set fitness values so NEAT crossover knows which parent is fitter
+        morph1.fitness = parent1.fitness if parent1.fitness is not None else float('inf')
+        morph2.fitness = parent2.fitness if parent2.fitness is not None else float('inf')
 
-    def crossover_morphologies(self, morph1: Genome, morph2: Genome) -> Genome:
-        """Simple morphology crossover: randomly select connections from each parent."""
-        # Create a new genome based on parent 1
-        child = morph1.copy()
+        # Use the proper NEAT crossover
+        # This handles weights AND structural changes (topology)
+        child_genome = morph1.crossover(morph2)
         
-        # Randomly replace some connections with parent 2's connections
-        try:
-            for conn in child.connections:
-                if RNG.random() < 0.5 and morph2.connections:
-                    # Randomly pick a connection from parent 2
-                    p2_conn = random.choice(morph2.connections)
-                    conn.weight = p2_conn.weight
-        except:
-            pass  # If crossover fails, just use child as-is
-        
-        return child
+        return child_genome
 
     # ------------------------------------------------------------------------ #
     #                          EA OPERATORS                                    #
@@ -256,11 +255,9 @@ class Evolution:
             if use_sexual:
                 # Select two parents for crossover
                 p1, p2 = random.sample(parents, 2)
-                p1_morph = Genome.from_dict(p1.genotype['morph'])
-                p2_morph = Genome.from_dict(p2.genotype['morph'])
                 
-                # Crossover morphologies
-                c_morph = self.crossover_morphologies(p1_morph, p2_morph)
+                # Crossover morphologies (method handles Genome conversion)
+                c_morph = self.crossover_morphologies(p1, p2)
                 
                 # Crossover brain vectors
                 c_ctrl = self.crossover_ctrl_vectors(p1.genotype['ctrl'], p2.genotype['ctrl'])
