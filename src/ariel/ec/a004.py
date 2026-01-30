@@ -16,7 +16,14 @@ from typing import Literal, cast
 import numpy as np
 from pydantic_settings import BaseSettings
 from rich.console import Console
-from rich.progress import track
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+    track,
+)
 from rich.traceback import install
 from sqlalchemy import create_engine
 from sqlmodel import Session, SQLModel, col, select
@@ -271,11 +278,30 @@ class EA(AbstractEA):
         self.commit_population()
 
     def run(self) -> None:
-        for _ in track(
-            range(self.num_of_generations),
-            description="Running EA:",
-        ):
-            self.step()
+        with Progress(
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            TimeRemainingColumn(),
+            # TextColumn("{task.fields[fitness_info]}"),
+            console=console,
+        ) as progress:
+            task_id = progress.add_task(
+                "Running EA::",
+                total=self.num_of_generations,
+                # fitness_info="",
+            )
+
+            for _ in range(self.num_of_generations):
+                self.step()
+
+                # Update counter and custom loss text
+                progress.update(
+                    task_id,
+                    advance=1,
+                    # fitness_info=f"| Current: {fitness:.4f} | Best: {best_fitness:.4f}",
+                )
+
         self.console.rule("[green]EA Finished Running")
 
 
