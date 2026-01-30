@@ -6,7 +6,9 @@ Notes
 """
 
 # Standard library
+import datetime
 import random
+import shutil
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, cast
@@ -18,6 +20,13 @@ import numpy as np
 import torch
 from mujoco import viewer
 from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+)
 from rich.traceback import install
 
 # Local libraries
@@ -61,111 +70,190 @@ type PopulationFunc = Callable[[Population], Population]
 # --- DATA SETUP --- #
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
-DATA = CWD / "__data__"
+DATA = CWD / "__data__" / SCRIPT_NAME
+shutil.rmtree(DATA)
 DATA.mkdir(exist_ok=True)
-
+VIDEOS = DATA / "videos"
+VIDEOS.mkdir(exist_ok=True)
 
 # Global constants
 SEED = 42
 DB_HANDLING_MODES = Literal["delete", "halt"]
-SPAWN_POS = [-0.8, 0, 0]
-NUM_OF_MODULES = 30
-TARGET_POSITION = [5, 0, 0.5]
 
-# Global functions
+# Global structures
 install()
 console = Console(width=120)
 RNG = np.random.default_rng(SEED)
 config = EASettings()
 ID_MANAGER = IdManager(node_start=6 + 13 - 1, innov_start=(6 * 13) - 1)
 
+# --- Overal Params ---
+# Robot
+NUM_OF_MODULES = 10
+SPAWN_POS = (-0.8, 0.0, 0.1)
+TARGET_POSITION = np.array([2.0, 0.0, 0.5])
+
+# EA
+POPULATION_SIZE = 80
+GENERATIONS = 80
+SIMULATION_DURATION = 30
+LEARNING_BUDGET = 80
+LEARNING_ALGORITHM = ng.optimizers.PSO
+
 
 # ------------------------------------------------------------------------ #
 # POPULATION OPS
 # ------------------------------------------------------------------------ #
-def parent_selection(population: Population) -> Population:
-    random.shuffle(population)
-    for idx in range(0, len(population) - 1, 2):
-        ind_i = population[idx]
-        ind_j = population[idx + 1]
+def parent_selection(population: list[Individual]) -> list[Individual]:
+    """
+    Perform truncation parent selection by tagging the top 50% of individuals.
 
-        # Compare fitness values
-        if ind_i.fitness > ind_j.fitness and config.is_maximisation:
-            ind_i.tags = {"ps": True}
-            ind_j.tags = {"ps": False}
-        else:
-            ind_i.tags = {"ps": False}
-            ind_j.tags = {"ps": True}
+    Parameters
+    ----------
+    population : list[Individual]
+        The current population to be tagged.
+
+    Returns
+    -------
+    list[Individual]
+        The population with updated 'ps' tags.
+    """
+    # Sort descending: higher fitness (closer to 0) is better
+    population.sort(key=lambda x: x.fitness, reverse=True)
+
+    cutoff = len(population) // 2
+    for i, ind in enumerate(population):
+        ind.tags["ps"] = i < cutoff
+
     return population
 
 
 def crossover(population: Population) -> Population:
+    """
+    Perform joint crossover on morphology (CPPN) and control (vector).
+
+    Parameters
+    ----------
+    population : Population
+        The current population containing selected parents.
+
+    Returns
+    -------
+    Population
+        The population expanded with new offspring.
+    """
     parents = [ind for ind in population if ind.tags.get("ps", False)]
-    for idx in range(0, len(parents), 2):
-        parent_i = parents[idx]
-        parent_j = parents[idx]
-        genotype_i, genotype_j = Crossover.one_point(
-            cast("list[int]", parent_i.genotype),
-            cast("list[int]", parent_j.genotype),
-        )
+    if len(parents) < 2:
+        return population
 
-        # First child
-        child_i = Individual()
-        child_i.genotype = genotype_i
-        child_i.tags = {"mut": True}
-        child_i.requires_eval = True
+    for idx in range(0, len(parents) - 1, 2):
+        p1, p2 = parents[idx], parents[idx + 1]
 
-        # Second child
-        child_j = Individual()
-        child_j.genotype = genotype_j
-        child_j.tags = {"mut": True}
-        child_j.requires_eval = True
+        # 1. Morphology Crossover (CPPN)
+        m1 = Genome.from_dict(p1.genotype["morph"])
+        m2 = Genome.from_dict(p2.genotype["morph"])
+        child_morph = m1.copy()
+        # Randomly replace some connections with parent 2's connections
+        try:
+            for conn in child_morph.connections:
+                if RNG.random() < 0.5 and len(m2.connections) > 0:
+                    p2_conn = random.choice(m2.connections)
+                    conn.weight = p2_conn.weight
+        except:
+            # If crossover fails, just use child as-is
+            pass
 
-        population.extend([child_i, child_j])
+        # 2. Control Crossover (Uniform)
+        c1, c2 = np.array(p1.genotype["ctrl"]), np.array(p2.genotype["ctrl"])
+        mask = RNG.random(len(c1)) < 0.5
+        child_ctrl = np.where(mask, c1, c2).tolist()
+
+        # Instantiate offspring
+        child = Individual()
+        child.genotype = {"morph": child_morph.to_dict(), "ctrl": child_ctrl}
+        child.tags = {"mut": True, "requires_lr": True}
+        child.requires_eval = True
+        population.append(child)
+
     return population
 
 
 def mutation(population: Population) -> Population:
+    """
+    Apply morphology mutations and Gaussian creep to control vectors.
+
+    Parameters
+    ----------
+    population : Population
+        The current population containing potential mutants.
+
+    Returns
+    -------
+    Population
+        The population with mutated individuals.
+    """
     for ind in population:
-        if ind.tags.get("mut", False):
-            genes = cast("list[int]", ind.genotype)
-            mutated = IntegerMutator.integer_creep(
-                individual=genes,
-                span=1,
-                mutation_probability=0.5,
-            )
-            ind.genotype = mutated
-            ind.requires_eval = True
+        if not ind.tags.get("mut", False):
+            continue
+
+        # 1. Morphology Mutation (Structural)
+        morph = Genome.from_dict(ind.genotype["morph"])
+        morph.mutate(
+            0.8, 0.5, ID_MANAGER.get_next_innov_id, ID_MANAGER.get_next_node_id
+        )
+        ind.genotype["morph"] = morph.to_dict()
+
+        # 2. Control Mutation (Gaussian Creep)
+        ctrl = np.array(ind.genotype["ctrl"])
+        mask = RNG.random(ctrl.shape) < 0.4
+        noise = RNG.normal(0, 0.6, ctrl.shape)
+        ctrl[mask] += noise[mask]
+        ind.genotype["ctrl"] = np.clip(ctrl, -1.0, 1.0).tolist()
+
+        ind.requires_eval = True
+
     return population
 
 
-def survivor_selection(population: Population) -> Population:
-    random.shuffle(population)
-    current_pop_size = len(population)
-    for idx in range(0, len(population) - 1, 2):
-        ind_i = population[idx]
-        ind_j = population[idx + 1]
+def survivor_selection(population: list[Individual]) -> list[Individual]:
+    """
+    Perform truncation survivor selection to maintain a fixed population size.
 
-        # Kill worse individual
-        if ind_i.fitness > ind_j.fitness and config.is_maximisation:
-            ind_j.alive = False
-        else:
-            ind_i.alive = False
+    Parameters
+    ----------
+    population : list[Individual]
+        The current population including parents and offspring.
 
-        # Termination condition
-        current_pop_size -= 1
-        if current_pop_size <= config.target_population_size:
-            break
+    Returns
+    -------
+    list[Individual]
+        The population with 'alive' status updated.
+    """
+    # target_population_size from main loop
+    target_size = 10
+
+    population.sort(key=lambda x: x.fitness, reverse=True)
+
+    for i, ind in enumerate(population):
+        ind.alive = i < target_size
+
     return population
 
 
 def learning(population: Population) -> Population:
     for ind in population:
-        if ind.requires_eval:
+        if ind.tags["requires_lr"]:
             robot = genotype_to_phenotype(ind)
             brain = learning_robot(robot)
             ind.tags["brain"] = brain
-            # exit()
+            ind.tags["requires_lr"] = False
+
+    # Move videos folder to give it a timestamp
+    timestamp = int(datetime.datetime.now(datetime.UTC).timestamp())
+    shutil.move(VIDEOS, DATA / f"{timestamp}")
+
+    # Ensure the empty folder exists
+    VIDEOS.mkdir()
     return population
 
 
@@ -182,24 +270,57 @@ def evaluate(
 # ------------------------------------------------------------------------ #
 # INDIVIDUAL OPS
 # ------------------------------------------------------------------------ #
-def fitness_function(history: list[tuple[float, float, float]]) -> float:
-    xt, yt, zt = TARGET_POSITION
-    xc, yc, zc = history[-1]
+def fitness_function(
+    history: list[tuple[float, float, float]],
+    duration: float,
+) -> float:
+    """
+    Calculate fitness based on displacement after a 1-second delay.
 
-    # Minimize the distance --> maximize the negative distance
-    cartesian_distance = np.sqrt(
-        (xt - xc) ** 2 + (yt - yc) ** 2 + (zt - zc) ** 2,
+    Parameters
+    ----------
+    history : list[tuple[float, float, float]]
+        The trajectory of the robot's core.
+    duration : float
+        Total simulation time in seconds.
+
+    Returns
+    -------
+    float
+        The negative 2D distance to target (for maximization).
+    """
+    if not history:
+        return -999.0
+
+    # 1. Calculate delay indices (1 second offset)
+    delay_time = min(1.0, duration)
+    delay_fraction = delay_time / duration if duration > 0 else 0
+    start_idx = max(0, int(len(history) * delay_fraction))
+
+    # 2. Calculate valid movement vector (Final Pos - Pos after 1s)
+    pos_after_delay = np.array(history[start_idx])
+    pos_final = np.array(history[-1])
+    valid_movement_vector = pos_final - pos_after_delay
+
+    # 3. Project movement from the starting spawn point
+    effective_pos = np.array(SPAWN_POS) + valid_movement_vector
+
+    # 4. Calculate 2D Euclidean distance to target
+    dist = np.sqrt(
+        np.sum((effective_pos[:2] - np.array(TARGET_POSITION[:2])) ** 2)
     )
-    return -cartesian_distance
+
+    # Return negative for maximization compatibility in file 3
+    return -float(dist)
 
 
 def learning_robot(
     robot: CoreModule,
-) -> dict[str, np.ndarray]:
+) -> dict[str, np.ndarray] | None:
     """Entry function to run the simulation with random movements."""
     # Config
-    num_of_workers = 50
-    budget = 500
+    budget = LEARNING_BUDGET
+    num_of_workers = 1
 
     # Check inputs
     mj.set_mjcb_control(None)
@@ -208,55 +329,81 @@ def learning_robot(
     num_of_inputs = len(data.ctrl)
     del model, data
 
+    # No hinges == no learning
+    if num_of_inputs == 0:
+        return None
+
     # Setup Nevergrad optimizer
-    # params = ng.p.Instrumentation(
-    #     phase=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-np.pi, np.pi),
-    #     w=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-0.2, 4.0),
-    #     amplitudes=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-0.5, 4.0),
-    #     ha=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-2.0, 2.0),
-    #     b=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-0.5, 0.5),
-    # )
     params = ng.p.Instrumentation(
         phase=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
-            -2 * np.pi,
-            2 * np.pi,
+            (-2 * np.pi) - 1,
+            (2 * np.pi) + 1,
         ),
-        w=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-2 * np.pi, 2 * np.pi),
+        w=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
+            (-2 * np.pi) - 1,
+            (2 * np.pi) + 1,
+        ),
         amplitudes=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
-            -2 * np.pi,
-            2 * np.pi,
+            (-2 * np.pi) - 1,
+            (2 * np.pi) + 1,
         ),
-        ha=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-10, 10),
-        b=ng.p.Array(shape=(num_of_inputs,)).set_bounds(-100, 100),
+        ha=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
+            -3,
+            3,
+        ),
+        b=ng.p.Array(shape=(num_of_inputs,)).set_bounds(
+            -2,
+            2,
+        ),
     )
-    optim = ng.optimizers.PSO
-    optimizer = optim(
+    optimizer = LEARNING_ALGORITHM(
         parametrization=params,
         budget=budget,
         num_workers=num_of_workers,
     )
 
-    # Run optimization loop
-    best_fitness = float("inf")
-    best_params = None
-    for idx in range(optimizer.budget):
-        x = optimizer.ask()
-        brain = x.kwargs
-        loss = evaluate_robot(robot, brain)
-        optimizer.tell(x, loss)
-        if loss < best_fitness:
-            best_fitness = loss
-            best_params = x.kwargs
-            console.log(
-                f"({idx}) Current loss: {loss}, Best loss: {best_fitness}",
+    with Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TimeRemainingColumn(),
+        TextColumn("{task.fields[loss_info]}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        task_id = progress.add_task("Learning:", total=budget, loss_info="")
+
+        best_fitness = float("inf")
+        best_params = None
+
+        for _ in range(budget):
+            x = optimizer.ask()
+            brain = x.kwargs
+            loss = evaluate_robot(robot, brain)
+            optimizer.tell(x, loss)
+
+            if loss < best_fitness:
+                best_fitness = loss
+                best_params = x.kwargs
+
+            # Update counter and custom loss text
+            progress.update(
+                task_id,
+                advance=1,
+                loss_info=f"| Current: {loss:.4f} | Best: {best_fitness:.4f}",
             )
-    return best_params
+
+    # View best
+    x = optimizer.provide_recommendation()
+    brain = x.kwargs
+    loss = evaluate_robot(robot, brain, mode="video")
+    return serialise_brain_to_json(best_params)
 
 
 def experiment(
     robot: CoreModule,
     controller: Controller,
-    duration: int = 15,
+    duration: float,
     mode: ViewerTypes = "simple",
 ) -> None:
     """Run the simulation with random movements."""
@@ -321,7 +468,7 @@ def experiment(
             single_frame_renderer(model, data, save=True, save_path=save_path)
         case "video":
             # This records a video of the simulation
-            path_to_video_folder = str(DATA / "videos")
+            path_to_video_folder = str(VIDEOS)
             video_recorder = VideoRecorder(output_folder=path_to_video_folder)
 
             # Render with video recorder
@@ -354,6 +501,7 @@ def experiment(
 def evaluate_robot(
     robot: CoreModule,
     brain: dict[str, np.ndarray] | None = None,
+    duration: float = SIMULATION_DURATION,
     mode: ViewerTypes = "simple",
 ) -> float:
     # -------------------------------------------------------------- #
@@ -382,9 +530,12 @@ def evaluate_robot(
     cpg = SimpleCPG(adj_dict)
 
     if brain is not None:
+        # JSON object to numpy arrays
+        brain_np = deserialise_brain_to_numpy(brain)
+
         # Map flat parameters to SimpleCPG tensors
         with torch.no_grad():
-            for key, val in brain.items():
+            for key, val in brain_np.items():
                 getattr(cpg, key).data.copy_(torch.from_numpy(val).float())
 
     # Simulate the robot
@@ -396,17 +547,26 @@ def evaluate_robot(
     # -------------------------------------------------------------- #
     # EXPERIMENT
     # -------------------------------------------------------------- #
-    experiment(robot=robot, controller=ctrl, mode=mode)
+    experiment(
+        robot=robot,
+        controller=ctrl,
+        mode=mode,
+        duration=duration,
+    )
 
     # Calculate and print the fitness of your robot
-    return fitness_function(tracker.history["xpos"][0])
+    return fitness_function(
+        tracker.history["xpos"][0],
+        duration=duration,
+    )
 
 
 def genotype_to_phenotype(individual: Individual) -> CoreModule:
     """Decode CPPN genome into a MuJoCo robot spec."""
     genome = Genome.from_dict(individual.genotype["morph"])
     decoder = MorphologyDecoderBestFirst(
-        cppn_genome=genome, max_modules=NUM_OF_MODULES
+        cppn_genome=genome,
+        max_modules=NUM_OF_MODULES,
     )
     robot_graph = decoder.decode()
     return construct_mjspec_from_graph(robot_graph)
@@ -425,18 +585,35 @@ def create_individual() -> Individual:
         "morph": genome.to_dict(),
         "ctrl": RNG.uniform(-1.0, 1.0, size=150).tolist(),  # Default size
     }
+    ind.tags["requires_lr"] = True
     return ind
 
 
+# ------------------------------------------------------------------------ #
+# FUNCTIONS
+# ------------------------------------------------------------------------ #
+def serialise_brain_to_json(brain: dict[str, np.ndarray]) -> dict[str, list]:
+    brain_json = {}
+    for key, value in brain.items():
+        brain_json[key] = value.tolist()
+    return brain_json
+
+
+def deserialise_brain_to_numpy(brain: dict[str, list]) -> dict[str, np.ndarray]:
+    brain_np = {}
+    for key, value in brain.items():
+        brain_np[key] = np.array(value)
+    return brain_np
+
+
+# ------------------------------------------------------------------------ #
+# OVERARCHING LOOP
+# ------------------------------------------------------------------------ #
 def main() -> None:
     """Entry point."""
     # Create initial population
-    pop_size = 10
-    n_gens = 100
-    population_list = [create_individual() for _ in range(pop_size)]
-    # population_list = evaluate(population_list, mode="launcher")
-    population_list = learning(population_list)
-    exit()
+    population_list = [create_individual() for _ in range(POPULATION_SIZE)]
+    population_list = evaluate(population_list)
 
     # Create EA steps
     ops = [
@@ -452,19 +629,19 @@ def main() -> None:
     ea = EA(
         population_list,
         operations=ops,
-        num_of_generations=n_gens,
+        num_of_generations=GENERATIONS,
     )
 
     ea.run()
 
     best = ea.get_solution(only_alive=False)
-    console.log(best)
+    console.log(f"{best.fitness=}")
 
     median = ea.get_solution("median", only_alive=False)
-    console.log(median)
+    console.log(f"{median.fitness=}")
 
     worst = ea.get_solution("worst", only_alive=False)
-    console.log(worst)
+    console.log(f"{worst.fitness=}")
 
 
 if __name__ == "__main__":
