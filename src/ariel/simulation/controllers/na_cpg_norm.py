@@ -50,10 +50,13 @@ def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
         adjacency_dict[i] = [j for j in range(num_nodes) if j != i]
     return adjacency_dict
 
+
 class NaCPG_Norm(nn.Module):
     """Implements the Normalized Asymmetric CPG (NA-CPG)."""
 
-    raise NotImplementedError("This class is a work in progress and not ready for use.")
+    raise NotImplementedError(
+        "This class is a work in progress and not ready for use."
+    )
 
     xy: torch.Tensor
     xy_dot_old: torch.Tensor
@@ -92,7 +95,7 @@ class NaCPG_Norm(nn.Module):
             If True, normalizes the output angles to [-π/2, π/2],
             by default False
         duration : int, optional
-            Duration in seconds for which the CPG will run    
+            Duration in seconds for which the CPG will run
         seed : int | None, optional
             Random seed for reproducibility, by default None
         """
@@ -193,19 +196,21 @@ class NaCPG_Norm(nn.Module):
         self.is_normalized = False
         if self.normalize:
             self.init_angle_history()
-    
+
     def init_angle_history(self) -> None:
         # console.log("[yellow]Normalizing CPG output angles[/yellow]: Angle tracking enabled since its needed")
-            self.angle_tracking = True
-            for _ in range(self.duration * int(1/self.dt) + 10):
-                self.forward()
-            hist = torch.tensor(self.angle_history) 
+        self.angle_tracking = True
+        for _ in range(self.duration * int(1 / self.dt) + 10):
+            self.forward()
+        hist = torch.tensor(self.angle_history)
 
-            # Normalize each joint's signal independently
-            self.angle_history = hist / hist.abs().max(dim=0, keepdim=True).values * (torch.pi / 2)
-            console.log(f"len angle history {len(self.angle_history)}")
-            # console.log(self.angle_history)
-            self.is_normalized = True
+        # Normalize each joint's signal independently
+        self.angle_history = (
+            hist / hist.abs().max(dim=0, keepdim=True).values * (torch.pi / 2)
+        )
+        console.log(f"len angle history {len(self.angle_history)}")
+        # console.log(self.angle_history)
+        self.is_normalized = True
 
     def param_type_converter(
         self,
@@ -286,9 +291,8 @@ class NaCPG_Norm(nn.Module):
         self.angles.data = self.initial_state["angles"].clone()
         self.angle_history = self.init_angle_history()
         self.current_step = 0
-    
-    
-    def step(self, time : float)-> torch.Tensor:
+
+    def step(self, time: float) -> torch.Tensor:
         self.current_step += 1
         # print(len(self.angle_history))
         # print(time)
@@ -304,7 +308,7 @@ class NaCPG_Norm(nn.Module):
         # if time is not None and abs(float(time)) < 1e-12:
         #     self.reset()
         # Normalize amplitudes
-        if self.normalize and self.is_normalized: 
+        if self.normalize and self.is_normalized:
             return self.step(self.current_step)
 
         # Update CPG states
@@ -392,8 +396,8 @@ class NaCPG_Norm(nn.Module):
             #         out=angles,
             #     )
 
-                # # Track how much clamping was done (can be used as a loss)
-                # self.clamping_error = (pre_clamping - angles).abs().sum().item()
+            # # Track how much clamping was done (can be used as a loss)
+            # self.clamping_error = (pre_clamping - angles).abs().sum().item()
 
             # Keep history if requested
             if self.angle_tracking:
@@ -446,7 +450,9 @@ def main(run_id: int) -> torch.Tensor:
     dur = 10  # duration in seconds
     t = time.perf_counter()
     adj_dict = create_fully_connected_adjacency(3)
-    na_cpg_mat = NaCPG_Norm(adj_dict, angle_tracking=True, normalize=True, duration=dur, alpha=30)
+    na_cpg_mat = NaCPG_Norm(
+        adj_dict, angle_tracking=True, normalize=True, duration=dur, alpha=30
+    )
 
     range_ = int(dur * int(1 / na_cpg_mat.dt))
     console.log(f"Running NaCPG_Norm for {range_} steps (Run {run_id})")
@@ -454,7 +460,9 @@ def main(run_id: int) -> torch.Tensor:
         na_cpg_mat.forward(time_step)
 
     hist = torch.tensor(na_cpg_mat.angle_history)
-    console.log(f"NaCPG_Norm Run {run_id} took {time.perf_counter() - t:.2f} seconds")
+    console.log(
+        f"NaCPG_Norm Run {run_id} took {time.perf_counter() - t:.2f} seconds"
+    )
     return hist
 
 

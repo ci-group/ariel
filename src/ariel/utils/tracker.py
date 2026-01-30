@@ -94,7 +94,7 @@ class Tracker:
         """
         Reset the history of tracked attributes.
         """
-        
+
         # Reset the history dictionary
         for attr in self.observable_attributes:
             for idx in range(len(self.to_track)):

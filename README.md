@@ -15,16 +15,30 @@
 * [vscode containers tut](https://code.visualstudio.com/docs/devcontainers/tutorial)
 
 --- -->
+
+## Documentation
+[ARIEL main documentation page](https://ci-group.github.io/ariel/)
+
 ## Installation and Running
 
 This project uses [uv](https://docs.astral.sh/uv/).
 
-To run the code examples please do
-
+To run the code examples, please do:
+1. Clone the repository
 ```bash
-uv venv
+git clone https://github.com/ci-group/ariel.git
+```
+3. Create a uv virtual environment inside the repository folder
+```bash
+  uv venv
+```
+4. Sync the virtual environment with the requirements
+```bash
 uv sync
-uv run examples/z_ec_course/0_render_single_frame.py
+```
+5. Run an example, in this case, brain evolution (aka learning) using:
+```bash
+uv run examples/re_book/1_brain_evolution.py
 ```
 
 <!-- ## TODO: Installation

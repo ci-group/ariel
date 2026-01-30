@@ -15,6 +15,26 @@ ARIEL contains and requires many other libraries to function properly, and avoid
  
 ## Installation with uv
 
+The current version of ARIEL is only available on GitHub. This page will be updated once an alternative installation method is made.
+
+### Installation Steps
+1. Clone the repository
+```bash
+git clone https://github.com/ci-group/ariel.git
+```
+3. Create a uv virtual environment inside the repository folder
+```bash
+  uv venv
+```
+4. Sync the virtual environment with the requirements
+```bash
+uv sync
+```
+5. Run an example, in this case, brain evolution (aka learning) using:
+```bash
+uv run examples/re_book/1_brain_evolution.py
+```
+<!-- 
 1. Install `uv` (if not already installed):
 
 ```bash
@@ -34,7 +54,7 @@ Run the following command to have uv create a virtual environment, double check 
 uv sync
 ```
 
-You can activate the uv virtual environment the same way you would activate a normal one using `.\.venv\Scripts\activate`
+You can activate the uv virtual environment the same way you would activate a normal one using `.\.venv\Scripts\activate` -->
 
 ## Installation using dev containers
 

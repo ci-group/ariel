@@ -38,12 +38,12 @@ torch.set_printoptions(precision=4)
 def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
     """
     Create a fully connected adjacency dictionary for the CPG network.
-    
+
     Parameters
     ----------
     num_nodes : int
         Number of nodes in the CPG network.
-    
+
     Returns
     -------
     dict[int, list[int]]
@@ -59,11 +59,11 @@ def create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]:
 class SimpleCPG(nn.Module):
     """
     Simplified CPG using coupled Hopf oscillators.
-    
+
     Dynamics:
         dx_i/dt = (mu - r_i^2) * x_i - w_i * y_i + sum_j(coupling_ij * (x_j - x_i))
         dy_i/dt = (mu - r_i^2) * y_i + w_i * x_i + sum_j(coupling_ij * (y_j - y_i))
-        
+
     Where r_i = sqrt(x_i^2 + y_i^2)
     """
 
@@ -111,31 +111,31 @@ class SimpleCPG(nn.Module):
         # ================================================================== #
         # Learnable parameters - keep same naming as NA-CPG for compatibility
         # ================================================================== #
-        
+
         # Phase offset for each oscillator
         self.phase = nn.Parameter(
             (torch.rand(self.n) * 2 - 1) * torch.pi,
             requires_grad=False,
         )
-        
+
         # Frequency for each oscillator
         self.w = nn.Parameter(
             (torch.rand(self.n) * 2 - 1) * 4.0 + 2.0,  # Range [0, 4] Hz roughly
             requires_grad=False,
         )
-        
+
         # Amplitude for each oscillator
         self.amplitudes = nn.Parameter(
             (torch.rand(self.n) * 2 - 1) * 2.0 + 1.0,  # Range [0, 2]
             requires_grad=False,
         )
-        
+
         # Coupling strengths (replaces 'ha' - coupling weight/asymmetry)
         self.ha = nn.Parameter(
             torch.randn(self.n) * 0.5,
             requires_grad=False,
         )
-        
+
         # Bias/offset parameter (minor role)
         self.b = nn.Parameter(
             torch.randn(self.n) * 0.1,
@@ -158,7 +158,7 @@ class SimpleCPG(nn.Module):
         self.register_buffer("x", torch.randn(self.n) * 0.1)
         self.register_buffer("y", torch.randn(self.n) * 0.1)
         self.register_buffer("angles", torch.zeros(self.n))
-        
+
         self.angle_history = []
         self.initial_state = {
             "x": self.x.clone(),
@@ -188,7 +188,9 @@ class SimpleCPG(nn.Module):
         pointer = 0
         for param in self.parameter_groups.values():
             num_param = param.numel()
-            param.data = safe_params[pointer : pointer + num_param].view_as(param)
+            param.data = safe_params[pointer : pointer + num_param].view_as(
+                param
+            )
             pointer += num_param
 
     def set_param_with_dict(self, params: dict[str, torch.Tensor]) -> None:
@@ -210,7 +212,9 @@ class SimpleCPG(nn.Module):
 
         param = self.parameter_groups[group_name]
         if safe_params.numel() != param.numel():
-            raise ValueError(f"Parameter vector has incorrect size for group '{group_name}'.")
+            raise ValueError(
+                f"Parameter vector has incorrect size for group '{group_name}'."
+            )
         param.data = safe_params.view_as(param)
 
     def get_flat_params(self) -> torch.Tensor:
@@ -227,12 +231,12 @@ class SimpleCPG(nn.Module):
     def forward(self, time: float | None = None) -> torch.Tensor:
         """
         Perform a forward pass to update CPG states and compute output angles.
-        
+
         Parameters
         ----------
         time : float | None, optional
             Current simulation time. If equal to zero, resets the CPG.
-        
+
         Returns
         -------
         torch.Tensor
@@ -248,31 +252,45 @@ class SimpleCPG(nn.Module):
         with torch.inference_mode():
             # Compute radius for each oscillator
             r = torch.sqrt(self.x**2 + self.y**2 + E)
-            
+
             # Hopf oscillator dynamics with coupling
             dx = torch.zeros_like(self.x)
             dy = torch.zeros_like(self.y)
-            
+
             for i in range(self.n):
                 # Local Hopf dynamics: (mu - r^2) * state + w * perpendicular
-                dx[i] = (self.mu - r[i]**2) * self.x[i] - self.w[i] * self.y[i]
-                dy[i] = (self.mu - r[i]**2) * self.y[i] + self.w[i] * self.x[i]
-                
+                dx[i] = (self.mu - r[i] ** 2) * self.x[i] - self.w[i] * self.y[
+                    i
+                ]
+                dy[i] = (self.mu - r[i] ** 2) * self.y[i] + self.w[i] * self.x[
+                    i
+                ]
+
                 # Coupling from connected oscillators
                 coupling_strength = self.ha[i]
                 for j in self.adjacency_dict[i]:
                     # Phase difference based coupling
-                    phase_diff = torch.atan2(self.y[j], self.x[j] + E) - torch.atan2(self.y[i], self.x[i] + E)
-                    dx[i] += coupling_strength * torch.sin(phase_diff) * (self.x[j] - self.x[i])
-                    dy[i] += coupling_strength * torch.sin(phase_diff) * (self.y[j] - self.y[i])
-            
+                    phase_diff = torch.atan2(
+                        self.y[j], self.x[j] + E
+                    ) - torch.atan2(self.y[i], self.x[i] + E)
+                    dx[i] += (
+                        coupling_strength
+                        * torch.sin(phase_diff)
+                        * (self.x[j] - self.x[i])
+                    )
+                    dy[i] += (
+                        coupling_strength
+                        * torch.sin(phase_diff)
+                        * (self.y[j] - self.y[i])
+                    )
+
             # Update states
             self.x = self.x + dx * self.dt
             self.y = self.y + dy * self.dt
-            
+
             # Compute output angles: amplitude * y component + phase offset
             angles = self.amplitudes * self.y + self.phase + self.b
-            
+
             # Apply hard bounds if requested
             if self.hard_bounds is not None:
                 pre_clamping = angles.clone()
@@ -282,15 +300,15 @@ class SimpleCPG(nn.Module):
                     max=self.hard_bounds[1],
                 )
                 self.clamping_error = (pre_clamping - angles).abs().sum().item()
-            
+
             # Keep history if requested
             if self.angle_tracking:
                 self.angle_history.append(angles.clone().tolist())
-            
+
             # Check for NaN
             if torch.isnan(angles).any():
                 raise ValueError(f"NaN detected in angles: {angles}")
-            
+
             self.angles = angles
             return self.angles.clone()
 
@@ -344,7 +362,9 @@ def main() -> None:
     plt.savefig(DATA / "simple_cpg_angles.png")
     plt.show()
 
-    console.log(f"[green]Saved plot to {DATA / 'simple_cpg_angles.png'}[/green]")
+    console.log(
+        f"[green]Saved plot to {DATA / 'simple_cpg_angles.png'}[/green]"
+    )
 
 
 if __name__ == "__main__":
