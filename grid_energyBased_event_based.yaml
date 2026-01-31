@@ -1,2 +1,2 @@
-num_mating_zones: [5,10,15,20]
-mating_energy_amount: [10,20,30,40, 50]
+num_mating_zones: [9,10,11,12,13,14,15,16]
+mating_energy_amount: [10,25,50]

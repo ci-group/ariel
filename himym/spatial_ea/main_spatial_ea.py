@@ -279,7 +279,7 @@ class SpatialEA:
             incubation_population = incubator.run()
             
             # Demonstrate best incubation individual
-            incubator.demonstrate_best(duration=15.0)
+            #incubator.demonstrate_best(duration=15.0)
             
             # Update next_unique_id to continue from incubation
             self.next_unique_id = incubator.next_unique_id

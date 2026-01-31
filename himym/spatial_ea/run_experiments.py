@@ -402,13 +402,12 @@ def define_experiments() -> dict[str, ExperimentConfig]:
         save_individual_runs=True,
     )
     
-    # Event-driven zones - move after matings occur (NEW!)
     experiments['eventDriven_matingZone_assignedMating_fitBased'] = ExperimentConfig(
         experiment_name="eventDriven_matingZone_assignedMating_fitBased",
-        num_runs=10,
+        num_runs=48,
         
         # Incubation
-        incubation_enabled=True,
+        incubation_enabled=False,
         incubation_num_generations=20,
         
         # Population parameters 
@@ -446,10 +445,10 @@ def define_experiments() -> dict[str, ExperimentConfig]:
         save_individual_runs=True,
     )
 
-    # uv run himym/spatial_ea/run_experiments.py --grid-file grid_probAge_event_based.yaml --grid-base-experiment eventDriven_matingZone_assignedMating_probAge --parallel --num-workers 10
+    # uv run himym/spatial_ea/run_experiments.py --grid-file grid_probAge_event_based.yaml --grid-base-experiment eventDriven_matingZone_assignedMating_probAge --parallel --num-workers 48
     experiments['eventDriven_matingZone_assignedMating_probAge'] = ExperimentConfig(
         experiment_name="eventDriven_matingZone_assignedMating_probAge",
-        num_runs=5,
+        num_runs=48,
         
         # Incubation
         incubation_enabled=False,
@@ -649,12 +648,13 @@ def define_experiments() -> dict[str, ExperimentConfig]:
     # END MINIMAL EXPERIMENT SET
     # =========================================================================
 
+    # uv run himym/spatial_ea/run_experiments.py --grid-file grid_energyBased_event_based.yaml --grid-base-experiment eventDriven_matingZone_assignedMating_energyBased --parallel --num-workers 45
     experiments['eventDriven_matingZone_assignedMating_energyBased'] = ExperimentConfig(
         experiment_name="eventDriven_matingZone_assignedMating_energyBased",
-        num_runs=3,
+        num_runs=45,
         
         # Incubation
-        incubation_enabled=False,
+        incubation_enabled=True,
         
         # Population parameters 
         population_size=30,

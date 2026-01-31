@@ -5,7 +5,7 @@
 incubation:
   enabled: false              # Enable incubation phase before spatial evolution
   population_size: 30         # Population size during incubation
-  num_generations: 20         # Number of generations in incubation phase (increased for gentler mutation)
+  num_generations:100         # Number of generations in incubation phase (increased for gentler mutation)
   mutation_rate: 0.8          # Weight mutation probability
   mutation_power: 0.2         # Weight mutation strength (reduced to prevent weight explosion)
   add_connection_rate: 0.05   # Probability of adding new connection
