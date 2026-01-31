@@ -882,7 +882,15 @@ class SpatialEA:
                     current_generation=self.generation,
                     current_orientations=self.current_orientations,
                     paired_indices=set(),  # No paired indices at this point
-                    max_age=config.max_age
+                    max_age=config.max_age,
+                    # Density-based selection parameters
+                    world_size=(config.world_size[0], config.world_size[1]),
+                    use_periodic_boundaries=config.use_periodic_boundaries,
+                    locality_radius=config.locality_radius,
+                    critical_density=config.critical_density,
+                    base_death_prob=config.base_death_prob,
+                    max_density_death_prob=config.max_density_death_prob,
+                    density_fitness_protection=config.density_fitness_protection
                 )
                 
                 print(f"  Post-selection population: {len(self.population)}")

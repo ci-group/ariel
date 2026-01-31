@@ -490,6 +490,164 @@ def define_experiments() -> dict[str, ExperimentConfig]:
         save_individual_runs=True,
     )
 
+    # ==== Density-Based Selection Experiment ====
+    # This experiment tests density-dependent death selection which creates
+    # negative feedback between local crowding and mortality. Unlike energy-based
+    # selection, death probability is directly coupled to spatial configuration.
+    experiments['eventDriven_matingZone_assignedMating_densityBased'] = ExperimentConfig(
+        experiment_name="eventDriven_matingZone_assignedMating_densityBased",
+        num_runs=5,
+        
+        # Incubation
+        incubation_enabled=False,
+        
+        # Population parameters 
+        population_size=30,
+        num_generations=100,
+        stop_on_limits=True,
+        
+        # Selection parameters
+        pairing_method="mating_zone",
+        movement_bias="assigned_zone",
+        selection_method="density_based",  # Key change: density-dependent death
+        pairing_radius=10,
+        offspring_radius=3.0,
+        
+        # Density-based selection parameters
+        # locality_radius: Gaussian kernel σ - how far density effect reaches
+        locality_radius=3.0,
+        # critical_density: ρ_c - density where death prob reaches ~63% of max
+        critical_density=5.0,
+        # base_death_prob: P_base - baseline death even when isolated
+        base_death_prob=0.05,
+        # max_density_death_prob: P_max - additional death prob at high density
+        max_density_death_prob=0.7,
+        # density_fitness_protection: how much fitness reduces death (0=none, 1=full)
+        density_fitness_protection=0.0,
+
+        # Mating zone configuration
+        mating_zone_radius=2.0,
+        num_mating_zones=15,
+        zone_relocation_strategy="event_driven",
+        min_zone_distance=2.0,
+        
+        # Mutation/Crossover
+        mutation_rate=0.8,
+        mutation_strength=0.5,
+        add_connection_rate=0.05,
+        add_node_rate=0.03,
+        crossover_rate=0.9,
+        
+        # Simulation
+        simulation_time=60.0,
+        use_periodic_boundaries=True,
+        
+        # Output
+        save_snapshots=True,
+        save_trajectories=True,
+        save_individual_runs=True,
+    )
+
+    # =========================================================================
+    # MINIMAL COHESIVE EXPERIMENT SET FOR REPORT
+    # =========================================================================
+    
+    # ----- 1. Density-Based Selection Validation (10 runs) -----
+    # Test if density-based selection fixes the bistability problem
+    # Can also be used as grid-base-experiment for density sensitivity grid search
+    experiments['densityBased_validation'] = ExperimentConfig(
+        experiment_name="densityBased_validation",
+        num_runs=10,
+        
+        # Incubation
+        incubation_enabled=False,
+        
+        # Population parameters 
+        population_size=30,
+        num_generations=100,
+        stop_on_limits=True,
+        
+        pairing_method="mating_zone",
+        movement_bias="assigned_zone",
+        selection_method="density_based",
+        pairing_radius=10,
+        offspring_radius=3.0,
+        
+        # Density selection defaults
+        locality_radius=3.0,
+        critical_density=5.0,
+        base_death_prob=0.05,
+        max_density_death_prob=0.7,
+        density_fitness_protection=0.0,
+        
+        mating_zone_radius=2.0,
+        num_mating_zones=15,  # Near critical point from energy experiments
+        zone_relocation_strategy="event_driven",
+        min_zone_distance=2.0,
+        
+        mutation_rate=0.8,
+        mutation_strength=0.5,
+        add_connection_rate=0.05,
+        add_node_rate=0.03,
+        crossover_rate=0.9,
+        
+        simulation_time=60.0,
+        use_periodic_boundaries=True,
+        
+        save_snapshots=True,
+        save_trajectories=True,
+        save_individual_runs=True,
+    )
+    
+    # ----- 2. Phase Transition Base Experiment -----
+    # Use with: --grid-file grid_phaseTransition_energyBased.yaml --grid-base-experiment phaseTransition_base
+    # Grid varies: num_mating_zones: [12, 13, 14, 15, 16, 18]
+    experiments['phaseTransition_base'] = ExperimentConfig(
+        experiment_name="phaseTransition_base",
+        num_runs=10,
+        
+        # Incubation
+        incubation_enabled=False,
+        
+        # Population parameters 
+        population_size=30,
+        num_generations=100,
+        stop_on_limits=True,
+        
+        pairing_method="mating_zone",
+        movement_bias="assigned_zone",
+        selection_method="energy_based",
+        pairing_radius=10,
+        offspring_radius=3.0,
+        
+        enable_energy=True,
+        initial_energy=100.0,
+        energy_depletion_rate=5.0,
+        mating_energy_effect="cost",
+        mating_energy_amount=25.0,
+        
+        mating_zone_radius=2.0,
+        num_mating_zones=15,  # Will be overridden by grid
+        zone_relocation_strategy="event_driven",
+        min_zone_distance=2.0,
+        
+        mutation_rate=0.8,
+        mutation_strength=0.5,
+        add_connection_rate=0.05,
+        add_node_rate=0.03,
+        crossover_rate=0.9,
+        
+        simulation_time=60.0,
+        use_periodic_boundaries=True,
+        
+        save_snapshots=False,
+        save_trajectories=True,
+        save_individual_runs=True,
+    )
+
+    # =========================================================================
+    # END MINIMAL EXPERIMENT SET
+    # =========================================================================
 
     experiments['eventDriven_matingZone_assignedMating_energyBased'] = ExperimentConfig(
         experiment_name="eventDriven_matingZone_assignedMating_energyBased",

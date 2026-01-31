@@ -270,6 +270,32 @@ class EAConfig:
         """Energy restored (if 'restore') or cost deducted (if 'cost') when mating occurs."""
         return self._config['selection'].get('mating_energy_amount', 50.0)
     
+    # Density-Based Selection Parameters
+    @property
+    def locality_radius(self) -> float:
+        """Gaussian kernel σ for local density calculation (meters)."""
+        return self._config['selection'].get('locality_radius', 3.0)
+    
+    @property
+    def critical_density(self) -> float:
+        """ρ_c threshold where density death probability ≈ 0.63 × P_max."""
+        return self._config['selection'].get('critical_density', 5.0)
+    
+    @property
+    def base_death_prob(self) -> float:
+        """P_base - baseline death probability for isolated individuals."""
+        return self._config['selection'].get('base_death_prob', 0.05)
+    
+    @property
+    def max_density_death_prob(self) -> float:
+        """P_max - maximum additional death probability from crowding."""
+        return self._config['selection'].get('max_density_death_prob', 0.8)
+    
+    @property
+    def density_fitness_protection(self) -> float:
+        """Reduction in death probability for high-fitness individuals (0-1)."""
+        return self._config['selection'].get('density_fitness_protection', 0.0)
+    
     # Crossover Parameters
     @property
     def crossover_rate(self) -> float:

@@ -48,6 +48,13 @@ selection:
   mating_energy_effect: "cost"  # Effect of mating on energy: "restore" (full reset), "cost" (energy penalty), "none" (no effect)
   mating_energy_amount: 35.0  # Energy restored (if "restore") or cost deducted (if "cost") when mating occurs
   
+  # Density-Based Selection Parameters
+  locality_radius: 3.0        # Gaussian kernel σ for local density calculation (meters)
+  critical_density: 5.0       # ρ_c threshold where density death probability ≈ 0.63 × P_max
+  base_death_prob: 0.05       # P_base - baseline death probability for isolated individuals
+  max_density_death_prob: 0.8  # P_max - maximum additional death probability from crowding
+  density_fitness_protection: 0.0  # Reduction in death prob for high-fitness individuals (0-1)
+  
   # Mating Zone Configuration
   mating_zone_center: [12.5, 12.5]  # Center coordinates (x, y) of the primary mating zone (used if num_zones=1 and zone_relocation_strategy="static")
   mating_zone_radius: 2.5     # Radius of the mating zone circle (meters)

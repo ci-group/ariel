@@ -73,6 +73,13 @@ class ExperimentConfig:
     mating_energy_effect: str | None = None
     mating_energy_amount: float | None = None
     
+    # Density-based selection parameters
+    locality_radius: float | None = None  # Gaussian kernel σ for local density calculation
+    critical_density: float | None = None  # ρ_c threshold where P_density ≈ 0.63 × P_max
+    base_death_prob: float | None = None  # P_base - baseline death probability for isolated individuals
+    max_density_death_prob: float | None = None  # P_max - max additional death prob from crowding
+    density_fitness_protection: float | None = None  # Reduction in death prob for high-fitness individuals (0-1)
+    
     # Mutation parameters (shared between incubation and spatial)
     mutation_rate: float | None = None
     mutation_strength: float | None = None
@@ -183,6 +190,18 @@ class ExperimentConfig:
             overrides['selection.mating_energy_effect'] = self.mating_energy_effect
         if self.mating_energy_amount is not None:
             overrides['selection.mating_energy_amount'] = self.mating_energy_amount
+        
+        # Density-based selection parameters
+        if self.locality_radius is not None:
+            overrides['selection.locality_radius'] = self.locality_radius
+        if self.critical_density is not None:
+            overrides['selection.critical_density'] = self.critical_density
+        if self.base_death_prob is not None:
+            overrides['selection.base_death_prob'] = self.base_death_prob
+        if self.max_density_death_prob is not None:
+            overrides['selection.max_density_death_prob'] = self.max_density_death_prob
+        if self.density_fitness_protection is not None:
+            overrides['selection.density_fitness_protection'] = self.density_fitness_protection
         
         # Mutation parameters (shared between incubation and spatial)
         if self.mutation_rate is not None:
@@ -563,7 +582,12 @@ class ExperimentRunner:
         self.base_output_dir = Path(base_output_dir)
         self.base_output_dir.mkdir(exist_ok=True)
         
-        self.base_config_path = base_config_path or "himym/spatial_ea/ea_config.yaml"
+        # Use absolute path based on module location if no path specified
+        if base_config_path is None:
+            module_dir = Path(__file__).parent
+            self.base_config_path = str(module_dir / "ea_config.yaml")
+        else:
+            self.base_config_path = base_config_path
         self.experiments: dict[str, list[RunResult]] = {}
         self._current_max_pop_limit: int | None = None  # Track max_population_limit for current experiment/grid
     
