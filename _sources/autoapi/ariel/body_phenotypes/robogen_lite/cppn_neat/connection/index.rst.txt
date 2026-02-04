@@ -1,0 +1,45 @@
+:py:mod:`connection`
+=================================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.cppn_neat.connection
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.cppn_neat.connection.Connection
+
+
+
+
+.. py:class:: Connection(in_id: int, out_id: int, weight: float, enabled: bool, innov_id: int)
+
+   A connection gene in a NEAT genome.
+
+
+   .. py:attribute:: in_id
+
+
+   .. py:attribute:: out_id
+
+
+   .. py:attribute:: weight
+
+
+   .. py:attribute:: enabled
+
+
+   .. py:attribute:: innov_id
+
+
+   .. py:method:: copy()
+
+      Returns a new Connection object with identical values.
+
+
+

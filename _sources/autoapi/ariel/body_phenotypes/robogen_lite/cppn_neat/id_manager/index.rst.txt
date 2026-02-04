@@ -1,0 +1,62 @@
+:py:mod:`id_manager`
+=================================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager.IdManager
+
+
+
+
+.. py:class:: IdManager(save_path: Union[str, pathlib.Path] = 'id_state.json', node_start: Optional[int] = None, innov_start: Optional[int] = None)
+
+   Manages and persists unique innovation and node IDs for a NEAT run.
+
+   Supports two modes:
+   1. Persistent Mode (default): Loads and saves its state from a JSON file.
+   2. In-Memory Mode: Initializes with specified starting IDs, useful for tests.
+
+
+   .. py:attribute:: save_path
+
+
+   .. py:method:: get_next_node_id() -> int
+
+      Returns the next available node ID and increments the counter.
+
+
+
+   .. py:method:: get_next_innov_id() -> int
+
+      Returns the next available innovation ID and increments the counter.
+
+
+
+   .. py:method:: set_initial_ids(num_inputs: int, num_outputs: int)
+
+      Sets the initial counters based on a genome's topology.
+      Call this once at the start of a new persistent run.
+
+
+
+   .. py:method:: save()
+
+      Saves the current ID counters to the specified JSON file.
+
+
+
+   .. py:method:: load()
+
+      Loads the ID counters from the specified JSON file if it exists.
+
+
+

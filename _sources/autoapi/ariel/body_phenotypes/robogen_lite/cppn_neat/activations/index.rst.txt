@@ -1,0 +1,63 @@
+:py:mod:`activations`
+==================================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.cppn_neat.activations
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.cppn_neat.activations.sigmoid
+   ariel.body_phenotypes.robogen_lite.cppn_neat.activations.tanh
+   ariel.body_phenotypes.robogen_lite.cppn_neat.activations.sin_act
+   ariel.body_phenotypes.robogen_lite.cppn_neat.activations.gaussian
+   ariel.body_phenotypes.robogen_lite.cppn_neat.activations.relu
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.cppn_neat.activations.ACTIVATION_FUNCTIONS
+   ariel.body_phenotypes.robogen_lite.cppn_neat.activations.DEFAULT_ACTIVATION
+
+
+.. py:function:: sigmoid(x: int) -> float
+
+   The standard logistic sigmoid function.
+
+
+.. py:function:: tanh(x: int) -> float
+
+   Hyperbolic tangent, maps values to (-1, 1).
+
+
+.. py:function:: sin_act(x: int) -> float
+
+   Sine function, useful for generating repeating patterns.
+
+
+.. py:function:: gaussian(x: int) -> float
+
+   Gaussian (bell curve) function.
+
+
+.. py:function:: relu(x: int) -> float
+
+   Rectified Linear Unit.
+
+
+.. py:data:: ACTIVATION_FUNCTIONS
+
+.. py:data:: DEFAULT_ACTIVATION
+   :value: 'sigmoid'
+
+
