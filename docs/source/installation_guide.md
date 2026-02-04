@@ -77,7 +77,7 @@ The `uv sync` command, installs and/or syncs all dependencies needed for the lib
 uv sync
 ```
 
-4. **Run an example**# Enter cloned folder
+4. **Run an example**
 
 ```bash
 uv run examples/re_book/1_brain_evolution.py
@@ -110,9 +110,9 @@ This method builds a Docker‑based development environment with all dependencie
 ### Steps
 
 1. Install the **Dev Containers** extension in Visual Studio Code.
-<p align="left">
-  <img src="../resources/dev_containers_1.jpg" width="600">
-</p>
+
+![dev_containers](../resources/dev_containers_1.jpg)
+
 
 2. Open the ARIEL repository folder in VS Code.
 
@@ -120,9 +120,8 @@ This method builds a Docker‑based development environment with all dependencie
 
    * If no prompt appears, open the command palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and select `Dev Containers: Build and Open in Container`.
 
-<p align="left">
-  <img src="../resources/dev_containers_2.jpg" width="600">
-</p>
+
+![dev_containers_2](../resources/dev_containers_2.jpg)
 
 4. VS Code will build the container and install all dependencies automatically.
 
@@ -148,9 +147,7 @@ A successful run should execute without import errors and produce either rendere
 
 The output of the `0_render_single_frame.py` should look something like this: 
 
-<p align="left">
-  <img src="../resources/example_image.jpg" width="600">
-</p>
+![Example](../resources/example_image.jpg)
 
 ---
 
