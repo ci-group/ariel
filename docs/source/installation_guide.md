@@ -1,91 +1,175 @@
-<!-- TODO:
-1. check docker section
-2. add images to docker section -->
-# Installation guide
+# Installation Guide
+
+This document describes how to install **ARIEL**, a research‑oriented evolutionary robotics and artificial life framework. The guide prioritizes **reproducibility, dependency stability, and ease of use** for both research and teaching environments.
+
+We strongly recommend using either **uv** or **VS Code Dev Containers**. While a pip‑based installation is technically possible, it is discouraged due to frequent dependency conflicts.
+
+---
+
+## Supported Platforms
+
+* Windows 10/11
+* macOS
+* Linux
+
+---
 
 ## Prerequisites
 
-- Python 3.12 or newer
-- [uv](https://github.com/astral-sh/uv) package manager
-- [pip](https://pip.pypa.io/en/stable/)
-- [dev containers VScode extension](https://code.visualstudio.com/docs/devcontainers/containers)
+### Required for all installation methods
 
-## Picking the right installation method
-ARIEL contains and requires many other libraries to function properly, and avoiding conflicts between them is hard even with set versions in the `requirements.txt` file. For this reason, we highly recommend you use uv or dev containers instead of pip. UV is an easy option, but it still might result to issues. If you run in to problems with the installation please install using dev containers, this should fix any lingering issues. 
- 
-## Installation with uv
+* Python 3.12+
+* Git
 
-The current version of ARIEL is only available on GitHub. This page will be updated once an alternative installation method is made.
+### For installation with `uv`
 
-### Installation Steps
-1. Clone the repository
+* `uv` package manager. Can be installed using stock Python with `pip`:
+```bash 
+pip install uv 
+```  
+
+### For installation using Dev Containers
+
+* Docker Desktop
+* Visual Studio Code
+* VS Code *Dev Containers* extension
+
+---
+
+## Choosing an Installation Method
+
+ARIEL depends on a large set of scientific and simulation libraries. Even with pinned versions, dependency conflicts can arise in local Python environments.
+
+* **Dev Containers**
+  Provides a fully reproducible, isolated environment. This is the most stable option and is strongly recommended for teaching, collaboration, and long‑term research projects.
+
+* **uv**
+  Lightweight and fast, but still relies on the host system. Suitable for users who prefer local environments.
+
+If you encounter installation issues with `uv`, switching to Dev Containers is the recommended solution.
+
+---
+
+## Installation Using `uv`
+
+> This method installs ARIEL directly from the GitHub repository.
+
+### Steps
+
+1. **Clone the repository**
+
 ```bash
 git clone https://github.com/ci-group/ariel.git
+# Enter the cloned folder
+cd ariel
 ```
-3. Create a uv virtual environment inside the repository folder
+
+2. **Create a virtual environment**
+
 ```bash
-  uv venv
+uv venv
 ```
-4. Sync the virtual environment with the requirements
+
+3. **Install and synchronize dependencies**
+
+The `uv sync` command, installs and/or syncs all dependencies needed for the library to function
 ```bash
 uv sync
 ```
-5. Run an example, in this case, brain evolution (aka learning) using:
+
+4. **Run an example**
+
 ```bash
 uv run examples/re_book/1_brain_evolution.py
 ```
-<!-- 
-1. Install `uv` (if not already installed):
 
+`uv run` automatically executes the script inside the managed virtual environment; manual activation is not required.
+
+5. **Extending Usability**
+
+If you want to add a dependency to the environment, you can do so using two methods.
+
+1. Add dependency to the environment 
+This option adds the dependency to the uv.lock file. This means that it will remain part of your environment until you uninstall it.
 ```bash
-pip install uv
+uv add <dependency>
 ```
 
-2. Install ariel:
+2. Install dependency, but don't add it to the environment
+This option installs the dependency in your current environment, but does not add it to the uv.lock file. This means that after reloading (re-activating) the environment, the dependency will not be installed.
 ```bash
-uv add ariel
+uv pip install <dependency>
 ```
 
-3. Install all dependencies and activate venv.
-If you installed ARIEL using `uv add` all packages should be installed, but if any were not installed this step should fix it.
+---
 
-Run the following command to have uv create a virtual environment, double check that all dependencies are installed and install any if they are missing.
-```bash
-uv sync
-```
+## Installation Using VS Code Dev Containers (Recommended)
 
-You can activate the uv virtual environment the same way you would activate a normal one using `.\.venv\Scripts\activate` -->
+This method builds a Docker‑based development environment with all dependencies preconfigured.
 
-## Installation using dev containers
+### Steps
 
-1. Install the `dev containers` extension on vs code.
+1. Install the **Dev Containers** extension in Visual Studio Code.
+
 ![dev_containers](../resources/dev_containers_1.jpg)
 
-2. Open the ARIEL folder in vs code
 
-3. You should automatically see an pop up on the bottom right of your screen that asks you to create a dev container for this project. This will create a `.devcontainer` folder in your directory. If you already have a `.devcontainer` folder, vs code will ask you to reopen the container.
-![reopen_dev_container](../resources/dev_containers_2.jpg)
+2. Open the ARIEL repository folder in VS Code.
 
-4. If you do not see the popup asking you to create/reopen the container you can do it manually using `ctrl+shift+p` (for windows) or `cmd+shift+p`(for mac) and select `Dev Containers: Build and Open in container`. This will create the container and install the requirements.
+3. You should automatically see an pop-up on the bottom right of your screen that asks you to create a dev container for this project. When prompted, select **“Reopen in Container”**.
 
-## Installation with pip (Not recommended)
+   * If no prompt appears, open the command palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and select `Dev Containers: Build and Open in Container`.
 
-1. Ensure you have the correct python version. ARIEL will only work with python `3.12` or higher.
 
-2. Install ariel:
+![dev_containers_2](../resources/dev_containers_2.jpg)
+
+4. VS Code will build the container and install all dependencies automatically.
+
+> The initial build may take several minutes depending on your system and internet connection.
+
+Once completed, the environment is ready for use with no additional setup.
+
+---
+
+## Verifying the Installation
+
+To verify that ARIEL is installed correctly, run one of the included examples.
+
+- For `uv`:
 
 ```bash
-pip install ariel
+uv run examples/a_mujoco/0_render_single_frame.py
 ```
 
-Pip is much less strict with dependencies than uv, so packages might conflict or might not be installed. You will need to fix the missing dependencies manually, if any arise.
+- For Dev Containers, run the same command inside the container terminal.
 
-## Verifying installation.
-To confirm your installation you can use any of the multiple examples we have added in the `examples` folder. Make sure you have activated your virtual environment using `uv venv`. If you are using uv you can run an example with `uv run examples/0_render_single_frame.py`. The same goes with
+A successful run should execute without import errors and produce either rendered output or logged evolutionary progress, depending on the example.
 
+The output of the `0_render_single_frame.py` should look something like this: 
+
+![Example](../resources/example_image.jpg)
+
+---
 
 ## Troubleshooting
 
-- Ensure all prerequisites are installed and up to date.
-- Check logs for errors and consult documentation for further help.
-- For Docker issues, verify Docker is running and ports are available.
+* **Python version errors**: Ensure Python 3.12+ is used. Earlier versions are unsupported.
+* **Dependency conflicts (uv)**: Run `uv sync` again or remove the `.venv` directory and recreate the environment.
+* **Dev Container build failures**:
+  * Verify Docker Desktop is running.
+  * Ensure sufficient disk space is available.
+* **Unexpected runtime errors**: Try a clean environment or switch to Dev Containers.
+
+For persistent issues, consult the project documentation or repository issue tracker.
+
+---
+
+## Notes on Reproducibility
+
+For published research, coursework, or collaborative projects, **Dev Containers are strongly recommended** to ensure consistent experimental results across systems.
+
+---
+
+## Citation
+
+If you use ARIEL in academic work, please cite the corresponding project publication (citation information will be added soon).

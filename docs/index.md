@@ -14,7 +14,6 @@ It is designed with a clear API, sensible defaults, and support for both beginne
 
 | Feature                     | Description                                                                                                      |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Easy to use GUI**         | Every aspect of the package from EC to ER can be configured and run through a user-friendly graphical interface. |
 | **Evolutionary Algorithms** | Already implemented evolutionary operators.                                                                      |
 | **Evolutionary Robotics**   | Tools for simulating and evolving robots in various environments.                                                |
 
@@ -38,7 +37,7 @@ See the [installation guide](source/installation_guide.md) for more details.
 Introduction to modular robots <source/introduction_to_modular_robots/index>
 Contributing guide <source/contributing_guide/index>
 Installation Guide <source/installation_guide>
-Evolutionary Computing Course Documentation <source/ec_course_docs>
+
 GUI <source/GUI>
 Your first EA with ARIEL <source/ea_intro/ea_example>
 ARIEL Database Handling <source/Db_examples/index>
