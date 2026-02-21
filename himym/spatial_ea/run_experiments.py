@@ -495,14 +495,14 @@ def define_experiments() -> dict[str, ExperimentConfig]:
     # selection, death probability is directly coupled to spatial configuration.
     experiments['eventDriven_matingZone_assignedMating_densityBased'] = ExperimentConfig(
         experiment_name="eventDriven_matingZone_assignedMating_densityBased",
-        num_runs=5,
+        num_runs=1,
         
         # Incubation
         incubation_enabled=False,
         
         # Population parameters 
         population_size=30,
-        num_generations=100,
+        num_generations=50,
         stop_on_limits=True,
         
         # Selection parameters
@@ -518,9 +518,9 @@ def define_experiments() -> dict[str, ExperimentConfig]:
         # critical_density: ρ_c - density where death prob reaches ~63% of max
         critical_density=5.0,
         # base_death_prob: P_base - baseline death even when isolated
-        base_death_prob=0.05,
+        base_death_prob=0.01,
         # max_density_death_prob: P_max - additional death prob at high density
-        max_density_death_prob=0.7,
+        max_density_death_prob=0.1,
         # density_fitness_protection: how much fitness reduces death (0=none, 1=full)
         density_fitness_protection=0.0,
 

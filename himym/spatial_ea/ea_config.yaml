@@ -5,7 +5,7 @@
 incubation:
   enabled: false              # Enable incubation phase before spatial evolution
   population_size: 30         # Population size during incubation
-  num_generations:100         # Number of generations in incubation phase (increased for gentler mutation)
+  num_generations: 100        # Number of generations in incubation phase (increased for gentler mutation)
   mutation_rate: 0.8          # Weight mutation probability
   mutation_power: 0.2         # Weight mutation strength (reduced to prevent weight explosion)
   add_connection_rate: 0.05   # Probability of adding new connection
@@ -52,13 +52,13 @@ selection:
   locality_radius: 3.0        # Gaussian kernel σ for local density calculation (meters)
   critical_density: 5.0       # ρ_c threshold where density death probability ≈ 0.63 × P_max
   base_death_prob: 0.05       # P_base - baseline death probability for isolated individuals
-  max_density_death_prob: 0.8  # P_max - maximum additional death probability from crowding
+  max_density_death_prob: 0.4  # P_max - maximum additional death probability from crowding
   density_fitness_protection: 0.0  # Reduction in death prob for high-fitness individuals (0-1)
   
   # Mating Zone Configuration
   mating_zone_center: [12.5, 12.5]  # Center coordinates (x, y) of the primary mating zone (used if num_zones=1 and zone_relocation_strategy="static")
   mating_zone_radius: 2.5     # Radius of the mating zone circle (meters)
-  num_mating_zones: 3         # Number of randomly placed mating zones (1 = single zone at mating_zone_center)
+  num_mating_zones: 17         # Number of randomly placed mating zones (1 = single zone at mating_zone_center)
   zone_relocation_strategy: "event_driven"  # Zone relocation strategy: "static" (never move), "generation_interval" (move every N generations), "event_driven" (move after matings)
   zone_change_interval: 3     # Generations between zone position changes (only used if zone_relocation_strategy="generation_interval")
   min_zone_distance: 2.0      # Minimum distance between zone centers when using multiple zones (in zone radii units)
