@@ -4,6 +4,8 @@
 
 The Experiment Runner automates running multiple evolutionary trials with consistent parameters, handling early stopping, aggregating statistics across runs, and generating comprehensive comparisons.
 
+The codebase has been streamlined with clean, concise code and minimal verbosity while maintaining all functionality.
+
 ## Quick Start
 
 ### 1. List Available Experiments

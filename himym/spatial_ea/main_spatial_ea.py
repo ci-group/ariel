@@ -1,10 +1,7 @@
 import mujoco
 import numpy as np
 
-# Import configuration
 from ea_config import config
-
-# Import local modules
 from spatial_individual import SpatialIndividual
 from genetic_operators import (
     create_initial_hyperneat_genome,
@@ -15,7 +12,7 @@ from genetic_operators import (
 from selection import apply_selection
 from evaluation import evaluate_population
 from visualization import save_mating_trajectories
-from parent_selection import find_pairs, calculate_offspring_positions
+from parent_selection import find_pairs, calculate_offspring_positions, generate_random_zone_centers
 from evolution_data_collector import EvolutionDataCollector
 from simulation_utils import (
     generate_spawn_positions,
@@ -27,9 +24,6 @@ from simulation_utils import (
 )
 from visualize_experiment import ExperimentVisualizer
 from incubation import IncubationEvolution, seed_spatial_population_from_incubation
-from genetic_operators import create_initial_hyperneat_genome
-
-# Import robot and environment
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
 from ariel.simulation.environments.simple_flat_world import SimpleFlatWorld
 from ariel.utils.renderers import video_renderer
@@ -38,12 +32,7 @@ from periodic_boundary_utils import apply_periodic_boundaries_to_simulation
 
 
 class SpatialEA:
-    """
-    Spatial Evolutionary Algorithm for robot movement.
-    
-    This EA uses physical proximity in simulation to determine mating pairs,
-    where robots move towards fitter neighbors during a mating phase.
-    """
+    """Spatial Evolutionary Algorithm using proximity-based mating in physical simulation."""
     
     def __init__(
         self, 
@@ -51,14 +40,6 @@ class SpatialEA:
         num_generations: int | None = None, 
         num_joints: int | None = None
     ):
-        """
-        Initialize the Spatial EA.
-        
-        Args:
-            population_size: Initial population size
-            num_generations: Number of generations to evolve
-            num_joints: Number of controllable joints per robot
-        """
         self.population_size = population_size or config.population_size
         self.num_generations = num_generations or config.num_generations
         self.num_joints = num_joints
@@ -67,36 +48,23 @@ class SpatialEA:
         self.generation = 0
         self.fitness_history: list[float] = []
         self.best_individual_history: list[SpatialIndividual] = []
-        
-        # Data collection
         self.data_collector = EvolutionDataCollector(config=config)
         
-        # World and simulation
         self.world = None
         self.model = None
         self.data = None
         self.robots = []
         self.tracked_geoms = []
-        
-        # Store current positions for cross-generation persistence
         self.current_positions: list[np.ndarray] = []
-        
-        # Store current orientations (yaw angles in radians)
         self.current_orientations: list[float] = []
-        
-        # Counter for assigning unique IDs to individuals
         self.next_unique_id = 0
         
-        # Mating zone management
         self.current_zone_centers: list[tuple[float, float]] = []
-        self.assigned_zones: dict[int, int] = {}  # Maps individual unique_id to zone index
+        self.assigned_zones: dict[int, int] = {}
         self._initialize_mating_zones()
     
     def _initialize_mating_zones(self) -> None:
         """Initialize mating zone positions."""
-        from parent_selection import generate_random_zone_centers
-        
-        # Initialize zones if needed for pairing or movement bias
         if config.pairing_method != "mating_zone" and config.movement_bias != "nearest_zone":
             return
         
@@ -117,8 +85,45 @@ class SpatialEA:
             print(f"  Zones used for: pairing")
         if config.movement_bias == "nearest_zone":
             print(f"  Zones used for: movement bias")
-        if config.dynamic_mating_zones:
-            print(f"  Zones will change every {config.zone_change_interval} generations")
+        
+        # Print zone relocation strategy
+        strategy = config.zone_relocation_strategy
+        if strategy == "static":
+            print(f"  Zone relocation: static (zones never move)")
+        elif strategy == "generation_interval":
+            print(f"  Zone relocation: every {config.zone_change_interval} generations")
+        elif strategy == "event_driven":
+            print(f"  Zone relocation: event-driven (zones relocate after matings)")
+        else:
+            print(f"  Zone relocation: {strategy}")
+    
+    def cleanup_simulation_resources(self) -> None:
+        """
+        Explicitly clean up simulation resources to prevent memory leaks.
+        Call this after each generation or when done with simulation.
+        """
+        import gc
+        
+        # Clear MuJoCo model and data
+        if self.data is not None:
+            del self.data
+            self.data = None
+        
+        if self.model is not None:
+            del self.model
+            self.model = None
+        
+        # Clear world
+        if self.world is not None:
+            del self.world
+            self.world = None
+        
+        # Clear robot references
+        self.robots = []
+        self.tracked_geoms = []
+        
+        # Force garbage collection
+        gc.collect()
     
     def _assign_zones_to_population(self) -> None:
         """Assign each individual to a random mating zone."""
@@ -132,31 +137,98 @@ class SpatialEA:
     
     def _update_mating_zones(self) -> None:
         """Update mating zone positions if dynamic zones are enabled."""
-        from parent_selection import generate_random_zone_centers
         
         # Only update zones if they're being used
         if config.pairing_method != "mating_zone" and config.movement_bias not in ["nearest_zone", "assigned_zone"]:
             return
         
-        if not config.dynamic_mating_zones:
+        strategy = config.zone_relocation_strategy
+        
+        if strategy == "static":
+            # Never move zones
             return
         
-        # Check if it's time to change zones
-        if self.generation > 0 and self.generation % config.zone_change_interval == 0:
-            print(f"\n  UPDATING MATING ZONES (Generation {self.generation})")
-            self.current_zone_centers = generate_random_zone_centers(
-                num_zones=config.num_mating_zones,
-                world_size=(config.world_size[0], config.world_size[1]),
-                zone_radius=config.mating_zone_radius,
-                min_zone_distance=config.min_zone_distance
-            )
+        if strategy == "generation_interval":
+            # Check if it's time to change zones
+            if self.generation > 0 and self.generation % config.zone_change_interval == 0:
+                print(f"\n  UPDATING MATING ZONES (Generation {self.generation})")
+                self.current_zone_centers = generate_random_zone_centers(
+                    num_zones=config.num_mating_zones,
+                    world_size=(config.world_size[0], config.world_size[1]),
+                    zone_radius=config.mating_zone_radius,
+                    min_zone_distance=config.min_zone_distance
+                )
+                
+                print(f"  New zone centers: {self.current_zone_centers}")
+                
+                # Reassign zones when they change (for assigned_zone movement bias)
+                if config.movement_bias == "assigned_zone":
+                    self._assign_zones_to_population()
+                    print(f"  Reassigned zones to all {len(self.population)} individuals")
+        
+        # Note: event_driven relocation is handled in create_next_generation after pairing
+    
+    def _relocate_zones(self, zone_indices: set[int]) -> None:
+        """
+        Relocate specific mating zones to new random positions.
+        
+        Args:
+            zone_indices: Set of zone indices to relocate
+        """
+        if not zone_indices or len(self.current_zone_centers) == 0:
+            return
+        
+        print(f"\n  EVENT-DRIVEN ZONE RELOCATION")
+        print(f"  Relocating {len(zone_indices)} zones that had matings: {sorted(zone_indices)}")
+        
+        # For each zone to relocate, generate a new position
+        for zone_idx in zone_indices:
+            if zone_idx < len(self.current_zone_centers):
+                # Generate new position that doesn't overlap with existing zones
+                max_attempts = 100
+                for attempt in range(max_attempts):
+                    # Generate random position
+                    margin = 1.0
+                    zone_radius = config.mating_zone_radius
+                    x_min = margin + zone_radius
+                    x_max = config.world_size[0] - margin - zone_radius
+                    y_min = margin + zone_radius
+                    y_max = config.world_size[1] - margin - zone_radius
+                    
+                    new_x = np.random.uniform(x_min, x_max)
+                    new_y = np.random.uniform(y_min, y_max)
+                    new_center = (new_x, new_y)
+                    
+                    min_distance = zone_radius * config.min_zone_distance
+                    too_close = False
+                    for other_idx, other_center in enumerate(self.current_zone_centers):
+                        if other_idx == zone_idx:
+                            continue
+                        distance = np.sqrt((new_x - other_center[0])**2 + (new_y - other_center[1])**2)
+                        if distance < min_distance:
+                            too_close = True
+                            break
+                    
+                    if not too_close:
+                        old_center = self.current_zone_centers[zone_idx]
+                        self.current_zone_centers[zone_idx] = new_center
+                        print(f"    Zone {zone_idx}: {old_center} -> {new_center}")
+                        break
+                else:
+                    print(f"    Warning: Could not find non-overlapping position for zone {zone_idx}")
+        
+        if config.movement_bias == "assigned_zone":
+            reassigned_count = 0
+            for individual in self.population:
+                if individual.unique_id in self.assigned_zones:
+                    old_zone = self.assigned_zones[individual.unique_id]
+                    if old_zone in zone_indices:
+                        new_zone = np.random.randint(0, len(self.current_zone_centers))
+                        self.assigned_zones[individual.unique_id] = new_zone
+                        reassigned_count += 1
             
-            print(f"  New zone centers: {self.current_zone_centers}")
-            
-            # Reassign zones when they change (for assigned_zone movement bias)
-            if config.movement_bias == "assigned_zone":
-                self._assign_zones_to_population()
-                print(f"  Reassigned zones to all {len(self.population)} individuals")
+            print(f"  Reassigned {reassigned_count} individuals from relocated zones")
+    
     
     def create_individual(self) -> SpatialIndividual:
         """Create a new individual with random genotype."""
@@ -166,14 +238,11 @@ class SpatialEA:
             initial_energy=config.initial_energy
         )
         self.next_unique_id += 1
-        
-        # Create HyperNEAT genome instead of sinusoidal
         individual.genotype = create_initial_hyperneat_genome(
-            num_inputs=4,  # CPPN inputs: x1, y1, x2, y2 (source and target coordinates)
-            num_outputs=1,  # CPPN output: connection weight
-            activation='sine'  # Use sine as default output activation
+            num_inputs=4,
+            num_outputs=1,
+            activation='sine'
         )
-        
         return individual
     
     def initialize_population(self) -> None:
@@ -210,7 +279,7 @@ class SpatialEA:
             incubation_population = incubator.run()
             
             # Demonstrate best incubation individual
-            incubator.demonstrate_best(duration=15.0)
+            #incubator.demonstrate_best(duration=15.0)
             
             # Update next_unique_id to continue from incubation
             self.next_unique_id = incubator.next_unique_id
@@ -246,28 +315,20 @@ class SpatialEA:
             print(f"Initializing population of {self.population_size} individuals")
             self.population = [self.create_individual() for _ in range(self.population_size)]
             
-            # Assign zones if using assigned_zone movement bias
             if config.movement_bias == "assigned_zone":
                 self._assign_zones_to_population()
-                print(f"  Assigned zones to {len(self.population)} individuals")
     
     def spawn_population(self) -> None:
         """Spawn population in simulation world."""
-        print(f"Spawning {self.population_size} robots in simulation space")
-        
-        # Sanity check: verify positions match population size
+        # Verify positions match population size
         if len(self.current_positions) > 0 and len(self.current_positions) != self.population_size:
-            print(f"  WARNING: Position count ({len(self.current_positions)}) != population size ({self.population_size})")
-            print(f"  Regenerating all positions...")
             self.current_positions = []
             self.current_orientations = []
         
         # Determine spawn positions
         if len(self.current_positions) == self.population_size:
-            print(f"  Using positions from previous generation")
             positions = [pos.copy() for pos in self.current_positions]
         else:
-            print(f"  Generating new random spawn positions")
             positions = generate_spawn_positions(
                 population_size=self.population_size,
                 spawn_x_range=(config.spawn_x_min, config.spawn_x_max),
@@ -302,29 +363,14 @@ class SpatialEA:
         )
         
         print(f"Spawned {len(self.population)} robots successfully")
-        print(f"Tracking {len(self.tracked_geoms)} core geoms")
     
     def evaluate_population_fitness(self) -> list[float]:
-        """
-        Evaluate fitness for individuals that haven't been evaluated yet.
-        
-        This implements an evaluate-once strategy: each individual is only
-        evaluated when first created. This is valid because:
-        1. Fitness is deterministic (same genotype → same fitness)
-        2. Genotypes never change after creation
-        3. Evaluation is in isolation (no environment dynamics)
-        
-        This provides 40-60% computation savings compared to evaluating
-        every individual every generation.
-        """
-        # Find individuals that need evaluation
+        """Evaluate fitness for new individuals using evaluate-once strategy."""
         unevaluated = [ind for ind in self.population if not ind.evaluated]
         
         if unevaluated:
-            print(f"  Evaluating {len(unevaluated)} new individuals (gen {self.generation + 1})")
-            print(f"  Skipping {len(self.population) - len(unevaluated)} already-evaluated individuals")
+            print(f"  Evaluating {len(unevaluated)} new individuals")
             
-            # Use HyperNEAT controller for evaluation
             fitness_values = evaluate_population(
                 population=unevaluated,
                 world_size=config.world_size,
@@ -337,13 +383,9 @@ class SpatialEA:
                 progress_weight=config.progress_weight
             )
             
-            # Mark as evaluated
             for ind in unevaluated:
                 ind.evaluated = True
-        else:
-            print(f"  All {len(self.population)} individuals already evaluated (gen {self.generation + 1})")
         
-        # Return fitness values for all individuals (whether newly evaluated or not)
         return [ind.fitness for ind in self.population]
     
     def mating_movement_phase(
@@ -351,25 +393,13 @@ class SpatialEA:
         duration: float = 60.0, 
         save_trajectories: bool = True
     ) -> None:
-        """
-        Run mating movement phase where robots move towards attractive neighbors.
-        
-        Args:
-            duration: Duration of movement phase
-            save_trajectories: Whether to save trajectory visualization
-        """
-        print(f"  MATING MOVEMENT PHASE ({duration}s)")
-        
+        """Run mating movement phase where robots move towards attractive neighbors."""
         fitness_values = [ind.fitness for ind in self.population]
         num_spawned = len(self.tracked_geoms)
         
-        # Initialize trajectory tracking
         sample_interval = max(1, int(duration / self.model.opt.timestep) // 100)
-        print(f"  Tracking trajectories for {num_spawned} spawned robots")
-        
         trajectories = track_trajectories(self.tracked_geoms, sample_interval)
         
-        # Create mating controller
         controller = create_mating_controller(
             population=self.population,
             tracked_geoms=self.tracked_geoms,
@@ -487,38 +517,48 @@ class SpatialEA:
             # Close renderer if it was only used for snapshots
             renderer.close()
         
-        # Update positions for next generation
-        # Only update for robots that exist in current population
+        # Update positions for next generation using robot_index mapping
         pop_size = len(self.population)
+        old_positions = self.current_positions.copy() if self.current_positions else []
+        old_orientations = self.current_orientations.copy() if self.current_orientations else []
+        
         self.current_positions = []
         self.current_orientations = []
-        for i in range(min(pop_size, num_spawned)):
-            pos = self.tracked_geoms[i].xpos.copy()
+        
+        for i in range(pop_size):
+            robot_idx = self.population[i].robot_index
+            
+            # Use old position if robot_index is invalid (offspring or edge cases)
+            if robot_idx is None or robot_idx >= num_spawned:
+                if i < len(old_positions):
+                    self.current_positions.append(old_positions[i].copy())
+                    self.current_orientations.append(old_orientations[i] if i < len(old_orientations) else 0.0)
+                else:
+                    self.current_positions.append(np.array([
+                        np.random.uniform(config.spawn_x_min, config.spawn_x_max),
+                        np.random.uniform(config.spawn_y_min, config.spawn_y_max),
+                        config.spawn_z
+                    ]))
+                    self.current_orientations.append(np.random.uniform(0, 2 * np.pi))
+                continue
+            
+            # Read current position from simulation using robot_index
+            pos = self.tracked_geoms[robot_idx].xpos.copy()
             self.current_positions.append(pos)
             
             # Extract orientation (yaw) from quaternion
-            joint_name = f"robot-{i}"
+            joint_name = f"robot-{robot_idx}"
             joint_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
             if joint_id >= 0:
                 qpos_addr = self.model.jnt_qposadr[joint_id]
-                # Get quaternion from qpos (indices 3-6)
                 qw = self.data.qpos[qpos_addr + 3]
                 qx = self.data.qpos[qpos_addr + 4]
                 qy = self.data.qpos[qpos_addr + 5]
                 qz = self.data.qpos[qpos_addr + 6]
-                
-                # Convert quaternion to yaw angle (rotation around z-axis)
-                # yaw = atan2(2*(qw*qz + qx*qy), 1 - 2*(qy^2 + qz^2))
                 yaw = np.arctan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy**2 + qz**2))
                 self.current_orientations.append(yaw)
             else:
-                # Fallback if joint not found
                 self.current_orientations.append(0.0)
-        
-        print(f"  Updated positions for next generation")
-        print(f"    Population size: {pop_size}")
-        print(f"    Tracked {len(self.current_positions)} positions")
-        print(f"    Tracked {len(self.current_orientations)} orientations")
         
         # Save trajectory visualization
         if save_trajectories and pop_size > 0:
@@ -528,7 +568,14 @@ class SpatialEA:
             pop_size = len(self.population)
             vis_population = self.population[:pop_size]
             vis_fitness = fitness_values[:pop_size]
-            vis_trajectories = trajectories[:pop_size]
+            
+            # Reorder trajectories to match population order using robot_index
+            vis_trajectories = []
+            for ind in vis_population:
+                if ind.robot_index is not None and ind.robot_index < len(trajectories):
+                    vis_trajectories.append(trajectories[ind.robot_index])
+                else:
+                    vis_trajectories.append([np.array([0.0, 0.0])])
             
             save_mating_trajectories(
                 trajectories=vis_trajectories,
@@ -568,23 +615,16 @@ class SpatialEA:
             
             if self.population:
                 energy_values = [ind.energy for ind in self.population]
-                print(f"  Energy after depletion: min={min(energy_values):.1f}, "
-                      f"max={max(energy_values):.1f}, avg={np.mean(energy_values):.1f}")
-            else:
-                print(f"  No population to deplete energy from")
+                print(f"  Energy after depletion: min={min(energy_values):.1f}, max={max(energy_values):.1f}, avg={np.mean(energy_values):.1f}")
         
-        # Allow robots to move towards partners
-        self.mating_movement_phase(
-            duration=config.simulation_time, 
-            save_trajectories=True
-        )
+        self.mating_movement_phase(duration=config.simulation_time, save_trajectories=True)
         
         new_population: list[SpatialIndividual] = []
         new_positions: list[np.ndarray] = []
         new_orientations: list[float] = []
         
         # Find pairs based on selected pairing method
-        pairs, paired_indices = find_pairs(
+        pairs, paired_indices, zones_with_matings = find_pairs(
             population=self.population,
             tracked_geoms=self.tracked_geoms,
             method=config.pairing_method,
@@ -598,6 +638,10 @@ class SpatialEA:
         print(f"  Created {len(pairs)} pairs from {self.population_size} robots")
         print(f"  Pairing method: {config.pairing_method}")
         print(f"  Unpaired robots: {self.population_size - len(paired_indices)}")
+        
+        # Event-driven zone relocation: relocate zones that had matings
+        if config.zone_relocation_strategy == "event_driven" and zones_with_matings:
+            self._relocate_zones(zones_with_matings)
         
         # Record mating statistics
         self.data_collector.record_mating_stats(
@@ -620,17 +664,14 @@ class SpatialEA:
             parent1 = self.population[parent1_idx]
             parent2 = self.population[parent2_idx]
             
-            # Apply mating energy effects to parents
+            # Apply mating energy effects
             if config.enable_energy:
                 if config.mating_energy_effect == "restore":
-                    # Mating restores energy to initial value
                     parent1.energy = config.initial_energy
                     parent2.energy = config.initial_energy
                 elif config.mating_energy_effect == "cost":
-                    # Mating costs energy
                     parent1.energy -= config.mating_energy_amount
                     parent2.energy -= config.mating_energy_amount
-                # If "none", no energy effect from mating
             
             # Crossover
             if np.random.random() < config.crossover_rate:
@@ -638,7 +679,6 @@ class SpatialEA:
                     parent1, parent2, self.next_unique_id, self.generation + 1
                 )
             else:
-                # No crossover - clone parents
                 child1, self.next_unique_id = clone_individual(
                     parent1, self.next_unique_id, self.generation + 1
                 )
@@ -683,27 +723,18 @@ class SpatialEA:
             for individual in new_population:
                 zone_idx = np.random.randint(0, len(self.current_zone_centers))
                 self.assigned_zones[individual.unique_id] = zone_idx
-            print(f"  Assigned zones to {len(new_population)} new offspring")
         
         # Verify consistency
         if len(self.population) != len(self.current_positions):
-            print(f"  ERROR: Population size ({len(self.population)}) != "
-                  f"Position count ({len(self.current_positions)})")
             raise RuntimeError("Population and position arrays out of sync!")
-        
         if len(self.population) != len(self.current_orientations):
-            print(f"  ERROR: Population size ({len(self.population)}) != "
-                  f"Orientation count ({len(self.current_orientations)})")
             raise RuntimeError("Population and orientation arrays out of sync!")
         
-        # Update population size before selection
+        # Update population size
         old_size = self.population_size
         self.population_size = len(self.population)
         
-        print(f"  Population extended from {old_size} to {self.population_size} individuals")
-        print(f"  Added {len(new_population)} offspring")
-        print(f"  Position tracking updated: {len(self.current_positions)} positions")
-        print(f"  Paired individuals: {len(paired_indices)} out of {old_size}")
+        print(f"  Population: {old_size} → {self.population_size} (+{len(new_population)} offspring, {len(paired_indices)} paired)")
         
         # Record reproduction statistics
         self.data_collector.record_reproduction(
@@ -711,11 +742,10 @@ class SpatialEA:
             population_before=old_size
         )
         
-        # Report mating energy effects
+        # Report energy effects if enabled
         if config.enable_energy and self.population:
             energy_values = [ind.energy for ind in self.population]
-            print(f"  Energy after mating: min={min(energy_values):.1f}, "
-                  f"max={max(energy_values):.1f}, avg={np.mean(energy_values):.1f}")
+            print(f"  Energy: min={min(energy_values):.1f}, max={max(energy_values):.1f}, avg={np.mean(energy_values):.1f}")
             if config.mating_energy_effect == "restore":
                 print(f"  Mating effect: Energy restored to {config.initial_energy} for {len(pairs)} mating pairs")
             elif config.mating_energy_effect == "cost":
@@ -852,7 +882,15 @@ class SpatialEA:
                     current_generation=self.generation,
                     current_orientations=self.current_orientations,
                     paired_indices=set(),  # No paired indices at this point
-                    max_age=config.max_age
+                    max_age=config.max_age,
+                    # Density-based selection parameters
+                    world_size=(config.world_size[0], config.world_size[1]),
+                    use_periodic_boundaries=config.use_periodic_boundaries,
+                    locality_radius=config.locality_radius,
+                    critical_density=config.critical_density,
+                    base_death_prob=config.base_death_prob,
+                    max_density_death_prob=config.max_density_death_prob,
+                    density_fitness_protection=config.density_fitness_protection
                 )
                 
                 print(f"  Post-selection population: {len(self.population)}")
@@ -892,6 +930,8 @@ class SpatialEA:
                             duration=config.simulation_time, 
                             save_trajectories=True
                         )
+                        # Clean up resources before breaking
+                        self.cleanup_simulation_resources()
                         break
                     
                     if self.population_size < config.min_population_limit:
@@ -905,6 +945,8 @@ class SpatialEA:
                             f"Population extinction after selection (below {config.min_population_limit})",
                             self.num_generations
                         )
+                        # Clean up resources before breaking
+                        self.cleanup_simulation_resources()
                         break
             else:
                 # Run mating movement to capture final positions
@@ -912,6 +954,9 @@ class SpatialEA:
                     duration=config.simulation_time, 
                     save_trajectories=True
                 )
+            
+            # Clean up simulation resources after each generation to manage memory
+            self.cleanup_simulation_resources()
         
         print(f"\n{'='*60}")
         print("EVOLUTION COMPLETE")

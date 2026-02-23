@@ -9,6 +9,7 @@ authors = [{ name = "jmdm", email = "jmdm.880@gmail.com" }]
 classifiers = ["Development Status :: 2 - Pre-Alpha"]
 
 dependencies = [
+  "imageio>=2.37.2",
   "matplotlib>=3.9.4",
   "mujoco>=3.3.6",
   "mypy>=1.18.2",
@@ -21,10 +22,12 @@ dependencies = [
   "numpy-quaternion>=2023.0.3",
   "opencv-python>=4.11.0.86",
   "pillow>=11.3.0",
+  "psutil>=6.1.0",
   "pydantic>=2.11.9",
   "pydantic-settings>=2.10.1",
   "rich>=14.1.0",
   "ruff>=0.13.1",
+  "seaborn>=0.13.2",
   "sqlalchemy>=2.0.43",
   "sqlmodel>=0.0.25",
   "torch>=2.8.0",

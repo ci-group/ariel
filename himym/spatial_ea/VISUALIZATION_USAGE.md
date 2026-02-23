@@ -4,6 +4,8 @@
 
 The visualization system provides comprehensive analysis and plotting tools for Spatial EA experiments. It automatically discovers data files, generates multi-panel plots, and provides programmatic access to all metrics.
 
+The codebase has been streamlined for better readability with concise docstrings and minimal comments while maintaining full functionality.
+
 ## Quick Start
 
 ### 1. Basic Visualization

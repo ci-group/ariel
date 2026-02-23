@@ -186,9 +186,43 @@ class EAConfig:
         return self._config['selection'].get('num_mating_zones', 1)
     
     @property
+    def zone_relocation_strategy(self) -> str:
+        """
+        Strategy for relocating mating zones.
+        
+        Returns:
+            One of: "static", "generation_interval", or "event_driven"
+            
+        Note: Provides backward compatibility with old boolean 'dynamic_mating_zones' config.
+        If dynamic_mating_zones is found, converts: True -> "generation_interval", False -> "static"
+        """
+        # Check for new string-based parameter first
+        strategy = self._config['selection'].get('zone_relocation_strategy', None)
+        if strategy is not None:
+            valid_strategies = ["static", "generation_interval", "event_driven"]
+            if strategy not in valid_strategies:
+                print(f"Warning: Invalid zone_relocation_strategy '{strategy}', defaulting to 'static'")
+                return "static"
+            return strategy
+        
+        # Backward compatibility: convert old boolean to string
+        old_dynamic = self._config['selection'].get('dynamic_mating_zones', None)
+        if old_dynamic is not None:
+            return "generation_interval" if old_dynamic else "static"
+        
+        # Default to static if neither parameter exists
+        return "static"
+    
+    @property
     def dynamic_mating_zones(self) -> bool:
-        """Whether mating zones change position over time."""
-        return self._config['selection'].get('dynamic_mating_zones', False)
+        """
+        DEPRECATED: Use zone_relocation_strategy instead.
+        
+        Maintained for backward compatibility only.
+        Returns True if zone_relocation_strategy is "generation_interval" or "event_driven".
+        """
+        strategy = self.zone_relocation_strategy
+        return strategy in ["generation_interval", "event_driven"]
     
     @property
     def zone_change_interval(self) -> int:
@@ -235,6 +269,32 @@ class EAConfig:
     def mating_energy_amount(self) -> float:
         """Energy restored (if 'restore') or cost deducted (if 'cost') when mating occurs."""
         return self._config['selection'].get('mating_energy_amount', 50.0)
+    
+    # Density-Based Selection Parameters
+    @property
+    def locality_radius(self) -> float:
+        """Gaussian kernel σ for local density calculation (meters)."""
+        return self._config['selection'].get('locality_radius', 3.0)
+    
+    @property
+    def critical_density(self) -> float:
+        """ρ_c threshold where density death probability ≈ 0.63 × P_max."""
+        return self._config['selection'].get('critical_density', 5.0)
+    
+    @property
+    def base_death_prob(self) -> float:
+        """P_base - baseline death probability for isolated individuals."""
+        return self._config['selection'].get('base_death_prob', 0.05)
+    
+    @property
+    def max_density_death_prob(self) -> float:
+        """P_max - maximum additional death probability from crowding."""
+        return self._config['selection'].get('max_density_death_prob', 0.8)
+    
+    @property
+    def density_fitness_protection(self) -> float:
+        """Reduction in death probability for high-fitness individuals (0-1)."""
+        return self._config['selection'].get('density_fitness_protection', 0.0)
     
     # Crossover Parameters
     @property

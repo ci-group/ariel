@@ -2,7 +2,27 @@
 
 ## Overview
 
-The Spatial EA (Evolutionary Algorithm) simulates robot populations that evolve through spatially-constrained mating. Robots move in a physical environment, and their proximity determines mating opportunities, creating spatial selection pressures.
+The Spatial EA (Evolutionary Algorithm) simulates robot populations that evolve## Programmatic Usage
+
+### Basic Setup
+
+```python
+from main_spatial_ea import SpatialEA
+from ea_config import config
+
+# Use default configuration
+spatial_ea = SpatialEA(num_joints=8)  # Number of robot actuators
+
+# Run evolution
+best_individual = spatial_ea.run_evolution()
+
+if best_individual:
+    print(f"Best fitness: {best_individual.fitness:.4f}")
+else:
+    print("Evolution stopped early (extinction or explosion)")
+```onstrained mating. Robots move in a physical environment, and their proximity determines mating opportunities, creating spatial selection pressures.
+
+This system has been streamlined for better readability while maintaining full functionality. All core modules use concise docstrings and minimal logging for cleaner output.
 
 ## Quick Start
 
@@ -71,13 +91,19 @@ record_generation_videos: false
 
 **None**
 - Robots move randomly (Brownian motion)
+- Default baseline behavior
 
 **Nearest Neighbor**
 - Robots move toward nearest neighbor
 - Creates aggregation dynamics
+- Promotes clustering behavior
+
+**Nearest Zone**
+- Robots move toward nearest mating zone
+- Works with multiple zones
 
 **Assigned Zone**
-- Each robot targets a specific mating zone
+- Each robot targets a specific assigned mating zone
 - Combines with `mating_zone` pairing
 
 ### 3. Selection Methods
@@ -88,18 +114,25 @@ record_generation_videos: false
 - Standard evolutionary pressure
 
 **Age-Based**
-- Older individuals have higher death probability
+- Younger individuals preferred
+- Maintains target population size
 - Can be combined with `max_age` limit
+
+**Probabilistic Age**
+- Death probability increases with age
+- No target population enforcement
+- Natural population dynamics (p_death = age/max_age)
 
 **Energy-Based**
 - Individuals have energy that depletes over time
 - Death when energy reaches zero
+- No target population enforcement
 - Mating can cost or restore energy
 
 **Parents Die**
 - Parents automatically removed after reproduction
-- No population control
-- Can lead to exponential growth
+- Offspring and non-maters survive
+- Enforces target population size
 
 ## Programmatic Usage
 
@@ -197,17 +230,22 @@ energy:
 
 ### 3. Mating Zones
 
-Create spatial mating constraints:
+Create spatial mating constraints with multiple zones:
 
 ```yaml
 mating:
   pairing_method: "mating_zone"
-  movement_bias: "assigned_zone"
+  num_mating_zones: 4  # Multiple zones
   mating_zone_radius: 2.5
-  num_mating_zones: 4
-  dynamic_mating_zones: true
-  zone_change_interval: 3  # Generations between moves
+  zone_relocation_strategy: "event_driven"  # or "generation_interval", "static"
+  zone_change_interval: 3  # For generation_interval strategy
+  min_zone_distance: 2.0  # Minimum spacing between zones
 ```
+
+**Zone Relocation Strategies:**
+- `static`: Zones never move
+- `generation_interval`: Zones relocate every N generations
+- `event_driven`: Zones relocate after successful matings occur within them
 
 ### 4. Population Control
 
