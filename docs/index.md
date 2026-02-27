@@ -37,6 +37,8 @@ See the [installation guide](source/installation_guide.md) for more details.
 Introduction to modular robots <source/introduction_to_modular_robots/index>
 Contributing guide <source/contributing_guide/index>
 Installation Guide <source/installation_guide>
+Genotypes <source/genotype_docs/index>
+
 
 GUI <source/GUI>
 Your first EA with ARIEL <source/ea_intro/ea_example>

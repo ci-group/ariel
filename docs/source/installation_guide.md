@@ -9,7 +9,7 @@ We strongly recommend using either **uv** or **VS Code Dev Containers**. While a
 ## Supported Platforms
 
 * Windows 10/11
-* macOS
+* MacOS
 * Linux
 
 ---
@@ -18,15 +18,12 @@ We strongly recommend using either **uv** or **VS Code Dev Containers**. While a
 
 ### Required for all installation methods
 
-* Python 3.12+
-* Git
-
+* Python 3.12+ _(mandatory)_
+* Git _(optional)_
+  * If you do not wish to use git, you can download the library from the GitHub page as a zip.
 ### For installation with `uv`
 
-* `uv` package manager. Can be installed using stock Python with `pip`:
-```bash 
-pip install uv 
-```  
+* Follow the installation instructions from the [official uv page](https://docs.astral.sh/uv/getting-started/installation/)
 
 ### For installation using Dev Containers
 
