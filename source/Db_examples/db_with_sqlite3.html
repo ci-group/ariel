@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Database manipulation with sqlite3 - ARIEL documentation</title><link rel="shortcut icon" href="../../_static/ariel_favicon.ico"/><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="MuJoCo Data Class Variables Documentation" href="../Mujoco_docs/mujoco_docs.html" /><link rel="prev" title="Database manipulation with polars" href="db_with_polars.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b1a1f93b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=bb284d7b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto+Slab:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+    rel="stylesheet">
+
+<style>
+    :root {
+        /* --------- FONTS --------- */
+        --sy-f-heading: 'Bree Serif', 'Roboto Slab', 'Georgia', 'Arial', serif;
+        --sy-f-text: 'Verdana', 'Ubuntu', 'Lato', 'Helvetica', 'Arial', var(--sy-f-sys), sans-serif;
+        --sy-f-mono: 'Monaco', monospace;
+
+        /* --------- NAVBAR --------- */
+        /* --sy-s-banner-height: 40px; */
+        /* --sy-s-navbar-height: 50px; */
+
+        /* --------- COLORS --------- */
+        /*  Text */
+        /* --header-foreground: #FFFFFF; */
+        --header-foreground: #ECEEED;
+
+        --text-foreground: #F1F3F2;
+        --text-foreground-light: #1A211E;
+
+        --muted-text: #8A8A8A;
+        --inline-code: #e74c3c;
+
+        /* Window */
+        --main-window: #111113;
+        --side-bar: #111113;
+        --border-color: #303036;
+        --code-border: #8A8A8A;
+
+        --main-window-light: #FFFFFF;
+        --side-bar-light: #FFFFFF;
+        --border-color-light: #FFFFFF;
+        --code-border-light: #8A8A8A;
+
+        /* Links */
+        --unvisited: #4D8BFF;
+        --unvisited-hover: #99BDFF;
+        --visited: #E61986;
+        --visited-hover: #F075B7;
+
+        --unvisited-light: #1A6AFF;
+        --unvisited-hover-light: #003EB3;
+        --visited-light: #CF1779;
+        --visited-hover-light: #A1125E;
+
+        /* Theme */
+        --accent-a2: #29AB8711;
+        --accent-a25: #29AB8722;
+        --accent-a3: #29AB8733;
+        --accent-a4: #29AB8755;
+        --accent-9: #29AB87EE;
+        --accent-a11: #29AB87FF;
+        --color-surface-accent: var(--accent-a2);
+        --sy-c-light: var(--muted-text);
+        --sy-c-border: var(--accent-a4);
+
+        /* --- Code --- */
+        /* highlight */
+        --syntax-highlight-bg: var(--accent-a25);
+        /* background */
+        --syntax-pre-bg: #8A8A8A11;
+        /* header */
+        --syntax-cap-bg: var(--accent-a4);
+
+    }
+
+    html.dark {
+        /* Background */
+        --sy-c-background: var(--side-bar);
+        --sy-c-foot-background: var(--side-bar);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground);
+        --yue-c-code-background: var(--main-window);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #FFA400;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--header-foreground);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-a4); */
+        --sy-c-foot-divider: var(--border-color);
+
+    }
+
+    html.light {
+        /* Background */
+        --sy-c-background: var(--side-bar-light);
+        --sy-c-foot-background: var(--side-bar-light);
+
+        /* mono font */
+        /* --accent-a11: var(--inline-code); */
+
+        /* text foreground */
+        --yue-c-text: var(--text-foreground-light);
+        --yue-c-code-background: var(--main-window-light);
+        --sy-c-foot-text: var(--muted-text);
+
+        /* Bold text (+header +breadcrumb)*/
+        --sy-c-bold: #F17300;
+
+        /* Headings (markdown) */
+        --sy-c-heading: var(--text-foreground-light);
+
+        /* Dividers */
+        /* --sy-c-divider: var(--accent-9); */
+        --sy-c-foot-divider: var(--border-color-light);
+    }
+
+
+    /* --------- CORRECT "BOLD" CHANGES HEADER --------- */
+    .sy-head-brand strong {
+        color: light-dark(var(--text-foreground-light), var(--text-foreground));
+    }
+
+    /* --------- UNDERLINE HEADERS --------- */
+    :is(h1, h2, h3, h4) {
+        font-weight: bold;
+    }
+
+    :is(h1, h2):not(:has(code)) {
+        text-decoration: underline;
+    }
+
+    /* --------- CODE BORDERS --------- */
+    /* .literal {
+        border: 1px solid;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    } */
+
+    .docutils.literal.notranslate {
+        font-weight: bold;
+    }
+
+    .literal-block-wrapper {
+        font-weight: bold;
+        border: 1px solid;
+        border-radius: 0.45em;
+        border-color: light-dark(var(--code-border-light), var(--code-border));
+    }
+
+    /* --------- EXTERNAL LINKS --------- */
+    /* unseen passive */
+    .reference.external {
+        border-color: light-dark(var(--unvisited-light), var(--unvisited));
+        color: light-dark(var(--unvisited-light), var(--unvisited));
+    }
+
+    /* unseen hover */
+    .reference.external:hover {
+        border-color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+        color: light-dark(var(--unvisited-hover-light), var(--unvisited-hover));
+    }
+
+    /* visited passive */
+    .reference.external:visited {
+        border-color: light-dark(var(--visited-light), var(--visited));
+        color: light-dark(var(--visited-light), var(--visited));
+    }
+
+    /* visited hover */
+    .reference.external:visited:hover {
+        border-color: light-dark(var(--visited-hover-light), var(--visited-hover));
+        color: light-dark(var(--visited-hover-light), var(--visited-hover));
+    }
+
+    /* --------- MAIN WINDOW COLORS --------- */
+    .sy-main {
+        border-left: 1px solid;
+        border-right: 1px solid;
+        border-color: light-dark(var(--border-color-light), var(--border-color));
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Ensure breadcrumb is the same color as the main window */
+    .sy-breadcrumbs {
+        background-color: light-dark(var(--main-window-light), var(--main-window));
+    }
+
+    /* Add a little bit of space to right side-bar */
+    .sy-scrollbar {
+        padding-left: 1em;
+    }
+
+    /* --------- API COLORS --------- */
+    .sig {
+        background-color: var(--accent-a2);
+        border-top: 3px solid var(--accent-a4);
+    }
+
+    .k {
+        font-style: italic;
+    }
+
+    /* Flow diagrams */
+    .inheritance.graphviz {
+        background-color: #92A0A077;
+        border-radius: 5px;
+    }
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Database manipulation with sqlite3"/>
+<meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../index.html">
+      
+      
+      <strong>ARIEL</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction_to_modular_robots/index.html">Introduction to modular robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing_guide/index.html">Contributing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genotype_docs/index.html">Genotypes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../genotype_docs/nde_docs.html">Neuro Developmental Encoding Genotype Representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../genotype_docs/cppn_docs.html">Compositional Pattern Producing Network (CPPN)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../genotype_docs/trees_docs.html">Tree Genotype Representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../genotype_docs/vector_docs.html">Vector representation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ea_intro/ea_example.html">Your first EA with ARIEL</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">ARIEL Database Handling</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="db_with_pandas.html">Database manipulation with pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db_with_polars.html">Database manipulation with polars</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Database manipulation with sqlite3</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Mujoco_docs/mujoco_docs.html">MuJoCo Data Variables Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/ariel/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">body_phenotypes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">robogen_lite</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/ec/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genotypes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a000/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a001/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a001</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a002/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a002</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a003/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a003</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a004/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/a005/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/parameters/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">parameters</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/parameters/ariel_modules/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_modules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/parameters/ariel_types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/parameters/mujoco_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_params</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/simulation/controllers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/simulation/environments/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/simulation/tasks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tasks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/optimizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/file_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">file_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/mujoco_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/noise_gen/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">noise_gen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/renderers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">renderers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/runners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runners</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/tracker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/video_recorder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">video_recorder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/ariel/visualisation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualisation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/visualisation/analysis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#1.-How-to-get-data-about-the-experiment">1. How to get data about the experiment</a><ul>
+<li><a class="reference internal" href="#1.1-Loading-the-database-using-sqlite3">1.1 Loading the database using sqlite3</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#1.2-Reconstructing-the-population-per-generation">1.2 Reconstructing the population per generation</a></li>
+<li><a class="reference internal" href="#2.-Computing-fitness-statistics-per-generation">2. Computing fitness statistics per generation</a></li>
+<li><a class="reference internal" href="#3.-Plotting-the-fitness-progression">3. Plotting the fitness progression</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">ARIEL</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">ARIEL Database Handling</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Database manipulation with sqlite3</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+        <article class="yue" role="main">
+          <section id="Database-manipulation-with-sqlite3">
+<h1>Database manipulation with sqlite3<a class="headerlink" href="#Database-manipulation-with-sqlite3" title="Link to this heading">¶</a></h1>
+<p>You can use any database library to manipulate data in the ARIEL database. In this example, we will be using sqlite3 directly, without pandas or Polars, and we will work with standard Python data structures and NumPy arrays.</p>
+<p>This is far from the easiest option to implement, but the option is always there.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[ ]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Import the libraries</span>
+</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+</span><span data-line="3"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span data-line="4"><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+</span></pre></div>
+</div>
+</div>
+<section id="1.-How-to-get-data-about-the-experiment">
+<h2>1. How to get data about the experiment<a class="headerlink" href="#1.-How-to-get-data-about-the-experiment" title="Link to this heading">¶</a></h2>
+<p>As explained above, ARIEL uses an SQL database to store data about individuals. This means we have a complete record of every individual that ever existed during the evolution, including those that died early and those that survived until the final generation.</p>
+<p>By querying this database, we can reconstruct the population per generation and compute statistics such as mean fitness, best fitness, and standard deviation.</p>
+<section id="1.1-Loading-the-database-using-sqlite3">
+<h3>1.1 Loading the database using sqlite3<a class="headerlink" href="#1.1-Loading-the-database-using-sqlite3" title="Link to this heading">¶</a></h3>
+<p>All data about the individuals is stored in the individual table. The code below shows how to load this table into Python using sqlite3 and convert each row into a dictionary for convenient access.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[8]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Connect to the ARIEL database</span>
+</span><span data-line="2"><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;__data__/database.db&quot;</span><span class="p">)</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Query all columns from the individual table</span>
+</span><span data-line="5"><span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM individual&quot;</span><span class="p">)</span>
+</span><span data-line="6"><span class="n">rows</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="c1"># Get column names from cursor metadata</span>
+</span><span data-line="9"><span class="n">colnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">desc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">desc</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="c1"># Represent each individual as a dictionary</span>
+</span><span data-line="12"><span class="n">individuals</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">colnames</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span>
+</span><span data-line="13">
+</span><span data-line="14"><span class="c1"># Preview the first few individuals</span>
+</span><span data-line="15"><span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">individuals</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>
+</span><span data-line="16">    <span class="nb">print</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+</span><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;id&#39;: 1, &#39;alive&#39;: 0, &#39;time_of_birth&#39;: 0, &#39;time_of_death&#39;: 7, &#39;requires_eval&#39;: 0, &#39;fitness_&#39;: 21.507857440124624, &#39;requires_init&#39;: 0, &#39;genotype_&#39;: &#39;[54.5476194721131, 18.787697613687754, 87.96643689561076, -63.10465030419044, -34.78564430824561, -75.98548645743739, -20.41546289988315, -35.24854191195988, -2.8982142266151194, -53.30041665832951]&#39;, &#39;tags_&#39;: &#39;{}&#39;}
+{&#39;id&#39;: 2, &#39;alive&#39;: 0, &#39;time_of_birth&#39;: 0, &#39;time_of_death&#39;: 4, &#39;requires_eval&#39;: 0, &#39;fitness_&#39;: 21.764198033830173, &#39;requires_init&#39;: 0, &#39;genotype_&#39;: &#39;[-23.51735411458668, 83.29895497528028, -50.734668633015, 72.22346654747052, 11.310461238575689, -58.35648718133856, -0.137770636521488, -56.955635585134765, 110.01457933714343, -68.58583486675592]&#39;, &#39;tags_&#39;: &#39;{}&#39;}
+{&#39;id&#39;: 3, &#39;alive&#39;: 0, &#39;time_of_birth&#39;: 0, &#39;time_of_death&#39;: 2, &#39;requires_eval&#39;: 0, &#39;fitness_&#39;: 21.364822322185717, &#39;requires_init&#39;: 0, &#39;genotype_&#39;: &#39;[-41.8642899864318, -26.625290981240703, 21.465199657827775, 5.11874352935109, 44.7537563596406, 55.04285066828638, -19.156019868762623, -3.2224622037823494, -18.12329441632709, -41.137956706250264]&#39;, &#39;tags_&#39;: &#39;{}&#39;}
+{&#39;id&#39;: 4, &#39;alive&#39;: 0, &#39;time_of_birth&#39;: 0, &#39;time_of_death&#39;: 4, &#39;requires_eval&#39;: 0, &#39;fitness_&#39;: 21.965413039753884, &#39;requires_init&#39;: 0, &#39;genotype_&#39;: &#39;[-2.399348473982663, 32.83936881495799, 49.43757518302404, -1.3162055256911454, 41.84862693471788, 82.3648347662892, 73.27243699973319, -82.32199264352194, 13.287813492942242, 38.69244504693036]&#39;, &#39;tags_&#39;: &#39;{}&#39;}
+{&#39;id&#39;: 5, &#39;alive&#39;: 0, &#39;time_of_birth&#39;: 0, &#39;time_of_death&#39;: 1, &#39;requires_eval&#39;: 0, &#39;fitness_&#39;: 21.85273970959811, &#39;requires_init&#39;: 0, &#39;genotype_&#39;: &#39;[40.97966824037182, -45.6694431228661, -49.29276658889283, 76.43447513086102, 26.522205580531104, 28.56325640769466, -9.187149312540432, -27.171775998740145, -20.209824974342553, 40.25532861426513]&#39;, &#39;tags_&#39;: &#39;{}&#39;}
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="1.2-Reconstructing-the-population-per-generation">
+<h2>1.2 Reconstructing the population per generation<a class="headerlink" href="#1.2-Reconstructing-the-population-per-generation" title="Link to this heading">¶</a></h2>
+<p>ARIEL does not store a list of individuals per generation. Instead, each individual has:</p>
+<ul class="simple">
+<li><p>time_of_birth: the generation it appears in the population</p></li>
+<li><p>time_of_death: the generation it disappears from the population</p></li>
+</ul>
+<p>We reconstruct the population for each generation using these two fields.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[9]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Extract birth and death times to determine the generation range</span>
+</span><span data-line="2"><span class="n">time_of_births</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="s2">&quot;time_of_birth&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">individuals</span><span class="p">]</span>
+</span><span data-line="3"><span class="n">time_of_deaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="s2">&quot;time_of_death&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">individuals</span><span class="p">]</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="n">min_gen</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">time_of_births</span><span class="p">))</span>
+</span><span data-line="6"><span class="n">max_gen</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">time_of_deaths</span><span class="p">))</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generation range:&quot;</span><span class="p">,</span> <span class="n">min_gen</span><span class="p">,</span> <span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="n">max_gen</span><span class="p">)</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="c1"># Build a dictionary: generation -&gt; list of individual IDs alive at that generation</span>
+</span><span data-line="11"><span class="n">population_per_gen</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="k">for</span> <span class="n">gen</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">min_gen</span><span class="p">,</span> <span class="n">max_gen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span data-line="14">    <span class="n">ids_alive</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="15">        <span class="n">ind</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+</span><span data-line="16">        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">individuals</span>
+</span><span data-line="17">        <span class="k">if</span> <span class="n">ind</span><span class="p">[</span><span class="s2">&quot;time_of_birth&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">gen</span> <span class="o">&lt;</span> <span class="n">ind</span><span class="p">[</span><span class="s2">&quot;time_of_death&quot;</span><span class="p">]</span>
+</span><span data-line="18">    <span class="p">]</span>
+</span><span data-line="19">    <span class="n">population_per_gen</span><span class="p">[</span><span class="n">gen</span><span class="p">]</span> <span class="o">=</span> <span class="n">ids_alive</span>
+</span><span data-line="20">
+</span><span data-line="21"><span class="c1"># Simple structured view similar to a table</span>
+</span><span data-line="22"><span class="n">pop_table</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="23">    <span class="p">{</span>
+</span><span data-line="24">        <span class="s2">&quot;generation&quot;</span><span class="p">:</span> <span class="n">gen</span><span class="p">,</span>
+</span><span data-line="25">        <span class="s2">&quot;individuals&quot;</span><span class="p">:</span> <span class="n">ids</span><span class="p">,</span>
+</span><span data-line="26">        <span class="s2">&quot;pop size&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">),</span>
+</span><span data-line="27">    <span class="p">}</span>
+</span><span data-line="28">    <span class="k">for</span> <span class="n">gen</span><span class="p">,</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">population_per_gen</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span data-line="29"><span class="p">]</span>
+</span><span data-line="30">
+</span><span data-line="31"><span class="c1"># Show the first few generations</span>
+</span><span data-line="32"><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">pop_table</span><span class="p">[:</span><span class="mi">4</span><span class="p">]:</span>
+</span><span data-line="33">    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Generation range: 0 to 100
+{&#39;generation&#39;: 0, &#39;individuals&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100], &#39;pop size&#39;: 100}
+{&#39;generation&#39;: 1, &#39;individuals&#39;: [1, 2, 3, 4, 7, 8, 9, 10, 12, 15, 20, 21, 22, 23, 24, 25, 26, 27, 30, 32, 34, 35, 36, 38, 41, 44, 45, 46, 47, 48, 49, 50, 51, 53, 56, 57, 58, 60, 62, 63, 64, 66, 67, 70, 71, 73, 75, 77, 78, 79, 81, 84, 88, 89, 90, 91, 92, 93, 95, 96, 98, 99, 100, 101, 103, 104, 105, 107, 109, 110, 111, 113, 116, 117, 119, 124, 127, 130, 131, 133, 134, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156], &#39;pop size&#39;: 100}
+{&#39;generation&#39;: 2, &#39;individuals&#39;: [1, 2, 4, 7, 9, 10, 15, 21, 22, 25, 26, 32, 34, 35, 36, 44, 46, 47, 48, 50, 51, 53, 56, 57, 58, 60, 62, 63, 64, 70, 71, 77, 78, 79, 81, 84, 88, 89, 90, 93, 95, 96, 98, 101, 103, 104, 105, 107, 109, 111, 116, 119, 124, 130, 134, 140, 141, 144, 145, 146, 148, 149, 151, 152, 153, 154, 155, 156, 158, 160, 162, 164, 165, 167, 169, 171, 173, 176, 178, 179, 181, 182, 183, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202], &#39;pop size&#39;: 100}
+{&#39;generation&#39;: 3, &#39;individuals&#39;: [1, 2, 4, 9, 10, 15, 21, 22, 25, 26, 32, 35, 36, 44, 48, 50, 51, 53, 56, 57, 60, 63, 64, 77, 79, 81, 84, 88, 89, 90, 93, 95, 96, 98, 101, 103, 104, 105, 109, 111, 116, 119, 130, 134, 140, 145, 146, 148, 151, 152, 154, 155, 164, 165, 167, 173, 176, 178, 183, 187, 188, 190, 191, 192, 193, 194, 196, 198, 199, 202, 205, 206, 207, 209, 210, 212, 215, 218, 220, 221, 223, 226, 227, 230, 231, 232, 234, 236, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250], &#39;pop size&#39;: 100}
+</pre></div></div>
+</div>
+</section>
+<section id="2.-Computing-fitness-statistics-per-generation">
+<h2>2. Computing fitness statistics per generation<a class="headerlink" href="#2.-Computing-fitness-statistics-per-generation" title="Link to this heading">¶</a></h2>
+<p>Now that we have the list of individuals per generation, we can compute:</p>
+<ul class="simple">
+<li><p>Mean fitness</p></li>
+<li><p>Standard deviation of fitness</p></li>
+<li><p>Best (minimum) fitness</p></li>
+</ul>
+<p>We first create a lookup from individual id to its fitness_ value, then aggregate per generation using NumPy.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[10]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Build a lookup dictionary: id -&gt; fitness</span>
+</span><span data-line="2"><span class="n">fitness_by_id</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="3">    <span class="n">ind</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="nb">float</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="s2">&quot;fitness_&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">individuals</span>
+</span><span data-line="4"><span class="p">}</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="n">generations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">min_gen</span><span class="p">,</span> <span class="n">max_gen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+</span><span data-line="7"><span class="n">means</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="8"><span class="n">stds</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="9"><span class="n">bests</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="k">for</span> <span class="n">gen</span> <span class="ow">in</span> <span class="n">generations</span><span class="p">:</span>
+</span><span data-line="12">    <span class="n">ids</span> <span class="o">=</span> <span class="n">population_per_gen</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="p">[])</span>
+</span><span data-line="13">    <span class="n">fits</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitness_by_id</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ids</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fitness_by_id</span><span class="p">]</span>
+</span><span data-line="14">
+</span><span data-line="15">    <span class="k">if</span> <span class="ow">not</span> <span class="n">fits</span><span class="p">:</span>
+</span><span data-line="16">        <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+</span><span data-line="17">        <span class="n">stds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+</span><span data-line="18">        <span class="n">bests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+</span><span data-line="19">        <span class="k">continue</span>
+</span><span data-line="20">
+</span><span data-line="21">    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fits</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</span><span data-line="22">    <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
+</span><span data-line="23">    <span class="n">stds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+</span><span data-line="24">    <span class="n">bests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span>
+</span><span data-line="25">
+</span><span data-line="26"><span class="c1"># For convenience, we can bundle this in a list of dicts like a table</span>
+</span><span data-line="27"><span class="n">stats_table</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="28">    <span class="p">{</span>
+</span><span data-line="29">        <span class="s2">&quot;generation&quot;</span><span class="p">:</span> <span class="n">gen</span><span class="p">,</span>
+</span><span data-line="30">        <span class="s2">&quot;pop size&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">population_per_gen</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="p">[])),</span>
+</span><span data-line="31">        <span class="s2">&quot;fitness_mean&quot;</span><span class="p">:</span> <span class="n">m</span><span class="p">,</span>
+</span><span data-line="32">        <span class="s2">&quot;fitness_std&quot;</span><span class="p">:</span> <span class="n">s</span><span class="p">,</span>
+</span><span data-line="33">        <span class="s2">&quot;fitness_best&quot;</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span>
+</span><span data-line="34">    <span class="p">}</span>
+</span><span data-line="35">    <span class="k">for</span> <span class="n">gen</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">generations</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="n">stds</span><span class="p">,</span> <span class="n">bests</span><span class="p">)</span>
+</span><span data-line="36"><span class="p">]</span>
+</span><span data-line="37">
+</span><span data-line="38"><span class="c1"># Show first few rows</span>
+</span><span data-line="39"><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">stats_table</span><span class="p">[:</span><span class="mi">4</span><span class="p">]:</span>
+</span><span data-line="40">    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;generation&#39;: 0, &#39;pop size&#39;: 100, &#39;fitness_mean&#39;: 21.666659879918125, &#39;fitness_std&#39;: 0.2739387905929811, &#39;fitness_best&#39;: 20.80687315912316}
+{&#39;generation&#39;: 1, &#39;pop size&#39;: 100, &#39;fitness_mean&#39;: 21.39977286346043, &#39;fitness_std&#39;: 0.6649110198261592, &#39;fitness_best&#39;: 19.846392385050848}
+{&#39;generation&#39;: 2, &#39;pop size&#39;: 100, &#39;fitness_mean&#39;: 21.261569281062137, &#39;fitness_std&#39;: 0.7480772220729439, &#39;fitness_best&#39;: 19.95231516202077}
+{&#39;generation&#39;: 3, &#39;pop size&#39;: 100, &#39;fitness_mean&#39;: 21.15982281628291, &#39;fitness_std&#39;: 0.8010332457872694, &#39;fitness_best&#39;: 19.862954104720316}
+</pre></div></div>
+</div>
+</section>
+<section id="3.-Plotting-the-fitness-progression">
+<h2>3. Plotting the fitness progression<a class="headerlink" href="#3.-Plotting-the-fitness-progression" title="Link to this heading">¶</a></h2>
+<p>With the statistics computed, we can now visualize the evolution of fitness over generations.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span><span data-line="1">[14]:
+</span></pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Convert to NumPy arrays for masking/plotting</span>
+</span><span data-line="2"><span class="n">gens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">generations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+</span><span data-line="3"><span class="n">means_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">means</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</span><span data-line="4"><span class="n">stds_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">stds</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</span><span data-line="5"><span class="n">bests_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bests</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="c1"># Mask to ignore generations without valid data</span>
+</span><span data-line="8"><span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">means_arr</span><span class="p">)</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="n">x</span> <span class="o">=</span> <span class="n">gens</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+</span><span data-line="11"><span class="n">mean</span> <span class="o">=</span> <span class="n">means_arr</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+</span><span data-line="12"><span class="n">std</span> <span class="o">=</span> <span class="n">stds_arr</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+</span><span data-line="13"><span class="n">best</span> <span class="o">=</span> <span class="n">bests_arr</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+</span><span data-line="14">
+</span><span data-line="15"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Fitness mean&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="18"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">best</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Fitness best&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="19"><span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span> <span class="o">-</span> <span class="n">std</span><span class="p">,</span> <span class="n">mean</span> <span class="o">+</span> <span class="n">std</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Mean ± Std&quot;</span><span class="p">)</span>
+</span><span data-line="20">
+</span><span data-line="21"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Generation&quot;</span><span class="p">)</span>
+</span><span data-line="22"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Fitness&quot;</span><span class="p">)</span>
+</span><span data-line="23"><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Fitness statistics per generation (sqlite3)&quot;</span><span class="p">)</span>
+</span><span data-line="24"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</span><span data-line="25"><span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+</span><span data-line="26"><span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+</span><span data-line="27"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</span><span data-line="28"><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span><br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/source_Db_examples_db_with_sqlite3_10_0.png" src="../../_images/source_Db_examples_db_with_sqlite3_10_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="db_with_polars.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Database manipulation with polars</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../Mujoco_docs/mujoco_docs.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">MuJoCo Data Class Variables Documentation</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>Computational Intelligence Group, Vrije Universiteit Amsterdam & Contributors</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/thebelab-helper.js"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="../../_static/shibuya.js?v=e730760c"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
+</html>

@@ -1,0 +1,53 @@
+:py:mod:`cppn_decoding`
+===============================================
+
+.. py:module:: ariel.ec.genotypes.cppn.cppn_decoding
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.genotypes.cppn.cppn_decoding.run
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.genotypes.cppn.cppn_decoding.SCRIPT_NAME
+   ariel.ec.genotypes.cppn.cppn_decoding.CWD
+   ariel.ec.genotypes.cppn.cppn_decoding.DATA
+   ariel.ec.genotypes.cppn.cppn_decoding.SEED
+   ariel.ec.genotypes.cppn.cppn_decoding.console
+   ariel.ec.genotypes.cppn.cppn_decoding.RNG
+   ariel.ec.genotypes.cppn.cppn_decoding.DECODER_TYPE
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: console
+
+.. py:data:: RNG
+
+.. py:function:: run(robot: ariel.body_phenotypes.robogen_lite.modules.core.CoreModule, *, with_viewer: bool = False) -> None
+
+.. py:data:: DECODER_TYPE
+   :value: 'best_first'
+
+

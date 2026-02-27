@@ -1,0 +1,61 @@
+:py:mod:`mujoco_ops`
+================================
+
+.. py:module:: ariel.utils.mujoco_ops
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   .. admonition:: Notes
+
+      *
+
+   .. admonition:: References
+
+      [1]
+
+   .. todo:: [ ]
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.mujoco_ops.euler_to_quat_conversion
+   ariel.utils.mujoco_ops.mjspec_deep_copy
+
+
+
+.. py:function:: euler_to_quat_conversion(rotation: ariel.parameters.ariel_types.Rotation, rotation_sequence: str) -> ariel.parameters.ariel_types.FloatArray
+
+   Convert Euler angles to a quaternion representation.
+
+   :param rotation: Euler angles in degrees (x, y, z).
+   :param rotation_sequence: The sequence of axes for the rotation: "xyzXYZ" (e.g., "XYZ").
+
+   :rtype: :class:`Quaternion representation` of :class:`the Euler angles (x`, :class:`y`, :class:`z`, :class:`w).`
+
+
+.. py:function:: mjspec_deep_copy(spec: mujoco.MjSpec) -> mujoco.MjSpec
+
+   Create a copy of a MuJoCo specification.
+
+   :param spec: The original MuJoCo specification to duplicate.
+
+   .. admonition:: Notes
+
+      It is MUCH faster to use the MuJoCo function `spec.copy()`, at no loss of
+      functionality as far as the author can tell. If you need to make EXTRA sure
+      you have a deep copy, use this function.
+
+   :returns: A deep copy of the provided MuJoCo specification.
+   :rtype: :class:`mujoco.MjSpec`
+
+

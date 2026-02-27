@@ -1,0 +1,108 @@
+:py:mod:`genome`
+=============================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.cppn_neat.genome
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.cppn_neat.genome.Genome
+
+
+
+
+.. py:class:: Genome(nodes: dict[int, ariel.body_phenotypes.robogen_lite.cppn_neat.node.Node], connections: dict[int, ariel.body_phenotypes.robogen_lite.cppn_neat.connection.Connection], fitness: float, serialized: dict = None)
+
+   A genome in the NEAT algorithm.
+
+
+   .. py:attribute:: nodes
+
+
+   .. py:attribute:: connections
+
+
+   .. py:attribute:: fitness
+
+
+   .. py:attribute:: serialized
+      :value: None
+
+
+
+   .. py:method:: copy()
+
+      Returns a new Genome object with identical, deep-copied gene sets.
+
+
+
+   .. py:method:: random(num_inputs: int, num_outputs: int, next_node_id: int, next_innov_id: int)
+      :classmethod:
+
+
+      Creates a new, randomly initialized Genome with a base topology.
+      Initial topology is fully connected inputs to outputs.
+
+
+
+   .. py:method:: mutate(node_add_rate: float, conn_add_rate: float, next_innov_id_getter, next_node_id_getter)
+
+      Applies structural mutation (add_node or add_connection).
+
+
+
+   .. py:method:: crossover(other: Genome) -> Genome
+
+      Creates a new offspring Genome by crossing over this Genome (parent A)
+      and another Genome (parent B).
+
+
+
+   .. py:method:: add_connection(connection: ariel.body_phenotypes.robogen_lite.cppn_neat.connection.Connection)
+
+      Adds a connection gene to the genome.
+
+
+
+   .. py:method:: add_node(node: ariel.body_phenotypes.robogen_lite.cppn_neat.node.Node)
+
+      Adds a node gene to the genome.
+
+
+
+   .. py:method:: get_node_ordering()
+
+      Calculates a topological sort order for feed-forward activation using Kahn's algorithm.
+      This ensures a node is evaluated only after all its input nodes are ready.
+      https://www.geeksforgeeks.org/dsa/topological-sorting-indegree-based-solution/
+
+
+
+   .. py:method:: activate(inputs: list[float]) -> list[float]
+
+      Activates the neural network.
+      1. Tries a topological sort (Feed-Forward) for speed and precision.
+      2. If a cycle is detected, falls back to iterative relaxation (Recurrent).
+
+
+
+   .. py:method:: to_dict() -> dict
+
+      Serializes the Genome to a dictionary.
+
+
+
+   .. py:method:: from_dict(data: dict, fitness: float = 0.0) -> Genome
+      :classmethod:
+
+
+      Reconstructs a Genome object from a dictionary.
+
+
+

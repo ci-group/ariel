@@ -1,0 +1,291 @@
+:py:mod:`a004`
+=======================
+
+.. py:module:: ariel.ec.a004
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   .. admonition:: Notes
+
+      * Do we consider survivors to be of the new generation?
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.a004.EASettings
+   ariel.ec.a004.AbstractEA
+   ariel.ec.a004.EAStep
+   ariel.ec.a004.EA
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.a004.parent_selection
+   ariel.ec.a004.crossover
+   ariel.ec.a004.mutation
+   ariel.ec.a004.evaluate
+   ariel.ec.a004.survivor_selection
+   ariel.ec.a004.create_individual
+   ariel.ec.a004.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.a004.SEED
+   ariel.ec.a004.DB_HANDLING_MODES
+   ariel.ec.a004.console
+   ariel.ec.a004.RNG
+   ariel.ec.a004.Population
+   ariel.ec.a004.PopulationFunc
+   ariel.ec.a004.config
+
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: DB_HANDLING_MODES
+
+.. py:data:: console
+
+.. py:data:: RNG
+
+.. py:type:: Population
+   :canonical: list[Individual]
+
+
+.. py:type:: PopulationFunc
+   :canonical: Callable[[Population], Population]
+
+
+.. py:class:: EASettings(_case_sensitive: bool | None = None, _nested_model_default_partial_update: bool | None = None, _env_prefix: str | None = None, _env_file: pydantic_settings.sources.DotenvType | None = ENV_FILE_SENTINEL, _env_file_encoding: str | None = None, _env_ignore_empty: bool | None = None, _env_nested_delimiter: str | None = None, _env_nested_max_split: int | None = None, _env_parse_none_str: str | None = None, _env_parse_enums: bool | None = None, _cli_prog_name: str | None = None, _cli_parse_args: bool | list[str] | tuple[str, Ellipsis] | None = None, _cli_settings_source: pydantic_settings.sources.CliSettingsSource[Any] | None = None, _cli_parse_none_str: str | None = None, _cli_hide_none_type: bool | None = None, _cli_avoid_json: bool | None = None, _cli_enforce_required: bool | None = None, _cli_use_class_docs_for_groups: bool | None = None, _cli_exit_on_error: bool | None = None, _cli_prefix: str | None = None, _cli_flag_prefix_char: str | None = None, _cli_implicit_flags: bool | None = None, _cli_ignore_unknown_args: bool | None = None, _cli_kebab_case: bool | None = None, _cli_shortcuts: collections.abc.Mapping[str, str | list[str]] | None = None, _secrets_dir: pydantic_settings.sources.PathType | None = None, **values: Any)
+
+   Bases: :py:obj:`pydantic_settings.BaseSettings`
+
+   .. autoapi-inheritance-diagram:: ariel.ec.a004.EASettings
+      :parts: 1
+
+
+   Base class for settings, allowing values to be overridden by environment variables.
+
+   This is useful in production for secrets you do not wish to save in code, it plays nicely with docker(-compose),
+   Heroku and any 12 factor app design.
+
+   All the below attributes can be set via `model_config`.
+
+   :param _case_sensitive: Whether environment and CLI variable names should be read with case-sensitivity.
+                           Defaults to `None`.
+   :param _nested_model_default_partial_update: Whether to allow partial updates on nested model default object fields.
+                                                Defaults to `False`.
+   :param _env_prefix: Prefix for all environment variables. Defaults to `None`.
+   :param _env_file: The env file(s) to load settings values from. Defaults to `Path('')`, which
+                     means that the value from `model_config['env_file']` should be used. You can also pass
+                     `None` to indicate that environment variables should not be loaded from an env file.
+   :param _env_file_encoding: The env file encoding, e.g. `'latin-1'`. Defaults to `None`.
+   :param _env_ignore_empty: Ignore environment variables where the value is an empty string. Default to `False`.
+   :param _env_nested_delimiter: The nested env values delimiter. Defaults to `None`.
+   :param _env_nested_max_split: The nested env values maximum nesting. Defaults to `None`, which means no limit.
+   :param _env_parse_none_str: The env string value that should be parsed (e.g. "null", "void", "None", etc.)
+                               into `None` type(None). Defaults to `None` type(None), which means no parsing should occur.
+   :param _env_parse_enums: Parse enum field names to values. Defaults to `None.`, which means no parsing should occur.
+   :param _cli_prog_name: The CLI program name to display in help text. Defaults to `None` if _cli_parse_args is `None`.
+                          Otherwise, defaults to sys.argv[0].
+   :param _cli_parse_args: The list of CLI arguments to parse. Defaults to None.
+                           If set to `True`, defaults to sys.argv[1:].
+   :param _cli_settings_source: Override the default CLI settings source with a user defined instance. Defaults to None.
+   :param _cli_parse_none_str: The CLI string value that should be parsed (e.g. "null", "void", "None", etc.) into
+                               `None` type(None). Defaults to _env_parse_none_str value if set. Otherwise, defaults to "null" if
+                               _cli_avoid_json is `False`, and "None" if _cli_avoid_json is `True`.
+   :param _cli_hide_none_type: Hide `None` values in CLI help text. Defaults to `False`.
+   :param _cli_avoid_json: Avoid complex JSON objects in CLI help text. Defaults to `False`.
+   :param _cli_enforce_required: Enforce required fields at the CLI. Defaults to `False`.
+   :param _cli_use_class_docs_for_groups: Use class docstrings in CLI group help text instead of field descriptions.
+                                          Defaults to `False`.
+   :param _cli_exit_on_error: Determines whether or not the internal parser exits with error info when an error occurs.
+                              Defaults to `True`.
+   :param _cli_prefix: The root parser command line arguments prefix. Defaults to "".
+   :param _cli_flag_prefix_char: The flag prefix character to use for CLI optional arguments. Defaults to '-'.
+   :param _cli_implicit_flags: Whether `bool` fields should be implicitly converted into CLI boolean flags.
+                               (e.g. --flag, --no-flag). Defaults to `False`.
+   :param _cli_ignore_unknown_args: Whether to ignore unknown CLI args and parse only known ones. Defaults to `False`.
+   :param _cli_kebab_case: CLI args use kebab case. Defaults to `False`.
+   :param _cli_shortcuts: Mapping of target field name to alias names. Defaults to `None`.
+   :param _secrets_dir: The secret files directory or a sequence of directories. Defaults to `None`.
+
+
+   .. py:attribute:: quiet
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: is_maximisation
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: first_generation_id
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: num_of_generations
+      :type:  int
+      :value: 100
+
+
+
+   .. py:attribute:: target_population_size
+      :type:  int
+      :value: 100
+
+
+
+   .. py:attribute:: output_folder
+      :type:  pathlib.Path
+
+
+   .. py:attribute:: db_file_name
+      :type:  str
+      :value: 'database.db'
+
+
+
+   .. py:attribute:: db_file_path
+      :type:  pathlib.Path
+
+
+   .. py:attribute:: db_handling
+      :type:  DB_HANDLING_MODES
+      :value: 'delete'
+
+
+
+.. py:data:: config
+
+.. py:class:: AbstractEA
+
+   .. py:method:: init_database(db_file_path: str | pathlib.Path | None = None, db_handling: DB_HANDLING_MODES | None = None) -> None
+
+      _summary_
+
+      :param db_file_path: _description_, by default None
+      :type db_file_path: :class:`str | Path | None`, *optional*
+      :param db_handling: _description_, by default None
+      :type db_handling: :class:`DB_HANDLING_MODES | None`, *optional*
+
+      :raises FileExistsError: _description_
+
+
+
+.. py:class:: EAStep
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: operation
+      :type:  collections.abc.Callable[[Population], Population]
+
+
+   .. py:method:: __call__(population: Population) -> Population
+
+
+.. py:class:: EA(population: Population, operations: list[EAStep], num_of_generations: int | None = None, *, first_generation_id: int | None = None, quiet: bool | None = None)
+
+   Bases: :py:obj:`AbstractEA`
+
+   .. autoapi-inheritance-diagram:: ariel.ec.a004.EA
+      :parts: 1
+
+
+   .. py:attribute:: operations
+
+
+   .. py:attribute:: quiet
+      :value: False
+
+
+
+   .. py:attribute:: console
+
+
+   .. py:attribute:: current_generation
+      :value: 0
+
+
+
+   .. py:attribute:: num_of_generations
+      :value: 100
+
+
+
+   .. py:attribute:: is_maximisation
+      :value: True
+
+
+
+   .. py:attribute:: target_population_size
+      :value: 100
+
+
+
+   .. py:attribute:: population
+
+
+   .. py:property:: population_size
+      :type: int
+
+
+
+   .. py:method:: commit_population() -> None
+
+
+   .. py:method:: fetch_population(best_comes: Literal['first', 'last'] | None = 'first', *, only_alive: bool = True, already_evaluated: bool | None = None, custom_logic: tuple[bool, Ellipsis] | None = None) -> None
+
+
+   .. py:method:: get_solution(mode: Literal['best', 'median', 'worst'] = 'best', *, only_alive: bool = True) -> ariel.ec.a001.Individual
+
+
+   .. py:method:: step() -> None
+
+
+   .. py:method:: run() -> None
+
+
+.. py:function:: parent_selection(population: Population) -> Population
+
+.. py:function:: crossover(population: Population) -> Population
+
+.. py:function:: mutation(population: Population) -> Population
+
+.. py:function:: evaluate(population: Population) -> Population
+
+.. py:function:: survivor_selection(population: Population) -> Population
+
+.. py:function:: create_individual() -> ariel.ec.a001.Individual
+
+.. py:function:: main() -> None
+
+   Entry point.
+
+

@@ -1,0 +1,263 @@
+:py:mod:`config`
+===================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.config
+
+.. autoapi-nested-parse::
+
+   High-level configuration for ARIEL-robots body phenotypes.
+
+   .. admonition:: Notes
+
+      * Using Enums ensures that the same naming is used across the codebase.
+
+   .. todo:: [ ] Extend ALLOWED_FACES to include TOP and BOTTOM faces.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.config.ModuleType
+   ariel.body_phenotypes.robogen_lite.config.ModuleFaces
+   ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx
+   ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta
+   ariel.body_phenotypes.robogen_lite.config.ModuleInstance
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.config.ALLOWED_FACES
+   ariel.body_phenotypes.robogen_lite.config.ALLOWED_ROTATIONS
+   ariel.body_phenotypes.robogen_lite.config.IDX_OF_CORE
+   ariel.body_phenotypes.robogen_lite.config.NUM_OF_TYPES_OF_MODULES
+   ariel.body_phenotypes.robogen_lite.config.NUM_OF_FACES
+   ariel.body_phenotypes.robogen_lite.config.NUM_OF_ROTATIONS
+
+
+.. py:class:: ModuleType(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.config.ModuleType
+      :parts: 1
+
+
+   Enum for module types.
+
+
+   .. py:attribute:: CORE
+      :value: 0
+
+
+
+   .. py:attribute:: BRICK
+      :value: 1
+
+
+
+   .. py:attribute:: HINGE
+      :value: 2
+
+
+
+   .. py:attribute:: NONE
+      :value: 3
+
+
+
+.. py:class:: ModuleFaces(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.config.ModuleFaces
+      :parts: 1
+
+
+   Enum for module attachment points.
+
+
+   .. py:attribute:: FRONT
+      :value: 0
+
+
+
+   .. py:attribute:: BACK
+      :value: 1
+
+
+
+   .. py:attribute:: RIGHT
+      :value: 2
+
+
+
+   .. py:attribute:: LEFT
+      :value: 3
+
+
+
+   .. py:attribute:: TOP
+      :value: 4
+
+
+
+   .. py:attribute:: BOTTOM
+      :value: 5
+
+
+
+.. py:class:: ModuleRotationsIdx(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.config.ModuleRotationsIdx
+      :parts: 1
+
+
+   Enum for module rotations as indices.
+
+
+   .. py:attribute:: DEG_0
+      :value: 0
+
+
+
+   .. py:attribute:: DEG_45
+      :value: 1
+
+
+
+   .. py:attribute:: DEG_90
+      :value: 2
+
+
+
+   .. py:attribute:: DEG_135
+      :value: 3
+
+
+
+   .. py:attribute:: DEG_180
+      :value: 4
+
+
+
+   .. py:attribute:: DEG_225
+      :value: 5
+
+
+
+   .. py:attribute:: DEG_270
+      :value: 6
+
+
+
+   .. py:attribute:: DEG_315
+      :value: 7
+
+
+
+.. py:class:: ModuleRotationsTheta(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.config.ModuleRotationsTheta
+      :parts: 1
+
+
+   Enum for module rotations in degrees.
+
+
+   .. py:attribute:: DEG_0
+      :value: 0
+
+
+
+   .. py:attribute:: DEG_45
+      :value: 45
+
+
+
+   .. py:attribute:: DEG_90
+      :value: 90
+
+
+
+   .. py:attribute:: DEG_135
+      :value: 135
+
+
+
+   .. py:attribute:: DEG_180
+      :value: 180
+
+
+
+   .. py:attribute:: DEG_225
+      :value: 225
+
+
+
+   .. py:attribute:: DEG_270
+      :value: 270
+
+
+
+   .. py:attribute:: DEG_315
+      :value: 315
+
+
+
+.. py:class:: ModuleInstance(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.config.ModuleInstance
+      :parts: 1
+
+
+   ModuleInstance represents a single module in the system.
+
+   :param BaseModel: The base model class from Pydantic.
+   :type BaseModel: :class:`pydantic.BaseModel`
+
+
+   .. py:attribute:: type
+      :type:  ModuleType
+
+
+   .. py:attribute:: rotation
+      :type:  ModuleRotationsIdx
+
+
+   .. py:attribute:: links
+      :type:  dict[ModuleFaces, int]
+
+
+.. py:data:: ALLOWED_FACES
+   :type:  dict[ModuleType, list[ModuleFaces]]
+
+.. py:data:: ALLOWED_ROTATIONS
+   :type:  dict[ModuleType, list[ModuleRotationsIdx]]
+
+.. py:data:: IDX_OF_CORE
+   :value: 0
+
+
+.. py:data:: NUM_OF_TYPES_OF_MODULES
+
+.. py:data:: NUM_OF_FACES
+
+.. py:data:: NUM_OF_ROTATIONS
+

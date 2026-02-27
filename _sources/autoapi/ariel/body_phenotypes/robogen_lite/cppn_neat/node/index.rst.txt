@@ -1,0 +1,49 @@
+:py:mod:`node`
+===========================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.cppn_neat.node
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.cppn_neat.node.Node
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.cppn_neat.node.ActivationFunction
+
+
+.. py:data:: ActivationFunction
+
+.. py:class:: Node(_id: int, typ: str, activation: ActivationFunction, bias: float)
+
+   A node gene in a NEAT genome.
+
+
+   .. py:attribute:: typ
+
+
+   .. py:attribute:: activation
+
+
+   .. py:attribute:: bias
+
+
+   .. py:method:: copy()
+
+      Returns a new Node object with identical values.
+
+
+

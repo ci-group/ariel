@@ -1,0 +1,49 @@
+:py:mod:`spider_with_blocks`
+===============================================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks.make_core
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks.attach
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks.body_spider
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks.body_spider45
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks.current_module
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks.SUBMODULES
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks.MODULES
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks.faces
+
+
+.. py:data:: current_module
+
+.. py:data:: SUBMODULES
+
+.. py:data:: MODULES
+
+.. py:data:: faces
+
+.. py:function:: make_core()
+
+.. py:function:: attach(parent: MODULES, face: ariel.body_phenotypes.robogen_lite.config.ModuleFaces, module: SUBMODULES, name: str, rotation: float = 0) -> SUBMODULES
+
+.. py:function:: body_spider() -> ariel.body_phenotypes.robogen_lite.modules.core.CoreModule
+
+.. py:function:: body_spider45() -> ariel.body_phenotypes.robogen_lite.modules.core.CoreModule
+

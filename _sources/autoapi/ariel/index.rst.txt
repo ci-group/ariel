@@ -1,0 +1,52 @@
+:py:mod:`ariel`
+===============
+
+.. py:module:: ariel
+
+.. autoapi-nested-parse::
+
+   ARIEL: Autonomous Robots through Integrated Evolution and Learning.
+
+   .. todo:: [ ] Make rich logger take command-line argument for verbosity  (click?)
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   body_phenotypes/index.rst
+   ec/index.rst
+   parameters/index.rst
+   simulation/index.rst
+   utils/index.rst
+   visualisation/index.rst
+
+
+Package Contents
+----------------
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: RNG
+
+.. py:data:: FORMAT
+   :value: '%(message)s'
+
+
+.. py:data:: console
+
+.. py:data:: logging_level
+   :value: 'INFO'
+
+
+.. py:data:: log
+

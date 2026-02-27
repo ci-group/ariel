@@ -1,0 +1,123 @@
+:py:mod:`olympic_arena`
+=====================================================
+
+.. py:module:: ariel.simulation.environments.olympic_arena
+
+.. autoapi-nested-parse::
+
+   Hybrid MuJoCo world combining flat, rugged, and inclined terrain sections.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.olympic_arena.OlympicArena
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.olympic_arena.quaternion_from_axis_angle
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.environments.olympic_arena.USE_DEGREES
+   ariel.simulation.environments.olympic_arena.TERRAIN_COLOR
+   ariel.simulation.environments.olympic_arena.arena
+
+
+.. py:data:: USE_DEGREES
+   :value: False
+
+
+.. py:data:: TERRAIN_COLOR
+   :value: [0.46, 0.362, 0.216, 1.0]
+
+
+.. py:function:: quaternion_from_axis_angle(axis: str, angle_deg: float) -> list[float]
+
+.. py:class:: OlympicArena(arena_width: float = 2.0, section_length: float = 1.0, flat_thickness: float = 0.1, rugged_resolution: int = 64, rugged_scale: float = 4.0, rugged_hillyness: float = 5.0, rugged_height: float = 0.07, incline_thickness: float = 0.1, incline_degrees: float = -15.0, incline_axis: str = 'y', *, load_precompiled: bool = True)
+
+   Bases: :py:obj:`ariel.simulation.environments.BaseWorld`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.environments.olympic_arena.OlympicArena
+      :parts: 1
+
+
+   Base class for MuJoCo world specifications.
+
+
+   .. py:attribute:: name
+      :value: 'olympic_arena'
+
+
+
+   .. py:attribute:: arena_width
+      :value: 2.0
+
+
+
+   .. py:attribute:: section_length
+      :value: 1.0
+
+
+
+   .. py:attribute:: flat_thickness
+      :value: 0.1
+
+
+
+   .. py:attribute:: rugged_resolution
+      :value: 64
+
+
+
+   .. py:attribute:: rugged_scale
+      :value: 4.0
+
+
+
+   .. py:attribute:: rugged_hillyness
+      :value: 5.0
+
+
+
+   .. py:attribute:: rugged_height
+      :value: 0.07
+
+
+
+   .. py:attribute:: incline_thickness
+      :value: 0.1
+
+
+
+   .. py:attribute:: incline_degrees
+      :value: -15.0
+
+
+
+   .. py:attribute:: incline_axis
+      :value: ''
+
+
+
+   .. py:attribute:: heightmap
+
+
+.. py:data:: arena
+

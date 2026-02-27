@@ -1,0 +1,68 @@
+:py:mod:`module`
+===========================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.modules.module
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   Todo:
+   ----
+       [ ] Autoincrement of index in subclasses.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.modules.module.Module
+
+
+
+
+.. py:class:: Module
+
+   Bases: :py:obj:`abc.ABC`
+
+   .. autoapi-inheritance-diagram:: ariel.body_phenotypes.robogen_lite.modules.module.Module
+      :parts: 1
+
+
+   Base class for all modules.
+
+
+   .. py:attribute:: required_attributes
+      :type:  ClassVar[list[str]]
+      :value: ['index', 'module_type']
+
+
+
+   .. py:method:: __init_subclass__() -> None
+      :classmethod:
+
+
+      Ensure that subclasses define required attributes.
+
+      :raises NotImplementedError: If a required attribute is not defined in the subclass.
+
+
+
+   .. py:method:: rotate(angle: float) -> None
+      :abstractmethod:
+
+
+      Rotate the module by a certain angle.
+
+      :param angle: The angle to rotate the module by, in degrees.
+      :type angle: :class:`float`
+
+      :raises NotImplementedError: If the method is not implemented in the subclass.
+
+
+

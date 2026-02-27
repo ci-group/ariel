@@ -1,0 +1,57 @@
+:py:mod:`renderers`
+===============================
+
+.. py:module:: ariel.utils.renderers
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   Todo:
+   ----
+       [ ] ".rotate" as superclass method?
+       [ ] Better documentation
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.renderers.single_frame_renderer
+   ariel.utils.renderers.video_renderer
+   ariel.utils.renderers.tracking_video_renderer
+
+
+
+.. py:function:: single_frame_renderer(model: mujoco.MjModel, data: mujoco.MjData, steps: int = 1, width: int = 480, height: int = 640, cam_fovy: float | None = None, cam_pos: tuple[float] | None = None, cam_quat: tuple[float] | None = None, *, show: bool = False, save: bool = False, save_path: str | pathlib.Path | None = None) -> PIL.Image.Image
+
+.. py:function:: video_renderer(model: mujoco.MjModel, data: mujoco.MjData, duration: float = 10.0, video_recorder: ariel.utils.video_recorder.VideoRecorder | None = None, cam_fovy: float | None = None, cam_pos: tuple[float] | None = None, cam_quat: tuple[float] | None = None) -> None
+
+   Render a video of the simulation using MuJoCo's rendering engine.
+
+   :param model: The MuJoCo model to render.
+   :param data: The MuJoCo data to render.
+   :param duration: The duration of the video in seconds, by default 10.0
+   :param video_recorder: The video recorder to use, by default None
+
+
+.. py:function:: tracking_video_renderer(model: mujoco.MjModel, data: mujoco.MjData, duration: float = 10.0, video_recorder: ariel.utils.video_recorder.VideoRecorder | None = None, geom_to_track: str = 'robot-core', tracking_distance: float = 1.5, tracking_azimuth: float = 135, tracking_elevation: float = -30) -> None
+
+   Render a video of the simulation with camera tracking the "core" module.
+
+   :param model: The MuJoCo model to render.
+   :param data: The MuJoCo data to render.
+   :param duration: The duration of the video in seconds, by default 10.0
+   :param video_recorder: The video recorder to use, by default None
+   :param geom_to_track: The name of the body to track, by default "robot-core"
+   :param tracking_distance: The distance of the camera from the body, by default 1.5
+   :param tracking_azimuth: The azimuth angle of the camera, by default 135
+   :param tracking_elevation: The elevation angle of the camera, by default -30
+
+

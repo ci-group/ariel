@@ -1,0 +1,23 @@
+:py:mod:`modules`
+====================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.modules
+
+.. autoapi-nested-parse::
+
+   Modules of ARIEL-robots.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   brick/index.rst
+   core/index.rst
+   hinge/index.rst
+   module/index.rst
+
+

@@ -1,0 +1,80 @@
+:py:mod:`a005`
+=======================
+
+.. py:module:: ariel.ec.a005
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.a005.Crossover
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.a005.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.a005.SCRIPT_NAME
+   ariel.ec.a005.CWD
+   ariel.ec.a005.DATA
+   ariel.ec.a005.DB_NAME
+   ariel.ec.a005.DB_PATH
+   ariel.ec.a005.SEED
+   ariel.ec.a005.console
+   ariel.ec.a005.RNG
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: DB_NAME
+   :value: 'database.db'
+
+
+.. py:data:: DB_PATH
+   :type:  pathlib.Path
+
+.. py:data:: SEED
+   :value: 42
+
+
+.. py:data:: console
+
+.. py:data:: RNG
+
+.. py:class:: Crossover
+
+   .. py:method:: one_point(parent_i: ariel.ec.a001.JSONIterable, parent_j: ariel.ec.a001.JSONIterable) -> tuple[ariel.ec.a001.JSONIterable, ariel.ec.a001.JSONIterable]
+      :staticmethod:
+
+
+
+.. py:function:: main() -> None
+
+   Entry point.
+
+

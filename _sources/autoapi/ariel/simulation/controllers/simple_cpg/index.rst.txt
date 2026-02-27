@@ -1,0 +1,222 @@
+:py:mod:`simple_cpg`
+=================================================
+
+.. py:module:: ariel.simulation.controllers.simple_cpg
+
+.. autoapi-nested-parse::
+
+   Simplified Central Pattern Generator (CPG) using coupled Hopf oscillators.
+
+   This is a faster, simpler alternative to NA-CPG that should learn more efficiently.
+   Uses classic coupled oscillator dynamics with an identical API.
+
+   .. admonition:: References
+
+      [1] Hopf oscillator formulation for locomotion control
+      [2] Phase-coupled oscillators for motor control
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.simple_cpg.SimpleCPG
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.simple_cpg.create_fully_connected_adjacency
+   ariel.simulation.controllers.simple_cpg.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.simple_cpg.E
+   ariel.simulation.controllers.simple_cpg.SCRIPT_NAME
+   ariel.simulation.controllers.simple_cpg.CWD
+   ariel.simulation.controllers.simple_cpg.DATA
+   ariel.simulation.controllers.simple_cpg.console
+
+
+.. py:data:: E
+   :value: 1e-09
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: console
+
+.. py:function:: create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]
+
+   Create a fully connected adjacency dictionary for the CPG network.
+
+   :param num_nodes: Number of nodes in the CPG network.
+   :type num_nodes: :class:`int`
+
+   :returns: Adjacency dictionary where each key is a node index and the value is a list
+             of indices of connected nodes.
+   :rtype: :class:`dict[int`, :class:`list[int]]`
+
+
+.. py:class:: SimpleCPG(adjacency_dict: dict[int, list[int]], mu: float = 1.0, dt: float = 0.01, hard_bounds: tuple[float, float] | None = (-torch.pi / 2, torch.pi / 2), *, angle_tracking: bool = False, seed: int | None = None)
+
+   Bases: :py:obj:`torch.nn.Module`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.controllers.simple_cpg.SimpleCPG
+      :parts: 1
+
+
+   Simplified CPG using coupled Hopf oscillators.
+
+   Dynamics:
+       dx_i/dt = (mu - r_i^2) * x_i - w_i * y_i + sum_j(coupling_ij * (x_j - x_i))
+       dy_i/dt = (mu - r_i^2) * y_i + w_i * x_i + sum_j(coupling_ij * (y_j - y_i))
+
+   Where r_i = sqrt(x_i^2 + y_i^2)
+
+
+   .. py:attribute:: adjacency_dict
+
+
+   .. py:attribute:: n
+
+
+   .. py:attribute:: mu
+      :value: 1.0
+
+
+
+   .. py:attribute:: dt
+      :value: 0.01
+
+
+
+   .. py:attribute:: angle_tracking
+      :value: False
+
+
+
+   .. py:attribute:: hard_bounds
+
+
+   .. py:attribute:: clamping_error
+      :value: 0.0
+
+
+
+   .. py:attribute:: phase
+
+
+   .. py:attribute:: w
+
+
+   .. py:attribute:: amplitudes
+
+
+   .. py:attribute:: ha
+
+
+   .. py:attribute:: b
+
+
+   .. py:attribute:: parameter_groups
+
+
+   .. py:attribute:: num_of_parameters
+
+
+   .. py:attribute:: num_of_parameter_groups
+      :value: 5
+
+
+
+   .. py:attribute:: angle_history
+      :value: []
+
+
+
+   .. py:attribute:: initial_state
+
+
+   .. py:method:: param_type_converter(params: list[float] | numpy.ndarray | torch.Tensor) -> torch.Tensor
+
+      Convert input parameters to torch.Tensor if needed.
+
+
+
+   .. py:method:: set_flat_params(params: torch.Tensor) -> None
+
+      Set all learnable parameters from a flat tensor.
+
+
+
+   .. py:method:: set_param_with_dict(params: dict[str, torch.Tensor]) -> None
+
+      Set parameters using a dictionary.
+
+
+
+   .. py:method:: set_params_by_group(group_name: str, params: torch.Tensor) -> None
+
+      Set parameters for a specific group.
+
+
+
+   .. py:method:: get_flat_params() -> torch.Tensor
+
+      Get all learnable parameters as a flat tensor.
+
+
+
+   .. py:method:: reset() -> None
+
+      Reset the internal states to their initial values.
+
+
+
+   .. py:method:: forward(time: float | None = None) -> torch.Tensor
+
+      Perform a forward pass to update CPG states and compute output angles.
+
+      :param time: Current simulation time. If equal to zero, resets the CPG.
+      :type time: :class:`float | None`, *optional*
+
+      :returns: Output angles for each CPG node.
+      :rtype: :class:`torch.Tensor`
+
+
+
+   .. py:method:: save(path: str | pathlib.Path) -> None
+
+      Save learnable parameters to file.
+
+
+
+   .. py:method:: load(path: str | pathlib.Path) -> None
+
+      Load learnable parameters from file.
+
+
+
+.. py:function:: main() -> None
+
+   Example usage of SimpleCPG.
+
+

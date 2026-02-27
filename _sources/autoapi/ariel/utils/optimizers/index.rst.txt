@@ -1,0 +1,20 @@
+:py:mod:`optimizers`
+================================
+
+.. py:module:: ariel.utils.optimizers
+
+.. autoapi-nested-parse::
+
+   Pre-built optimizers.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   revde/index.rst
+
+

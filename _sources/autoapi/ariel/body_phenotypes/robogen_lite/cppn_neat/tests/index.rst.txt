@@ -1,0 +1,36 @@
+:py:mod:`tests`
+============================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.cppn_neat.tests
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.cppn_neat.tests.display_genome
+   ariel.body_phenotypes.robogen_lite.cppn_neat.tests.test_mutation
+   ariel.body_phenotypes.robogen_lite.cppn_neat.tests.test_crossover
+
+
+
+.. py:function:: display_genome(genome: ariel.body_phenotypes.robogen_lite.cppn_neat.genome.Genome, title: str)
+
+   Prints a readable summary of a genome's structure.
+
+
+.. py:function:: test_mutation()
+
+   Tests the add_node and add_connection mutations.
+
+
+.. py:function:: test_crossover()
+
+   Tests the crossover of two parent genomes.
+
+

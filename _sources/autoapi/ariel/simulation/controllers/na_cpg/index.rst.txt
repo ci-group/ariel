@@ -1,0 +1,285 @@
+:py:mod:`na_cpg`
+=============================================
+
+.. py:module:: ariel.simulation.controllers.na_cpg
+
+.. autoapi-nested-parse::
+
+   TODO(jmdm): description of script.
+
+   .. admonition:: Notes
+
+      *
+
+   .. admonition:: References
+
+      [1] https://www.sciencedirect.com/science/article/pii/S2667379722000353
+
+   .. todo::
+
+      [ ] Fix constraint function:
+          This requires experimental validation to find the mapping from angular
+          velocity to maximum allowed change in the CPG state space.
+          The paper determines this information empirically.
+      [ ] Implement matrix formulation
+      [ ] What should the initial values be???
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.na_cpg.NaCPG
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.na_cpg.create_fully_connected_adjacency
+   ariel.simulation.controllers.na_cpg.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.controllers.na_cpg.E
+   ariel.simulation.controllers.na_cpg.SCRIPT_NAME
+   ariel.simulation.controllers.na_cpg.CWD
+   ariel.simulation.controllers.na_cpg.DATA
+   ariel.simulation.controllers.na_cpg.console
+
+
+.. py:data:: E
+   :value: 1e-09
+
+
+.. py:data:: SCRIPT_NAME
+
+.. py:data:: CWD
+
+.. py:data:: DATA
+
+.. py:data:: console
+
+.. py:function:: create_fully_connected_adjacency(num_nodes: int) -> dict[int, list[int]]
+
+   Create a fully connected adjacency dictionary for the CPG network.
+
+   :param num_nodes: Number of nodes in the CPG network.
+   :type num_nodes: :class:`int`
+
+   :returns: Adjacency dictionary where each key is a node index and the value is a list
+             of indices of connected nodes.
+   :rtype: :class:`dict[int`, :class:`list[int]]`
+
+
+.. py:class:: NaCPG(adjacency_dict: dict[int, list[int]], alpha: float = 0.1, dt: float = 0.01, hard_bounds: tuple[float, float] | None = (-torch.pi / 2, torch.pi / 2), *, angle_tracking: bool = False, seed: int | None = None)
+
+   Bases: :py:obj:`torch.nn.Module`
+
+   .. autoapi-inheritance-diagram:: ariel.simulation.controllers.na_cpg.NaCPG
+      :parts: 1
+
+
+   Implements the Normalized Asymmetric CPG (NA-CPG).
+
+
+   .. py:attribute:: xy
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: xy_dot_old
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: angles
+      :type:  torch.Tensor
+
+
+   .. py:attribute:: adjacency_dict
+
+
+   .. py:attribute:: n
+
+
+   .. py:attribute:: angle_tracking
+      :value: False
+
+
+
+   .. py:attribute:: hard_bounds
+
+
+   .. py:attribute:: clamping_error
+      :value: 0.0
+
+
+
+   .. py:attribute:: alpha
+      :value: 0.1
+
+
+
+   .. py:attribute:: dt
+      :value: 0.01
+
+
+
+   .. py:attribute:: phase
+
+
+   .. py:attribute:: amplitudes
+
+
+   .. py:attribute:: w
+
+
+   .. py:attribute:: ha
+
+
+   .. py:attribute:: b
+
+
+   .. py:attribute:: parameter_groups
+
+
+   .. py:attribute:: num_of_parameters
+
+
+   .. py:attribute:: num_of_parameter_groups
+      :value: 5
+
+
+
+   .. py:attribute:: angle_history
+      :value: []
+
+
+
+   .. py:attribute:: initial_state
+
+
+   .. py:method:: param_type_converter(params: list[float] | numpy.ndarray | torch.Tensor) -> torch.Tensor
+
+      Convert input parameters to torch.Tensor if needed.
+
+      :param params: Input parameters to convert.
+      :type params: :class:`list[float] | np.ndarray | torch.Tensor`
+
+      :returns: Converted parameters as a torch.Tensor.
+      :rtype: :class:`torch.Tensor`
+
+
+
+   .. py:method:: set_flat_params(params: torch.Tensor) -> None
+
+      Set all learnable parameters from a flat tensor.
+
+      :param params: A flat tensor containing all learnable parameters.
+      :type params: :class:`torch.Tensor`
+
+
+
+   .. py:method:: set_param_with_dict(params: dict[str, torch.Tensor]) -> None
+
+      Set parameters using a dictionary where keys are group names and values are tensors.
+
+      :param params: Dictionary with parameter group names as keys and parameter tensors as values.
+      :type params: :class:`dict[str`, :class:`torch.Tensor]`
+
+
+
+   .. py:method:: set_params_by_group(group_name: str, params: torch.Tensor) -> None
+
+      Set parameters for a specific group.
+
+      :param group_name: The name of the parameter group to set.
+      :type group_name: :class:`str`
+      :param params: A tensor containing the parameters for the specified group.
+      :type params: :class:`torch.Tensor`
+
+
+
+   .. py:method:: get_flat_params() -> torch.Tensor
+
+      Get all learnable parameters as a flat tensor.
+
+
+
+   .. py:method:: term_a(alpha: float, r2i: float) -> float
+      :staticmethod:
+
+
+      Term A from the NA-CPG equations.
+
+
+
+   .. py:method:: term_b(zeta_i: float, w_i: float) -> float
+      :staticmethod:
+
+
+      Term B from the NA-CPG equations.
+
+
+
+   .. py:method:: zeta(ha_i: float, x_dot_old: float) -> float
+      :staticmethod:
+
+
+      Zeta function from the NA-CPG equations.
+
+
+
+   .. py:method:: reset() -> None
+
+      Reset the internal states to their initial values.
+
+
+
+   .. py:method:: forward(time: float | None = None) -> torch.Tensor
+
+      Perform a forward pass to update the CPG states and compute output angles.
+
+      :param time: Current simulation time. If provided and equal to zero, the CPG states
+                   will be reset, by default None.
+      :type time: :class:`float | None`, *optional*
+
+      :returns: The output angles for each CPG node after the update.
+      :rtype: :class:`torch.Tensor`
+
+
+
+   .. py:method:: save(path: str | pathlib.Path) -> None
+
+      Save learnable parameters to file.
+
+      :param path: File path to save the parameters.
+      :type path: :class:`str | Path`
+
+
+
+   .. py:method:: load(path: str | pathlib.Path) -> None
+
+      Load learnable parameters from file.
+
+      :param path: File path to load the parameters from.
+      :type path: :class:`str | Path`
+
+
+
+.. py:function:: main() -> None
+
+   Example usage of the NaCPG class.
+
+

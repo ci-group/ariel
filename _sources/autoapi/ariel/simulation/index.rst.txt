@@ -1,0 +1,22 @@
+:py:mod:`simulation`
+==========================
+
+.. py:module:: ariel.simulation
+
+.. autoapi-nested-parse::
+
+   ARIEL simulation package.
+
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   controllers/index.rst
+   environments/index.rst
+   tasks/index.rst
+
+

@@ -1,0 +1,58 @@
+:py:mod:`cppn_best_first`
+=====================================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first.MorphologyDecoderBestFirst
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first.softmax
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first.console
+
+
+.. py:data:: console
+
+.. py:function:: softmax(raw_scores: numpy.typing.NDArray[numpy.float32]) -> numpy.typing.NDArray[numpy.float32]
+
+.. py:class:: MorphologyDecoderBestFirst(cppn_genome: ariel.body_phenotypes.robogen_lite.cppn_neat.genome.Genome, max_modules: int = 20)
+
+   Decodes a CPPN using a true greedy, best-first search strategy.
+
+
+   .. py:attribute:: cppn_genome
+
+
+   .. py:attribute:: max_modules
+      :value: 20
+
+
+
+   .. py:attribute:: face_deltas
+
+
+   .. py:method:: decode() -> networkx.DiGraph
+
+

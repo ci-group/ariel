@@ -1,0 +1,38 @@
+:py:mod:`ariel_types`
+======================================
+
+.. py:module:: ariel.parameters.ariel_types
+
+.. autoapi-nested-parse::
+
+   ARIEL Types.
+
+
+
+Module Contents
+---------------
+
+.. py:data:: ND_FLOAT_PRECISION
+
+.. py:data:: ND_INT_PRECISION
+
+.. py:type:: Dimension
+   :canonical: tuple[float, float, float]
+
+
+.. py:type:: Position
+   :canonical: tuple[float, float, float]
+
+
+.. py:type:: Rotation
+   :canonical: tuple[float, float, float]
+
+
+.. py:type:: FloatArray
+   :canonical: npt.NDArray[ND_FLOAT_PRECISION]
+
+
+.. py:type:: IntArray
+   :canonical: npt.NDArray[ND_INT_PRECISION]
+
+
