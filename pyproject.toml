@@ -10,6 +10,7 @@ classifiers = ["Development Status :: 2 - Pre-Alpha"]
 
 dependencies = [
   "deap>=1.4.3",
+  "evotorch>=0.6.1",
   "ipykernel>=6.30.1",
   "jupyter>=1.1.1",
   "keyboard>=0.13.5",

@@ -230,21 +230,15 @@ def run_vision_simulation(model,
                 vision_inputs
             ]).astype(np.float32)
 
-
-            console.log(len(state_input))
-            exit(1)
-
             # 4. Network Forward Pass
             current_action = network.forward(model, data, state_input)
         
         # 5. Apply Control (Hold previous action if not a control step)
         data.ctrl[:] = current_action
         
-        
         # 6. Step Physics
         mujoco.mj_step(model, data)
          
-
 # ============================================================================ #
 #                         Define evolutionary loop                             #
 # ============================================================================ #

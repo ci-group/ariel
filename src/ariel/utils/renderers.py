@@ -39,10 +39,10 @@ def single_frame_renderer(
 
     # MuJoCo visualisation configuration
     viz_options = mujoco.MjvOption()
-    viz_options.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = True
-    viz_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-    viz_options.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = True
-    viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = True
+    # viz_options.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = True
+    # viz_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
+    # viz_options.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = True
+    # viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = True
 
     # Update rendering engine
     camera = mujoco.mj_name2id(
