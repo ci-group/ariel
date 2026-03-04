@@ -38,8 +38,8 @@ Introduction to modular robots <source/introduction_to_modular_robots/index>
 Contributing guide <source/contributing_guide/index>
 Installation Guide <source/installation_guide>
 Genotypes <source/genotype_docs/index>
+EAs with ARIEL Introduction <source/EA_intro/index>
 GUI <source/GUI>
-EAs with ARIEL Introduction <source/ea_intro/index>
 ARIEL Database Handling <source/Db_examples/index>
 MuJoCo Data Variables Documentation <source/Mujoco_docs/mujoco_docs>
 ```
