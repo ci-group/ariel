@@ -5,7 +5,7 @@
 ![Ariel Logo](resources/ariel_logo.svg)
 
 
-Ariel is a Python package, similar to Revolve, that provides efficient and easy-to-use tools for many aspects of evolutionary computing and evolutionary robotics.  
+Ariel is a Python package that provides efficient and easy-to-use tools for many aspects of evolutionary computing and evolutionary robotics.  
 It is designed with a clear API, sensible defaults, and support for both beginners and advanced users.
 
 ---
@@ -38,10 +38,8 @@ Introduction to modular robots <source/introduction_to_modular_robots/index>
 Contributing guide <source/contributing_guide/index>
 Installation Guide <source/installation_guide>
 Genotypes <source/genotype_docs/index>
-
-
 GUI <source/GUI>
-Your first EA with ARIEL <source/ea_intro/ea_example>
+EAs with ARIEL Introduction <source/ea_intro/index>
 ARIEL Database Handling <source/Db_examples/index>
 MuJoCo Data Variables Documentation <source/Mujoco_docs/mujoco_docs>
 ```
