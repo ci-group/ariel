@@ -40,10 +40,15 @@ from mujoco import viewer
 # tree genotype imports
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from ariel.ec.genotypes.tree.operators import (
-    crossover_one_point,
+    crossover_subtree,
     mutate_replace_node,
+    mutate_subtree_replacement,
+    mutate_shrink,
+    mutate_hoist,
     random_tree,
     _prune_invalid_edges,
+    get_tree_depth,
+    validate_tree_depth,
 )
 from ariel.ec.genotypes.tree.validation import validate_genome_dict
 
@@ -78,6 +83,7 @@ args = parser.parse_args()
 POP_SIZE: int = args.pop
 BUDGET: int = args.budget
 NUM_MODULES: int = args.max_modules
+MAX_DEPTH: int = 12  # Maximum tree depth to prevent bloat
 
 # Type Aliases
 Population = list[Individual]
@@ -214,11 +220,26 @@ class MorphologyEvolution:
         return len(genome.nodes)
 
     def mutate_morphology(self, genome: TreeGenome) -> TreeGenome:
-        """Apply mutations to morphology."""
+        """Apply mutations to morphology with multiple GP operators."""
         new = copy.deepcopy(genome)
-        # always try at least one node replacement
-        mutate_replace_node(new)
-        # optionally mutate rotation on random node
+
+        # Choose mutation type (standard GP mutation operators)
+        mutation_type = RNG.choice(['point', 'subtree', 'shrink', 'hoist'], p=[0.4, 0.4, 0.1, 0.1])
+
+        if mutation_type == 'point':
+            # Point mutation: change node type/rotation
+            mutate_replace_node(new)
+        elif mutation_type == 'subtree':
+            # Subtree mutation: replace subtree with new random tree
+            mutate_subtree_replacement(new, max_modules=NUM_MODULES)
+        elif mutation_type == 'shrink':
+            # Shrink mutation: replace node+subtree with single leaf
+            mutate_shrink(new)
+        elif mutation_type == 'hoist':
+            # Hoist mutation: promote child to replace parent
+            mutate_hoist(new)
+
+        # Additional rotation mutation (20% chance)
         if RNG.random() < 0.2:
             noncore = [nid for nid in new.nodes if nid != IDX_OF_CORE]
             if noncore:
@@ -228,6 +249,7 @@ class MorphologyEvolution:
                 rots = [r.name for r in ALLOWED_ROTATIONS[mtype]]
                 if rots:
                     new.nodes[nid]["rotation"] = random.choice(rots)
+
         # prune any invalid edges before returning
         _prune_invalid_edges(new)
         try:
@@ -245,7 +267,7 @@ class MorphologyEvolution:
         if isinstance(t2, dict):
             t2 = TreeGenome.from_dict(t2)
         
-        child1, child2 = crossover_one_point(t1, t2)
+        child1, child2 = crossover_subtree(t1, t2)
         
         # Return first valid child, otherwise fallback to asexual copy
         chosen = child1 if RNG.random() < 0.5 else child2
@@ -296,7 +318,9 @@ class MorphologyEvolution:
             valid_child = False
             attempts = 0
             while not valid_child and attempts < 20:
-                if self.get_module_count(c_morph) > 0:
+                has_modules = self.get_module_count(c_morph) > 0
+                valid_depth = validate_tree_depth(c_morph, MAX_DEPTH)
+                if has_modules and valid_depth:
                     valid_child = True
                 else:
                     c_morph = self.mutate_morphology(c_morph)

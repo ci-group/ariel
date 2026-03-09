@@ -126,21 +126,20 @@ def subtree_swap(a: TreeGenome, b: TreeGenome, a_node: int, b_node: int) -> None
     # clean up any now-invalid connections and perform final checks
     _prune_invalid_edges(a)
     _prune_invalid_edges(b)
-    validate_genome_dict(a.to_dict())
-    validate_genome_dict(b.to_dict())
+    # Note: Validation moved to calling code to allow for temporary invalid states during crossover
 
 
 # ---------------------------------------------------------------------------
 # Additional general operators
 # ---------------------------------------------------------------------------
 
-def crossover_one_point(a: TreeGenome, b: TreeGenome) -> tuple[TreeGenome, TreeGenome]:
-    """Perform one-point crossover on tree genomes.
+def crossover_subtree(a: TreeGenome, b: TreeGenome) -> tuple[TreeGenome, TreeGenome]:
+    """Perform standard GP subtree crossover on tree genomes.
 
-    Two offspring are produced by exchanging the subtrees rooted at randomly
-    chosen non-core nodes from each parent.  The selected subtree is expanded
-    to its top ancestor so that an entire branch is swapped.  Returns a pair
-    ``(child1, child2)``.  Parents are left unmodified.
+    Two offspring are produced by exchanging randomly chosen subtrees from each parent.
+    Unlike one-point crossover on linear genomes, this selects any node (including leaves)
+    and swaps the entire subtree rooted at that node. Returns a pair ``(child1, child2)``.
+    Parents are left unmodified.
     """
     child1 = copy.deepcopy(a)
     child2 = copy.deepcopy(b)
@@ -154,12 +153,32 @@ def crossover_one_point(a: TreeGenome, b: TreeGenome) -> tuple[TreeGenome, TreeG
     if n1 is None or n2 is None:
         return child1, child2
 
-    root1 = get_top_ancestor(child1, n1)
-    root2 = get_top_ancestor(child2, n2)
-
-    subtree_swap(child1, child2, root1, root2)
-    # subtree_swap already validates
+    # Standard GP: swap subtrees directly at selected nodes (no ancestor expansion)
+    subtree_swap(child1, child2, n1, n2)
+    # Validate after crossover
+    try:
+        validate_genome_dict(child1.to_dict())
+        validate_genome_dict(child2.to_dict())
+    except ValueError:
+        # If validation fails, return copies of parents
+        return copy.deepcopy(a), copy.deepcopy(b)
     return child1, child2
+
+
+# Keep the old function for backward compatibility but mark as deprecated
+def crossover_one_point(a: TreeGenome, b: TreeGenome) -> tuple[TreeGenome, TreeGenome]:
+    """DEPRECATED: Use crossover_subtree() instead.
+
+    This function incorrectly implements 'one-point crossover' by expanding to top ancestors.
+    Standard GP subtree crossover should swap at randomly selected nodes directly.
+    """
+    import warnings
+    warnings.warn(
+        "crossover_one_point() is deprecated. Use crossover_subtree() for standard GP behavior.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return crossover_subtree(a, b)
 
 
 def mutate_replace_node(genome: TreeGenome) -> None:
@@ -204,6 +223,197 @@ def mutate_replace_node(genome: TreeGenome) -> None:
         pass
 
 
+def mutate_subtree_replacement(genome: TreeGenome, max_modules: int = 10) -> None:
+    """Standard GP subtree mutation: replace a random subtree with a newly generated one.
+
+    Selects a random non-core node, removes its entire subtree, and replaces it
+    with a new randomly generated subtree. This is the primary mutation operator
+    in canonical GP (Koza, 1992).
+    """
+    def reassign_ids(nodes: dict[int, dict],
+                     edges: list[dict],
+                     existing_ids: set[int]):
+        """Return copies of *nodes* and *edges* with fresh identifiers."""
+        if not nodes:
+            return {}, [], {}
+        mapping: dict[int, int] = {}
+        next_id = max(existing_ids, default=-1) + 1
+        for old in sorted(nodes):
+            mapping[old] = next_id
+            next_id += 1
+        new_nodes = {mapping[old]: copy.deepcopy(attr) for old, attr in nodes.items()}
+        new_edges: list[dict] = []
+        for e in edges:
+            edge_copy = {k: copy.deepcopy(v) for k, v in e.items()}
+            edge_copy["parent"] = mapping[e["parent"]]
+            edge_copy["child"] = mapping[e["child"]]
+            new_edges.append(edge_copy)
+        return new_nodes, new_edges, mapping
+
+    candidates = [nid for nid in genome.nodes if nid != IDX_OF_CORE]
+    if not candidates:
+        return
+
+    # Select node to replace
+    node_id = random.choice(candidates)
+
+    # Find parent and face connection
+    parent_id = None
+    parent_face = None
+    for e in genome.edges:
+        if e["child"] == node_id:
+            parent_id = e["parent"]
+            parent_face = e["face"]
+            break
+
+    # Remove the old subtree
+    remove_subtree(genome, node_id)
+
+    # Generate new random subtree and attach it
+    if parent_id is not None and parent_face is not None:
+        # Create a small random subtree (1-3 nodes typically)
+        subtree_size = random.randint(1, min(3, max_modules))
+        new_subtree = random_tree(subtree_size)
+
+        # The new subtree has its own core, but we need to graft it onto the parent
+        # Remove the core from new_subtree and reattach its children to the parent
+        if IDX_OF_CORE in new_subtree.nodes:
+            # Get all direct children of the core in the new subtree
+            core_children = []
+            for e in new_subtree.edges:
+                if e["parent"] == IDX_OF_CORE:
+                    core_children.append((e["child"], e["face"]))
+
+            # Remove core and its edges
+            del new_subtree.nodes[IDX_OF_CORE]
+            new_subtree.edges = [e for e in new_subtree.edges if e["parent"] != IDX_OF_CORE]
+
+            # Reassign IDs to avoid conflicts
+            existing_ids = set(genome.nodes.keys())
+            new_nodes, new_edges, _ = reassign_ids(new_subtree.nodes, new_subtree.edges, existing_ids)
+
+            # Add the new nodes and edges, connecting to the original parent
+            genome.nodes.update(new_nodes)
+            for child_id, face in core_children:
+                if child_id in new_nodes:  # Should always be true after reassignment
+                    new_child_id = [k for k, v in new_nodes.items() if v == new_subtree.nodes[child_id]][0]
+                    genome.edges.append({"parent": parent_id, "child": new_child_id, "face": face})
+
+            genome.edges.extend(new_edges)
+
+    # Clean up and validate
+    _prune_invalid_edges(genome)
+    try:
+        validate_genome_dict(genome.to_dict())
+    except ValueError:
+        pass
+
+
+def mutate_shrink(genome: TreeGenome) -> None:
+    """Shrink mutation: replace a node and its subtree with a single new leaf node.
+
+    Selects a random non-core node, removes its entire subtree, and replaces it
+    with a single new randomly chosen module type. This reduces tree size and
+    is part of standard GP mutation operators.
+    """
+    candidates = [nid for nid in genome.nodes if nid != IDX_OF_CORE]
+    if not candidates:
+        return
+
+    node_id = random.choice(candidates)
+
+    # Find parent connection
+    parent_id = None
+    parent_face = None
+    for e in genome.edges:
+        if e["child"] == node_id:
+            parent_id = e["parent"]
+            parent_face = e["face"]
+            break
+
+    if parent_id is None:
+        return  # Shouldn't happen for valid trees
+
+    # Remove the entire subtree
+    remove_subtree(genome, node_id)
+
+    # Replace with a single new node
+    types = [t for t in ModuleType if t not in (ModuleType.CORE, ModuleType.NONE)]
+    new_type = random.choice(types).name
+    rotations = [r.name for r in ALLOWED_ROTATIONS[ModuleType[new_type]]]
+    new_rot = random.choice(rotations) if rotations else "DEG_0"
+
+    genome.nodes[node_id] = {"type": new_type, "rotation": new_rot}
+    genome.edges.append({"parent": parent_id, "child": node_id, "face": parent_face})
+
+    # Clean up and validate
+    _prune_invalid_edges(genome)
+    try:
+        validate_genome_dict(genome.to_dict())
+    except ValueError:
+        pass
+
+
+def mutate_hoist(genome: TreeGenome) -> None:
+    """Hoist mutation: replace a parent node with one of its children.
+
+    Selects a random node that has children, then replaces it with one of its
+    children, effectively "hoisting" the child up in the tree. This changes
+    tree structure without changing size and is part of standard GP operators.
+    """
+    # Find nodes that have children
+    nodes_with_children = set()
+    for e in genome.edges:
+        nodes_with_children.add(e["parent"])
+
+    candidates = [nid for nid in nodes_with_children if nid != IDX_OF_CORE]
+    if not candidates:
+        return
+
+    parent_id = random.choice(candidates)
+
+    # Get all children of this parent
+    children = [e["child"] for e in genome.edges if e["parent"] == parent_id]
+    if not children:
+        return
+
+    # Choose one child to hoist
+    child_to_hoist = random.choice(children)
+
+    # Find the parent's parent and face
+    grandparent_id = None
+    parent_face = None
+    for e in genome.edges:
+        if e["child"] == parent_id:
+            grandparent_id = e["parent"]
+            parent_face = e["face"]
+            break
+
+    if grandparent_id is None:
+        return  # Can't hoist root
+
+    # Remove the parent and all its other children (except the one being hoisted)
+    for child in children:
+        if child != child_to_hoist:
+            remove_subtree(genome, child)
+
+    # Remove the parent node and its edges
+    if parent_id in genome.nodes:
+        del genome.nodes[parent_id]
+    genome.edges = [e for e in genome.edges if e["child"] != parent_id and e["parent"] != parent_id]
+
+    # Connect the hoisted child directly to the grandparent
+    genome.edges = [e for e in genome.edges if not (e["parent"] == grandparent_id and e["face"] == parent_face)]
+    genome.edges.append({"parent": grandparent_id, "child": child_to_hoist, "face": parent_face})
+
+    # Clean up and validate
+    _prune_invalid_edges(genome)
+    try:
+        validate_genome_dict(genome.to_dict())
+    except ValueError:
+        pass
+
+
 def random_tree(max_modules: int) -> TreeGenome:
     """Generate a random valid tree genome with up to ``max_modules`` nodes.
 
@@ -236,6 +446,33 @@ def random_tree(max_modules: int) -> TreeGenome:
         add_node(g, parent, face, next_id, mtype, rot)
         next_id += 1
     return g
+
+
+def get_tree_depth(genome: TreeGenome) -> int:
+    """Calculate the maximum depth from core to any leaf node."""
+    if not genome.nodes:
+        return 0
+
+    g = genome.to_networkx()
+    if len(g) == 0:
+        return 0
+
+    max_depth = 0
+    stack = [(IDX_OF_CORE, 0)]  # (node, depth)
+
+    while stack:
+        node, depth = stack.pop()
+        max_depth = max(max_depth, depth)
+
+        for child in g.successors(node):
+            stack.append((child, depth + 1))
+
+    return max_depth
+
+
+def validate_tree_depth(genome: TreeGenome, max_depth: int) -> bool:
+    """Check if tree depth is within the specified limit."""
+    return get_tree_depth(genome) <= max_depth
 
 
 def _prune_invalid_edges(genome: TreeGenome) -> None:
