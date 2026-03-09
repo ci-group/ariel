@@ -165,22 +165,6 @@ def crossover_subtree(a: TreeGenome, b: TreeGenome) -> tuple[TreeGenome, TreeGen
     return child1, child2
 
 
-# Keep the old function for backward compatibility but mark as deprecated
-def crossover_one_point(a: TreeGenome, b: TreeGenome) -> tuple[TreeGenome, TreeGenome]:
-    """DEPRECATED: Use crossover_subtree() instead.
-
-    This function incorrectly implements 'one-point crossover' by expanding to top ancestors.
-    Standard GP subtree crossover should swap at randomly selected nodes directly.
-    """
-    import warnings
-    warnings.warn(
-        "crossover_one_point() is deprecated. Use crossover_subtree() for standard GP behavior.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    return crossover_subtree(a, b)
-
-
 def mutate_replace_node(genome: TreeGenome) -> None:
     """Point mutation: replace a randomly selected non-core node.
 
