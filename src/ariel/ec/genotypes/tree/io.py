@@ -14,5 +14,5 @@ def save_genome(genome: TreeGenome, path: str) -> None:
     genome.save_json(path)
 
 
-def genome_to_networkx_dict(genome: TreeGenome) -> Dict[str, Any]:
+def genome_to_networkx_dict(genome: TreeGenome) -> dict[str, Any]:
     return genome.to_dict()

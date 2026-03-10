@@ -10,7 +10,6 @@ import copy
 import random
 import time
 from pathlib import Path
-from typing import Any, Literal
 
 # Third-party libraries
 import numpy as np
@@ -23,40 +22,39 @@ install()
 console = Console()
 
 # --- ARIEL IMPORTS ---
-from ariel.body_phenotypes.robogen_lite.config import (
-    IDX_OF_CORE,
-    ModuleType,
-    ALLOWED_ROTATIONS,
-)
-from ariel.simulation.environments._simple_flat_with_target import (
-    SimpleFlatWorldWithTarget,
-    )
-from ariel.body_phenotypes.robogen_lite.constructor import (
-    construct_mjspec_from_graph,
-)
+import contextlib
+
 import mujoco
 from mujoco import viewer
 
-# tree genotype imports
-from ariel.ec.genotypes.tree.tree_genome import TreeGenome
-from ariel.ec.genotypes.tree.operators import (
-    crossover_subtree,
-    mutate_replace_node,
-    mutate_subtree_replacement,
-    mutate_shrink,
-    mutate_hoist,
-    random_tree,
-    _prune_invalid_edges,
-    get_tree_depth,
-    validate_tree_depth,
+from ariel.body_phenotypes.robogen_lite.config import (
+    ALLOWED_ROTATIONS,
+    IDX_OF_CORE,
+    ModuleType,
 )
-from ariel.ec.genotypes.tree.validation import validate_genome_dict
-
+from ariel.body_phenotypes.robogen_lite.constructor import (
+    construct_mjspec_from_graph,
+)
 from ariel.ec.a001 import Individual
 from ariel.ec.a004 import EA, EASettings, EAStep
+from ariel.ec.genotypes.tree.operators import (
+    _prune_invalid_edges,
+    crossover_subtree,
+    mutate_hoist,
+    mutate_replace_node,
+    mutate_shrink,
+    mutate_subtree_replacement,
+    random_tree,
+    validate_tree_depth,
+)
 
+# tree genotype imports
+from ariel.ec.genotypes.tree.tree_genome import TreeGenome
+from ariel.ec.genotypes.tree.validation import validate_genome_dict
+from ariel.simulation.environments._simple_flat_with_target import (
+    SimpleFlatWorldWithTarget,
+)
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
-from ariel.utils.tracker import Tracker
 
 # ============================================================================ #
 #                               CONFIGURATION                                  #
@@ -64,17 +62,17 @@ from ariel.utils.tracker import Tracker
 
 parser = argparse.ArgumentParser(description="Morphology-Only Evolution (trees)")
 parser.add_argument(
-    "--budget", type=int, default=50, help="Number of generations"
+    "--budget", type=int, default=50, help="Number of generations",
 )
 parser.add_argument("--pop", type=int, default=100, help="Population size")
 parser.add_argument(
-    "--max-modules", type=int, default=20, help="Maximum modules per robot"
+    "--max-modules", type=int, default=20, help="Maximum modules per robot",
 )
 parser.add_argument(
-    "--visualize", type=bool, default=True, help="Launch MuJoCo viewer for best individual"
+    "--visualize", type=bool, default=True, help="Launch MuJoCo viewer for best individual",
 )
 parser.add_argument(
-    "--max_modules", type=int, default=20, help="Maximum number of modules in a morphology"
+    "--max_modules", type=int, default=20, help="Maximum number of modules in a morphology",
 )
 
 args = parser.parse_args()
@@ -121,35 +119,33 @@ def is_connected_tree(genome: TreeGenome) -> bool:
     while stack:
         node = stack.pop()
         reachable.add(node)
-        for succ in robot_graph.successors(node):
-            if succ not in reachable:
-                stack.append(succ)
+        stack.extend(succ for succ in robot_graph.successors(node) if succ not in reachable)
     return len(reachable) == robot_graph.number_of_nodes()
 
 
 def calculate_morphological_fitness(genome: TreeGenome) -> float:
     """
     Calculate fitness based on morphological properties.
-    
+
     Combines multiple morphological descriptors:
     - Symmetry (S): Higher symmetry is rewarded
     - Joints (J): More articulation is rewarded
     - Branching (B): Branching structure is rewarded
     - Limbs (L): Long limbs are rewarded
-    
+
     Returns a fitness value (lower is better for minimization).
     """
     try:
         # Validate connectivity
         if not is_connected_tree(genome):
             return float("inf")
-        
+
         robot_graph = genome.to_networkx()
         if robot_graph.number_of_nodes() == 0:
             return float("inf")
-        
+
         measures = MorphologicalMeasures(robot_graph)
-        
+
         # Weighted combination of morphological properties
         # Higher values are better, so we negate for minimization
         morpho_score = (
@@ -159,11 +155,10 @@ def calculate_morphological_fitness(genome: TreeGenome) -> float:
             measures.length_of_limbs * 0.20 +  # Reward limb length
             measures.module_diversity * 0.20    # Reward alternation/diversity
         )
-        
+
         # Fitness = negative of morpho_score (for minimization framework)
-        fitness = -morpho_score
-        
-        return fitness
+        return -morpho_score
+
     except Exception:
         return float("inf")
 
@@ -179,7 +174,6 @@ def visualize_genome(genome: TreeGenome) -> None:
         world = SimpleFlatWorldWithTarget()
         world.spawn(spec, position=SPAWN_POSITION)
         model = world.spec.compile()
-
 
         data = mujoco.MjData(model)
         viewer.launch(model=model, data=data)
@@ -224,18 +218,18 @@ class MorphologyEvolution:
         new = copy.deepcopy(genome)
 
         # Choose mutation type (standard GP mutation operators)
-        mutation_type = RNG.choice(['point', 'subtree', 'shrink', 'hoist'], p=[0.4, 0.4, 0.1, 0.1])
+        mutation_type = RNG.choice(["point", "subtree", "shrink", "hoist"], p=[0.4, 0.4, 0.1, 0.1])
 
-        if mutation_type == 'point':
+        if mutation_type == "point":
             # Point mutation: change node type/rotation
             mutate_replace_node(new)
-        elif mutation_type == 'subtree':
+        elif mutation_type == "subtree":
             # Subtree mutation: replace subtree with new random tree
             mutate_subtree_replacement(new, max_modules=NUM_MODULES)
-        elif mutation_type == 'shrink':
+        elif mutation_type == "shrink":
             # Shrink mutation: replace node+subtree with single leaf
             mutate_shrink(new)
-        elif mutation_type == 'hoist':
+        elif mutation_type == "hoist":
             # Hoist mutation: promote child to replace parent
             mutate_hoist(new)
 
@@ -252,10 +246,8 @@ class MorphologyEvolution:
 
         # prune any invalid edges before returning
         _prune_invalid_edges(new)
-        try:
+        with contextlib.suppress(ValueError):
             validate_genome_dict(new.to_dict())
-        except ValueError:
-            pass
         return new
 
     def crossover_morphologies(self, parent1: Individual, parent2: Individual) -> TreeGenome:
@@ -266,16 +258,16 @@ class MorphologyEvolution:
             t1 = TreeGenome.from_dict(t1)
         if isinstance(t2, dict):
             t2 = TreeGenome.from_dict(t2)
-        
+
         child1, child2 = crossover_subtree(t1, t2)
-        
+
         # Return first valid child, otherwise fallback to asexual copy
         chosen = child1 if RNG.random() < 0.5 else child2
-        
+
         # If disconnected, return copy of a parent instead
         if not is_connected_tree(chosen):
             return TreeGenome.from_dict(random.choice([t1, t2]).to_dict())
-        
+
         return chosen
 
     def create_individual(self) -> Individual:
@@ -296,7 +288,7 @@ class MorphologyEvolution:
         parents = [ind for ind in population if ind.tags.get("ps", False)]
         if not parents:
             console.log(
-                "[yellow]Warning: No ps-tagged individuals, using entire population[/yellow]"
+                "[yellow]Warning: No ps-tagged individuals, using entire population[/yellow]",
             )
             parents = population
 
@@ -356,21 +348,21 @@ class MorphologyEvolution:
     def parent_selection(self, population: Population) -> Population:
         """Select top 50% as parents."""
         population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf")
+            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
         )
         cutoff = len(population) // 2
         for i, ind in enumerate(population):
             ind.tags["ps"] = i < cutoff
         ps_count = sum(1 for ind in population if ind.tags.get("ps", False))
         console.log(
-            f"[cyan]Parent Selection: {ps_count}/{len(population)} marked for reproduction[/cyan]"
+            f"[cyan]Parent Selection: {ps_count}/{len(population)} marked for reproduction[/cyan]",
         )
         return population
 
     def survivor_selection(self, population: Population) -> Population:
         """Keep top 50% as survivors."""
         population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf")
+            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
         )
         survivors = population[: self.config.target_population_size]
         for ind in population:
@@ -383,20 +375,16 @@ class MorphologyEvolution:
             for ind in survivors
             if ind.fitness_ is not None and ind.fitness_ != float("inf")
         ])
-        min_fitness = min([
-            ind.fitness_
+        min_fitness = min(ind.fitness_
             for ind in survivors
-            if ind.fitness_ is not None and ind.fitness_ != float("inf")
-        ])
-        max_fitness = max([
-            ind.fitness_
+            if ind.fitness_ is not None and ind.fitness_ != float("inf"))
+        max_fitness = max(ind.fitness_
             for ind in survivors
-            if ind.fitness_ is not None and ind.fitness_ != float("inf")
-        ])
+            if ind.fitness_ is not None and ind.fitness_ != float("inf"))
 
         console.log(
             f"[green]Survivor Selection:[/green] "
-            f"Avg={avg_fitness:.4f}, Min={min_fitness:.4f}, Max={max_fitness:.4f}"
+            f"Avg={avg_fitness:.4f}, Min={min_fitness:.4f}, Max={max_fitness:.4f}",
         )
         return population
 
@@ -423,7 +411,7 @@ class MorphologyEvolution:
 
 def main() -> None:
     console.rule(
-        "[bold purple]Starting Morphology-Only Evolution (Tree Genomes)[/bold purple]"
+        "[bold purple]Starting Morphology-Only Evolution (Tree Genomes)[/bold purple]",
     )
     console.log(f"Population: {POP_SIZE}, Budget: {BUDGET}, Max Modules: {NUM_MODULES}")
 
@@ -456,7 +444,7 @@ def main() -> None:
             visualize_genome(TreeGenome.from_dict(best.genotype))
         except Exception as e:
             console.log(f"[red]Visualization error: {e}[/red]")
-    
+
 
 if __name__ == "__main__":
     main()
