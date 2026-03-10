@@ -8,6 +8,6 @@ The default genotypes found in ARIEL are:
 
 nde_docs
 cppn_docs
-trees_docs
+tree_docs
 vector_docs
 ```
