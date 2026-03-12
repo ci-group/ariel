@@ -1,0 +1,61 @@
+:py:mod:`gait_learning`
+==============================================
+
+.. py:module:: ariel.simulation.tasks.gait_learning
+
+.. autoapi-nested-parse::
+
+   Gait learning.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.simulation.tasks.gait_learning.xy_displacement
+   ariel.simulation.tasks.gait_learning.x_speed
+   ariel.simulation.tasks.gait_learning.y_speed
+
+
+
+.. py:function:: xy_displacement(xy1: tuple[float, float], xy2: tuple[float, float]) -> float
+
+   Calculate the displacement between two points in 2D space.
+
+   :param xy1: Coordinates of the first point (x1, y1).
+   :param xy2: Coordinates of the second point (x2, y2).
+
+   :returns: The Euclidean distance between the two points.
+   :rtype: :class:`float`
+
+
+.. py:function:: x_speed(xy1: tuple[float, float], xy2: tuple[float, float], dt: float) -> float
+
+   Calculate the speed in the x direction between two points.
+
+   :param xy1: Coordinates of the first point (x1, y1).
+   :param xy2: Coordinates of the second point (x2, y2).
+   :param dt: Time difference between the two points.
+
+   :returns: The speed in the x direction.
+   :rtype: :class:`float`
+
+
+.. py:function:: y_speed(xy1: tuple[float, float], xy2: tuple[float, float], dt: float) -> float
+
+   Calculate the speed in the y direction between two points.
+
+   :param xy1: Coordinates of the first point (x1, y1).
+   :param xy2: Coordinates of the second point (x2, y2).
+   :param dt: Time difference between the two points.
+
+   :returns: The speed in the y direction.
+   :rtype: :class:`float`
+
+

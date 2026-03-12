@@ -1,0 +1,102 @@
+:py:mod:`tree`
+=================================
+
+.. py:module:: ariel.ec.genotypes.tree
+
+.. autoapi-nested-parse::
+
+   Tree genotype package for ARIEL.
+
+   Provides a JSON-serializable tree genome and helpers.
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   io/index.rst
+   operators/index.rst
+   operators_1/index.rst
+   tree_genome/index.rst
+   validation/index.rst
+   validation_1/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.genotypes.tree.TreeGenome
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.genotypes.tree.load_genome
+   ariel.ec.genotypes.tree.save_genome
+   ariel.ec.genotypes.tree.add_node
+   ariel.ec.genotypes.tree.remove_subtree
+   ariel.ec.genotypes.tree.subtree_swap
+
+
+
+.. py:class:: TreeGenome
+
+   .. py:attribute:: nodes
+      :type:  Dict[int, Dict[str, str]]
+
+
+   .. py:attribute:: edges
+      :type:  List[Dict[str, Any]]
+      :value: []
+
+
+
+   .. py:method:: to_networkx() -> networkx.DiGraph
+
+
+   .. py:method:: to_dict() -> Dict[str, Any]
+
+
+   .. py:method:: from_dict(data: Dict[str, Any]) -> TreeGenome
+      :classmethod:
+
+
+
+   .. py:method:: save_json(path: str) -> None
+
+
+   .. py:method:: load_json(path: str) -> TreeGenome
+      :classmethod:
+
+
+
+.. py:function:: load_genome(path: str) -> ariel.ec.genotypes.tree.tree_genome.TreeGenome
+
+.. py:function:: save_genome(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, path: str) -> None
+
+.. py:function:: add_node(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, parent: int, face: str, node_id: int, mtype: str, rotation: str) -> None
+
+.. py:function:: remove_subtree(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, node_id: int) -> None
+
+.. py:function:: subtree_swap(a: ariel.ec.genotypes.tree.tree_genome.TreeGenome, b: ariel.ec.genotypes.tree.tree_genome.TreeGenome, a_node: int, b_node: int) -> None
+
+   Swap subtrees rooted at *a_node* and *b_node* between two genomes.
+
+   The subtrees are detached from their original parents and then inserted into
+   the opposite genome.  To avoid identifier collisions we remap all node IDs
+   in each subtree before reinsertion.  Only internal edges (both parent and
+   child in the subtree) are carried across; any external connections are
+   discarded.  After the exchange the two genomes are pruned and validated.
+
+

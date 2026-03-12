@@ -1,0 +1,40 @@
+:py:mod:`validation`
+============================================
+
+.. py:module:: ariel.ec.genotypes.tree.validation
+
+.. autoapi-nested-parse::
+
+   Validation utilities for tree genomes.
+
+   Functions here check required fields and enforce allowed faces/rotations.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.genotypes.tree.validation.validate_genome_dict
+   ariel.ec.genotypes.tree.validation.is_single_connected_tree
+   ariel.ec.genotypes.tree.validation.validate_genome_dict
+
+
+
+.. py:function:: validate_genome_dict(genome: dict) -> None
+
+.. py:function:: is_single_connected_tree(genome: dict) -> bool
+
+   Verify that the genome forms a single connected tree with core as root.
+
+   In this domain, the core (IDX_OF_CORE) must be the root and all nodes
+   must be reachable from it.
+
+
+.. py:function:: validate_genome_dict(genome: dict) -> None
+

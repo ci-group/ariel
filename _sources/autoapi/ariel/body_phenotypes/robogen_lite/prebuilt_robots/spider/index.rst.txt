@@ -1,0 +1,37 @@
+:py:mod:`spider`
+===================================================================
+
+.. py:module:: ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider
+
+.. autoapi-nested-parse::
+
+   TODO(A-lamo): description of script.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider.spider
+
+
+
+.. py:function:: spider() -> ariel.body_phenotypes.robogen_lite.modules.core.CoreModule
+
+   Spider robot body.
+
+   Body Description
+   ---------
+   The spider body consists of a core module, 4 legs. Each leg constains two hinges,
+   with blocks attached at the end of them.
+
+   :returns: The core module of the robot, with all other modules attached.
+   :rtype: :class:`CoreModule`
+
+

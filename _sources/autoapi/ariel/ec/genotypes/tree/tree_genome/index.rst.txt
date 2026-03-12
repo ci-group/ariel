@@ -1,0 +1,58 @@
+:py:mod:`tree_genome`
+=============================================
+
+.. py:module:: ariel.ec.genotypes.tree.tree_genome
+
+.. autoapi-nested-parse::
+
+   TreeGenome: minimal tree-based genome representation and conversion.
+
+   This module provides a simple JSON-serializable tree genome that converts
+   to a NetworkX DiGraph compatible with `construct_mjspec_from_graph`.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.genotypes.tree.tree_genome.TreeGenome
+
+
+
+
+.. py:class:: TreeGenome
+
+   .. py:attribute:: nodes
+      :type:  Dict[int, Dict[str, str]]
+
+
+   .. py:attribute:: edges
+      :type:  List[Dict[str, Any]]
+      :value: []
+
+
+
+   .. py:method:: to_networkx() -> networkx.DiGraph
+
+
+   .. py:method:: to_dict() -> Dict[str, Any]
+
+
+   .. py:method:: from_dict(data: Dict[str, Any]) -> TreeGenome
+      :classmethod:
+
+
+
+   .. py:method:: save_json(path: str) -> None
+
+
+   .. py:method:: load_json(path: str) -> TreeGenome
+      :classmethod:
+
+
+

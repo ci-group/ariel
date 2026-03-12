@@ -1,0 +1,32 @@
+:py:mod:`io`
+====================================
+
+.. py:module:: ariel.ec.genotypes.tree.io
+
+.. autoapi-nested-parse::
+
+   I/O helpers for tree genomes (JSON load/save and networkx conversion).
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.genotypes.tree.io.load_genome
+   ariel.ec.genotypes.tree.io.save_genome
+   ariel.ec.genotypes.tree.io.genome_to_networkx_dict
+
+
+
+.. py:function:: load_genome(path: str) -> ariel.ec.genotypes.tree.tree_genome.TreeGenome
+
+.. py:function:: save_genome(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, path: str) -> None
+
+.. py:function:: genome_to_networkx_dict(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome) -> dict[str, Any]
+

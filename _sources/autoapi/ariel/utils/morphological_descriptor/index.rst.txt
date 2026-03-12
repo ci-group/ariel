@@ -1,0 +1,543 @@
+:py:mod:`morphological_descriptor`
+==============================================
+
+.. py:module:: ariel.utils.morphological_descriptor
+
+.. autoapi-nested-parse::
+
+   MorphologicalMeasures class for robot phenotype digraph analysis.
+   Mostly based on the revolve implementation: https://github.com/ci-group/revolve2/blob/master/standards/revolve2/standards/morphological_measures.py
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.morphological_descriptor.MorphologicalMeasures
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.utils.morphological_descriptor.TModule
+
+
+.. py:data:: TModule
+
+.. py:class:: MorphologicalMeasures(robot_graph: networkx.DiGraph)
+
+   Bases: :py:obj:`Generic`\ [\ :py:obj:`TModule`\ ]
+
+   .. autoapi-inheritance-diagram:: ariel.utils.morphological_descriptor.MorphologicalMeasures
+      :parts: 1
+
+
+   Modular robot morphological measures for robot phenotype digraph.
+
+   Works with a NetworkX directed graph representation of a robot.
+   Only works for robot with only right angle module rotations (90 degrees).
+   Some measures only work for 2d robots, which is noted in their docstring.
+
+   The measures are based on the following paper:
+   Miras, K., Haasdijk, E., Glette, K., Eiben, A.E. (2018).
+   Search Space Analysis of Evolvable Robot Morphologies.
+   In: Sim, K., Kaufmann, P. (eds) Applications of Evolutionary Computation.
+   EvoApplications 2018. Lecture Notes in Computer Science(), vol 10784. Springer, Cham.
+   https://doi.org/10.1007/978-3-319-77538-8_47
+
+
+   .. py:attribute:: grid
+      :type:  numpy.typing.NDArray[TModule]
+
+
+   .. py:attribute:: symmetry_grid
+      :type:  numpy.typing.NDArray[TModule]
+
+      Position of the core in 'body_as_grid'.
+
+
+   .. py:attribute:: core_grid_position
+      :type:  numpy.ndarray
+
+      If the robot is two dimensional, i.e. all module rotations are 0 degrees.
+
+
+   .. py:attribute:: is_2d
+      :type:  bool
+
+      The robot graph structure.
+
+
+   .. py:attribute:: graph
+      :type:  networkx.DiGraph
+
+
+   .. py:attribute:: core_node
+      :type:  Any
+
+
+   .. py:attribute:: modules
+      :type:  list[Any]
+
+
+   .. py:attribute:: bricks
+      :type:  list[Any]
+
+
+   .. py:attribute:: active_hinges
+      :type:  list[Any]
+
+      If all slots of the core are filled with other modules.
+
+
+   .. py:attribute:: core_is_filled
+      :type:  bool
+
+      Bricks which have all slots filled with other modules.
+
+
+   .. py:attribute:: filled_bricks
+      :type:  list[Any]
+
+      Active hinges which have all slots filled with other modules.
+
+
+   .. py:attribute:: filled_active_hinges
+      :type:  list[Any]
+
+      Modules that only connect to one other module.
+
+      This includes children and parents.
+
+
+   .. py:attribute:: single_neighbour_modules
+      :type:  list[Any]
+
+      Bricks that are only connected to one other module.
+
+      Both children and parent are counted.
+
+
+   .. py:attribute:: single_neighbour_bricks
+      :type:  list[Any]
+
+      Bricks that are connected to exactly two other modules.
+
+      Both children and parent are counted.
+
+
+   .. py:attribute:: double_neighbour_bricks
+      :type:  list[Any]
+
+      Active hinges that are connected to exactly two other modules.
+
+      Both children and parent are counted.
+
+
+   .. py:attribute:: double_neighbour_active_hinges
+      :type:  list[Any]
+
+      X/Y-plane symmetry according to the paper but in 3D.
+
+      X-axis is defined as forward/backward for the core module
+      Y-axis is defined as left/right for the core module.
+
+
+   .. py:attribute:: xy_symmetry
+      :type:  float
+
+      X/Z-plane symmetry according to the paper but in 3D.
+
+      X-axis is defined as forward/backward for the core module
+      Z-axis is defined as up/down for the core module.
+
+
+   .. py:attribute:: xz_symmetry
+      :type:  float
+
+      Y/Z-plane symmetry according to the paper but in 3D.
+
+      Y-axis is defined as left/right for the core module.
+      Z-axis is defined as up/down for the core module.
+
+
+   .. py:attribute:: yz_symmetry
+      :type:  float
+
+
+   .. py:property:: bounding_box_depth
+      :type: int
+
+
+      Get the depth of the bounding box around the body.
+
+      Forward/backward axis for the core module.
+
+      :returns: The depth.
+
+
+   .. py:property:: bounding_box_width
+      :type: int
+
+
+      Get the width of the bounding box around the body.
+
+      Right/left axis for the core module.
+
+      :returns: The width.
+
+
+   .. py:property:: bounding_box_height
+      :type: int
+
+
+      Get the height of the bounding box around the body.
+
+      Up/down axis for the core module.
+
+      :returns: The height.
+
+
+   .. py:property:: num_modules
+      :type: int
+
+
+      Get the number of modules.
+
+      :returns: The number of modules.
+
+
+   .. py:property:: num_bricks
+      :type: int
+
+
+      Get the number of bricks.
+
+      :returns: The number of bricks.
+
+
+   .. py:property:: num_active_hinges
+      :type: int
+
+
+      Get the number of active hinges.
+
+      :returns: The number of active hinges.
+
+
+   .. py:property:: num_filled_bricks
+      :type: int
+
+
+      Get the number of bricks which have all slots filled with other modules.
+
+      :returns: The number of bricks.
+
+
+   .. py:property:: num_filled_active_hinges
+      :type: int
+
+
+      Get the number of bricks which have all slots filled with other modules.
+
+      :returns: The number of bricks.
+
+
+   .. py:property:: num_filled_modules
+      :type: int
+
+
+      Get the number of modules which have all slots filled with other modules, including the core.
+
+      :returns: The number of modules.
+
+
+   .. py:property:: max_potentionally_filled_core_and_bricks
+      :type: int
+
+
+      Get the maximum number of core and bricks that could potentially be filled with this set of modules if rearranged in an optimal way.
+
+      This calculates 'b_max' from the paper.
+
+      :returns: The calculated number.
+
+
+   .. py:property:: filled_core_and_bricks_proportion
+      :type: float
+
+
+      Get the ratio between filled cores and bricks and how many that potentially could have been if this set of modules was rearranged in an optimal way.
+
+      This calculates 'branching' from the paper.
+
+      :returns: The proportion.
+
+
+   .. py:property:: num_single_neighbour_modules
+      :type: int
+
+
+      Get the number of bricks that are only connected to one other module.
+
+      Both children and parent are counted.
+
+      :returns: The number of bricks.
+
+
+   .. py:property:: max_potential_single_neighbour_modules
+      :type: int
+
+
+      Get the maximum number of bricks that could potentially have only one neighbour if this set of modules was rearranged in an optimal way.
+
+      This calculates "l_max" from the paper.
+
+      :returns: The calculated number.
+
+
+   .. py:property:: num_double_neighbour_bricks
+      :type: int
+
+
+      Get the number of bricks that are connected to exactly two other modules.
+
+      Both children and parent are counted.
+
+      :returns: The number of bricks.
+
+
+   .. py:property:: num_double_neighbour_active_hinges
+      :type: int
+
+
+      Get the number of active hinges that are connected to exactly two other modules.
+
+      Both children and parent are counted.
+
+      :returns: The number of active hinges.
+
+
+   .. py:property:: potential_double_neighbour_bricks_and_active_hinges
+      :type: int
+
+
+      Get the maximum number of bricks and active hinges that could potentially have exactly two neighbours if this set of modules was rearranged in an optimal way.
+
+      This calculates e_max from the paper.
+
+      :returns: The calculated number.
+
+
+   .. py:property:: double_neighbour_brick_and_active_hinge_proportion
+      :type: float
+
+
+      Get the ratio between the number of bricks and active hinges with exactly two neighbours and how many that could potentially have been if this set of modules was rearranged in an optimal way.
+
+      This calculate length of limbs proportion(extensiveness) from the paper.
+
+      :returns: The proportion.
+
+
+   .. py:property:: bounding_box_volume
+      :type: int
+
+
+      Get the volume of the bounding box.
+
+      This calculates m_area from the paper.
+
+      :returns: The volume.
+
+
+   .. py:property:: bounding_box_volume_coverage
+      :type: float
+
+
+      Get the proportion of the bounding box that is filled with modules.
+
+      This calculates 'coverage' from the paper.
+
+      :returns: The proportion.
+
+
+   .. py:property:: branching
+      :type: float
+
+
+      Get the 'branching' measurement from the paper.
+
+      Alias for filled_core_and_bricks_proportion.
+
+      :returns: Branching measurement.
+
+
+   .. py:property:: limbs
+      :type: float
+
+
+      Get the 'limbs' measurement from the paper.
+
+      Alias for single_neighbour_brick_proportion.
+
+      :returns: Limbs measurement.
+
+
+   .. py:property:: length_of_limbs
+      :type: float
+
+
+      Get the 'length of limbs' measurement from the paper.
+
+      Alias for double_neighbour_brick_and_active_hinge_proportion.
+
+      :returns: Length of limbs measurement.
+
+
+   .. py:property:: coverage
+      :type: float
+
+
+      Get the 'coverage' measurement from the paper.
+
+      Alias for bounding_box_volume_coverage.
+
+      :returns: Coverage measurement.
+
+
+   .. py:property:: proportion_2d
+      :type: float
+
+
+      Get the 'proportion' measurement from the paper.
+
+      Only for 2d robots.
+
+      :returns: Proportion measurement.
+
+
+   .. py:property:: symmetry
+      :type: float
+
+
+      Get the 'symmetry' measurement from the paper, but extended to 3d.
+
+      :returns: Symmetry measurement.
+
+
+   .. py:property:: module_diversity
+      :type: float
+
+
+      Measure module-type alternation (BRICK <-> HINGE) along connections.
+
+      Returns the fraction of edges connecting BRICK and HINGE out of all
+      edges that connect BRICK/HINGE module pairs. Value in [0, 1].
+
+
+   .. py:property:: D
+      :type: float
+
+
+      Alias for module_diversity (diversity metric).
+
+
+   .. py:property:: num_joints
+      :type: int
+
+
+      Number of joints (active hinges).
+
+
+   .. py:property:: max_potential_joints
+      :type: int
+
+
+      Maximum possible joints (if every connection were a hinge).
+
+
+   .. py:property:: joints
+      :type: float
+
+
+      Get the 'number of joints' measurement J = j / j_max.
+
+
+   .. py:property:: size
+      :type: float
+
+
+      Size S = m / m_max (proportion of occupied volume).
+
+      m = number of modules
+      m_max = bounding box volume (max possible occupancy)
+
+      Equivalent to 'coverage' in Miras et al. (2018) if volume is used as reference.
+
+
+   .. py:property:: proportion
+      :type: float
+
+
+      Proportion P = p_s / p_l (only valid for 2D morphologies).
+
+
+   .. py:property:: B
+      :type: float
+
+
+      Branching B = b / b_max.
+
+
+   .. py:property:: L
+      :type: float
+
+
+      Length of limbs L = e / e_max.
+
+
+   .. py:property:: S
+      :type: float
+
+
+      Symmetry S = s.
+
+
+   .. py:property:: C
+      :type: float
+
+
+      Coverage C = c.
+
+
+   .. py:property:: J
+      :type: float
+
+
+      Joints J = j / j_max.
+
+
+   .. py:property:: E
+      :type: float
+
+
+      Extensiveness E = e / e_max.
+
+
+   .. py:property:: P
+      :type: float
+
+
+      Proportion P = p_s / p_l (only valid for 2D morphologies).
+
+

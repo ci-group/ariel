@@ -1,0 +1,31 @@
+:py:mod:`data_get`
+==================
+
+.. py:module:: data_get
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   data_get.get_state_from_data
+
+
+
+.. py:function:: get_state_from_data(data: mujoco.MjData)
+
+   Extracts the robot state EXCLUDING global position.
+   Processes quaternion to be consistent (scaled by sign of w).
+
+   :param data: Data variable of mujoco containing global x, y, z position, x, y, z quaternion orientation, and all hinge positions
+   :type data: :class:`mujoco.MjData`
+
+   :returns: Array of quaternion orientation and hinge positions
+   :rtype: :class:`np.array`
+
+

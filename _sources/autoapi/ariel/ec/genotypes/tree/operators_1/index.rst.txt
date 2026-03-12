@@ -1,0 +1,126 @@
+:py:mod:`operators_1`
+=============================================
+
+.. py:module:: ariel.ec.genotypes.tree.operators_1
+
+.. autoapi-nested-parse::
+
+   Genetic operators for tree genomes.
+
+   Simple, conservative operators that preserve core node and face constraints.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   ariel.ec.genotypes.tree.operators_1.add_node
+   ariel.ec.genotypes.tree.operators_1.remove_subtree
+   ariel.ec.genotypes.tree.operators_1.get_top_ancestor
+   ariel.ec.genotypes.tree.operators_1.subtree_swap
+   ariel.ec.genotypes.tree.operators_1.crossover_subtree
+   ariel.ec.genotypes.tree.operators_1.mutate_replace_node
+   ariel.ec.genotypes.tree.operators_1.mutate_subtree_replacement
+   ariel.ec.genotypes.tree.operators_1.mutate_shrink
+   ariel.ec.genotypes.tree.operators_1.mutate_hoist
+   ariel.ec.genotypes.tree.operators_1.random_tree
+   ariel.ec.genotypes.tree.operators_1.get_tree_depth
+   ariel.ec.genotypes.tree.operators_1.validate_tree_depth
+
+
+
+.. py:function:: add_node(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, parent: int, face: str, node_id: int, mtype: str, rotation: str) -> None
+
+.. py:function:: remove_subtree(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, node_id: int) -> None
+
+.. py:function:: get_top_ancestor(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, node_id: int) -> int
+
+   Return the highest ancestor of ``node_id`` (stop at core or no parent).
+
+   This walks predecessors in the directed graph until reaching a node whose
+   parent is the core (IDX_OF_CORE) or there is no parent. Useful for
+   selecting a subtree root that contains a full branch rather than a leaf.
+
+
+.. py:function:: subtree_swap(a: ariel.ec.genotypes.tree.tree_genome.TreeGenome, b: ariel.ec.genotypes.tree.tree_genome.TreeGenome, a_node: int, b_node: int) -> None
+
+   Swap subtrees rooted at *a_node* and *b_node* between two genomes.
+
+   The subtrees are detached from their original parents and then inserted into
+   the opposite genome.  To avoid identifier collisions we remap all node IDs
+   in each subtree before reinsertion.  Only internal edges (both parent and
+   child in the subtree) are carried across; any external connections are
+   discarded.  After the exchange the two genomes are pruned and validated.
+
+
+.. py:function:: crossover_subtree(a: ariel.ec.genotypes.tree.tree_genome.TreeGenome, b: ariel.ec.genotypes.tree.tree_genome.TreeGenome) -> tuple[ariel.ec.genotypes.tree.tree_genome.TreeGenome, ariel.ec.genotypes.tree.tree_genome.TreeGenome]
+
+   Perform standard GP subtree crossover on tree genomes.
+
+   Two offspring are produced by exchanging randomly chosen subtrees from each parent.
+   Unlike one-point crossover on linear genomes, this selects any node (including leaves)
+   and swaps the entire subtree rooted at that node. Returns a pair ``(child1, child2)``.
+   Parents are left unmodified.
+
+
+.. py:function:: mutate_replace_node(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome) -> None
+
+   Point mutation: replace a randomly selected non-core node.
+
+   The node's type and rotation are chosen uniformly at random from the
+   allowed options (excluding CORE/NONE).  Any children attached to faces not
+   permitted by the new type are deleted along with their subtrees.  The
+   genome is validated at the end; invalid mutations are simply no-ops.
+
+
+.. py:function:: mutate_subtree_replacement(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, max_modules: int = 10) -> None
+
+   Standard GP subtree mutation: replace a random subtree with a newly generated one.
+
+   Selects a random non-core node, removes its entire subtree, and replaces it
+   with a new randomly generated subtree. This is the primary mutation operator
+   in canonical GP (Koza, 1992).
+
+
+.. py:function:: mutate_shrink(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome) -> None
+
+   Shrink mutation: replace a node and its subtree with a single new leaf node.
+
+   Selects a random non-core node, removes its entire subtree, and replaces it
+   with a single new randomly chosen module type. This reduces tree size and
+   is part of standard GP mutation operators.
+
+
+.. py:function:: mutate_hoist(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome) -> None
+
+   Hoist mutation: replace a parent node with one of its children.
+
+   Selects a random node that has children, then replaces it with one of its
+   children, effectively "hoisting" the child up in the tree. This changes
+   tree structure without changing size and is part of standard GP operators.
+
+
+.. py:function:: random_tree(max_modules: int) -> ariel.ec.genotypes.tree.tree_genome.TreeGenome
+
+   Generate a random valid tree genome with up to ``max_modules`` nodes.
+
+   Starts with only the core and iteratively adds a random module on a free
+   face until the budget is exhausted or no free faces remain.
+
+
+.. py:function:: get_tree_depth(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome) -> int
+
+   Calculate the maximum depth from core to any leaf node.
+
+
+.. py:function:: validate_tree_depth(genome: ariel.ec.genotypes.tree.tree_genome.TreeGenome, max_depth: int) -> bool
+
+   Check if tree depth is within the specified limit.
+
+

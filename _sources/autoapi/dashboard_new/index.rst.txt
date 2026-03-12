@@ -1,0 +1,98 @@
+:py:mod:`dashboard_new`
+=======================
+
+.. py:module:: dashboard_new
+
+.. autoapi-nested-parse::
+
+   ARIEL Evolution Dashboard.
+
+   Interactive Panel dashboard for visualising evolutionary experiment data
+   stored in an SQLite database (ARIEL format).
+
+   Usage:
+       panel serve dashboard_new.py --show
+
+
+
+Module Contents
+---------------
+
+.. py:data:: sld_font_size
+
+.. py:data:: sld_fig_width
+
+.. py:data:: sel_colour_theme
+
+.. py:data:: mc_db_select
+
+.. py:data:: chk_show_individual
+
+.. py:data:: chk_fit_mean
+
+.. py:data:: chk_fit_std
+
+.. py:data:: chk_fit_max
+
+.. py:data:: chk_fit_min
+
+.. py:data:: txt_fit_yaxis
+
+.. py:data:: txt_fit_ymin
+
+.. py:data:: txt_fit_ymax
+
+.. py:data:: chk_fit_hide_title
+
+.. py:data:: chk_nov_mean
+
+.. py:data:: chk_nov_max
+
+.. py:data:: sld_nov_window
+
+.. py:data:: txt_nov_yaxis
+
+.. py:data:: txt_nov_ymin
+
+.. py:data:: txt_nov_ymax
+
+.. py:data:: chk_nov_hide_title
+
+.. py:data:: txt_div_yaxis
+
+.. py:data:: txt_div_ymin
+
+.. py:data:: txt_div_ymax
+
+.. py:data:: chk_div_hide_title
+
+.. py:data:: chk_age_mean
+
+.. py:data:: chk_age_max
+
+.. py:data:: chk_age_median
+
+.. py:data:: txt_age_yaxis
+
+.. py:data:: txt_age_ymin
+
+.. py:data:: txt_age_ymax
+
+.. py:data:: chk_age_hide_title
+
+.. py:data:: btn_load
+
+.. py:data:: btn_fit
+
+.. py:data:: btn_div
+
+.. py:data:: btn_nov
+
+.. py:data:: btn_age
+
+.. py:data:: main_area
+
+.. py:data:: sidebar
+
+.. py:data:: template
+
