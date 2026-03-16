@@ -18,6 +18,7 @@ from rich.traceback import install
 
 # --- DATA SETUP --- #
 CWD = Path.cwd()
+ROOT = Path(__name__)
 DATA = Path(CWD / "__data__")
 
 # --- RANDOM GENERATOR SETUP --- #

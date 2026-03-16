@@ -1,0 +1,220 @@
+# Configuration Constants for RL Robot Environment
+
+RLConfig:
+  # --- Robot Configuration ---
+  PORT: '/dev/ttyACM0'
+  
+  # --- Robot Morphology Parameters ---
+  L_LINK2: 0.2805
+  L_LINK3: 0.3055
+
+  CONTROL_MODE: "position"
+  JOINT_LIMITS:
+    # Original Joint Limits
+    - [-180, 180] # Joint 0 (Base Rotation)
+    - [-88, 88]   # Joint 1 (Shoulder)
+    - [-145, 145] # Joint 2 (Elbow)
+    - [-180, 180] # Joint 3 (Wrist Yaw)
+    - [-180, 180] # Joint 4 (Wrist Pitch)
+    - [-180, 180] # Joint 5 (Gripper Rotation)
+    # - [-180, 180] # Joint 0 (Base Rotation)
+    # - [-180, 180] # Joint 1 (Shoulder)
+    # - [-180, 180] # Joint 2 (Elbow)
+    # - [-180, 180] # Joint 3 (Wrist Yaw)
+    # - [-180, 180] # Joint 4 (Wrist Pitch)
+    # - [-180, 180] # Joint 5 (Gripper Rotation)
+  JOINT_LIMITS_ENV:
+    # Original Joint Limits Env
+    - [-180, 180] # Joint 0 (Base Rotation)
+    - [-75, 75]   # Joint 1 (Shoulder)
+    - [-110, 110] # Joint 2 (Elbow)
+    - [-180, 180] # Joint 3 (Wrist Yaw)
+    - [-180, 180] # Joint 4 (Wrist Pitch)
+    - [-180, 180] # Joint 5 (Gripper Rotation)
+    # - [-180, 180] # Joint 0 (Base Rotation)
+    # - [-180, 180] # Joint 1 (Shoulder)
+    # - [-180, 180] # Joint 2 (Elbow)
+    # - [-180, 180] # Joint 3 (Wrist Yaw)
+    # - [-180, 180] # Joint 4 (Wrist Pitch)
+    # - [-180, 180] # Joint 5 (Gripper Rotation)
+  DELTA_JOINT_LIMITS:
+    - [-30, 30] # Joint 0 (Base Rotation)
+    - [-30, 30] # Joint 1 (Shoulder)
+    - [-30, 30] # Joint 2 (Elbow)
+    - [-30, 30] # Joint 3 (Wrist Yaw)
+    - [-30, 30] # Joint 4 (Wrist Pitch)
+    - [-30, 30] # Joint 5 (Gripper Rotation)
+  # Original Combined Joint 2-3 Limit
+  COMBINED_JOINT_2_3_LIMIT: 105
+  # COMBINED_JOINT_2_3_LIMIT: 360
+  EE_LIMIT: 0.05
+  HOME_POSITION_TOLERANCE_DEG: 2.0
+  HOME_POSITION_RETRIES: 5
+
+  # --- OptiTrack Configuration ---
+  NATNET_SERVER_IP: '192.168.1.2'
+  NATNET_CONNECT_TIMEOUT: 5
+  NATNET_RIGID_BODY_IDS:
+    end_effector: 14
+    table: 13
+
+  TARGET_MIN_X_CORRECTED: 0.15
+  TARGET_MAX_X_CORRECTED: 0.65
+  TARGET_MIN_Y_CORRECTED: -0.2
+  TARGET_MAX_Y_CORRECTED: 0.2
+  TARGET_MIN_Z_CORRECTED: 0.4
+  TARGET_MAX_Z_CORRECTED: 0.8
+
+  TARGET_MIN_X: -0.3
+  TARGET_MAX_X: 0.3
+  TARGET_MIN_Y: -0.3
+  TARGET_MAX_Y: 0.3
+  TARGET_MIN_Z: 0.65
+  TARGET_MAX_Z: 0.85
+
+  TARGET_CYLINDER_RADIUS: 0.5
+  TARGET_CYLINDER_HEIGHT_MAX: 0.8
+  TARGET_CYLINDER_HEIGHT_MIN: 0.45
+  TARGET_CYLINDER_MINIMUM_DISTANCE: 0.35
+
+  # --- Target Sampling Method ---
+  TARGET_SAMPLING_METHOD: "kinematic_sampling"
+  KINEMATIC_SAMPLING_POINTS: 10000
+
+  # --- Environment Parameters ---
+  # ACTION_RANGE_DEG: 5.0
+  ACTION_EXECUTION_TIME_SEC: 0.05
+  RENDER_FPS: 10
+
+  RL_ENV_RESET_SEC: 3
+
+  # --- Main Script/Stress Test Configuration ---
+  WATCHDOG_INTERVAL: 0.01
+  MARKER_RADII:
+    1: 0.025
+    2: 0.025
+    3: 0.025
+    4: 0.025
+    5: 0.025
+    6: 0.025
+
+  # --- Stress Test Configuration ---
+  STRESS_TEST_ITERS: 1000
+  STRESS_TEST_INTERVAL: 0.05
+
+  # --- RL Training Configuration ---
+  RL_CONTROL_INTERVAL: 0.05
+
+TrainConfig:
+  # Experiment
+  project: "LynxReach"
+  group: "Sim"
+  name: "mujoco"
+  device: "cuda:0" # Default, will be overridden by platform.node()
+  seed: 0
+  base_log_dir: ".results/" # Default, will be overridden by platform.node()
+  algo: "SAC"
+  model_save_freq: 500000
+  total_timesteps: 5000000
+  load_model_path: null
+  load_replay_buffer_path: null
+  num_envs: 1
+  render_mode: "rgb_array"  # human, rgb_array
+  action_mode: "rel_abs"  # ENV
+  real_time_speed: false  # ENV
+  collision_detection: true
+
+  # exp callback:
+  eval_episode_freq: 100
+  epi_rest_freq: null  # null for sim
+  n_eval_episodes: 1
+
+  # SAC/PPO common
+  learning_rate: 0.0003
+  batch_size: 256
+  gamma: 0.99
+  stats_window_size: 1
+
+  # SAC specific
+  tau: 0.005
+  train_freq_str: "1,episode"
+  gradient_steps: 300
+  learning_starts: 10000
+  sac_net_arch_pi: [512, 256, 128]
+  sac_net_arch_qf: [512, 256, 128]
+
+  # PPO specific
+  ppo_n_steps: 2048
+  ppo_n_epochs: 10
+  ppo_gae_lambda: 0.95
+  ppo_ent_coef: 0.001
+  ppo_clip_range: 0.2
+  ppo_vf_coef: 1.0
+  ppo_net_arch_pi: [512, 256, 128]
+  ppo_net_arch_vf: [512, 256, 128]
+
+  # Enviornment specific
+  time_step: 0.016666666666666666 # 1.0/60.0  # ENV
+  control_frequency: 5  # ENV
+  v_start_scale: 1.0  # ENV
+  action_range_deg: 10.0  # ENV
+  reset_random_scale: 0.3 # ENV - Scale for random reset range
+  clip_action_scale: 1.0 # ENV - Scale for clipping action to avoid extreme commands (set to 1.0 to disable clipping)
+  target_pos_sampling_method: "cylinder"
+  max_speed: 2000.0  # ENV
+  motor_acceleration: 100.0  # ENV
+  max_steps_per_episode: 100  # ENV
+  fixed_target_orientation: [0.0, 0.70710678118, 0.0, 0.70710678118] # np.sqrt(2)/2  # ENV
+  real_lynx: false  # ENV
+  reward_type: "pos"  # ENV
+  goal_tolerance_m: 0.05  # ENV
+  # reward_scaling_factor: 10.0
+  sphere_target_range: 0.5  # ENV
+  distance_threshold: 0.03  # ENV
+
+  model_dir: ".results/models" # Default, will be overridden by platform.node()
+
+  # Offline RL specific:
+  vis_target_sphere: false
+  use_camera: false
+  collect_imu: false
+  real_time_latency: 0.08  # ENV - Compensate for real-world latency in seconds
+  use_random_action_for_data_collection: false
+
+TestConfig:
+  # testing:
+  # model_path: "/home/zuxinrui/LynxRobotics/.results/sim_sac/lynxsim-models_2025-11-05_12-28-03/mujoco-SAC-lynxsim-models_2025-11-05_12-28-03_best_ee_pos_model_3560000.zip"
+  model_path: "/home/zuxinrui/LynxRobotics/.results/sim_sac/lynxsim-models_2025-12-04_15-57-52/mujoco-SAC-lynxsim-models_2025-12-04_15-57-52_best_ee_pos_model_2980000_dist_0.0483.zip"
+
+MorphConfig:
+  robot_description_dict:
+    l_link2: 0.2875
+    l_link3: 0.2875  # 0.3055 + 0.007
+    # tube 1:
+    link2_type: "next_joint_pose"  # straight_tube, next_joint_pose
+    l2_pre_joint_radius: 0.062
+    l2_next_joint_radius: 0.042
+    l2_end_point_pos: [0.0, 0.0, 0.2]  # y range: [-0.2, 0.2] z range: [0.1, 0.36]
+    l2_end_point_ori: [0.0, 0.0, 1.0]  # y-z plane, angle range: [-pi, pi]
+    # tube 2:
+    link3_type: "next_joint_pose"  # straight_tube, next_joint_pose
+    l3_pre_joint_radius: 0.042
+    l3_next_joint_radius: 0.042
+    l3_end_point_pos: [0.0, 0.0, 0.2]
+    l3_end_point_ori: [0.0, 0.0, 1.0]
+    # angles:
+    joint1_rotation_angle: 0.0
+    joint2_rotation_angle: 0.0  # tube 1
+    joint3_rotation_angle: 0.0  # tube 2
+    joint4_rotation_angle: 0.0
+    joint5_rotation_angle: 0.0
+    joint6_rotation_angle: 0.0
+    control_mode: "position"
+    clamp_length: 0.051  # the length of the clamp part
+    dual_point_distance: 0.05
+    num_segments: 100
+
+checkpoint_groups:
+  - "/home/zuxinrui/LynxRobotics/.results/sim_sac/lynxsim-offline-both-slightly-bended-1209"
+
+

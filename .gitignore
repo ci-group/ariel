@@ -11,6 +11,8 @@ ariel_header.svg
 # Docs
 docs/apidocs/
 docs/autoapi
+# 3D Models
+*.stl
 ### PYTHON ######################################################################
 # Byte-compiled / optimized / DLL files
 __pycache__/
