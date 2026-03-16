@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import copy
 import random
-from typing import Dict, List, Set
+from typing import Any
 
 import networkx as nx
 
@@ -77,9 +77,11 @@ def subtree_swap(a: TreeGenome, b: TreeGenome, a_node: int, b_node: int) -> None
         nodes = {n: genome.nodes[n] for n in subnodes}
         return nodes, internal_edges
 
-    def reassign_ids(nodes: dict[int, dict],
-                     edges: list[dict],
-                     existing_ids: set[int]):
+    def reassign_ids(
+        nodes: dict[int, dict[str, str]],
+        edges: list[dict[str, Any]],
+        existing_ids: set[int],
+    ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]:
         """Return copies of *nodes* and *edges* with fresh identifiers.
 
         IDs are remapped to the smallest integers greater than any value in
@@ -94,7 +96,7 @@ def subtree_swap(a: TreeGenome, b: TreeGenome, a_node: int, b_node: int) -> None
             mapping[old] = next_id
             next_id += 1
         new_nodes = {mapping[old]: copy.deepcopy(attr) for old, attr in nodes.items()}
-        new_edges: list[dict] = []
+        new_edges: list[dict[str, Any]] = []
         for e in edges:
             # preserve any additional keys (face/rotation/etc.)
             edge_copy = {k: copy.deepcopy(v) for k, v in e.items()}
@@ -156,6 +158,7 @@ def crossover_subtree(a: TreeGenome, b: TreeGenome) -> tuple[TreeGenome, TreeGen
     # Standard GP: swap subtrees directly at selected nodes (no ancestor expansion)
     subtree_swap(child1, child2, n1, n2)
     # Validate after crossover
+    
     try:
         validate_genome_dict(child1.to_dict())
         validate_genome_dict(child2.to_dict())
@@ -173,6 +176,10 @@ def mutate_replace_node(genome: TreeGenome) -> None:
     permitted by the new type are deleted along with their subtrees.  The
     genome is validated at the end; invalid mutations are simply no-ops.
     """
+    # transactional backup: restore if mutation cannot be validated
+    old_nodes = copy.deepcopy(genome.nodes)
+    old_edges = copy.deepcopy(genome.edges)
+
     candidates = [nid for nid in genome.nodes if nid != IDX_OF_CORE]
     if not candidates:
         return
@@ -199,12 +206,13 @@ def mutate_replace_node(genome: TreeGenome) -> None:
         if e["parent"] == nid and e["face"] not in allowed:
             remove_subtree(genome, e["child"])
 
-    # validate and silently ignore issues
+    # validate
     try:
         _prune_invalid_edges(genome)
         validate_genome_dict(genome.to_dict())
     except ValueError:
-        pass
+        genome.nodes = old_nodes
+        genome.edges = old_edges
 
 
 def mutate_subtree_replacement(genome: TreeGenome, max_modules: int = 10) -> None:
@@ -214,9 +222,11 @@ def mutate_subtree_replacement(genome: TreeGenome, max_modules: int = 10) -> Non
     with a new randomly generated subtree. This is the primary mutation operator
     in canonical GP (Koza, 1992).
     """
-    def reassign_ids(nodes: dict[int, dict],
-                     edges: list[dict],
-                     existing_ids: set[int]):
+    def reassign_ids(
+        nodes: dict[int, dict[str, str]],
+        edges: list[dict[str, Any]],
+        existing_ids: set[int],
+    ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]:
         """Return copies of *nodes* and *edges* with fresh identifiers."""
         if not nodes:
             return {}, [], {}
@@ -226,13 +236,17 @@ def mutate_subtree_replacement(genome: TreeGenome, max_modules: int = 10) -> Non
             mapping[old] = next_id
             next_id += 1
         new_nodes = {mapping[old]: copy.deepcopy(attr) for old, attr in nodes.items()}
-        new_edges: list[dict] = []
+        new_edges: list[dict[str, Any]] = []
         for e in edges:
             edge_copy = {k: copy.deepcopy(v) for k, v in e.items()}
             edge_copy["parent"] = mapping[e["parent"]]
             edge_copy["child"] = mapping[e["child"]]
             new_edges.append(edge_copy)
         return new_nodes, new_edges, mapping
+
+    # transactional backup: restore if mutation cannot be validated
+    old_nodes = copy.deepcopy(genome.nodes)
+    old_edges = copy.deepcopy(genome.edges)
 
     candidates = [nid for nid in genome.nodes if nid != IDX_OF_CORE]
     if not candidates:
@@ -259,38 +273,42 @@ def mutate_subtree_replacement(genome: TreeGenome, max_modules: int = 10) -> Non
         subtree_size = random.randint(1, min(3, max_modules))
         new_subtree = random_tree(subtree_size)
 
-        # The new subtree has its own core, but we need to graft it onto the parent
-        # Remove the core from new_subtree and reattach its children to the parent
+        # The generated subtree has its own core. We graft a single branch under
+        # the original parent/face to preserve tree connectivity.
         if IDX_OF_CORE in new_subtree.nodes:
-            # Get all direct children of the core in the new subtree
-            core_children = []
-            for e in new_subtree.edges:
-                if e["parent"] == IDX_OF_CORE:
-                    core_children.append((e["child"], e["face"]))
+            g_sub = new_subtree.to_networkx()
+            core_children = [e["child"] for e in new_subtree.edges if e["parent"] == IDX_OF_CORE]
 
-            # Remove core and its edges
-            del new_subtree.nodes[IDX_OF_CORE]
-            new_subtree.edges = [e for e in new_subtree.edges if e["parent"] != IDX_OF_CORE]
+            if core_children:
+                root_child = random.choice(core_children)
+                branch_nodes = set([root_child] + list(nx.descendants(g_sub, root_child)))
+                branch_node_dict = {n: copy.deepcopy(new_subtree.nodes[n]) for n in branch_nodes}
+                branch_edges = [
+                    copy.deepcopy(e)
+                    for e in new_subtree.edges
+                    if e["parent"] in branch_nodes and e["child"] in branch_nodes
+                ]
 
-            # Reassign IDs to avoid conflicts
-            existing_ids = set(genome.nodes.keys())
-            new_nodes, new_edges, _ = reassign_ids(new_subtree.nodes, new_subtree.edges, existing_ids)
+                existing_ids = set(genome.nodes.keys())
+                new_nodes, new_edges, mapping = reassign_ids(branch_node_dict, branch_edges, existing_ids)
 
-            # Add the new nodes and edges, connecting to the original parent
-            genome.nodes.update(new_nodes)
-            for child_id, face in core_children:
-                if child_id in new_nodes:  # Should always be true after reassignment
-                    new_child_id = [k for k, v in new_nodes.items() if v == new_subtree.nodes[child_id]][0]
-                    genome.edges.append({"parent": parent_id, "child": new_child_id, "face": face})
-
-            genome.edges.extend(new_edges)
+                genome.nodes.update(new_nodes)
+                genome.edges.extend(new_edges)
+                genome.edges.append(
+                    {
+                        "parent": parent_id,
+                        "child": mapping[root_child],
+                        "face": parent_face,
+                    }
+                )
 
     # Clean up and validate
     _prune_invalid_edges(genome)
     try:
         validate_genome_dict(genome.to_dict())
     except ValueError:
-        pass
+        genome.nodes = old_nodes
+        genome.edges = old_edges
 
 
 def mutate_shrink(genome: TreeGenome) -> None:
@@ -300,6 +318,10 @@ def mutate_shrink(genome: TreeGenome) -> None:
     with a single new randomly chosen module type. This reduces tree size and
     is part of standard GP mutation operators.
     """
+    # transactional backup: restore if mutation cannot be validated
+    old_nodes = copy.deepcopy(genome.nodes)
+    old_edges = copy.deepcopy(genome.edges)
+
     candidates = [nid for nid in genome.nodes if nid != IDX_OF_CORE]
     if not candidates:
         return
@@ -335,7 +357,8 @@ def mutate_shrink(genome: TreeGenome) -> None:
     try:
         validate_genome_dict(genome.to_dict())
     except ValueError:
-        pass
+        genome.nodes = old_nodes
+        genome.edges = old_edges
 
 
 def mutate_hoist(genome: TreeGenome) -> None:
@@ -345,6 +368,10 @@ def mutate_hoist(genome: TreeGenome) -> None:
     children, effectively "hoisting" the child up in the tree. This changes
     tree structure without changing size and is part of standard GP operators.
     """
+    # transactional backup: restore if mutation cannot be validated
+    old_nodes = copy.deepcopy(genome.nodes)
+    old_edges = copy.deepcopy(genome.edges)
+
     # Find nodes that have children
     nodes_with_children = set()
     for e in genome.edges:
@@ -395,7 +422,8 @@ def mutate_hoist(genome: TreeGenome) -> None:
     try:
         validate_genome_dict(genome.to_dict())
     except ValueError:
-        pass
+        genome.nodes = old_nodes
+        genome.edges = old_edges
 
 
 def random_tree(max_modules: int) -> TreeGenome:
@@ -469,7 +497,7 @@ def _prune_invalid_edges(genome: TreeGenome) -> None:
     during iteration.
     """
     seen = set()  # (parent, face) tuples
-    valid_edges: list[dict] = []
+    valid_edges: list[dict[str, Any]] = []
     to_prune: list[int] = []
 
     # iterate over a snapshot of edges to safely modify genome later
@@ -500,4 +528,7 @@ def _prune_invalid_edges(genome: TreeGenome) -> None:
     for cid in set(to_prune):
         remove_subtree(genome, cid)
 
-    genome.edges = valid_edges
+    # keep only edges that still reference existing nodes after subtree pruning
+    genome.edges = [
+        e for e in valid_edges if e["parent"] in genome.nodes and e["child"] in genome.nodes
+    ]
