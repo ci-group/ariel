@@ -1,4 +1,4 @@
-"""Example: one-max EA using the refactored ariel.ec module."""
+"""Example: one-max EA using the refactored prototype of ariel.ec module."""
 
 from typing import cast
 
@@ -116,7 +116,7 @@ def main() -> None:
         EAStep("survivor_select", survivor_selection),
     ]
 
-    ea = EA(initial, ops, num_of_generations=50)
+    ea = EA(initial, ops, num_steps=50)
     ea.run()
 
     console.log("─── Results ───")

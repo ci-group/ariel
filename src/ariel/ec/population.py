@@ -1,3 +1,5 @@
+"""Population Class for the EC module."""
+
 import random
 from collections.abc import Callable, Iterator
 from typing import Literal, overload
@@ -73,7 +75,18 @@ class Population:
     # ── Chainable query API ───────────────────────────────────────────────────
 
     def sample(self, n: int) -> "Population":
-        """Return a new Population with *n* randomly drawn individuals (without replacement)."""
+        """Return a new Population with *n* randomly drawn individuals.
+
+        Parameters
+        ----------
+        n: int
+            Number of individuals to sample
+
+        Returns
+        -------
+        population: Population
+            Sample of n individuals (without replacement) from the population
+        """
         return Population(random.sample(self._population, min(n, len(self._population))))
 
     def best(
@@ -89,8 +102,8 @@ class Population:
         Parameters
         ----------
         sort :
-            "max" -> highest first (default),
-            "min" -> lowest first.
+            - "max" -> highest first (default),
+            - "min" -> lowest first.
         attribute :
             Any attribute of Individual. Defaults to "fitness_"
             (the raw stored value).  Pass "fitness" to use the
@@ -104,7 +117,9 @@ class Population:
         Population : list[Individual]
         """
         reverse: bool = sort == "max"
-        key: Callable[[Individual], float] = lambda ind: _safe_attr(ind, attribute)
+
+        def key(ind: Individual) -> float:
+            return _safe_attr(ind, attribute)
         return Population(sorted(self._population, key=key, reverse=reverse)[:n])
 
     def shuffle(self) -> "Population":
@@ -157,7 +172,7 @@ class Population:
 
     @property
     def size(self) -> int:
-        return self.__len__()
+        return len(self._population)
 
     # ── Constructors ──────────────────────────────────────────────────────────
 

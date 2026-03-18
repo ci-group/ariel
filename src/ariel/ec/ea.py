@@ -65,7 +65,7 @@ class EASettings(BaseSettings):
     quiet: bool = False
     is_maximisation: bool = True
     first_generation_id: int = 0
-    num_of_steps: int = 100
+    num_steps: int = 100
     target_population_size: int = 100
     output_folder: Path = Path.cwd() / "__data__"
     db_file_name: str = "database.db"
@@ -131,7 +131,7 @@ class EA:
         population: Population,
         operations: list[EAStep],
         *,
-        num_of_generations: int | None = None,
+        num_steps: int | None = None,
         first_generation_id: int | None = None,
         quiet: bool | None = None,
         db_file_path: Path | None = None,
@@ -172,10 +172,10 @@ class EA:
             if first_generation_id is not None
             else config.first_generation_id
         )
-        self.num_of_generations: int = (
-            num_of_generations
-            if num_of_generations is not None
-            else config.num_of_steps
+        self.num_steps: int = (
+            num_steps
+            if num_steps is not None
+            else config.num_steps
         )
         self.console: Console = Console(
             quiet=quiet if quiet is not None else config.quiet
@@ -191,7 +191,8 @@ class EA:
     # ── Database ──────────────────────────────────────────────────────────────
 
     def _setup_database(
-        self, db_file_path: Path, db_handling: DBHandlingMode
+        self, db_file_path: Path,
+        db_handling: DBHandlingMode,
     ) -> Engine:
         db_file_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -252,7 +253,7 @@ class EA:
         requires_eval: bool | None = None,
     ) -> None:
         self.population = self._fetch(
-            only_alive=only_alive, requires_eval=requires_eval
+            only_alive=only_alive, requires_eval=requires_eval,
         )
 
     # ── Population stats ──────────────────────────────────────────────────────
@@ -282,6 +283,7 @@ class EA:
     # ── Execution ─────────────────────────────────────────────────────────────
 
     def step(self) -> None:
+        """Perform one cycle of the EAStep Operations."""
         self.current_generation += 1
         self.fetch_population()
         for op in self.operations:
@@ -289,6 +291,7 @@ class EA:
         self._commit()
 
     def run(self) -> None:
+        """Run the EA for num_steps."""
         with Progress(
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
@@ -297,9 +300,9 @@ class EA:
             console=self.console,
         ) as progress:
             task = progress.add_task(
-                "Running EA", total=self.num_of_generations
+                "Running EA", total=self.num_steps,
             )
-            for _ in range(self.num_of_generations):
+            for _ in range(self.num_steps):
                 self.step()
                 progress.advance(task)
 

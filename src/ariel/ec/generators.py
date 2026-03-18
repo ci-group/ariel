@@ -1,10 +1,14 @@
+""""Generators and mutations for the EC module."""
+
 from collections.abc import Sequence
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 from numpy.random import Generator
-from numpy.typing import NDArray
 from pydantic_settings import BaseSettings
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 # ── Module-level RNG (shared across generators, mutators, crossover) ──────────
 SEED: int = 42
@@ -65,7 +69,7 @@ class IntegersGenerator:
                     p=probabilities,
                     axis=axis,
                     shuffle=s,
-                )
+                ),
             )
             .astype(int)
             .tolist(),
@@ -129,7 +133,7 @@ class FloatsGenerator:
                     size=size,
                     replace=replace,
                     p=probabilities,
-                )
+                ),
             )
             .astype(float)
             .tolist(),
@@ -201,7 +205,7 @@ class IntegerMutator:
         arr: list[int] = list(individual)
         n: int = len(arr)
         lo, hi = sorted(
-            cast("list[int]", _rng.choice(np.arange(n + 1), size=2, replace=False).tolist())
+            cast("list[int]", _rng.choice(np.arange(n + 1), size=2, replace=False).tolist()),
         )
         arr[lo:hi] = arr[lo:hi][::-1]
         return arr
@@ -216,7 +220,7 @@ class IntegerMutator:
         arr: list[int] = list(individual)
         n: int = len(arr)
         lo, hi = sorted(
-            cast("list[int]", _rng.choice(np.arange(n + 1), size=2, replace=False).tolist())
+            cast("list[int]", _rng.choice(np.arange(n + 1), size=2, replace=False).tolist()),
         )
         segment: list[int] = arr[lo:hi]
         _rng.shuffle(np.array(segment))  # shuffle produces NDArray; re-assign below
@@ -272,7 +276,7 @@ class FloatMutator:
         arr: NDArray[np.float64] = np.array(individual, dtype=np.float64)
         shape = arr.shape
         boundary_vals: NDArray[np.float64] = _rng.choice(
-            np.array([low, high]), size=shape
+            np.array([low, high]), size=shape,
         ).astype(np.float64)
         mask: NDArray[np.bool_] = _rng.random(shape) < mutation_probability
         return cast("Floats", np.where(mask, boundary_vals, arr).tolist())
@@ -299,7 +303,7 @@ class FloatMutator:
             1.0 - (2.0 * (1.0 - u) + 2.0 * (u - 0.5) * (1.0 - delta_high) ** (eta + 1.0)) ** (1.0 / (eta + 1.0)),
         )
         result: NDArray[np.float64] = np.clip(
-            np.where(mask, arr + delta_q * (high - low), arr), low, high
+            np.where(mask, arr + delta_q * (high - low), arr), low, high,
         )
         return cast("Floats", result.tolist())
 
@@ -326,7 +330,7 @@ class FloatMutator:
         arr: list[float] = list(individual)
         n: int = len(arr)
         lo, hi = sorted(
-            cast("list[int]", _rng.choice(np.arange(n + 1), size=2, replace=False).tolist())
+            cast("list[int]", _rng.choice(np.arange(n + 1), size=2, replace=False).tolist()),
         )
         arr[lo:hi] = arr[lo:hi][::-1]
         return arr
