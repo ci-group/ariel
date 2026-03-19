@@ -73,7 +73,7 @@ class CoreModule(Module):
         
         core.add_camera(
             name=f"{core_name}_mycamera",
-            pos=[0, 0, 0], 
+            pos=[0, 0, CORE_DIMENSIONS[0]-0.02], 
             euler=[-90, 0, 180]
         )
 
