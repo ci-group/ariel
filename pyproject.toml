@@ -45,6 +45,7 @@ Changelog = "https://github.com/ci-group/ariel/releases"
 [dependency-groups]
 dev = ["mypy>=1.18.2", "pytest>=8.4.2", "pytest-modern>=0.7.4", "ruff>=0.13.3"]
 docs = [
+  "furo>=2025.12.19",
   "jupyter-sphinx>=0.5.3",
   "linkify-it-py>=2.0.3",
   "myst-parser>=3.0.1",
