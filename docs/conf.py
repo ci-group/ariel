@@ -1,7 +1,8 @@
 """Sphinx configuration."""
 
 # --------- BASICS --------- #
-html_theme = "shibuya"
+# html_theme = "shibuya"
+html_theme = "furo"
 
 project = "ARIEL"
 
