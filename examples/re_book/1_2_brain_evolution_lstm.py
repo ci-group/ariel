@@ -19,7 +19,6 @@ import numpy as np
 import mujoco
 import keyboard as kb
 import matplotlib.pyplot as plt
-import optuna 
 
 # Network imports
 import torch
@@ -29,7 +28,6 @@ from torch.nn import Tanh
 # Learner
 from evotorch.algorithms import CMAES
 from evotorch.neuroevolution import NEProblem
-from evotorch.neuroevolution.net.misc import fill_parameters
 
 # Local libraries
 from ariel.simulation.environments import SimpleFlatWorld
@@ -53,7 +51,6 @@ parser.add_argument('--budget', type=int, default=600, help='Number of generatio
 parser.add_argument('--dur', type=int, default=15, help="Duration of an evaluation")
 parser.add_argument('--population', type=int, default=26, help="Population size")
 parser.add_argument('--fitness', type=str, default='distance', choices=['delta', 'efficiency', 'survival', 'direct', 'distance'])
-parser.add_argument('--optimize', action='store_true', help="Run Optuna Bayesian Optimization")
 args = parser.parse_args()
 
 BUDGET = args.budget
@@ -88,53 +85,47 @@ class Network(nn.Module):
         self, input_size: int, output_size: int, hidden_size: int
     ) -> None:
         super(Network, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc4 = nn.Linear(hidden_size, output_size)
-
-        self.hidden_activation = nn.ELU()
-        self.output_activation = nn.Tanh()
-
+        self.hidden_size = hidden_size
         self.input = input_size
 
-        # Disable gradients for all parameters
+        # Use an LSTMCell for step-by-step processing
+        self.lstm = nn.LSTMCell(input_size, hidden_size)
+        
+        # Output layer maps the LSTM hidden state to joint actions
+        self.fc_out = nn.Linear(hidden_size, output_size)
+
+        self.output_activation = nn.Tanh()
+
+        # Internal state placeholders for the LSTM
+        self.hx = None
+        self.cx = None
+
+        # Disable gradients for all parameters (we are using evolution, not backprop)
         for param in self.parameters():
             param.requires_grad = False
 
+    def reset_states(self):
+        """Resets the hidden and cell states for a new simulation episode."""
+        self.hx = torch.zeros(1, self.hidden_size)
+        self.cx = torch.zeros(1, self.hidden_size)
+
     @torch.inference_mode()
     def forward(self, model, data, state):
-        x = torch.Tensor(state)
+        # Ensure states are initialized
+        if self.hx is None or self.cx is None:
+            self.reset_states()
 
-        x = self.hidden_activation(self.fc1(x))
-        x = self.hidden_activation(self.fc2(x))
-        x = self.output_activation(self.fc4(x)) * (torch.pi / 2)
+        # Convert 1D state array to 2D tensor (batch_size=1, input_size)
+        x = torch.Tensor(state).unsqueeze(0)
 
-        return x.detach().numpy()
+        # Forward pass through the LSTM cell updates the hidden and cell states
+        self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
 
-@torch.no_grad()
-def fill_parameters(net: nn.Module, vector: torch.Tensor):
-    """Fill the parameters of a torch module (net) from a vector.
+        # Calculate final action based on the new hidden state
+        action = self.output_activation(self.fc_out(self.hx)) * (torch.pi / 2)
 
-    No gradient information is kept.
-
-    The vector's length must be exactly the same with the number
-    of parameters of the PyTorch module.
-
-    Args:
-        net: The torch module whose parameter values will be filled.
-        vector: A 1-D torch tensor which stores the parameter values.
-    """
-    address = 0
-    for p in net.parameters():
-        d = p.data.view(-1)
-        n = len(d)
-        d[:] = torch.as_tensor(vector[address : address + n], device=d.device)
-        address += n
-
-    if address != len(vector):
-        raise IndexError("The parameter vector is larger than expected")
-
-
+        # Return as a 1D numpy array for MuJoCo
+        return action.squeeze(0).detach().numpy()
 
 # ============================================================================ #
 #                         Camera frame processing                              #
@@ -202,6 +193,7 @@ def run_vision_simulation(model,
     total_path_length = 0.0
     
     trajectory = []
+    network.reset_states()
     
     while data.time < duration:
         
@@ -255,13 +247,13 @@ def run_vision_simulation(model,
 # ============================================================================ #
 #                         Define evolutionary loop                             #
 # ============================================================================ #
+  
 def evolve(world, model, data):
     """Evolve the robot's movement using an evolutionary algorithm."""
-
+    
     tracker = Tracker(mujoco_obj_to_find=data, observable_attributes=["xpos"])
     tracker.setup(world.spec, data)
 
-    # Identify Camera for ROBOT VISION
     robot_cam_name = None
     for i in range(model.ncam):
         name = model.camera(i).name
@@ -271,160 +263,174 @@ def evolve(world, model, data):
     if robot_cam_name is None and model.ncam > 0:
         robot_cam_name = model.camera(0).name
 
+    # Pre-initialize renderer for the evolution loop
     renderer = mujoco.Renderer(model, height=24, width=32)
 
+    # Get Mocap ID for the green target
     try:
         target_mocap_id = model.body("green_target").mocapid[0]
     except:
         console.print("[red]Error: Green target mocap body not found![/red]")
         target_mocap_id = 0
 
-    # 1. Define the Fitness Function once so both Optuna and the final run can use it
+    # Define the fitness function
     def fitness_function(x: Network) -> float:
         total_fitness = 0.0
+        
         for target_pos in TARGET_POSITIONS:
             mujoco.mj_resetData(model, data)
             tracker.reset()
             
             data.mocap_pos[target_mocap_id] = target_pos
-            mujoco.mj_forward(model, data) # Ghost Frame Fix!
 
+            # 1. Capture Initial State BEFORE simulation
             initial_pos = np.array(data.qpos[0:3].copy())
             target_pos_arr = np.array(target_pos)
 
+            # Run Simulation
             metrics = run_vision_simulation(
-                model, data, network=x, duration=DURATION, 
-                renderer=renderer, cam_name=robot_cam_name, control_step_freq=50 
+                model, 
+                data, 
+                network=x, 
+                duration=DURATION, 
+                renderer=renderer,
+                cam_name=robot_cam_name,
+                control_step_freq=50 
             )
             
+            # 2. Capture Final State AFTER simulation
             final_pos = np.array(data.qpos[0:3].copy())
             final_z_height = final_pos[2]
             
+            # 3. Route to the correct fitness function based on terminal args
             if args.fitness == 'delta':
                 score = fitness_delta_distance(initial_pos, final_pos, target_pos_arr)
-            elif args.fitness == 'distance':
-                # FIXED: Changed initial_pos to final_pos
-                score = distance_to_target(final_pos, target_pos_arr)
+            if args.fitness == 'distance':
+                score = distance_to_target(initial_pos, target_pos_arr)
             elif args.fitness == 'survival':
                 score = fitness_survival_and_locomotion(initial_pos, final_pos, target_pos_arr, final_z_height)
             elif args.fitness == 'efficiency':
+                # Assuming 0.0 for effort right now unless you track it in run_vision_simulation
                 score = fitness_distance_and_efficiency(initial_pos, final_pos, target_pos_arr, 0.0) 
             elif args.fitness == 'direct':
                 score = fitness_direct_path(initial_pos, final_pos, target_pos_arr, metrics["path_length"])
-            
             total_fitness += score
             
         return total_fitness / len(TARGET_POSITIONS)
 
-    input_dim = 3 + (len(data.qpos) - 7) + 3 + 2
-
-    # ==========================================
-    # 2. OPTUNA BAYESIAN TUNING BLOCK
-    # ==========================================
-    if args.optimize:
-        console.log("[cyan]Starting Optuna Bayesian Optimization...[/cyan]")
-        
-        def objective(trial):
-            # Let Optuna pick the architecture and hyperparameters
-            hidden_size = trial.suggest_int("hidden_size", 16, 64, step=16)
-            pop_size = trial.suggest_int("pop_size", 10, 50, step=10)
-            init_bounds = trial.suggest_float("init_bounds", 0.1, 1.0)
-
-            network = Network(input_dim, model.nu, hidden_size)
-            problem = NEProblem(
-                objective_sense="min", network_eval_func=fitness_function,
-                network=network.eval(), initial_bounds=(-init_bounds, init_bounds), device="cpu"
-            )
-            searcher = CMAES(problem=problem, popsize=pop_size, stdev_init=init_bounds)
-            
-            tuning_budget = 30 # Short budget to test viability
-            for gen in range(tuning_budget):
-                searcher.step()
-                trial.report(searcher.status["pop_best_eval"], gen)
-                if trial.should_prune():
-                    raise optuna.TrialPruned()
-                    
-            return searcher.status["pop_best_eval"]
-
-        study = optuna.create_study(direction="minimize", pruner=optuna.pruners.MedianPruner())
-        study.optimize(objective, n_trials=20)
-        
-        console.log("[green]Tuning Complete![/green]")
-        console.log("Best Hyperparameters:", study.best_params)
-        
-        # Apply the best parameters for the final run
-        best_hidden = study.best_params["hidden_size"]
-        best_pop = study.best_params["pop_size"]
-        best_bounds = study.best_params["init_bounds"]
-    else:
-        # Default parameters if not tuning
-        best_hidden = 32
-        best_pop = POP_SIZE
-        best_bounds = 0.5 
-
-    # ==========================================
-    # 3. FINAL EVOLUTION RUN (Using Best Params)
-    # ==========================================
-    console.log(f"Evolving for {BUDGET} generations with Vision Input (Hidden: {best_hidden}, Pop: {best_pop})")
+    console.log(f"Evolving for {BUDGET} generations with Vision Input")
     
-    network = Network(input_dim, model.nu, best_hidden)
-    problem = NEProblem(
-        objective_sense="min", network_eval_func=fitness_function,
-        network=network.eval(), initial_bounds=(-best_bounds, best_bounds), device="cpu"
+    # --- CALCULATE NEW INPUT SIZE ---
+    num_joints = len(data.qpos) - 7
+
+    # Inputs: Quat(3) + Joints(N) + Vision(3) + Heartbeat(2)
+    # In case of the spider: 3 + 8 + 3 + 2
+    input_dim = 3 + num_joints + 3 + 2
+
+    # Initialise Neural Network Controller
+    # 14 input neurons
+    # 32 hidden layer neurons
+    # 8 output neurons
+    network = Network(
+        input_size=input_dim, 
+        output_size=model.nu, 
+        hidden_size=32
     )
-    searcher = CMAES(problem=problem, popsize=best_pop, stdev_init=best_bounds)
+    
+    # Initialise Problem for the solver/learner
+    problem = NEProblem(
+            objective_sense="min",
+            network_eval_func=fitness_function,
+            network=network.eval(),
+            initial_bounds=(-0.5, 0.5),
+            device="cpu"
+    )
+    
+    # Initialise CMA-ES learner 
+    searcher = CMAES(problem=problem,
+                     stdev_init=0.1
+                     )
+    
+    console.log(f"Population size: {searcher.popsize}")
     
     for bud in range(BUDGET + 1):
         searcher.step()
+        gen_best = searcher.status["pop_best_eval"]
+        
         console.rule(f"Budget: {bud}/{BUDGET}")
-        console.log(f"Best Fit (Avg): {searcher.status['pop_best_eval']:.4f}")
+        console.log(f"Best Fit (Avg): {gen_best:.4f}")
 
-    # Return the Evotorch solution directly, plus network sizes
-    return searcher.status["pop_best"], input_dim, best_hidden
+
+    best_ind = searcher.status["best"].values
+    return best_ind, input_dim
 
 
 # ============================================================================ #
 #                           Main entry function                                #
 # ============================================================================ #
+
 def main():
     mujoco.set_mjcb_control(None)
+
+    # Initialise world
     world = SimpleFlatWorld()
     
-    target_pos = TARGET_POSITIONS[0]
+    # Add Green Target Object
+    target_pos = TARGET_POSITIONS[0] # left
     target_body = world.spec.worldbody.add_body(name="green_target", mocap=True, pos=target_pos)
-    target_body.add_geom(type=mujoco.mjtGeom.mjGEOM_BOX, size=[0.1, 0.1, 0.1], rgba=[0, 1, 0, 1]) 
+    target_body.add_geom(
+        type=mujoco.mjtGeom.mjGEOM_BOX, 
+        size=[0.1, 0.1, 0.1], 
+        rgba=[0, 1, 0, 1]
+    ) 
     
-    world.spec.worldbody.add_camera(name="video_cam", pos=[0, -1, 3], xyaxes=[1, 0, 0, 0, 3, 0])
+    # Add Global Camera for Video Recording
+    world.spec.worldbody.add_camera(
+        name="video_cam", 
+        pos=[0, -1, 3], 
+        xyaxes=[1, 0, 0, 0, 3, 0]
+    )
 
+    # Spawn Spider
     spider_core = body_spider45()
     world.spawn(spider_core.spec, position=[0, 0, 0.1])
     
     model = world.spec.compile()
     data = mujoco.MjData(model)
 
-    # Catch the new dynamic variables
-    best_solution, final_input_dim, best_hidden = evolve(world, model, data)
+    best_weights, final_input_dim = evolve(world, model, data)
     
-    return model, data, best_solution, world, final_input_dim, best_hidden
+    return model, data, best_weights, world, final_input_dim
 
 if __name__ == "__main__":
-    start_time = time.time()
-    
-    # Unpack variables including best_hidden
-    model, data, best_solution, world, input_dim, best_hidden = main()
+    start = time.time()
+    model, data, best_weights, world, input_dim = main()
+    end = time.time()
 
-    console.log(f"[bold]Evolution took {round((time.time() - start_time) / 60, 2)} minutes[/bold]")
+    console.log(f"Evolution took {(end-start)/60:.2f} minutes")
 
-    # Build the network dynamically based on Optuna's choice
-    network = Network(input_size=input_dim, output_size=model.nu, hidden_size=best_hidden)
-    
-    fill_parameters(network, best_solution.values)
-    
-    console.log("[cyan]Best weights loaded directly into memory![/cyan]")
+    weights_path = "3_spider_vision_new.npy"
+    # Unconditionally save the new weights, overwriting any old ones
+    np.save(weights_path, best_weights)
+    console.log(f"Best weights saved to {weights_path}")
 
+# ============================================================================ #
+#                           Initialise world and                               #
+#                           load best  performer                               #
+#                           for  video recording                               #
+# ============================================================================ #
+    network = Network(
+        input_size=input_dim, 
+        output_size=model.nu, 
+        hidden_size=32
+    )
+    fill_parameters(network, torch.Tensor(best_weights))
+
+    # Identify robot camera
     robot_cam_name = None
     for i in range(model.ncam):
         cam_name = model.camera(i).name
+        # Check for 'core' to match the spider's camera naming convention
         if ("camera" in cam_name or "core" in cam_name) and "video" not in cam_name:
             robot_cam_name = cam_name
             break
@@ -433,11 +439,16 @@ if __name__ == "__main__":
     path_to_video_folder = str(DATA / "videos")
     
     mujoco.mj_resetData(model, data)
+    
+    # Set target to middle position for the video demo
     target_mocap_id = model.body("green_target").mocapid[0]
     data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
-    mujoco.mj_forward(model, data) # Ghost Frame Fix!
     
+    # 1. Renderer for Robot Vision (Low Res)
     control_renderer = mujoco.Renderer(model, height=24, width=32)
+    
+    # 2. Renderer for Video Output (High Res)
+    video_capture_renderer = mujoco.Renderer(model, height=480, width=640)
     
     def get_vision_control_signal(m, d):
         if robot_cam_name:
@@ -449,73 +460,146 @@ if __name__ == "__main__":
             vision_inputs = [0,0,0]
             
         robot_state = get_robot_state(d)
-        phase_inputs = [np.sin(d.time * 2.0 * np.pi), np.cos(d.time * 2.0 * np.pi)]
-        state = np.concatenate([robot_state, vision_inputs, phase_inputs]).astype(np.float32)
+        
+        phase_inputs = [
+            np.sin(d.time * 2.0 * np.pi), 
+            np.cos(d.time * 2.0 * np.pi)
+        ]
+        
+        state = np.concatenate([
+            robot_state,
+            vision_inputs,
+            phase_inputs
+        ]).astype(np.float32)
         
         return network.forward(m, d, state)
 
-    video_recorder = VideoRecorder(file_name="spider_vision_best", output_folder=path_to_video_folder)
+    # Video Timing Variables
+    fps = 30
+    video_dt = 1.0 / fps
+    next_video_time = 0.0
+    frames = []
 
+    # Simulation Timing Variables (must match evolve/run_vision_simulation exactly)
+    timestep = model.opt.timestep
+    control_step_freq = 50 
+    
+    current_ctrl = np.zeros(model.nu)
+
+# --- REPLAY BEST & RECORD VIDEO ---
+    console.log("Rendering Best Video...")
+    path_to_video_folder = str(DATA / "videos")
+    
+    # 1. Setup VideoRecorder (using your Ariel library class)
+    video_recorder = VideoRecorder(
+        file_name="spider_vision_best", 
+        output_folder=path_to_video_folder
+    )
+
+    # 2. Reset Simulation & Target
+    mujoco.mj_resetData(model, data)
+    target_mocap_id = model.body("green_target").mocapid[0]
+    data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
+
+    # 3. Setup Visualization Options (from your snippet)
     viz_options = mujoco.MjvOption()
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = False
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = False
 
+    # 4. Get Camera ID ("video_cam" is the one we created earlier)
     camera_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, "video_cam")
 
+    # 5. Timing Variables
     fps = 30
     dt = model.opt.timestep
     steps_per_frame = int(1.0 / (fps * dt))
     control_step_freq = 50
     current_ctrl = np.zeros(model.nu)
 
-    with mujoco.Renderer(model, height=480, width=640) as renderer:
-        while data.time < DURATION:
-            for _ in range(steps_per_frame):
-                deduced_step = int(np.round(data.time / dt))
+    # 6. Setup separate renderer for the Robot's Vision (Low Res)
+    # We keep this outside the video loop so we don't recreate it every frame
+    control_renderer = mujoco.Renderer(model, height=24, width=32)
+    network.reset_states()
 
+    # 7. Main Rendering Loop (Using Context Manager as requested)
+    # We use the video_recorder width/height for the output video
+    with mujoco.Renderer(model, height=480, width=640) as renderer:
+        
+        while data.time < DURATION:
+            
+            # INNER LOOP: Step physics N times to match Video FPS
+            # We must loop manually here to inject the Control Logic
+            for _ in range(steps_per_frame):
+                
+                # A. Calculate deduced step (Exact same timing as training)
+                deduced_step = int(np.ceil(data.time / dt))
+
+                # B. Run Network if needed
                 if deduced_step % control_step_freq == 0:
                     current_ctrl = get_vision_control_signal(model, data)
 
+                # C. Apply Control & Step
                 data.ctrl[:] = current_ctrl
                 mujoco.mj_step(model, data)
 
-            renderer.update_scene(data, scene_option=viz_options, camera=camera_id)
+            # OUTER LOOP: Render Frame (Once per 1/30th second)
+            renderer.update_scene(
+                data, 
+                scene_option=viz_options, 
+                camera=camera_id
+            )
+            
+            # Use the VideoRecorder's write method (handles cv2/saving internally)
             video_recorder.write(frame=renderer.render())
 
+        # 8. Finish
         video_recorder.release()
         console.log(f"[green]Video rendering complete. Saved to {path_to_video_folder}[/green]")
 
+        # 9. Save Path Figure
+
+        # Pick one target position to test on (e.g., the first one)
         test_target = TARGET_POSITIONS[0]
         mujoco.mj_resetData(model, data)
         data.mocap_pos[target_mocap_id] = test_target
-        mujoco.mj_forward(model, data) # Ghost Frame Fix!
         
+        # Run the simulation once more to get the path
         metrics = run_vision_simulation(
-            model, data, network=network, duration=DURATION, 
-            renderer=None, cam_name=robot_cam_name, control_step_freq=50
+            model, 
+            data, 
+            network=network, 
+            duration=DURATION, 
+            renderer=None, # No need to render video for this
+            cam_name=robot_cam_name, # <--- ADD THIS LINE HERE
+            control_step_freq=50
         )
         
+        # Extract X and Y coordinates
         path = metrics["trajectory"]
         x_coords = [p[0] for p in path]
         y_coords = [p[1] for p in path]
         
+        # Create the plot
         plt.figure(figsize=(8, 8))
+        
+        # Plot the robot's starting position
         plt.plot(x_coords[0], y_coords[0], 'go', markersize=10, label='Start')
+        
+        # Plot the Target position
         plt.plot(test_target[0], test_target[1], 'r*', markersize=15, label='Target')
+        
+        # Plot the actual path
         plt.plot(x_coords, y_coords, 'b-', linewidth=2, label='Robot Path')
+        
         plt.title(f"Robot Trajectory Map (Fitness: {args.fitness})")
         plt.xlabel("X Position (meters)")
         plt.ylabel("Y Position (meters)")
         plt.legend()
         plt.grid(True)
         
+        # Save the plot next to your videos
         plot_path = os.path.join(path_to_video_folder, f"trajectory_{args.fitness}.png")
         plt.savefig(plot_path)
         console.log(f"[green]Trajectory map saved to {plot_path}[/green]")
-        
-        # --- Safely Archive the Brain ---
-        brain_path = os.path.join(path_to_video_folder, f"brain_{args.fitness}.npy")
-        np.save(brain_path, best_solution.values.numpy())
-        console.log(f"[green]Brain archived to {brain_path}[/green]")

@@ -100,9 +100,9 @@ class MorphologyDecoderBestFirst:
 
                     type_probs = softmax(type_scores)
 
-                    type_probs[
-                        ModuleType.NONE.value
-                    ] = -1.0  # Ignore NONE if that's the output
+                    # type_probs[
+                    #     ModuleType.NONE.value
+                    # ] = -1.0  # Ignore NONE if that's the output
                     type_probs[
                         ModuleType.CORE.value
                     ] = -1.0  # Ignore CORE if that's the output
