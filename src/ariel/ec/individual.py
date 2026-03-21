@@ -1,33 +1,34 @@
+"""ARIEL Individual."""
 from collections.abc import Hashable, Sequence
 
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
 type JSONPrimitive = str | int | float | bool
-type JSONType = JSONPrimitive | Sequence["JSONType"] | dict[Hashable, "JSONType"]
+type JSONType = JSONPrimitive | Sequence[JSONType] | dict[Hashable, JSONType]
 type JSONIterable = Sequence[JSONType] | dict[Hashable, JSONType]
 
 
 class Individual(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    # ── Lifetime ──────────────────────────────────────────────────────────────
+    # -- Lifetime --------------------------------------------------------------
     alive: bool = Field(default=True, index=True)
     time_of_birth: int = Field(default=-1, index=True)
     time_of_death: int = Field(default=-1, index=True)
 
-    # ── Fitness ───────────────────────────────────────────────────────────────
+    # -- Fitness ---------------------------------------------------------------
     requires_eval: bool = Field(default=True, index=True)
     fitness_: float | None = Field(default=None, index=True)
 
-    # ── Genotype ──────────────────────────────────────────────────────────────
+    # -- Genotype --------------------------------------------------------------
     requires_init: bool = Field(default=True, index=True)
     genotype_: JSONIterable | None = Field(default=None, sa_column=Column(JSON))
 
-    # ── Tags ──────────────────────────────────────────────────────────────────
+    # -- Tags ------------------------------------------------------------------
     tags_: dict[JSONType, JSONType] = Field(default={}, sa_column=Column(JSON))
 
-    # ── Fitness property ──────────────────────────────────────────────────────
+    # -- Fitness property ------------------------------------------------------
 
     @property
     def fitness(self) -> float:
@@ -40,7 +41,7 @@ class Individual(SQLModel, table=True):
         self.requires_eval = False
         self.fitness_ = float(value)
 
-    # ── Genotype property ─────────────────────────────────────────────────────
+    # -- Genotype property -----------------------------------------------------
 
     @property
     def genotype(self) -> JSONIterable:
@@ -53,7 +54,7 @@ class Individual(SQLModel, table=True):
         self.requires_init = not bool(value)
         self.genotype_ = value
 
-    # ── Tags property ─────────────────────────────────────────────────────────
+    # -- Tags property ---------------------------------------------------------
 
     @property
     def tags(self) -> dict[JSONType, JSONType]:

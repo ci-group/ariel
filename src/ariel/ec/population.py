@@ -31,24 +31,56 @@ class Population:
     """
 
     def __init__(self, individuals: list[Individual]) -> None:
-        self._population: list[Individual] = list(individuals)
+        self.population: list[Individual] = list(individuals)
 
-    # ── Core sequence protocol ────────────────────────────────────────────────
+    # -- Core sequence protocol ------------------------------------------------
 
     def __len__(self) -> int:
-        return len(self._population)
+        """Get length of population.
+
+        Returns
+        -------
+        int
+        """
+        return len(self.population)
 
     def __iter__(self) -> Iterator[Individual]:
-        return iter(self._population)
+        """Do iter stuff.
+
+        Returns
+        -------
+        Iterator[Individual]
+        """
+        return iter(self.population)
 
     def __repr__(self) -> str:
-        return f"Population(n={len(self._population)})"
+        """Show length of population.
+
+        Returns
+        -------
+        len(Population): str
+        """
+        return f"Population(n={len(self.population)})"
 
     def __bool__(self) -> bool:
-        return bool(self._population)
+        """See if Population.
+
+        Does it exist? You never know.
+
+        Returns
+        -------
+        bool
+        """
+        return bool(self.population)
 
     def __add__(self, other: "Population") -> "Population":
-        return Population(self._population + other._population)
+        """Add a population to the current population.
+
+        Returns
+        -------
+        Population
+        """
+        return Population(self.population + other.population)
 
     @overload
     def __getitem__(self, index: int) -> Individual: ...
@@ -57,22 +89,38 @@ class Population:
     def __getitem__(self, index: slice) -> "Population": ...
 
     def __getitem__(self, index: int | slice) -> "Individual | Population":
-        if isinstance(index, slice):
-            return Population(self._population[index])
-        return self._population[index]
+        """Get item method.
 
-    # ── Mutation helpers ──────────────────────────────────────────────────────
+        Returns
+        -------
+        Individual | Population
+        """
+        if isinstance(index, slice):
+            return Population(self.population[index])
+        return self.population[index]
+
+    # -- Mutation helpers ------------------------------------------------------
 
     def append(self, individual: Individual) -> None:
-        self._population.append(individual)
+        """Append individual to Population."""
+        self.population.append(individual)
 
     def extend(self, other: "Population | list[Individual]") -> None:
-        self._population.extend(other._population if isinstance(other, Population) else other)
+        """Extend Population with another Population."""
+        self.population.extend(
+            other.population if isinstance(other, Population) else other,
+            )
 
     def to_list(self) -> list[Individual]:
-        return list(self._population)
+        """Turn population to default Python list object.
 
-    # ── Chainable query API ───────────────────────────────────────────────────
+        Returns
+        -------
+        list[Individual]
+        """
+        return list(self.population)
+
+    # -- Chainable query API ---------------------------------------------------
 
     def sample(self, n: int) -> "Population":
         """Return a new Population with *n* randomly drawn individuals.
@@ -87,7 +135,10 @@ class Population:
         population: Population
             Sample of n individuals (without replacement) from the population
         """
-        return Population(random.sample(self._population, min(n, len(self._population))))
+        return Population(random.sample(self.population,
+                                        min(n, len(self.population)),
+                                        ),
+                                            )
 
     def best(
         self,
@@ -120,7 +171,7 @@ class Population:
 
         def key(ind: Individual) -> float:
             return _safe_attr(ind, attribute)
-        return Population(sorted(self._population, key=key, reverse=reverse)[:n])
+        return Population(sorted(self.population, key=key, reverse=reverse)[:n])
 
     def shuffle(self) -> "Population":
         """Return a new Population with the same individuals in random order.
@@ -129,53 +180,68 @@ class Population:
         -------
         Population : list[Individual]
         """
-        data = list(self._population)
+        data = list(self.population)
         random.shuffle(data)
         return Population(data)
 
     def where(self, predicate: Callable[[Individual], bool]) -> "Population":
-        """Return a new Population containing only individuals matching *predicate*.
+        """Query the population.
+
+        Return a new Population containing
+        only individuals matching *predicate*.
 
         Parameters
         ----------
         predicate : Callable[[Individual], bool]
             Predicate rule for what to pull from the population
             ```python
-                population.where(lambda ind: ind.alive) # Get all alive individuals
+                # Get all alive individuals
+                population.where(lambda ind: ind.alive)
             ```
 
         Returns
         -------
         Population: list[Individual]
         """
-        return Population([ind for ind in self._population if predicate(ind)])
+        return Population([ind for ind in self.population if predicate(ind)])
 
-    # ── Convenience filter properties ─────────────────────────────────────────
+    # -- Convenience filter properties -----------------------------------------
 
     @property
     def alive(self) -> "Population":
+        """Get all alive individual from the current population."""
         return self.where(lambda ind: ind.alive)
 
     @property
     def dead(self) -> "Population":
+        """Get all dead individual from the current population."""
         return self.where(lambda ind: not ind.alive)
 
     @property
     def unevaluated(self) -> "Population":
+        """Get all unevaluated individuals from the current population."""
         return self.where(lambda ind: ind.requires_eval)
 
     @property
     def evaluated(self) -> "Population":
+        """Get all evaluated individuals  from the current population."""
         return self.where(lambda ind: not ind.requires_eval)
 
-    # ── Numerical Properties ─────────────────────────────────────────
+    # -- Numerical Properties -----------------------------------------
 
     @property
     def size(self) -> int:
-        return len(self._population)
+        """Population size."""
+        return len(self.population)
 
-    # ── Constructors ──────────────────────────────────────────────────────────
+    # -- Constructors ----------------------------------------------------------
 
     @classmethod
     def empty(cls) -> "Population":
+        """Initialise empty population.
+
+        Returns
+        -------
+        Population
+        """
         return cls([])

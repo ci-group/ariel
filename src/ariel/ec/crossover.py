@@ -36,7 +36,7 @@ def _pack(flat: NDArray[Any], shape: tuple[int, ...]) -> JSONIterable:
 
 class Crossover:
 
-    # ── One-point ─────────────────────────────────────────────────────────────
+    # -- One-point -------------------------------------------------------------
 
     @staticmethod
     def one_point(
@@ -50,7 +50,7 @@ class Crossover:
         c2[point:] = flat_i[point:]
         return _pack(c1, shape), _pack(c2, shape)
 
-    # ── N-point ───────────────────────────────────────────────────────────────
+    # -- N-point ---------------------------------------------------------------
 
     @staticmethod
     def n_point(
@@ -81,7 +81,7 @@ class Crossover:
 
         return _pack(c1, shape), _pack(c2, shape)
 
-    # ── Uniform ───────────────────────────────────────────────────────────────
+    # -- Uniform ---------------------------------------------------------------
 
     @staticmethod
     def uniform(
@@ -101,7 +101,7 @@ class Crossover:
 
         return _pack(c1, shape), _pack(c2, shape)
 
-    # ── Order crossover (OX) — for permutation representations ───────────────
+    # -- Order crossover (OX) — for permutation representations ---------------
 
     @staticmethod
     def order_crossover(

@@ -1,4 +1,4 @@
-"""Generators and mutations for the EC module."""
+""" "Generators and mutations for the EC module."""
 
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, cast
@@ -367,14 +367,11 @@ class IntegerMutator:
         arr: NDArray[np.int_] = np.asarray(individual, dtype=np.int_)
         shape = arr.shape
         replacement = _rng.integers(
-            low=low,
-            high=high,
-            size=shape,
-            endpoint=True,
+            low=low, high=high, size=shape, endpoint=True
         )
         mask: NDArray[np.bool_] = _rng.random(shape) < mutation_probability
         return cast(
-            "Integers", np.where(mask, replacement, arr).astype(int).tolist(),
+            "Integers", np.where(mask, replacement, arr).astype(int).tolist()
         )
 
     @staticmethod
@@ -522,9 +519,7 @@ class IntegerMutator:
         _rng.shuffle(
             np.array(segment)
         )  # shuffle produces NDArray; re-assign below
-        shuffled: list[int] = cast(
-            "list[int]", _rng.permutation(segment).tolist(),
-        )
+        shuffled: list[int] = _rng.permutation(segment).tolist()
         arr[lo:hi] = shuffled
         return arr
 

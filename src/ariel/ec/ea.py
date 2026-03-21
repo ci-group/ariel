@@ -2,8 +2,9 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import computed_field
 from pydantic_settings import BaseSettings
@@ -27,7 +28,7 @@ install()
 type DBHandlingMode = Literal["delete", "halt"]
 
 
-# ── Settings ──────────────────────────────────────────────────────────────────
+# -- Settings ------------------------------------------------------------------
 
 
 class EASettings(BaseSettings):
@@ -74,19 +75,29 @@ class EASettings(BaseSettings):
     @computed_field
     @property
     def db_file_path(self) -> Path:
+        """Path to database file."""
         return self.output_folder / self.db_file_name
 
 
 config: EASettings = EASettings()
 
 
-# ── Step wrapper ──────────────────────────────────────────────────────────────
+# -- Step wrapper --------------------------------------------------------------
+####################################################
+#                   OLD VERSION                    #
+####################################################
+
 @dataclass
 class EAStep:
     """A named, callable wrapper around a single EA pipeline operation."""
 
-    name: str
+    name: str | None
     operation: Callable[[Population], Population]
+
+    def __post_init__(self) -> None:
+        """Post init."""
+        if self.name is None:
+            self.name = self.operation.__name__
 
     def __call__(self, population: Population) -> Population:
         """Run the operation given to EAStep.
@@ -101,8 +112,63 @@ class EAStep:
         """
         return self.operation(population)
 
+####################################################
+#                   NEW VERSION 1                  #
+####################################################
 
-# ── EA ────────────────────────────────────────────────────────────────────────
+
+def mutate(population: Population,
+           probability: float = 0.5,
+           scale: float = 2,
+           ) -> Population:
+    """Do mutation with extra inputs.
+
+    Returns
+    -------
+    Population
+    """
+    return population
+
+
+ops = [
+    EAStep("mutate", partial(mutate, probability=0.5, scale=2)),
+]
+
+####################################################
+#                   NEW VERSION 2                  #
+####################################################
+
+
+class EAStep:
+    """A named, callable wrapper around a single EA pipeline operation."""
+
+    def __init__(
+        self,
+        operation: Callable[[Population], Population],
+        *,
+        name: str | None = None,
+        **kwargs: dict[str, Any],
+    ) -> None:
+        self.name = name or operation.__name__
+        self.operation = operation
+        self.kwargs = kwargs
+
+    def __post_init__(self) -> None:
+        """Post init."""
+        if self.name is None:
+            self.name = self.operation.__name__
+
+    def __call__(self, population: Population) -> Population:
+        """Call the operation.
+
+        Returns
+        -------
+        Population
+        """
+        return self.operation(population, **self.kwargs)
+
+
+# -- EA ------------------------------------------------------------------------
 
 
 class EA:
@@ -115,15 +181,18 @@ class EA:
 
     Quick-start
     -----------
-    ::
+    ```python
 
         ops = [
             EAStep("evaluate", evaluate),
             EAStep("survivor_selection", survivor_selection),
         ]
-        ea = EA(Population(initial_individuals), ops, num_of_generations=200)
+        ea = EA(population = Population(initial_individuals),
+                operations = ops,
+                num_of_generations=200)
         ea.run()
         winner = ea.best()
+    ```
     """
 
     def __init__(
@@ -188,7 +257,7 @@ class EA:
         self._commit()
         self.console.rule("[blue]EA Initialized")
 
-    # ── Database ──────────────────────────────────────────────────────────────
+    # -- Database --------------------------------------------------------------
 
     def _setup_database(
         self, db_file_path: Path,
@@ -218,7 +287,7 @@ class EA:
                 session.add(ind)
             session.commit()
 
-    # ── Query helpers ─────────────────────────────────────────────────────────
+    # -- Query helpers ---------------------------------------------------------
 
     def _fetch(
         self,
@@ -252,14 +321,24 @@ class EA:
         only_alive: bool = True,
         requires_eval: bool | None = None,
     ) -> None:
+        """Fetch population from database.
+
+        Parameters
+        ----------
+        only_alive : bool
+            When true it fetches only the alive individuals
+        requires_eval : bool
+            Fetches the individuals that require evaluation
+        """
         self.population = self._fetch(
             only_alive=only_alive, requires_eval=requires_eval,
         )
 
-    # ── Population stats ──────────────────────────────────────────────────────
+    # -- Population stats ------------------------------------------------------
 
     @property
     def size(self) -> int:
+        """Current population size."""
         self.fetch_population()
         return self.population.size
 
@@ -269,6 +348,20 @@ class EA:
         *,
         only_alive: bool = True,
     ) -> Individual:
+        """Return the best n individuals from the population.
+
+        Parameters
+        ----------
+        mode
+            Which individual to return using to fitness. Best always returns the
+            "best" individual according to is_maximisation.
+            - Minimum fitness if is self.is_maximisation is False
+            - Maximum fitness if is self.is_maximisation is True
+
+        Returns
+        -------
+        Individual
+        """
         sort: Literal["asc", "desc"] = "desc" if self.is_maximisation else "asc"
         pop = self._fetch(sort=sort, only_alive=only_alive, requires_eval=False)
 
@@ -280,7 +373,7 @@ class EA:
             case "worst":
                 return pop[-1]
 
-    # ── Execution ─────────────────────────────────────────────────────────────
+    # -- Execution -------------------------------------------------------------
 
     def step(self) -> None:
         """Perform one cycle of the EAStep Operations."""
