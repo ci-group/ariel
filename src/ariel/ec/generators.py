@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-# ── Module-level RNG (shared across generators, mutators, crossover) ──────────
+# -- Module-level RNG (shared across generators, mutators, crossover) ----------
 SEED: int = 42
 _rng: Generator = np.random.default_rng(SEED)
 
@@ -18,7 +18,7 @@ type Integers = Sequence[int]
 type Floats = Sequence[float]
 
 
-# ── Settings ──────────────────────────────────────────────────────────────────
+# -- Settings ------------------------------------------------------------------
 
 
 class _GeneratorSettings(BaseSettings):
@@ -46,7 +46,7 @@ class _GeneratorSettings(BaseSettings):
 _settings: _GeneratorSettings = _GeneratorSettings()
 
 
-# ── Integer generator ─────────────────────────────────────────────────────────
+# -- Integer generator ---------------------------------------------------------
 
 
 class IntegersGenerator:
@@ -170,7 +170,7 @@ class IntegersGenerator:
         return cast("list[int]", _rng.permutation(n).tolist())
 
 
-# ── Float generator ───────────────────────────────────────────────────────────
+# -- Float generator -----------------------------------------------------------
 
 
 class FloatsGenerator:
@@ -329,7 +329,7 @@ class FloatsGenerator:
         return cast("Floats", np.linspace(start, stop, num).tolist())
 
 
-# ── Integer mutator ───────────────────────────────────────────────────────────
+# -- Integer mutator -----------------------------------------------------------
 
 
 class IntegerMutator:
@@ -342,8 +342,10 @@ class IntegerMutator:
         high: int,
         mutation_probability: float,
     ) -> Integers:
-        """
-        Replace each gene with a random integer drawn uniformly from ``[low, high]``.
+        """Replace with random ingeger individual.
+
+        Replace each gene with a random integer drawn uniformly
+        from ``[low, high]``.
 
         Each gene is independently mutated with probability
         ``mutation_probability``.
@@ -529,7 +531,7 @@ class IntegerMutator:
         return arr
 
 
-# ── Float mutator ─────────────────────────────────────────────────────────────
+# -- Float mutator -------------------------------------------------------------
 
 
 class FloatMutator:
