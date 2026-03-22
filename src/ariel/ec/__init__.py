@@ -1,7 +1,7 @@
 """EC module for ARIEL."""
 
 from ariel.ec.crossover import Crossover
-from ariel.ec.ea import EA, DBHandlingMode, EASettings, EAStep, config
+from ariel.ec.ea import EA, DBHandlingMode, EAOperation, EASettings, config
 from ariel.ec.generators import (
     SEED,
     FloatMutator,
@@ -30,8 +30,8 @@ __all__: list[str] = [
     # Crossover
     "Crossover",
     "DBHandlingMode",
+    "EAOperation",
     "EASettings",
-    "EAStep",
     "FloatMutator",
     "Floats",
 

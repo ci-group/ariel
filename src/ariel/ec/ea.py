@@ -1,12 +1,14 @@
-"""EA class and EAStep."""
+"""EA class and EAOperation."""
 
+import inspect
 from collections.abc import Callable
-from dataclasses import dataclass
-from functools import partial
 from pathlib import Path
-from typing import Any, Literal
+from typing import Concatenate, Literal, ParamSpec
 
 from pydantic import computed_field
+
+P = ParamSpec("P")
+
 from pydantic_settings import BaseSettings
 from rich.console import Console
 from rich.progress import (
@@ -35,7 +37,7 @@ class EASettings(BaseSettings):
     """
     Global configuration for the EA engine.
 
-    Consumed by both ``EA`` and ``EAStep``. Values can be overridden via
+    Consumed by both ``EA`` and ``EAOperation``. Values can be overridden via
     environment variables or a ``.env`` file thanks to ``pydantic-settings``.
 
     Parameters
@@ -97,142 +99,155 @@ config: EASettings = EASettings()
 
 
 # -- Step wrapper --------------------------------------------------------------
-####################################################
-#                   OLD VERSION                    #
-####################################################
-
-@dataclass
-class EAStep:
-    """A named, callable wrapper around a single EA pipeline operation.
-
-    Parameters
-    ----------
-    name : str or None
-        Human-readable label for this step. When ``None``, the name is
-        inferred from ``operation.__name__`` in ``__post_init__``.
-    operation : Callable[[Population], Population]
-        The pipeline function to invoke. Must accept a ``Population`` and
-        return a ``Population``.
-    """
-
-    name: str | None
-    operation: Callable[[Population], Population]
-
-    def __post_init__(self) -> None:
-        """Derive ``name`` from the wrapped function when not provided."""
-        if self.name is None:
-            self.name = self.operation.__name__
-
-    def __call__(self, population: Population) -> Population:
-        """Execute the wrapped operation on the given population.
-
-        Parameters
-        ----------
-        population : Population
-            The current population to transform.
-
-        Returns
-        -------
-        Population
-            The population returned by the wrapped operation.
-        """
-        return self.operation(population)
-
-####################################################
-#                   NEW VERSION 1                  #
-####################################################
 
 
-def mutate(population: Population,
-           probability: float = 0.5,
-           scale: float = 2,
-           ) -> Population:
-    """Apply mutation to the population.
+class EAOperation[**P]:
+    """EAOperation class.
+
+    Decorating a function with ``@EAOperation`` validates its signature and
+    turns it into a factory. Calling the decorated name with configuration
+    arguments returns a new bound ``EAOperation`` instance ready to be placed
+    in the ``ops`` list. The EA engine then calls each instance with a
+    ``Population`` to execute it.
 
     Parameters
     ----------
-    population : Population
-        The population whose individuals will be mutated.
-    probability : float, optional
-        Per-gene mutation probability. Must be in ``[0.0, 1.0]``.
-        Default is ``0.5``.
-    scale : float, optional
-        Magnitude scaling factor applied to each mutation step.
-        Default is ``2``.
+    func : Callable[Concatenate[Population, P], Population]
+        The pipeline function to wrap. Its first argument must be annotated
+        as ``Population`` and its return type must be ``Population``.
+    *args : P.args
+        Positional configuration arguments bound at construction time.
+    **kwargs : P.kwargs
+        Keyword configuration arguments bound at construction time.
 
-    Returns
-    -------
-    Population
-        The population after mutation has been applied.
-    """
-    return population
-
-
-ops = [
-    EAStep("mutate", partial(mutate, probability=0.5, scale=2)),
-]
-
-####################################################
-#                   NEW VERSION 2                  #
-####################################################
-
-
-class EAStep:
-    """A callable wrapper around a single EA pipeline operation.
-
-    Keyword arguments passed at construction time are forwarded to the
-    wrapped operation on every call, allowing step-specific parameters to
-    be bound once at the point of pipeline definition rather than hard-coded
-    inside each operator function.
-
-    Parameters
-    ----------
-    operation : Callable[[Population], Population]
-        The pipeline function to invoke. Must accept a ``Population`` as its
-        first positional argument and return a ``Population``.
-    name : str or None, optional
-        Human-readable label for this step. Defaults to
-        ``operation.__name__`` when ``None``. Default is ``None``.
-    **kwargs : Any
-        Additional keyword arguments forwarded to ``operation`` on every
-        ``__call__``.
+    Raises
+    ------
+    TypeError
+        If the decorated function has no parameters.
+    TypeError
+        If the first parameter of the decorated function is not annotated
+        as ``Population``.
+    TypeError
+        If the return annotation of the decorated function is not
+        ``Population``.
 
     Examples
     --------
-    >>> EAStep(mutate, probability=0.2, scale=1)
-    >>> EAStep(parent_selection, tournament_size=5)
+    >>> @EAOperation
+    ... def mutate(
+    ...     population: Population, probability: float = 0.2, span: int = 1
+    ... ) -> Population:
+    ...     ...
+    ...     return population
+
+    >>> ops: list[EAOperation] = [
+    ...     mutate(probability=0.5, span=2),
+    ...     parent_selection(tournament_size=5),
+    ... ]
     """
 
     def __init__(
         self,
-        operation: Callable[[Population], Population],
-        *,
-        name: str | None = None,
-        **kwargs: dict[str, Any],
+        func: Callable[Concatenate[Population, P], Population],
+        *args: P.args,
+        **kwargs: P.kwargs,
     ) -> None:
-        self.name = name or operation.__name__
-        self.operation = operation
+        sig = inspect.signature(func)
+        params = list(sig.parameters.values())
+
+        if not args and not kwargs:
+            if not params:
+                msg = (
+                    f"@EAOperation function '{func.__name__}' must have "
+                    f"a Population as its first argument."
+                )
+                raise TypeError(
+                    msg,
+                )
+            if params[0].annotation is not Population:
+                msg = (
+                    f"@EAOperation function '{func.__name__}' first argument "
+                    f"must be annotated as Population, got "
+                    f"'{getattr(params[0].annotation, '__name__', params[0].annotation)}'."
+                )
+                raise TypeError(
+                    msg,
+                )
+            if sig.return_annotation is not Population:
+                msg = (
+                    f"@EAOperation function '{func.__name__}' must return "
+                    f"Population, got "
+                    f"'{getattr(sig.return_annotation, '__name__', sig.return_annotation)}'."
+                )
+                raise TypeError(
+                    msg,
+                )
+
+        self.func = func
+        self.args = args
         self.kwargs = kwargs
+        self.name = func.__name__
 
-    def __post_init__(self) -> None:
-        """Derive ``name`` from the wrapped function when not provided."""
-        if self.name is None:
-            self.name = self.operation.__name__
+    def __call__(self, *args, **kwargs) -> "Population | EAOperation[P]":
+        """
+        Either bind configuration arguments or execute against a population.
 
-    def __call__(self, population: Population) -> Population:
-        """Execute the wrapped operation with the bound keyword arguments.
+        When the first positional argument is a ``Population`` the operator
+        executes immediately and returns the result. Otherwise a new bound
+        ``EAOperation`` instance is returned with the supplied arguments
+        forwarded on every subsequent execution.
 
         Parameters
         ----------
-        population : Population
-            The current population to transform.
+        *args
+            If the first element is a ``Population``, it is passed as the
+            population argument to the wrapped function. Otherwise treated
+            as configuration arguments to bind.
+        **kwargs
+            Configuration keyword arguments to bind.
 
         Returns
         -------
         Population
-            The population returned by the wrapped operation.
+            When called with a ``Population`` as the first argument.
+        EAOperation
+            When called with configuration arguments, returning a new
+            bound instance.
+
+        Raises
+        ------
+        TypeError
+            If called with a ``Population`` but the input is not an instance
+            of ``Population``.
+        TypeError
+            If the wrapped function does not return a ``Population``.
         """
-        return self.operation(population, **self.kwargs)
+        if args and isinstance(args[0], Population):
+            population = args[0]
+            if not isinstance(population, Population):
+                msg = (
+                    f"'{self.func.__name__}' expected a Population as input, "
+                    f"got '{type(population).__name__}'."
+                )
+                raise TypeError(
+                    msg,
+                )
+            result = self.func(population, *self.args, **self.kwargs)
+            if not isinstance(result, Population):
+                msg = (
+                    f"'{self.func.__name__}' expected a Population as return "
+                    f"value, got '{type(result).__name__}'."
+                )
+                raise TypeError(
+                    msg,
+                )
+            return result
+
+        return EAOperation(self.func, *args, **kwargs)
+
+    def __repr__(self) -> str:
+        kwargs = ", ".join(f"{k}={v!r}" for k, v in self.kwargs.items())
+        return f"{self.func.__name__}({kwargs})"
 
 
 # -- EA ------------------------------------------------------------------------
@@ -243,14 +258,14 @@ class EA:
     Generational evolutionary algorithm engine.
 
     Each call to ``step()`` / ``run()`` executes the ordered list of
-    ``EAStep`` operations against the current population, then persists
+    ``EAOperation`` operations against the current population, then persists
     the result to a SQLite database via SQLModel.
 
     Parameters
     ----------
     population : Population
         Initial population. Committed to the database on construction.
-    operations : list[EAStep]
+    operations : list[EAOperation]
         Ordered pipeline of operations executed once per generation.
     num_steps : int or None, optional
         Total number of generational steps to run. Falls back to
@@ -271,8 +286,8 @@ class EA:
     Examples
     --------
     >>> ops = [
-    ...     EAStep(evaluate),
-    ...     EAStep(survivor_selection),
+    ...     EAOperation(evaluate),
+    ...     EAOperation(survivor_selection),
     ... ]
     >>> ea = EA(Population(initial_individuals), ops, num_steps=200)
     >>> ea.run()
@@ -282,7 +297,7 @@ class EA:
     def __init__(
         self,
         population: Population,
-        operations: list[EAStep],
+        operations: list[EAOperation],
         *,
         num_steps: int | None = None,
         first_generation_id: int | None = None,
@@ -290,7 +305,7 @@ class EA:
         db_file_path: Path | None = None,
         db_handling: DBHandlingMode | None = None,
     ) -> None:
-        self.operations: list[EAStep] = operations
+        self.operations: list[EAOperation] = operations
         self.is_maximisation: bool = config.is_maximisation
         self.target_population_size: int = config.target_population_size
         self.current_generation: int = (
@@ -299,12 +314,10 @@ class EA:
             else config.first_generation_id
         )
         self.num_steps: int = (
-            num_steps
-            if num_steps is not None
-            else config.num_steps
+            num_steps if num_steps is not None else config.num_steps
         )
         self.console: Console = Console(
-            quiet=quiet if quiet is not None else config.quiet
+            quiet=quiet if quiet is not None else config.quiet,
         )
         self.engine: Engine = self._setup_database(
             db_file_path=db_file_path or config.db_file_path,
@@ -356,7 +369,8 @@ class EA:
                     self.console.log(f"⚠️  {msg} → deleting", style="yellow")
                     db_file_path.unlink()
                 case "halt":
-                    raise FileExistsError(f"⚠️  {msg} → halted")
+                    msg = f"⚠️  {msg} → halted"
+                    raise FileExistsError(msg)
 
         engine = create_engine(f"sqlite:///{db_file_path}")
         SQLModel.metadata.create_all(engine)
@@ -416,7 +430,7 @@ class EA:
             statement = statement.where(Individual.alive)
         if requires_eval is not None:
             statement = statement.where(
-                Individual.requires_eval == requires_eval
+                Individual.requires_eval == requires_eval,
             )
 
         match sort:
@@ -447,7 +461,8 @@ class EA:
             no filter is applied. Default is ``None``.
         """
         self.population = self._fetch(
-            only_alive=only_alive, requires_eval=requires_eval,
+            only_alive=only_alive,
+            requires_eval=requires_eval,
         )
 
     # -- Population stats ------------------------------------------------------
@@ -466,7 +481,7 @@ class EA:
         self.fetch_population()
         return self.population.size
 
-    def best(
+    def get_solution(
         self,
         mode: Literal["best", "median", "worst"] = "best",
         *,
@@ -500,7 +515,7 @@ class EA:
         Individual
             The selected individual.
         """
-        sort: Literal["asc", "desc"] = "desc" if self.is_maximisation else "asc"
+        sort: Literal["asc", "desc"] = "desc" if not self.is_maximisation else "asc"
         pop = self._fetch(sort=sort, only_alive=only_alive, requires_eval=False)
 
         match mode:
@@ -517,7 +532,7 @@ class EA:
         """Advance the EA by one generation.
 
         Increments ``current_generation``, refreshes ``self.population`` from
-        the database, passes the population through each ``EAStep`` in
+        the database, passes the population through each ``EAOperation`` in
         ``self.operations`` in order, then commits the result.
         """
         self.current_generation += 1
@@ -540,7 +555,8 @@ class EA:
             console=self.console,
         ) as progress:
             task = progress.add_task(
-                "Running EA", total=self.num_steps,
+                "Running EA",
+                total=self.num_steps,
             )
             for _ in range(self.num_steps):
                 self.step()
