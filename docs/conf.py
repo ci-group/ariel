@@ -62,6 +62,21 @@ myst_enable_extensions = [
 # Myst notebook settings
 nbsphinx_execute = "never"  # Do not run notebooks during build
 
+# # Adds a "source" button to notebooks
+# nbsphinx_prolog = """
+# .. raw:: html
+
+#     <style>
+#         .nbinput .prompt, .nboutput .prompt {
+#             display: none;   /* cleaner: remove In/Out labels */
+#         }
+#     </style>
+# """
+
+# # Nicer code highlighting theme
+pygments_style = "default"          # dark code blocks
+pygments_dark_style = "monokai"     # Furo-specific: dark mode highlight theme
+
 # --------- AUTOAPI --------- #
 autoapi_add_toctree_entry = True
 autoapi_dirs = ["../src/ariel/"]
