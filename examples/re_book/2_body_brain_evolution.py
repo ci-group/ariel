@@ -11,11 +11,9 @@ from __future__ import annotations
 
 # Standard library
 import argparse
-import copy
 import random
-import time
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 import mujoco
 
@@ -26,12 +24,6 @@ from mujoco import viewer
 from rich.console import Console
 from rich.progress import track
 from rich.traceback import install
-
-from ariel.utils.renderers import video_renderer
-
-# Initialize rich console
-install()
-console = Console()
 
 # --- ARIEL IMPORTS ---
 from ariel.body_phenotypes.robogen_lite.config import (
@@ -48,11 +40,9 @@ from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
-from ariel.ec.a001 import Individual
-from ariel.ec.a004 import EA, EASettings, EAStep
+from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.controllers.na_cpg import (
-    NaCPG,
     create_fully_connected_adjacency,
 )
 from ariel.simulation.controllers.simple_cpg import (
@@ -62,9 +52,13 @@ from ariel.simulation.controllers.simple_cpg import (
 from ariel.simulation.environments._simple_flat_with_target import (
     SimpleFlatWorldWithTarget,
 )
-from ariel.utils.runners import simple_runner
+from ariel.utils.renderers import video_renderer
 from ariel.utils.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
+
+# Initialize rich console
+install()
+console = Console()
 
 # ============================================================================ #
 #                               CONFIGURATION                                  #
@@ -72,7 +66,7 @@ from ariel.utils.video_recorder import VideoRecorder
 
 parser = argparse.ArgumentParser(description="Dual Evolution: Body + Brain")
 parser.add_argument(
-    "--budget", type=int, default=80, help="Number of generations"
+    "--budget", type=int, default=80, help="Number of generations",
 )
 parser.add_argument("--pop", type=int, default=80, help="Population size")
 parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
@@ -94,7 +88,6 @@ NUM_CPPN_INPUTS = 6
 NUM_CPPN_OUTPUTS = 1 + T + R
 
 # Type Aliases
-type Population = list[Individual]
 type ViewerTypes = Literal["launcher", "video", "simple"]
 
 # Determinism
@@ -120,7 +113,7 @@ class Evolution:
 
         self.config = EASettings(
             is_maximisation=False,  # Minimize Distance to Target
-            num_of_generations=BUDGET,
+            num_steps=BUDGET,
             target_population_size=POP_SIZE,
             db_file_path=DATA / "database.db",
         )
@@ -129,7 +122,7 @@ class Evolution:
     #                          HELPER METHODS                                  #
     # ------------------------------------------------------------------------ #
     def map_genotype_to_body(
-        self, genome_data: dict | Genome
+        self, genome_data: dict | Genome,
     ) -> mujoco.MjSpec | None:
         """Decodes CPPN into a MuJoCo Body Spec."""
         genome = (
@@ -141,7 +134,7 @@ class Evolution:
         try:
             genome.get_node_ordering()  # Topological check (deep stuff)
             decoder = MorphologyDecoderBestFirst(
-                cppn_genome=genome, max_modules=NUM_MODULES
+                cppn_genome=genome, max_modules=NUM_MODULES,
             )
             robot_graph = decoder.decode()
 
@@ -154,7 +147,7 @@ class Evolution:
             return None
 
     def map_genotype_to_brain(
-        self, cpg: SimpleCPG, full_genome: list[float]
+        self, cpg: SimpleCPG, full_genome: list[float],
     ) -> None:
         """Decodes Float Vector into CPG Parameters."""
         n = cpg.phase.shape[0]
@@ -177,11 +170,11 @@ class Evolution:
             cpg.phase.data.copy_(torch.from_numpy(p_phase * np.pi).float())
             # Frequency: [0.2, 4.0] Hz - Faster movements for quicker walking
             cpg.w.data.copy_(
-                torch.from_numpy(0.2 + (3.8 * (p_w + 1.0) / 2.0)).float()
+                torch.from_numpy(0.2 + (3.8 * (p_w + 1.0) / 2.0)).float(),
             )
             # Amplitude: [0.5, 4.0] - MUCH stronger motor commands
             cpg.amplitudes.data.copy_(
-                torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float()
+                torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float(),
             )
             cpg.ha.data.copy_(torch.from_numpy(p_ha * 2.0).float())
             cpg.b.data.copy_(torch.from_numpy(p_b * 0.5).float())
@@ -206,7 +199,7 @@ class Evolution:
         return np.clip(arr, -1.0, 1.0).tolist()
 
     def crossover_ctrl_vectors(
-        self, ctrl1: list[float], ctrl2: list[float]
+        self, ctrl1: list[float], ctrl2: list[float],
     ) -> list[float]:
         """Uniform crossover for controller float vectors."""
         arr1 = np.array(ctrl1)
@@ -221,22 +214,26 @@ class Evolution:
         mask = RNG.random(size) < 0.5
         child = np.where(mask, arr1, arr2)
         return child.tolist()
-    
-    def crossover_morphologies(self, parent1: Individual, parent2: Individual) -> Genome:
+
+    def crossover_morphologies(
+        self, parent1: Individual, parent2: Individual,
+    ) -> Genome:
         """Crossover two parent individual morphologies using NEAT crossover."""
         # Convert dictionaries to Genome objects
-        morph1 = Genome.from_dict(parent1.genotype['morph'])
-        morph2 = Genome.from_dict(parent2.genotype['morph'])
-        
+        morph1 = Genome.from_dict(parent1.genotype["morph"])
+        morph2 = Genome.from_dict(parent2.genotype["morph"])
+
         # Set fitness values so NEAT crossover knows which parent is fitter
-        morph1.fitness = parent1.fitness if parent1.fitness is not None else float('inf')
-        morph2.fitness = parent2.fitness if parent2.fitness is not None else float('inf')
+        morph1.fitness = (
+            parent1.fitness if parent1.fitness is not None else float("inf")
+        )
+        morph2.fitness = (
+            parent2.fitness if parent2.fitness is not None else float("inf")
+        )
 
         # Use the proper NEAT crossover
         # This handles weights AND structural changes (topology)
-        child_genome = morph1.crossover(morph2)
-        
-        return child_genome
+        return morph1.crossover(morph2)
 
     # ------------------------------------------------------------------------ #
     #                          EA OPERATORS                                    #
@@ -275,6 +272,7 @@ class Evolution:
         ind.tags["debug_joints"] = 0
         return ind
 
+    @EAOperation
     def reproduction(self, population: Population) -> Population:
         """Joint Reproduction: Crossover (Body + Brain) + Mutation."""
         parents = [ind for ind in population if ind.tags.get("ps", False)]
@@ -282,7 +280,7 @@ class Evolution:
         # Fallback: if no ps parents, use all individuals
         if not parents:
             console.log(
-                "[yellow]Warning: No ps-tagged individuals, using entire population as parents[/yellow]"
+                "[yellow]Warning: No ps-tagged individuals, using entire population as parents[/yellow]",
             )
             parents = population
 
@@ -296,13 +294,13 @@ class Evolution:
             if use_sexual:
                 # Select two parents for crossover
                 p1, p2 = random.sample(parents, 2)
-                
+
                 # Crossover morphologies (method handles Genome conversion)
                 c_morph = self.crossover_morphologies(p1, p2)
-                
+
                 # Crossover brain vectors
                 c_ctrl = self.crossover_ctrl_vectors(
-                    p1.genotype["ctrl"], p2.genotype["ctrl"]
+                    p1.genotype["ctrl"], p2.genotype["ctrl"],
                 )
             else:
                 # Asexual reproduction: single parent
@@ -345,6 +343,7 @@ class Evolution:
         population.extend(new_offspring)
         return population
 
+    @EAOperation
     def evaluate(self, population: Population) -> Population:
         """Evaluation Loop: Calls run_simulation in 'simple' mode."""
         to_eval = [
@@ -364,9 +363,10 @@ class Evolution:
 
         return population
 
+    @EAOperation
     def parent_selection(self, population: Population) -> Population:
         population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf")
+            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
         )
         cutoff = len(population) // 2
         for i, ind in enumerate(population):
@@ -375,14 +375,15 @@ class Evolution:
         # Diagnostics
         ps_count = sum(1 for ind in population if ind.tags.get("ps", False))
         console.log(
-            f"[cyan]Parent Selection: {ps_count}/{len(population)} marked for reproduction[/cyan]"
+            f"[cyan]Parent Selection: {ps_count}/{len(population)} marked for reproduction[/cyan]",
         )
 
         return population
 
+    @EAOperation
     def survivor_selection(self, population: Population) -> Population:
         population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf")
+            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
         )
         survivors = population[: self.config.target_population_size]
         for ind in population:
@@ -396,7 +397,7 @@ class Evolution:
             if ind.fitness_ is not None and ind.fitness_ != float("inf")
         ])
         console.log(
-            f"[green]Survivor Selection: Avg fitness = {avg_fitness:.4f}[/green]"
+            f"[green]Survivor Selection: Avg fitness = {avg_fitness:.4f}[/green]",
         )
 
         return population
@@ -422,7 +423,7 @@ class Evolution:
         self.id_manager._innov_id = max_inn
 
     def fast_physics_runner(
-        self, model: mujoco.MjModel, data: mujoco.MjData, duration: float
+        self, model: mujoco.MjModel, data: mujoco.MjData, duration: float,
     ) -> None:
         """
         Optimized physics-only simulation runner (no rendering).
@@ -495,14 +496,14 @@ class Evolution:
 
         if mode != "simple":
             console.log(
-                f"[green]Simulating with {model.nu} joints (Target: {expected_joints})[/green]"
+                f"[green]Simulating with {model.nu} joints (Target: {expected_joints})[/green]",
             )
 
         # 4. Setup Controller
         tracker = Tracker(mujoco.mjtObj.mjOBJ_BODY, "core", ["xpos"])
         ctrl = Controller(
             controller_callback_function=lambda m, d, *a, **k: cpg.forward(
-                d.time
+                d.time,
             ),
             tracker=tracker,
         )
@@ -511,7 +512,7 @@ class Evolution:
         # Bind Control Loop
         # Note: *args and **kwargs in lambda ensure compatibility with runner
         mujoco.set_mjcb_control(
-            lambda m, d: ctrl.set_control(m, d, duration=DURATION)
+            lambda m, d: ctrl.set_control(m, d, duration=DURATION),
         )
         mujoco.mj_resetData(model, data)
 
@@ -526,7 +527,7 @@ class Evolution:
                     file_name=f"dual_{ind.id}",
                 )
                 video_renderer(
-                    model, data, duration=DURATION, video_recorder=recorder
+                    model, data, duration=DURATION, video_recorder=recorder,
                 )
             case "launcher":
                 viewer.launch(model=model, data=data)
@@ -535,14 +536,14 @@ class Evolution:
         # 1-Second Delay Implementation to penalize falling strategies
         # Always enforce 1 second delay if simulation duration allows
         delay_time = min(
-            1.0, DURATION
+            1.0, DURATION,
         )  # Delay is always 1 second (or full duration if shorter)
         delay_fraction = delay_time / DURATION if DURATION > 0 else 0
 
         dist = float("inf")
 
         if tracker.history["xpos"]:
-            first_key = list(tracker.history["xpos"].keys())[0]
+            first_key = next(iter(tracker.history["xpos"].keys()))
             traj = tracker.history["xpos"][first_key]
 
             if traj:
@@ -553,12 +554,12 @@ class Evolution:
                 valid_movement_vector = pos_final - pos_after_delay
                 effective_pos = np.array(SPAWN_POSITION) + valid_movement_vector
                 dist = np.sqrt(
-                    np.sum((effective_pos[:2] - TARGET_POSITION[:2]) ** 2)
+                    np.sum((effective_pos[:2] - TARGET_POSITION[:2]) ** 2),
                 )
 
                 if mode != "simple":
                     console.log(
-                        f"[blue]Traj len: {len(traj)}, start_idx: {start_idx}, movement: {np.linalg.norm(valid_movement_vector):.3f}[/blue]"
+                        f"[blue]Traj len: {len(traj)}, start_idx: {start_idx}, movement: {np.linalg.norm(valid_movement_vector):.3f}[/blue]",
                     )
 
         return dist
@@ -568,20 +569,22 @@ class Evolution:
     # ------------------------------------------------------------------------ #
     def evolve(self) -> Individual | None:
         console.log("Initializing population...")
-        population = [self.create_individual() for _ in range(POP_SIZE)]
+        population = Population([
+            self.create_individual() for _ in range(POP_SIZE)
+        ])
         self.sync_ids(population)
 
         # Initial Eval
         population = self.evaluate(population)
 
         ops = [
-            EAStep("parent_selection", self.parent_selection),
-            EAStep("reproduction", self.reproduction),
-            EAStep("evaluation", self.evaluate),
-            EAStep("survivor_selection", self.survivor_selection),
+            self.parent_selection(),
+            self.reproduction(),
+            self.evaluate(),
+            self.survivor_selection(),
         ]
 
-        ea = EA(population, operations=ops, num_of_generations=BUDGET)
+        ea = EA(population, operations=ops, num_steps=BUDGET)
         ea.run()
 
         return ea.get_solution("best", only_alive=False)
@@ -589,7 +592,7 @@ class Evolution:
 
 def main() -> None:
     console.rule(
-        "[bold purple]Starting Joint Evolution (Morph + Ctrl)[/bold purple]"
+        "[bold purple]Starting Joint Evolution (Morph + Ctrl)[/bold purple]",
     )
 
     evo = Evolution()

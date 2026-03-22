@@ -35,7 +35,7 @@ def _safe_attr(individual: Individual, attribute: str) -> float:
         return float("-inf")
 
 
-class Population:
+class Population:  # noqa: PLR0904
     """
     Ordered, mutable container of ``Individual`` objects.
 
@@ -202,6 +202,18 @@ class Population:
                                         min(n, len(self.population)),
                                         ),
                                             )
+
+    def sort(
+        self,
+        *,
+        sort: Literal["max", "min"] = "max",
+        attribute: str = "fitness_",
+    ) -> "Population":
+        reverse: bool = sort == "max"
+
+        def key(ind: Individual) -> float:
+            return _safe_attr(ind, attribute)
+        return Population(sorted(self.population, key=key, reverse=reverse))
 
     def best(
         self,

@@ -2,30 +2,34 @@
 Morphology-only evolution using TreeGenome and morphological descriptors.
 Evolves robot structures based purely on morphological properties without simulation.
 """
+
 from __future__ import annotations
 
 # Standard library
 import argparse
+
+# --- ARIEL IMPORTS ---
+import contextlib
 import copy
+
+# Standard library
 import random
 import time
 from pathlib import Path
 
+import mujoco
+
+# Third-party libraries
 # Third-party libraries
 import numpy as np
+
+# Function to show fitness landscape
+from mujoco import viewer
+
+# Pretty little errors and progress bars
 from rich.console import Console
 from rich.progress import track
 from rich.traceback import install
-
-# Initialize rich console
-install()
-console = Console()
-
-# --- ARIEL IMPORTS ---
-import contextlib
-
-import mujoco
-from mujoco import viewer
 
 from ariel.body_phenotypes.robogen_lite.config import (
     ALLOWED_ROTATIONS,
@@ -35,8 +39,15 @@ from ariel.body_phenotypes.robogen_lite.config import (
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
-from ariel.ec.a001 import Individual
-from ariel.ec.a004 import EA, EASettings, EAStep
+
+# Local libraries
+from ariel.ec import (
+    EA,
+    EAOperation,
+    EASettings,
+    Individual,
+    Population,
+)
 from ariel.ec.genotypes.tree.operators import (
     _prune_invalid_edges,
     crossover_subtree,
@@ -56,23 +67,41 @@ from ariel.simulation.environments._simple_flat_with_target import (
 )
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
 
+# Initialize rich console
+install()
+console = Console()
+
 # ============================================================================ #
 #                               CONFIGURATION                                  #
 # ============================================================================ #
 
-parser = argparse.ArgumentParser(description="Morphology-Only Evolution (trees)")
+parser = argparse.ArgumentParser(
+    description="Morphology-Only Evolution (trees)",
+)
 parser.add_argument(
-    "--budget", type=int, default=50, help="Number of generations",
+    "--budget",
+    type=int,
+    default=50,
+    help="Number of generations",
 )
 parser.add_argument("--pop", type=int, default=100, help="Population size")
 parser.add_argument(
-    "--max-modules", type=int, default=20, help="Maximum modules per robot",
+    "--max-modules",
+    type=int,
+    default=20,
+    help="Maximum modules per robot",
 )
 parser.add_argument(
-    "--visualize", type=bool, default=True, help="Launch MuJoCo viewer for best individual",
+    "--visualize",
+    type=bool,
+    default=True,
+    help="Launch MuJoCo viewer for best individual",
 )
 parser.add_argument(
-    "--max_modules", type=int, default=20, help="Maximum number of modules in a morphology",
+    "--max_modules",
+    type=int,
+    default=20,
+    help="Maximum number of modules in a morphology",
 )
 
 args = parser.parse_args()
@@ -84,7 +113,7 @@ NUM_MODULES: int = args.max_modules
 MAX_DEPTH: int = 12  # Maximum tree depth to prevent bloat
 
 # Type Aliases
-Population = list[Individual]
+# Population = list[Individual]
 
 # Determinism
 SEED = 42
@@ -103,6 +132,7 @@ SPAWN_POSITION = (-0.8, 0.0, 0.1)
 #                            MORPHOLOGICAL FITNESS                             #
 # ============================================================================ #
 
+
 def is_connected_tree(genome: TreeGenome) -> bool:
     """Check if genome is a valid connected tree with single root."""
     if len(genome.nodes) == 0:
@@ -119,7 +149,11 @@ def is_connected_tree(genome: TreeGenome) -> bool:
     while stack:
         node = stack.pop()
         reachable.add(node)
-        stack.extend(succ for succ in robot_graph.successors(node) if succ not in reachable)
+        stack.extend(
+            succ
+            for succ in robot_graph.successors(node)
+            if succ not in reachable
+        )
     return len(reachable) == robot_graph.number_of_nodes()
 
 
@@ -149,11 +183,11 @@ def calculate_morphological_fitness(genome: TreeGenome) -> float:
         # Weighted combination of morphological properties
         # Higher values are better, so we negate for minimization
         morpho_score = (
-            measures.symmetry * 0.20 +         # Reward symmetry
-            measures.joints * 0.20 +           # Reward articulation
-            measures.branching * 0.20 +        # Reward branching
-            measures.length_of_limbs * 0.20 +  # Reward limb length
-            measures.module_diversity * 0.20    # Reward alternation/diversity
+            measures.symmetry * 0.20  # Reward symmetry
+            + measures.joints * 0.20  # Reward articulation
+            + measures.branching * 0.20  # Reward branching
+            + measures.length_of_limbs * 0.20  # Reward limb length
+            + measures.module_diversity * 0.20  # Reward alternation/diversity
         )
 
         # Fitness = negative of morpho_score (for minimization framework)
@@ -185,11 +219,12 @@ def visualize_genome(genome: TreeGenome) -> None:
 #                            EVOLUTION CLASS                                   #
 # ============================================================================ #
 
+
 class MorphologyEvolution:
     def __init__(self) -> None:
         self.config = EASettings(
             is_maximisation=False,  # Minimize negative fitness (maximize morphological score)
-            num_of_generations=BUDGET,
+            num_steps=BUDGET,
             target_population_size=POP_SIZE,
             db_file_path=DATA / "database.db",
         )
@@ -218,7 +253,9 @@ class MorphologyEvolution:
         new = copy.deepcopy(genome)
 
         # Choose mutation type (standard GP mutation operators)
-        mutation_type = RNG.choice(["point", "subtree", "shrink", "hoist"], p=[0.4, 0.4, 0.1, 0.1])
+        mutation_type = RNG.choice(
+            ["point", "subtree", "shrink", "hoist"], p=[0.4, 0.4, 0.1, 0.1],
+        )
 
         if mutation_type == "point":
             # Point mutation: change node type/rotation
@@ -250,7 +287,9 @@ class MorphologyEvolution:
             validate_genome_dict(new.to_dict())
         return new
 
-    def crossover_morphologies(self, parent1: Individual, parent2: Individual) -> TreeGenome:
+    def crossover_morphologies(
+        self, parent1: Individual, parent2: Individual,
+    ) -> TreeGenome:
         """One-point crossover for morphologies. Recovers from invalid results."""
         t1 = parent1.genotype
         t2 = parent2.genotype
@@ -283,6 +322,7 @@ class MorphologyEvolution:
         ind.tags["valid"] = True
         return ind
 
+    @EAOperation
     def reproduction(self, population: Population) -> Population:
         """Create offspring through crossover and mutation."""
         parents = [ind for ind in population if ind.tags.get("ps", False)]
@@ -327,6 +367,7 @@ class MorphologyEvolution:
         population.extend(new_offspring)
         return population
 
+    @EAOperation
     def evaluate(self, population: Population) -> Population:
         """Evaluate population using morphological fitness."""
         to_eval = [
@@ -345,11 +386,11 @@ class MorphologyEvolution:
 
         return population
 
-    def parent_selection(self, population: Population) -> Population:
+    @EAOperation
+    @staticmethod
+    def parent_selection(population: Population) -> Population:
         """Select top 50% as parents."""
-        population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
-        )
+        population.sort(sort="min")
         cutoff = len(population) // 2
         for i, ind in enumerate(population):
             ind.tags["ps"] = i < cutoff
@@ -359,10 +400,13 @@ class MorphologyEvolution:
         )
         return population
 
+    @EAOperation
     def survivor_selection(self, population: Population) -> Population:
         """Keep top 50% as survivors."""
         population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
+            key=lambda x: x.fitness_
+            if x.fitness_ is not None
+            else float("inf"),
         )
         survivors = population[: self.config.target_population_size]
         for ind in population:
@@ -375,12 +419,16 @@ class MorphologyEvolution:
             for ind in survivors
             if ind.fitness_ is not None and ind.fitness_ != float("inf")
         ])
-        min_fitness = min(ind.fitness_
+        min_fitness = min(
+            ind.fitness_
             for ind in survivors
-            if ind.fitness_ is not None and ind.fitness_ != float("inf"))
-        max_fitness = max(ind.fitness_
+            if ind.fitness_ is not None and ind.fitness_ != float("inf")
+        )
+        max_fitness = max(
+            ind.fitness_
             for ind in survivors
-            if ind.fitness_ is not None and ind.fitness_ != float("inf"))
+            if ind.fitness_ is not None and ind.fitness_ != float("inf")
+        )
 
         console.log(
             f"[green]Survivor Selection:[/green] "
@@ -391,19 +439,21 @@ class MorphologyEvolution:
     def evolve(self) -> Individual | None:
         """Run the evolutionary algorithm."""
         console.log("Initializing population...")
-        population = [self.create_individual() for _ in range(POP_SIZE)]
+        population = Population([
+            self.create_individual() for _ in range(POP_SIZE)
+        ])
 
         # initial eval
         population = self.evaluate(population)
 
         ops = [
-            EAStep("parent_selection", self.parent_selection),
-            EAStep("reproduction", self.reproduction),
-            EAStep("evaluation", self.evaluate),
-            EAStep("survivor_selection", self.survivor_selection),
+            self.parent_selection(),
+            self.reproduction(),
+            self.evaluate(),
+            self.survivor_selection(),
         ]
 
-        ea = EA(population, operations=ops, num_of_generations=BUDGET)
+        ea = EA(population, operations=ops, num_steps=BUDGET)
         ea.run()
 
         return ea.get_solution("best", only_alive=False)
@@ -413,7 +463,9 @@ def main() -> None:
     console.rule(
         "[bold purple]Starting Morphology-Only Evolution (Tree Genomes)[/bold purple]",
     )
-    console.log(f"Population: {POP_SIZE}, Budget: {BUDGET}, Max Modules: {NUM_MODULES}")
+    console.log(
+        f"Population: {POP_SIZE}, Budget: {BUDGET}, Max Modules: {NUM_MODULES}",
+    )
 
     evo = MorphologyEvolution()
     start_time = time.time()

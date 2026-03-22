@@ -2,15 +2,16 @@
 Tree morphology version of 2_body_brain_evolution.
 Uses TreeGenome for bodies with one-point crossover and node-replacement mutation.
 """
+
 from __future__ import annotations
 
 # Standard library
 import argparse
+import contextlib
 import copy
 import random
-import time
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 import mujoco
 
@@ -22,63 +23,57 @@ from rich.console import Console
 from rich.progress import track
 from rich.traceback import install
 
-# Initialize rich console
-install()
-console = Console()
-
 # --- ARIEL IMPORTS ---
 from ariel.body_phenotypes.robogen_lite.config import (
-    NUM_OF_ROTATIONS,
-    NUM_OF_TYPES_OF_MODULES,
+    ALLOWED_ROTATIONS,
     IDX_OF_CORE,
     ModuleType,
-    ALLOWED_ROTATIONS,
 )
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
+from ariel.ec import EA, EAOperation, EASettings, Individual, Population
+from ariel.ec.genotypes.tree.operators import (
+    _prune_invalid_edges,
+    crossover_subtree,
+    mutate_hoist,
+    mutate_replace_node,
+    mutate_shrink,
+    mutate_subtree_replacement,
+    random_tree,
+)
 
 # tree genotype imports
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
-from ariel.ec.genotypes.tree.operators import (
-    crossover_subtree,
-    mutate_replace_node,
-    mutate_subtree_replacement,
-    mutate_shrink,
-    mutate_hoist,
-    random_tree,
-    _prune_invalid_edges,
-    get_tree_depth,
-    validate_tree_depth,
-)
 from ariel.ec.genotypes.tree.validation import validate_genome_dict
-
-from ariel.ec.a001 import Individual
-from ariel.ec.a004 import EA, EASettings, EAStep
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.controllers.na_cpg import (
-    NaCPG,
     create_fully_connected_adjacency,
 )
 from ariel.simulation.controllers.simple_cpg import (
     SimpleCPG,
     create_fully_connected_adjacency,
 )
-from ariel.utils.renderers import video_renderer
 from ariel.simulation.environments._simple_flat_with_target import (
     SimpleFlatWorldWithTarget,
 )
-from ariel.utils.runners import simple_runner
+from ariel.utils.renderers import video_renderer
 from ariel.utils.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
+
+# Initialize rich console
+install()
+console = Console()
 
 # ============================================================================ #
 #                               CONFIGURATION                                  #
 # ============================================================================ #
 
-parser = argparse.ArgumentParser(description="Dual Evolution: Body + Brain (trees)")
+parser = argparse.ArgumentParser(
+    description="Dual Evolution: Body + Brain (trees)",
+)
 parser.add_argument(
-    "--budget", type=int, default=10, help="Number of generations"
+    "--budget", type=int, default=10, help="Number of generations",
 )
 parser.add_argument("--pop", type=int, default=30, help="Population size")
 parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
@@ -96,7 +91,6 @@ SPAWN_POSITION = (-0.8, 0.0, 0.1)
 TARGET_POSITION = np.array([2.0, 0.0, 0.5])
 
 # Type Aliases
-Population = list[Individual]
 ViewerTypes = Literal["launcher", "video", "simple"]
 
 # Determinism
@@ -114,11 +108,12 @@ DATA.mkdir(exist_ok=True, parents=True)
 #                            EVOLUTION CLASS                                   #
 # ============================================================================ #
 
+
 class Evolution:
     def __init__(self) -> None:
         self.config = EASettings(
             is_maximisation=False,  # Minimize Distance to Target
-            num_of_generations=BUDGET,
+            num_steps=BUDGET,
             target_population_size=POP_SIZE,
             db_file_path=DATA / "database.db",
         )
@@ -127,11 +122,13 @@ class Evolution:
     #                          HELPER METHODS                                  #
     # ------------------------------------------------------------------------ #
     def map_genotype_to_body(
-        self, genome_data: dict | TreeGenome
+        self, genome_data: dict | TreeGenome,
     ) -> mujoco.MjSpec | None:
         """Decodes TreeGenome into a MuJoCo Body Spec."""
         genome = (
-            TreeGenome.from_dict(genome_data) if isinstance(genome_data, dict) else genome_data
+            TreeGenome.from_dict(genome_data)
+            if isinstance(genome_data, dict)
+            else genome_data
         )
 
         try:
@@ -143,7 +140,7 @@ class Evolution:
             return None
 
     def map_genotype_to_brain(
-        self, cpg: SimpleCPG, full_genome: list[float]
+        self, cpg: SimpleCPG, full_genome: list[float],
     ) -> None:
         # identical to original
         n = cpg.phase.shape[0]
@@ -164,10 +161,10 @@ class Evolution:
         with torch.no_grad():
             cpg.phase.data.copy_(torch.from_numpy(p_phase * np.pi).float())
             cpg.w.data.copy_(
-                torch.from_numpy(0.2 + (3.8 * (p_w + 1.0) / 2.0)).float()
+                torch.from_numpy(0.2 + (3.8 * (p_w + 1.0) / 2.0)).float(),
             )
             cpg.amplitudes.data.copy_(
-                torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float()
+                torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float(),
             )
             cpg.ha.data.copy_(torch.from_numpy(p_ha * 2.0).float())
             cpg.b.data.copy_(torch.from_numpy(p_b * 0.5).float())
@@ -188,7 +185,9 @@ class Evolution:
         arr[mask] += noise[mask]
         return np.clip(arr, -1.0, 1.0).tolist()
 
-    def crossover_morphologies(self, parent1: Individual, parent2: Individual) -> TreeGenome:
+    def crossover_morphologies(
+        self, parent1: Individual, parent2: Individual,
+    ) -> TreeGenome:
         """One-point crossover that returns a single child genome."""
         t1 = parent1.genotype["morph"]
         t2 = parent2.genotype["morph"]
@@ -204,19 +203,20 @@ class Evolution:
         new = copy.deepcopy(genome)
 
         # Choose mutation type (standard GP mutation operators)
-        mutation_type = RNG.choice(['point', 'subtree', 'shrink', 'hoist'],
-                                  p=[0.7, 0.2, 0.05, 0.05])  # Favor point mutations heavily for stability
+        mutation_type = RNG.choice(
+            ["point", "subtree", "shrink", "hoist"], p=[0.7, 0.2, 0.05, 0.05],
+        )  # Favor point mutations heavily for stability
 
-        if mutation_type == 'point':
+        if mutation_type == "point":
             # Point mutation: change node type/rotation
             mutate_replace_node(new)
-        elif mutation_type == 'subtree':
+        elif mutation_type == "subtree":
             # Subtree mutation: replace subtree with new random tree
             mutate_subtree_replacement(new, max_modules=NUM_MODULES)
-        elif mutation_type == 'shrink':
+        elif mutation_type == "shrink":
             # Shrink mutation: replace node+subtree with single leaf
             mutate_shrink(new)
-        elif mutation_type == 'hoist':
+        elif mutation_type == "hoist":
             # Hoist mutation: promote child to replace parent
             mutate_hoist(new)
 
@@ -233,14 +233,12 @@ class Evolution:
 
         # prune any invalid edges before returning
         _prune_invalid_edges(new)
-        try:
+        with contextlib.suppress(ValueError):
             validate_genome_dict(new.to_dict())
-        except ValueError:
-            pass
         return new
 
     def crossover_ctrl_vectors(
-        self, ctrl1: list[float], ctrl2: list[float]
+        self, ctrl1: list[float], ctrl2: list[float],
     ) -> list[float]:
         """Uniform crossover for controller float vectors."""
         arr1 = np.array(ctrl1)
@@ -273,11 +271,13 @@ class Evolution:
         ind.tags["debug_joints"] = 0
         return ind
 
-    def reproduction(self, population: Population) -> Population:
+    @EAOperation
+    @staticmethod
+    def reproduction(population: Population) -> Population:
         parents = [ind for ind in population if ind.tags.get("ps", False)]
         if not parents:
             console.log(
-                "[yellow]Warning: No ps-tagged individuals, using entire population as parents[/yellow]"
+                "[yellow]Warning: No ps-tagged individuals, using entire population as parents[/yellow]",
             )
             parents = population
         new_offspring: list[Individual] = []
@@ -288,7 +288,7 @@ class Evolution:
                 p1, p2 = random.sample(parents, 2)
                 c_morph = self.crossover_morphologies(p1, p2)
                 c_ctrl = self.crossover_ctrl_vectors(
-                    p1.genotype["ctrl"], p2.genotype["ctrl"]
+                    p1.genotype["ctrl"], p2.genotype["ctrl"],
                 )
             else:
                 parent = random.choice(parents)
@@ -321,7 +321,9 @@ class Evolution:
         population.extend(new_offspring)
         return population
 
-    def evaluate(self, population: Population) -> Population:
+    @EAOperation
+    @staticmethod
+    def evaluate(population: Population) -> Population:
         to_eval = [
             ind
             for ind in population
@@ -335,22 +337,26 @@ class Evolution:
             ind.requires_eval = False
         return population
 
-    def parent_selection(self, population: Population) -> Population:
+    @EAOperation
+    @staticmethod
+    def parent_selection(population: Population) -> Population:
         population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf")
+            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
         )
         cutoff = len(population) // 2
         for i, ind in enumerate(population):
             ind.tags["ps"] = i < cutoff
         ps_count = sum(1 for ind in population if ind.tags.get("ps", False))
         console.log(
-            f"[cyan]Parent Selection: {ps_count}/{len(population)} marked for reproduction[/cyan]"
+            f"[cyan]Parent Selection: {ps_count}/{len(population)} marked for reproduction[/cyan]",
         )
         return population
 
-    def survivor_selection(self, population: Population) -> Population:
+    @EAOperation
+    @staticmethod
+    def survivor_selection(population: Population) -> Population:
         population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf")
+            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
         )
         survivors = population[: self.config.target_population_size]
         for ind in population:
@@ -362,7 +368,7 @@ class Evolution:
             if ind.fitness_ is not None and ind.fitness_ != float("inf")
         ])
         console.log(
-            f"[green]Survivor Selection: Avg fitness = {avg_fitness:.4f}[/green]"
+            f"[green]Survivor Selection: Avg fitness = {avg_fitness:.4f}[/green]",
         )
         return population
 
@@ -371,7 +377,7 @@ class Evolution:
         pass
 
     def fast_physics_runner(
-        self, model: mujoco.MjModel, data: mujoco.MjData, duration: float
+        self, model: mujoco.MjModel, data: mujoco.MjData, duration: float,
     ) -> None:
         steps_required = int(duration / model.opt.timestep)
         step = 0
@@ -417,13 +423,13 @@ class Evolution:
         tracker = Tracker(mujoco.mjtObj.mjOBJ_BODY, "core", ["xpos"])
         ctrl = Controller(
             controller_callback_function=lambda m, d, *a, **k: cpg.forward(
-                d.time
+                d.time,
             ),
             tracker=tracker,
         )
         ctrl.tracker.setup(world.spec, data)
         mujoco.set_mjcb_control(
-            lambda m, d: ctrl.set_control(m, d, duration=DURATION)
+            lambda m, d: ctrl.set_control(m, d, duration=DURATION),
         )
         mujoco.mj_resetData(model, data)
         match mode:
@@ -435,17 +441,15 @@ class Evolution:
                     file_name=f"dual_{ind.id}",
                 )
                 video_renderer(
-                    model, data, duration=DURATION, video_recorder=recorder
+                    model, data, duration=DURATION, video_recorder=recorder,
                 )
             case "launcher":
                 viewer.launch(model=model, data=data)
-        delay_time = min(
-            1.0, DURATION
-        )
+        delay_time = min(1.0, DURATION)
         delay_fraction = delay_time / DURATION if DURATION > 0 else 0
         dist = float("inf")
         if tracker.history["xpos"]:
-            first_key = list(tracker.history["xpos"].keys())[0]
+            first_key = next(iter(tracker.history["xpos"].keys()))
             traj = tracker.history["xpos"][first_key]
             if traj:
                 start_idx = max(0, int(len(traj) * delay_fraction))
@@ -454,29 +458,31 @@ class Evolution:
                 valid_movement_vector = pos_final - pos_after_delay
                 effective_pos = np.array(SPAWN_POSITION) + valid_movement_vector
                 dist = np.sqrt(
-                    np.sum((effective_pos[:2] - TARGET_POSITION[:2]) ** 2)
+                    np.sum((effective_pos[:2] - TARGET_POSITION[:2]) ** 2),
                 )
         return dist
 
     def evolve(self) -> Individual | None:
         console.log("Initializing population...")
-        population = [self.create_individual() for _ in range(POP_SIZE)]
+        population = Population([
+            self.create_individual() for _ in range(POP_SIZE)
+        ])
         # initial eval
         population = self.evaluate(population)
         ops = [
-            EAStep("parent_selection", self.parent_selection),
-            EAStep("reproduction", self.reproduction),
-            EAStep("evaluation", self.evaluate),
-            EAStep("survivor_selection", self.survivor_selection),
+            self.parent_selection(),
+            self.reproduction(),
+            self.evaluate(),
+            self.survivor_selection(),
         ]
-        ea = EA(population, operations=ops, num_of_generations=BUDGET)
+        ea = EA(population, operations=ops, num_steps=BUDGET)
         ea.run()
         return ea.get_solution("best", only_alive=False)
 
 
 def main() -> None:
     console.rule(
-        "[bold purple]Starting Joint Evolution (Tree Morph + Ctrl)[/bold purple]"
+        "[bold purple]Starting Joint Evolution (Tree Morph + Ctrl)[/bold purple]",
     )
     evo = Evolution()
     best = evo.evolve()

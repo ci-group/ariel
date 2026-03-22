@@ -6,9 +6,6 @@ from pathlib import Path
 from typing import Concatenate, Literal, ParamSpec
 
 from pydantic import computed_field
-
-P = ParamSpec("P")
-
 from pydantic_settings import BaseSettings
 from rich.console import Console
 from rich.progress import (
@@ -26,6 +23,7 @@ from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
 install()
+P = ParamSpec("P")
 
 type DBHandlingMode = Literal["delete", "halt"]
 
@@ -515,7 +513,9 @@ class EA:
         Individual
             The selected individual.
         """
-        sort: Literal["asc", "desc"] = "desc" if not self.is_maximisation else "asc"
+        sort: Literal["asc", "desc"] = (
+            "desc" if not self.is_maximisation else "asc"
+        )
         pop = self._fetch(sort=sort, only_alive=only_alive, requires_eval=False)
 
         match mode:
