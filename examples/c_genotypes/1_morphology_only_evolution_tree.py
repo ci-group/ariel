@@ -3,8 +3,6 @@ Morphology-only evolution using TreeGenome and morphological descriptors.
 Evolves robot structures based purely on morphological properties without simulation.
 """
 
-from __future__ import annotations
-
 # Standard library
 import argparse
 
@@ -93,7 +91,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--visualize",
-    type=bool,
+    action=argparse.BooleanOptionalAction,
     default=True,
     help="Launch MuJoCo viewer for best individual",
 )
@@ -226,7 +224,8 @@ class MorphologyEvolution:
             is_maximisation=False,  # Minimize negative fitness (maximize morphological score)
             num_steps=BUDGET,
             target_population_size=POP_SIZE,
-            db_file_path=DATA / "database.db",
+            output_folder=DATA,
+            db_file_name="database.db",
         )
 
     # ------------------------------------------------------------------------ #
@@ -322,7 +321,6 @@ class MorphologyEvolution:
         ind.tags["valid"] = True
         return ind
 
-    @EAOperation
     def reproduction(self, population: Population) -> Population:
         """Create offspring through crossover and mutation."""
         parents = [ind for ind in population if ind.tags.get("ps", False)]
@@ -367,7 +365,6 @@ class MorphologyEvolution:
         population.extend(new_offspring)
         return population
 
-    @EAOperation
     def evaluate(self, population: Population) -> Population:
         """Evaluate population using morphological fitness."""
         to_eval = [
@@ -386,11 +383,9 @@ class MorphologyEvolution:
 
         return population
 
-    @EAOperation
-    @staticmethod
-    def parent_selection(population: Population) -> Population:
+    def parent_selection(self, population: Population) -> Population:
         """Select top 50% as parents."""
-        population.sort(sort="min")
+        population = population.sort(sort="min")
         cutoff = len(population) // 2
         for i, ind in enumerate(population):
             ind.tags["ps"] = i < cutoff
@@ -400,14 +395,9 @@ class MorphologyEvolution:
         )
         return population
 
-    @EAOperation
     def survivor_selection(self, population: Population) -> Population:
         """Keep top 50% as survivors."""
-        population.sort(
-            key=lambda x: x.fitness_
-            if x.fitness_ is not None
-            else float("inf"),
-        )
+        population = population.sort(sort="min", attribute="fitness_")
         survivors = population[: self.config.target_population_size]
         for ind in population:
             if ind not in survivors:
@@ -447,10 +437,10 @@ class MorphologyEvolution:
         population = self.evaluate(population)
 
         ops = [
-            self.parent_selection(),
-            self.reproduction(),
-            self.evaluate(),
-            self.survivor_selection(),
+            EAOperation(self.parent_selection),
+            EAOperation(self.reproduction),
+            EAOperation(self.evaluate),
+            EAOperation(self.survivor_selection),
         ]
 
         ea = EA(population, operations=ops, num_steps=BUDGET)
