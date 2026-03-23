@@ -1,0 +1,628 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="parameters" href="../../parameters/index.html"><link rel="prev" title="a004" href="../a004/index.html">
+
+    <link rel="shortcut icon" href="../../../../_static/ariel_favicon.ico"><!-- Generated with Sphinx 8.1.3 and Furo 2025.12.19 -->
+        <title>a005 - ARIEL</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #4A90D9;
+  --color-brand-content: #4A90D9;
+  --color-admonition-background: rgba(74, 144, 217, 0.05);
+  --font-stack: Inter, system-ui, sans-serif;
+  --font-stack--monospace: JetBrains Mono, monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #79B8FF;
+  --color-brand-content: #79B8FF;
+  --color-admonition-background: rgba(121, 184, 255, 0.05);
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #79B8FF;
+  --color-brand-content: #79B8FF;
+  --color-admonition-background: rgba(121, 184, 255, 0.05);
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     <b>🚀 New release coming soon!</b> Check out what's new in v0.1 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">ARIEL</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">ARIEL</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/introduction_to_modular_robots/index.html">Introduction to modular robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/contributing_guide/index.html">Contributing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../source/genotype_docs/index.html">Genotypes</a><input aria-label="Toggle navigation of Genotypes" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/genotype_docs/nde_docs.html">Neuro Developmental Encoding (NDE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/genotype_docs/cppn_docs.html">Compositional Pattern Producing Network (CPPN)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/genotype_docs/tree_docs.html">Tree Genome Genotype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/genotype_docs/vector_docs.html">Vector representation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../source/EA_intro/index.html">EAs with ARIEL Introduction</a><input aria-label="Toggle navigation of EAs with ARIEL Introduction" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/EA_intro/ea_example_ackley.html">Continuous Optimisation (Ackley Function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/EA_intro/ea_example_queens.html">Discrete Optimisation (N-Queens Problem)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/EA_intro/robot_evolution.html">Robot Evolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/EA_intro/parallel_ackley.html">Parallelising ARIEL with Ray</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/GUI.html">GUI</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../source/Db_examples/index.html">ARIEL Database Handling</a><input aria-label="Toggle navigation of ARIEL Database Handling" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/Db_examples/db_with_pandas.html">Database manipulation with pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/Db_examples/db_with_polars.html">Database manipulation with polars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../source/Db_examples/db_with_sqlite3.html">Database manipulation with sqlite3</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/Mujoco_docs/mujoco_docs.html">MuJoCo Data Variables Documentation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></a><input aria-label="Toggle navigation of ariel" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../body_phenotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">body_phenotypes</span></code></a><input aria-label="Toggle navigation of body_phenotypes" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../body_phenotypes/robogen_lite/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">robogen_lite</span></code></a><input aria-label="Toggle navigation of robogen_lite" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../body_phenotypes/robogen_lite/cppn_neat/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_neat</span></code></a><input aria-label="Toggle navigation of cppn_neat" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/cppn_neat/activations/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">activations</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/cppn_neat/connection/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">connection</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/cppn_neat/genome/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genome</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/cppn_neat/id_manager/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">id_manager</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/cppn_neat/node/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">node</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/cppn_neat/tests/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tests</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../body_phenotypes/robogen_lite/decoders/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">decoders</span></code></a><input aria-label="Toggle navigation of decoders" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/decoders/cppn_best_first/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_best_first</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hi_prob_decoding</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../body_phenotypes/robogen_lite/modules/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">modules</span></code></a><input aria-label="Toggle navigation of modules" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/modules/brick/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">brick</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/modules/core/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/modules/hinge/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hinge</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/modules/module/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">module</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../body_phenotypes/robogen_lite/prebuilt_robots/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prebuilt_robots</span></code></a><input aria-label="Toggle navigation of prebuilt_robots" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/prebuilt_robots/gecko/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gecko</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/prebuilt_robots/spider/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spider</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../body_phenotypes/robogen_lite/prebuilt_robots/spider_with_blocks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spider_with_blocks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../body_phenotypes/robogen_lite/config/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../body_phenotypes/robogen_lite/constructor/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">constructor</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></a><input aria-label="Toggle navigation of ec" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l4 has-children"><a class="reference internal" href="../genotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genotypes</span></code></a><input aria-label="Toggle navigation of genotypes" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../genotypes/cppn/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn</span></code></a><input aria-label="Toggle navigation of cppn" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../genotypes/cppn/cppn_decoding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_decoding</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../genotypes/nde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nde</span></code></a><input aria-label="Toggle navigation of nde" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../genotypes/nde/nde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nde</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../genotypes/tree/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tree</span></code></a><input aria-label="Toggle navigation of tree" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../genotypes/tree/io/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../genotypes/tree/operators/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">operators</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../genotypes/tree/tree_genome/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tree_genome</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../genotypes/tree/validation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">validation</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../a000/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a000</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a001/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a001</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a002/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a002</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a003/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a003</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../a004/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code></a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../parameters/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">parameters</span></code></a><input aria-label="Toggle navigation of parameters" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../parameters/ariel_modules/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_modules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../parameters/ariel_types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../parameters/mujoco_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_params</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a><input aria-label="Toggle navigation of simulation" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../simulation/controllers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></a><input aria-label="Toggle navigation of controllers" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/controllers/controller/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controller</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/controllers/na_cpg/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/controllers/na_cpg_beta/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_beta</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/controllers/na_cpg_norm/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_norm</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/controllers/simple_cpg/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simple_cpg</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../simulation/environments/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a><input aria-label="Toggle navigation of environments" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/environments/compile_terrains/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">compile_terrains</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/environments/heightmap_functions/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">heightmap_functions</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/environments/olympic_arena/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">olympic_arena</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../simulation/tasks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tasks</span></code></a><input aria-label="Toggle navigation of tasks" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/tasks/gait_learning/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gait_learning</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/tasks/targeted_locomotion/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">targeted_locomotion</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../simulation/tasks/turning_in_place/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">turning_in_place</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a><input aria-label="Toggle navigation of utils" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../utils/optimizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a><input aria-label="Toggle navigation of optimizers" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../utils/optimizers/revde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">revde</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/file_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">file_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/morphological_descriptor/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">morphological_descriptor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/mujoco_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/noise_gen/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">noise_gen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/renderers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">renderers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/runners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runners</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/tracker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utils/video_recorder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">video_recorder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../visualisation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualisation</span></code></a><input aria-label="Toggle navigation of visualisation" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../visualisation/analysis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../data_get/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">data_get</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dashboard_new/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dashboard_new</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-ariel.ec.a005">
+<span id="a005"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code><a class="headerlink" href="#module-ariel.ec.a005" title="Link to this heading">¶</a></h1>
+<p>TODO(jmdm): description of script.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a005.Crossover" title="ariel.ec.a005.Crossover"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Crossover</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a005.main" title="ariel.ec.a005.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(→ None)</p></td>
+<td><p>Entry point.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a005.SCRIPT_NAME" title="ariel.ec.a005.SCRIPT_NAME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a005.CWD" title="ariel.ec.a005.CWD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CWD</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a005.DATA" title="ariel.ec.a005.DATA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DATA</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a005.DB_NAME" title="ariel.ec.a005.DB_NAME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DB_NAME</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a005.DB_PATH" title="ariel.ec.a005.DB_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DB_PATH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a005.SEED" title="ariel.ec.a005.SEED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SEED</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ariel.ec.a005.console" title="ariel.ec.a005.console"><code class="xref py py-obj docutils literal notranslate"><span class="pre">console</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ariel.ec.a005.RNG" title="ariel.ec.a005.RNG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RNG</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a005.SCRIPT_NAME">
+<span class="sig-name descname"><span class="pre">SCRIPT_NAME</span></span><a class="headerlink" href="#ariel.ec.a005.SCRIPT_NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a005.CWD">
+<span class="sig-name descname"><span class="pre">CWD</span></span><a class="headerlink" href="#ariel.ec.a005.CWD" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a005.DATA">
+<span class="sig-name descname"><span class="pre">DATA</span></span><a class="headerlink" href="#ariel.ec.a005.DATA" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a005.DB_NAME">
+<span class="sig-name descname"><span class="pre">DB_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'database.db'</span></em><a class="headerlink" href="#ariel.ec.a005.DB_NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a005.DB_PATH">
+<span class="sig-name descname"><span class="pre">DB_PATH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pathlib.Path</span></em><a class="headerlink" href="#ariel.ec.a005.DB_PATH" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a005.SEED">
+<span class="sig-name descname"><span class="pre">SEED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">42</span></em><a class="headerlink" href="#ariel.ec.a005.SEED" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a005.console">
+<span class="sig-name descname"><span class="pre">console</span></span><a class="headerlink" href="#ariel.ec.a005.console" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="ariel.ec.a005.RNG">
+<span class="sig-name descname"><span class="pre">RNG</span></span><a class="headerlink" href="#ariel.ec.a005.RNG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ariel.ec.a005.Crossover">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Crossover</span></span><a class="headerlink" href="#ariel.ec.a005.Crossover" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="ariel.ec.a005.Crossover.one_point">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">one_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ariel.ec.a001.JSONIterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ariel.ec.a001.JSONIterable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ariel.ec.a001.JSONIterable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ariel.ec.a001.JSONIterable</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ariel.ec.a005.Crossover.one_point" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ariel.ec.a005.main">
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ariel.ec.a005.main" title="Link to this definition">¶</a></dt>
+<dd><p>Entry point.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../../parameters/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">parameters</span></code></div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../a004/index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a004</span></code></div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Computational Intelligence Group, Vrije Universiteit Amsterdam &amp; Contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on Mar 23, 2026</div>
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/ci-group/ariel" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" viewBox="0 0 16 16" height="1em" width="1em">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                  0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                  -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                  .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                  -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+                  .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+                  .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+                  0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">a005</span></code></a><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#ariel.ec.a005.SCRIPT_NAME"><code class="docutils literal notranslate"><span class="pre">SCRIPT_NAME</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a005.CWD"><code class="docutils literal notranslate"><span class="pre">CWD</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a005.DATA"><code class="docutils literal notranslate"><span class="pre">DATA</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a005.DB_NAME"><code class="docutils literal notranslate"><span class="pre">DB_NAME</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a005.DB_PATH"><code class="docutils literal notranslate"><span class="pre">DB_PATH</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a005.SEED"><code class="docutils literal notranslate"><span class="pre">SEED</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a005.console"><code class="docutils literal notranslate"><span class="pre">console</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a005.RNG"><code class="docutils literal notranslate"><span class="pre">RNG</span></code></a></li>
+<li><a class="reference internal" href="#ariel.ec.a005.Crossover"><code class="docutils literal notranslate"><span class="pre">Crossover</span></code></a><ul>
+<li><a class="reference internal" href="#ariel.ec.a005.Crossover.one_point"><code class="docutils literal notranslate"><span class="pre">Crossover.one_point()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ariel.ec.a005.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=7f41d439"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../../../_static/thebelab-helper.js"></script>
+    <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>
