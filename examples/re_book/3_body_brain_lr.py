@@ -59,8 +59,9 @@ type PopulationFunc = Callable[[Population], Population]
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__" / SCRIPT_NAME
-shutil.rmtree(DATA)
-DATA.mkdir(exist_ok=True)
+if DATA.exists():
+    shutil.rmtree(DATA)
+DATA.mkdir(exist_ok=True, parents=True)
 VIDEOS = DATA / "videos"
 VIDEOS.mkdir(exist_ok=True)
 
@@ -82,10 +83,10 @@ SPAWN_POS = (-0.8, 0.0, 0.1)
 TARGET_POSITION = np.array([2.0, 0.0, 0.5])
 
 # EA
-POPULATION_SIZE = 80
-GENERATIONS = 80
-SIMULATION_DURATION = 30
-LEARNING_BUDGET = 80
+POPULATION_SIZE = 10
+GENERATIONS = 2
+SIMULATION_DURATION = 10
+LEARNING_BUDGET = 10
 LEARNING_ALGORITHM = ng.optimizers.PSO
 
 
@@ -108,7 +109,7 @@ def parent_selection(population: Population) -> Population:
         The population with updated 'ps' tags.
     """
     # Sort descending: higher fitness (closer to 0) is better
-    population.sort(key=lambda x: x.fitness, reverse=True)
+    population = population.sort(sort="max", attribute="fitness_")
 
     cutoff = len(population) // 2
     for i, ind in enumerate(population):
@@ -224,7 +225,7 @@ def survivor_selection(population: Population) -> Population:
     # target_population_size from main loop
     target_size = 10
 
-    population.sort(key=lambda x: x.fitness, reverse=True)
+    population = population.sort(sort="max", attribute="fitness_")
 
     for i, ind in enumerate(population):
         ind.alive = i < target_size
@@ -626,6 +627,8 @@ def main() -> None:
         population_list,
         operations=ops,
         num_steps=GENERATIONS,
+        db_file_path=DATA / "database.db",
+        db_handling="delete",
     )
 
     ea.run()
