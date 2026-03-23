@@ -24,8 +24,10 @@
         {
             "label": "Run nox: docs",
             "type": "shell",
-            "command": "nox",
+            "command": "uv",
             "args": [
+                "run",
+                "nox",
                 "--session=docs",
             ],
             "group": {

@@ -21,7 +21,7 @@
         "**/.pytest_cache": true,
         "**/__pycache__": true,
         ".typings": false,
-        ".venv": true
+        ".venv": false
     },
     "python-envs.pythonProjects": [],
     "python.testing.pytestArgs": [
