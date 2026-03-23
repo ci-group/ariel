@@ -3,8 +3,6 @@ Tree morphology version of 2_body_brain_evolution.
 Uses TreeGenome for bodies with one-point crossover and node-replacement mutation.
 """
 
-from __future__ import annotations
-
 # Standard library
 import argparse
 import contextlib
@@ -47,9 +45,6 @@ from ariel.ec.genotypes.tree.operators import (
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from ariel.ec.genotypes.tree.validation import validate_genome_dict
 from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.controllers.na_cpg import (
-    create_fully_connected_adjacency,
-)
 from ariel.simulation.controllers.simple_cpg import (
     SimpleCPG,
     create_fully_connected_adjacency,
@@ -77,6 +72,12 @@ parser.add_argument(
 )
 parser.add_argument("--pop", type=int, default=30, help="Population size")
 parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Launch MuJoCo viewer for best individual",
+)
 args = parser.parse_args()
 
 # Constants
@@ -115,7 +116,8 @@ class Evolution:
             is_maximisation=False,  # Minimize Distance to Target
             num_steps=BUDGET,
             target_population_size=POP_SIZE,
-            db_file_path=DATA / "database.db",
+            output_folder=DATA,
+            db_file_name="database.db",
         )
 
     # ------------------------------------------------------------------------ #
@@ -271,9 +273,7 @@ class Evolution:
         ind.tags["debug_joints"] = 0
         return ind
 
-    @EAOperation
-    @staticmethod
-    def reproduction(population: Population) -> Population:
+    def reproduction(self, population: Population) -> Population:
         parents = [ind for ind in population if ind.tags.get("ps", False)]
         if not parents:
             console.log(
@@ -321,9 +321,7 @@ class Evolution:
         population.extend(new_offspring)
         return population
 
-    @EAOperation
-    @staticmethod
-    def evaluate(population: Population) -> Population:
+    def evaluate(self, population: Population) -> Population:
         to_eval = [
             ind
             for ind in population
@@ -337,12 +335,8 @@ class Evolution:
             ind.requires_eval = False
         return population
 
-    @EAOperation
-    @staticmethod
-    def parent_selection(population: Population) -> Population:
-        population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
-        )
+    def parent_selection(self, population: Population) -> Population:
+        population = population.sort(sort="min", attribute="fitness_")
         cutoff = len(population) // 2
         for i, ind in enumerate(population):
             ind.tags["ps"] = i < cutoff
@@ -352,12 +346,8 @@ class Evolution:
         )
         return population
 
-    @EAOperation
-    @staticmethod
-    def survivor_selection(population: Population) -> Population:
-        population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
-        )
+    def survivor_selection(self, population: Population) -> Population:
+        population = population.sort(sort="min", attribute="fitness_")
         survivors = population[: self.config.target_population_size]
         for ind in population:
             if ind not in survivors:
@@ -470,12 +460,19 @@ class Evolution:
         # initial eval
         population = self.evaluate(population)
         ops = [
-            self.parent_selection(),
-            self.reproduction(),
-            self.evaluate(),
-            self.survivor_selection(),
+            EAOperation(self.parent_selection),
+            EAOperation(self.reproduction),
+            EAOperation(self.evaluate),
+            EAOperation(self.survivor_selection),
         ]
-        ea = EA(population, operations=ops, num_steps=BUDGET)
+        ea = EA(
+            population,
+            operations=ops,
+            num_steps=BUDGET,
+            db_file_path=self.config.db_file_path,
+            db_handling=self.config.db_handling,
+            quiet=self.config.quiet,
+        )
         ea.run()
         return ea.get_solution("best", only_alive=False)
 
@@ -489,7 +486,8 @@ def main() -> None:
     if best:
         console.rule("[bold green]Final Best Result")
         console.log(f"Best Fitness (Dist to Target): {best.fitness:.4f}")
-        evo.run_simulation("launcher", best)
+        if args.visualize:
+            evo.run_simulation("launcher", best)
 
 
 if __name__ == "__main__":
