@@ -10,6 +10,7 @@ Status:     Completed ✅
 
 # Third-party libraries
 import mujoco
+from pathlib import Path
 
 # Local libraries
 from ariel.simulation.environments import SimpleFlatWorld
@@ -40,8 +41,12 @@ def main() -> None:
     model = world.spec.compile()
     data = mujoco.MjData(model)
 
-    # Render a single frame
-    single_frame_renderer(model, data, show=True)
+    # Render a single frame and save it locally.
+    # Using show=True can fail on Linux systems where the default image viewer is broken.
+    output_path = Path.cwd() / "__data__" / "single_frame.png"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    single_frame_renderer(model, data, show=False, save=True, save_path=output_path)
+    print(f"Saved rendered frame to: {output_path}")
 
 
 if __name__ == "__main__":
