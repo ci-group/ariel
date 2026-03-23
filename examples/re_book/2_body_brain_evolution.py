@@ -7,8 +7,6 @@ Genotype:
   - 'ctrl':  Float Vector (Array)  -> Decodes to CPG Parameters
 """
 
-from __future__ import annotations
-
 # Standard library
 import argparse
 import random
@@ -70,6 +68,12 @@ parser.add_argument(
 )
 parser.add_argument("--pop", type=int, default=80, help="Population size")
 parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
+parser.add_argument(
+    "--visualize",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Launch MuJoCo viewer for best individual",
+)
 args = parser.parse_args()
 
 # Constants
@@ -115,7 +119,8 @@ class Evolution:
             is_maximisation=False,  # Minimize Distance to Target
             num_steps=BUDGET,
             target_population_size=POP_SIZE,
-            db_file_path=DATA / "database.db",
+            output_folder=DATA,
+            db_file_name="database.db",
         )
 
     # ------------------------------------------------------------------------ #
@@ -272,7 +277,6 @@ class Evolution:
         ind.tags["debug_joints"] = 0
         return ind
 
-    @EAOperation
     def reproduction(self, population: Population) -> Population:
         """Joint Reproduction: Crossover (Body + Brain) + Mutation."""
         parents = [ind for ind in population if ind.tags.get("ps", False)]
@@ -343,7 +347,6 @@ class Evolution:
         population.extend(new_offspring)
         return population
 
-    @EAOperation
     def evaluate(self, population: Population) -> Population:
         """Evaluation Loop: Calls run_simulation in 'simple' mode."""
         to_eval = [
@@ -363,11 +366,8 @@ class Evolution:
 
         return population
 
-    @EAOperation
     def parent_selection(self, population: Population) -> Population:
-        population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
-        )
+        population = population.sort(sort="min", attribute="fitness_")
         cutoff = len(population) // 2
         for i, ind in enumerate(population):
             ind.tags["ps"] = i < cutoff
@@ -380,11 +380,8 @@ class Evolution:
 
         return population
 
-    @EAOperation
     def survivor_selection(self, population: Population) -> Population:
-        population.sort(
-            key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"),
-        )
+        population = population.sort(sort="min", attribute="fitness_")
         survivors = population[: self.config.target_population_size]
         for ind in population:
             if ind not in survivors:
@@ -578,13 +575,20 @@ class Evolution:
         population = self.evaluate(population)
 
         ops = [
-            self.parent_selection(),
-            self.reproduction(),
-            self.evaluate(),
-            self.survivor_selection(),
+            EAOperation(self.parent_selection),
+            EAOperation(self.reproduction),
+            EAOperation(self.evaluate),
+            EAOperation(self.survivor_selection),
         ]
 
-        ea = EA(population, operations=ops, num_steps=BUDGET)
+        ea = EA(
+            population,
+            operations=ops,
+            num_steps=BUDGET,
+            db_file_path=self.config.db_file_path,
+            db_handling=self.config.db_handling,
+            quiet=self.config.quiet,
+        )
         ea.run()
 
         return ea.get_solution("best", only_alive=False)
@@ -601,7 +605,8 @@ def main() -> None:
     if best:
         console.rule("[bold green]Final Best Result")
         console.log(f"Best Fitness (Dist to Target): {best.fitness:.4f}")
-        evo.run_simulation("launcher", best)
+        if args.visualize:
+            evo.run_simulation("launcher", best)
 
 
 if __name__ == "__main__":
