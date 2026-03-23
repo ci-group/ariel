@@ -39,37 +39,33 @@ from ariel.simulation.tasks.targeted_locomotion import (
     fitness_direct_path,
     fitness_distance_and_efficiency,
     fitness_survival_and_locomotion,
+    fitness_direct_path,
+    distance_to_target,
+    fitness_speed_to_target,
 )
-from ariel.utils.renderers import VideoRecorder
-from ariel.utils.tracker import Tracker
 
-# Initialize rich console and traceback handler
-install()
-console = Console()
-
-parser = argparse.ArgumentParser(
-    description="Evolution simulation with configurable budget",
-)
-parser.add_argument(
-    "--budget", type=int, default=600, help="Number of generations for learning",
-)
-parser.add_argument(
-    "--dur", type=int, default=15, help="Duration of an evaluation",
-)
-parser.add_argument(
-    "--population", type=int, default=26, help="Population size",
-)
-parser.add_argument(
-    "--fitness",
-    type=str,
-    default="distance",
-    choices=["delta", "efficiency", "survival", "direct", "distance"],
-)
+# Set up command line argument parsing
+# If none given, default values are used.
+import argparse
+parser = argparse.ArgumentParser(description='Evolution simulation with configurable budget')
+parser.add_argument('--budget', type=int, default=40, help='Number of generations for learning')
+parser.add_argument('--dur', type=int, default=20, help="Duration of an evaluation")
+parser.add_argument('--population', type=int, default=10, help="Population size")
+parser.add_argument('--fitness', type=str, default='distance', choices=['delta', 'efficiency', 'survival', 'direct', 'distance', 'speed'])
+parser.add_argument('--reach-radius', type=float, default=0.25, help='Planar distance threshold for counting target arrival')
 args = parser.parse_args()
 
 BUDGET = args.budget
 DURATION = args.dur
 POP_SIZE = args.population
+REACH_RADIUS = max(0.01, args.reach_radius)
+
+# 1. Defined 3 target positions to prevent overfitting
+# TARGET_POSITIONS = [ 
+#     [-0.5 , -2, 0.1],  # Left
+#     [0.0, -2, 0.1],    # Center
+#     [0.5, -2, 0.1]     # Right
+# ]
 
 TARGET_POSITIONS = [
     [0.5, -2, 0.1],  # Right
@@ -186,16 +182,15 @@ def analyze_sections(green_mask):
 #                  Custom simulation runner with camera                        #
 # ============================================================================ #
 
-
-def run_vision_simulation(
-    model,
-    data,
-    network: Network,
-    duration: int,
-    renderer=None,
-    cam_name=None,
-    control_step_freq=50,
-):
+def run_vision_simulation(model, 
+                          data, 
+                          network:Network, 
+                          duration:int, 
+                          target_position: Optional[np.ndarray] = None,
+                          renderer=None, 
+                          cam_name=None,
+                          control_step_freq=50 
+                          ):
     """Custom runner that processes vision."""
     # Setup Renderer if not passed (creates a new context)
     if renderer is None:
@@ -208,7 +203,9 @@ def run_vision_simulation(
 
     last_pos = np.array(data.qpos[0:3].copy())
     total_path_length = 0.0
-
+    min_distance_to_target = float("inf")
+    time_to_target: Optional[float] = None
+    
     trajectory = []
 
     while data.time < duration:
@@ -230,8 +227,8 @@ def run_vision_simulation(
 
             # Using both sin and cos gives the network a smooth, circular sense of time
             phase_inputs = [
-                np.sin(data.time * 2.0 * np.pi),
-                np.cos(data.time * 2.0 * np.pi),
+                2*np.sin(data.time * 2.0 * np.pi), 
+                2*np.cos(data.time * 2.0 * np.pi)
             ]
 
             state_input = np.concatenate([
@@ -254,9 +251,22 @@ def run_vision_simulation(
         total_path_length += np.linalg.norm(current_pos - last_pos)
         last_pos = current_pos
 
-    return {"path_length": total_path_length, "trajectory": trajectory}
+        if target_position is not None:
+            planar_distance = float(np.linalg.norm(current_pos[:2] - target_position[:2]))
+            min_distance_to_target = min(min_distance_to_target, planar_distance)
+            if time_to_target is None and planar_distance <= REACH_RADIUS:
+                time_to_target = float(data.time)
 
+    if target_position is None:
+        min_distance_to_target = float(np.linalg.norm(last_pos[:2]))
 
+    return {
+        "path_length": total_path_length,
+        "trajectory" : trajectory,
+        "min_distance_to_target": min_distance_to_target,
+        "time_to_target": time_to_target,
+        }
+        
 # ============================================================================ #
 #                         Define evolutionary loop                             #
 # ============================================================================ #
@@ -303,10 +313,11 @@ def evolve(world, model, data) -> list[float]:
 
             # Run Simulation
             metrics = run_vision_simulation(
-                model,
-                data,
-                network=x,
-                duration=DURATION,
+                model, 
+                data, 
+                network=x, 
+                duration=DURATION, 
+                target_position=target_pos_arr,
                 renderer=renderer,
                 cam_name=robot_cam_name,
                 control_step_freq=50,
@@ -317,28 +328,25 @@ def evolve(world, model, data) -> list[float]:
             final_z_height = final_pos[2]
 
             # 3. Route to the correct fitness function based on terminal args
-            if args.fitness == "delta":
-                score = fitness_delta_distance(
-                    initial_pos, final_pos, target_pos_arr,
-                )
-            if args.fitness == "distance":
-                score = distance_to_target(initial_pos, target_pos_arr)
-            elif args.fitness == "survival":
-                score = fitness_survival_and_locomotion(
-                    initial_pos, final_pos, target_pos_arr, final_z_height,
-                )
-            elif args.fitness == "efficiency":
+            if args.fitness == 'delta':
+                score = fitness_delta_distance(initial_pos, final_pos, target_pos_arr)
+            elif args.fitness == 'distance':
+                score = distance_to_target(final_pos, target_pos_arr)
+            elif args.fitness == 'survival':
+                score = fitness_survival_and_locomotion(initial_pos, final_pos, target_pos_arr, final_z_height)
+            elif args.fitness == 'efficiency':
                 # Assuming 0.0 for effort right now unless you track it in run_vision_simulation
-                score = fitness_distance_and_efficiency(
-                    initial_pos, final_pos, target_pos_arr, 0.0,
+                score = fitness_distance_and_efficiency(initial_pos, final_pos, target_pos_arr, 0.0) 
+            elif args.fitness == 'direct':
+                score = fitness_direct_path(initial_pos, final_pos, target_pos_arr, metrics["path_length"])
+            elif args.fitness == 'speed':
+                score = fitness_speed_to_target(
+                    time_to_target=metrics["time_to_target"],
+                    duration=DURATION,
+                    min_distance_to_target=metrics["min_distance_to_target"],
                 )
-            elif args.fitness == "direct":
-                score = fitness_direct_path(
-                    initial_pos,
-                    final_pos,
-                    target_pos_arr,
-                    metrics["path_length"],
-                )
+            else:
+                score = distance_to_target(final_pos, target_pos_arr)
             total_fitness += score
 
         return total_fitness / len(TARGET_POSITIONS)
@@ -368,10 +376,13 @@ def evolve(world, model, data) -> list[float]:
         initial_bounds=(-0.5, 0.5),
         device="cpu",
     )
-
-    # Initialise CMA-ES learner
-    searcher = CMAES(problem=problem, stdev_init=0.1)
-
+    
+    # Initialise CMA-ES learner 
+    searcher = CMAES(problem=problem,
+                     stdev_init=0.075,
+                     popsize=POP_SIZE,
+                     )
+    
     console.log(f"Population size: {searcher.popsize}")
 
     for bud in range(BUDGET + 1):
@@ -482,8 +493,8 @@ if __name__ == "__main__":
         robot_state = get_robot_state(d)
 
         phase_inputs = [
-            np.sin(d.time * 2.0 * np.pi),
-            np.cos(d.time * 2.0 * np.pi),
+            2*np.sin(d.time * 2.0 * np.pi), 
+            2*np.cos(d.time * 2.0 * np.pi)
         ]
 
         state = np.concatenate([
@@ -584,13 +595,14 @@ if __name__ == "__main__":
 
         # Run the simulation once more to get the path
         metrics = run_vision_simulation(
-            model,
-            data,
-            network=network,
-            duration=DURATION,
-            renderer=None,  # No need to render video for this
-            cam_name=robot_cam_name,  # <--- ADD THIS LINE HERE
-            control_step_freq=50,
+            model, 
+            data, 
+            network=network, 
+            duration=DURATION, 
+            target_position=np.asarray(test_target),
+            renderer=None, # No need to render video for this
+            cam_name=robot_cam_name, # <--- ADD THIS LINE HERE
+            control_step_freq=50
         )
 
         # Extract X and Y coordinates
