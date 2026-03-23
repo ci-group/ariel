@@ -18,7 +18,6 @@ from pathlib import Path
 import mujoco
 
 # Third-party libraries
-# Third-party libraries
 import numpy as np
 
 # Function to show fitness landscape
@@ -85,6 +84,8 @@ parser.add_argument(
 parser.add_argument("--pop", type=int, default=100, help="Population size")
 parser.add_argument(
     "--max-modules",
+    "--max_modules",
+    dest="max_modules",
     type=int,
     default=20,
     help="Maximum modules per robot",
@@ -95,13 +96,6 @@ parser.add_argument(
     default=True,
     help="Launch MuJoCo viewer for best individual",
 )
-parser.add_argument(
-    "--max_modules",
-    type=int,
-    default=20,
-    help="Maximum number of modules in a morphology",
-)
-
 args = parser.parse_args()
 
 # Constants
@@ -443,7 +437,14 @@ class MorphologyEvolution:
             EAOperation(self.survivor_selection),
         ]
 
-        ea = EA(population, operations=ops, num_steps=BUDGET)
+        ea = EA(
+            population,
+            operations=ops,
+            num_steps=BUDGET,
+            db_file_path=self.config.db_file_path,
+            db_handling=self.config.db_handling,
+            quiet=self.config.quiet,
+        )
         ea.run()
 
         return ea.get_solution("best", only_alive=False)
