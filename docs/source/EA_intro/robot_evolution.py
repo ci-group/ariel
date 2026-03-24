@@ -1,10 +1,12 @@
 # Imports
+import argparse
 import random
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import mujoco as mj
+import mujoco.viewer
 
 # Learning EA
 import nevergrad as ng
@@ -19,6 +21,7 @@ import torch
 # Pretty little errors and progress bars
 from rich.console import Console
 from rich.traceback import install
+from sqlmodel import Session, col, create_engine, select
 
 # Import torch for brain controller
 from torch import nn
@@ -122,7 +125,23 @@ NDE = NeuralDevelopmentalEncoding(
     number_of_modules=NUM_MODULES,  # Seems to be a good value
     genotype_size=64,
 )
-torch.save(NDE.state_dict(), DATA / "NDE.pth")
+NDE_PATH = DATA / "NDE.pth"
+DB_PATH = DATA / "database.db"
+
+
+def load_or_create_nde_weights() -> None:
+    """Load saved NDE weights if available; otherwise create and save them."""
+    if NDE_PATH.exists():
+        state_dict = torch.load(NDE_PATH, map_location="cpu")
+        NDE.load_state_dict(state_dict)
+        console.log(f"Loaded NDE weights from: {NDE_PATH}")
+        return
+
+    torch.save(NDE.state_dict(), NDE_PATH)
+    console.log(f"Saved new NDE weights to: {NDE_PATH}")
+
+
+load_or_create_nde_weights()
 
 class Network(nn.Module):
     def __init__(
@@ -522,6 +541,34 @@ def pop_learn(population: Population) -> Population:
 
     return population
 
+
+def get_best_individual_from_db(
+    db_path: Path,
+    *,
+    is_maximisation: bool = False,
+) -> Individual:
+    """Load best evaluated individual from a saved EA SQLite database."""
+    if not db_path.exists():
+        raise FileNotFoundError(f"Database not found: {db_path}")
+
+    engine = create_engine(f"sqlite:///{db_path}")
+    with Session(engine) as session:
+        statement = select(Individual).where(Individual.requires_eval == False)  # noqa: E712
+        if is_maximisation:
+            statement = statement.order_by(col(Individual.fitness_).desc())
+        else:
+            statement = statement.order_by(col(Individual.fitness_).asc())
+
+        best_individual = session.exec(statement).first()
+
+    if best_individual is None:
+        raise RuntimeError(
+            "No evaluated individuals found in database. "
+            "Run evolution first to populate fitness values."
+        )
+
+    return best_individual
+
 def evolve() -> EA:
     """Entry point for the evolutionary algorithm.
 
@@ -570,25 +617,20 @@ def evolve() -> EA:
 
     return ea
 
-def visualize_best_robot(ea: EA) -> None:
-    """Visualize the best robot evolved by rendering it in simulation.
-    
-    Does NOT re-learn the controller - just shows the evolved morphology
-    in action with a basic neural network controller.
-    
-    Parameters
-    ----------
-    ea : EA
-        The evolved EA object containing the best solution.
-    """
+def visualize_individual(
+    individual: Individual,
+    title: str = "best",
+    *,
+    use_viewer: bool = False,
+    viewer_duration: float | None = None,
+) -> None:
+    """Render a specific individual in simulation without re-learning."""
     console.log("\n[bold cyan]Visualizing best robot morphology...[/bold cyan]")
-    
-    # Get the best individual from EA (don't re-learn)
-    best_individual = ea.get_solution("best", only_alive=False)
-    console.log(f"Best robot fitness: {best_individual.fitness:.3f}")
+
+    console.log(f"{title.capitalize()} robot fitness: {individual.fitness:.3f}")
     
     # Decode morphology
-    p_matrices = NDE.forward(np.array(best_individual.genotype))
+    p_matrices = NDE.forward(np.array(individual.genotype))
     hpd = HighProbabilityDecoder(num_modules=20)
     robot_graph = hpd.probability_matrices_to_graph(
         p_matrices[0],
@@ -630,9 +672,27 @@ def visualize_best_robot(ea: EA) -> None:
     # Run simulation with basic controller (no re-learning)
     mj.mj_resetData(model, data)
     mj.set_mjcb_control(controller.set_control)
-    
-    console.log(f"Running best robot for {SIMULATION_DURATION}s...")
-    simple_runner(model, data, duration=SIMULATION_DURATION)
+
+    duration = SIMULATION_DURATION if viewer_duration is None else viewer_duration
+
+    if use_viewer:
+        console.log(
+            f"Running best robot in MuJoCo viewer for {duration:.1f}s..."
+        )
+        with mujoco.viewer.launch_passive(model, data) as viewer:
+            sim_start = time.time()
+            while viewer.is_running() and (time.time() - sim_start) < duration:
+                step_start = time.time()
+                mj.mj_step(model, data)
+                viewer.sync()
+
+                # Keep wall-clock and simulation time roughly aligned.
+                remaining = model.opt.timestep - (time.time() - step_start)
+                if remaining > 0:
+                    time.sleep(remaining)
+    else:
+        console.log(f"Running best robot for {duration:.1f}s...")
+        simple_runner(model, data, duration=duration)
     
     # Render and save final frame
     renderer = mj.Renderer(model)
@@ -651,6 +711,36 @@ def visualize_best_robot(ea: EA) -> None:
     console.log(f"Target position: (2.000, 0.000, 0.100)")
 
 
+def simulate_best_from_saved_artifacts(
+    *,
+    use_viewer: bool = False,
+    viewer_duration: float | None = None,
+) -> None:
+    """Load best individual from saved DB + NDE weights and simulate it."""
+    if not NDE_PATH.exists():
+        raise FileNotFoundError(f"NDE weights file not found: {NDE_PATH}")
+    if not DB_PATH.exists():
+        raise FileNotFoundError(f"Database file not found: {DB_PATH}")
+
+    # Ensure NDE in memory matches saved file used during evolution.
+    state_dict = torch.load(NDE_PATH, map_location="cpu")
+    NDE.load_state_dict(state_dict)
+    console.log(f"Loaded NDE weights from: {NDE_PATH}")
+
+    best_individual = get_best_individual_from_db(
+        DB_PATH,
+        is_maximisation=config.is_maximisation,
+    )
+    console.log(f"Loaded best individual from DB: {DB_PATH}")
+
+    visualize_individual(
+        best_individual,
+        title="best (from saved db)",
+        use_viewer=use_viewer,
+        viewer_duration=viewer_duration,
+    )
+
+
 def main() -> EA:
     """Is the main entry loop to the code."""
     return evolve()
@@ -658,15 +748,46 @@ def main() -> EA:
 
 start = time.time()
 
-ea = main()
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--evolve",
+    action="store_true",
+    help="Run full evolution instead of loading best individual from saved artifacts.",
+)
+parser.add_argument(
+    "--viewer",
+    action="store_true",
+    help="Open MuJoCo viewer and simulate in real time.",
+)
+parser.add_argument(
+    "--viewer-duration",
+    type=float,
+    default=None,
+    help="Simulation duration in seconds for viewer/headless playback.",
+)
+args = parser.parse_args()
 
-best_fitness = ea.get_solution("best", only_alive=False).fitness
+# Default behavior now reuses saved artifacts when available.
+if args.evolve:
+    ea = main()
 
-console.log(f"Best fitness found: {best_fitness:.3f}")
-console.log("Best fitness possible: 0")
+    best_fitness = ea.get_solution("best", only_alive=False).fitness
 
-# Visualize the best robot
-visualize_best_robot(ea)
+    console.log(f"Best fitness found: {best_fitness:.3f}")
+    console.log("Best fitness possible: 0")
+
+    # Visualize the best robot from the fresh EA run
+    visualize_individual(
+        ea.get_solution("best", only_alive=False),
+        title="best",
+        use_viewer=args.viewer,
+        viewer_duration=args.viewer_duration,
+    )
+else:
+    simulate_best_from_saved_artifacts(
+        use_viewer=args.viewer,
+        viewer_duration=args.viewer_duration,
+    )
 
 end = time.time()
 
