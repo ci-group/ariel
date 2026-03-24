@@ -201,27 +201,41 @@ class JointTreeNNLearningEvolution:
 
     def spawn_with_fallback(
         self,
-        world: SimpleFlatWorld,
-        spec: mujoco.MjSpec,
+        genome_data: dict | TreeGenome,
         position: tuple[float, float, float],
-    ) -> None:
-        """Spawn robot robustly, retrying without floor correction on failure."""
-        try:
+    ) -> tuple[SimpleFlatWorld, mujoco.MjModel, mujoco.MjData]:
+        """Spawn robustly, rebuilding a fresh spec on each attempt.
+
+        A failed spawn can consume/alter spec internals in MuJoCo, so retries
+        must use a newly decoded morphology.
+        """
+
+        def _build_world(
+            *,
+            correct_collision_with_floor: bool,
+        ) -> tuple[SimpleFlatWorld, mujoco.MjModel, mujoco.MjData]:
+            spec = self.map_genotype_to_body(genome_data)
+            if spec is None:
+                raise ValueError("Could not decode morphology into MuJoCo spec")
+
+            world = SimpleFlatWorld()
             world.spawn(
                 spec,
                 position=position,
-                correct_collision_with_floor=True,
+                correct_collision_with_floor=correct_collision_with_floor,
             )
+            model = world.spec.compile()
+            data = mujoco.MjData(model)
+            return world, model, data
+
+        try:
+            return _build_world(correct_collision_with_floor=True)
         except Exception as exc:
             console.log(
                 "[yellow]Spawn with floor-correction failed; retrying without correction:[/yellow] "
                 f"{exc}",
             )
-            world.spawn(
-                spec,
-                position=position,
-                correct_collision_with_floor=False,
-            )
+            return _build_world(correct_collision_with_floor=False)
 
     def get_joint_count(self, genome: TreeGenome) -> int:
         spec = self.map_genotype_to_body(genome)
@@ -347,19 +361,17 @@ class JointTreeNNLearningEvolution:
 
     def individual_learn(self, ind: Individual) -> tuple[float, list[float]]:
         """Learn NN controller for one morphology with CMA-ES."""
-        spec = self.map_genotype_to_body(ind.genotype["morph"])
-        if spec is None:
+        mujoco.set_mjcb_control(None)
+        try:
+            world, model, data = self.spawn_with_fallback(
+                ind.genotype["morph"],
+                SPAWN_POSITION,
+            )
+        except Exception:
             return float("inf"), []
 
-        mujoco.set_mjcb_control(None)
-        world = SimpleFlatWorld()
-        self.spawn_with_fallback(world, spec, SPAWN_POSITION)
-
-        model = world.spec.compile()
         if model.nu == 0:
             return float("inf"), []
-
-        data = mujoco.MjData(model)
 
         net = Network(
             input_size=len(get_state_from_data(data)),
@@ -459,16 +471,14 @@ class JointTreeNNLearningEvolution:
         duration: float = 10.0,
     ) -> None:
         """Replay best morphology with its learned NN controller."""
-        spec = self.map_genotype_to_body(best.genotype["morph"])
-        if spec is None:
-            console.log("[red]Cannot visualize invalid best morphology.[/red]")
+        try:
+            world, model, data = self.spawn_with_fallback(
+                best.genotype["morph"],
+                SPAWN_POSITION,
+            )
+        except Exception as exc:
+            console.log(f"[red]Could not spawn best morphology for replay: {exc}[/red]")
             return
-
-        world = SimpleFlatWorld()
-        self.spawn_with_fallback(world, spec, SPAWN_POSITION)
-
-        model = world.spec.compile()
-        data = mujoco.MjData(model)
 
         if model.nu == 0:
             console.log("[red]Best morphology has no actuators; cannot simulate controller.[/red]")
