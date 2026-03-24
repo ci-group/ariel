@@ -4,12 +4,7 @@ from typing import Literal, cast, List, Optional, Any
 from pathlib import Path
 import time
 import os
-
-try:
-    import cv2
-    CV2_AVAILABLE = True
-except Exception:
-    CV2_AVAILABLE = False
+import cv2 
 
 # Pretty little errors and progress bars
 from rich.console import Console
@@ -22,18 +17,7 @@ console = Console()
 # Third-party libraries
 import numpy as np
 import mujoco
-
-try:
-    import keyboard as kb  # Optional on macOS
-    KEYBOARD_AVAILABLE = True
-except Exception:
-    KEYBOARD_AVAILABLE = False
-
-try:
-    import matplotlib.pyplot as plt
-    MATPLOTLIB_AVAILABLE = True
-except Exception:
-    MATPLOTLIB_AVAILABLE = False
+import matplotlib.pyplot as plt
 
 # Network imports
 import torch
@@ -68,24 +52,12 @@ parser.add_argument('--dur', type=int, default=20, help="Duration of an evaluati
 parser.add_argument('--population', type=int, default=10, help="Population size")
 parser.add_argument('--fitness', type=str, default='distance', choices=['delta', 'efficiency', 'survival', 'direct', 'distance', 'speed'])
 parser.add_argument('--reach-radius', type=float, default=0.25, help='Planar distance threshold for counting target arrival')
-parser.add_argument('--headless', action=argparse.BooleanOptionalAction, default=False, help='Disable GUI/video-heavy features for compatibility')
-parser.add_argument('--video', action=argparse.BooleanOptionalAction, default=True, help='Render and save best-run video')
-parser.add_argument('--plot', action=argparse.BooleanOptionalAction, default=True, help='Save trajectory plot image')
 args = parser.parse_args()
 
 BUDGET = args.budget
 DURATION = args.dur
 POP_SIZE = args.population
 REACH_RADIUS = max(0.01, args.reach_radius)
-
-ENABLE_VIDEO = (not args.headless) and args.video
-ENABLE_PLOT = args.plot
-
-if not CV2_AVAILABLE:
-    console.log("[yellow]OpenCV not available; vision inputs will fallback to zeros.[/yellow]")
-if not MATPLOTLIB_AVAILABLE and ENABLE_PLOT:
-    console.log("[yellow]matplotlib not available; disabling plot output.[/yellow]")
-    ENABLE_PLOT = False
 
 # 1. Defined 3 target positions to prevent overfitting
 # TARGET_POSITIONS = [ 
@@ -168,10 +140,6 @@ def fill_parameters(net: nn.Module, vector: torch.Tensor):
 # ============================================================================ #
     
 def isolate_green(frame):
-    if not CV2_AVAILABLE:
-        # Return an all-zero mask with the same HxW shape.
-        return np.zeros(frame.shape[:2], dtype=np.uint8)
-
     # Convert to HSV color space
     # Enhances colours, makes it easier to detect target colour
     hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
@@ -223,10 +191,7 @@ def run_vision_simulation(model,
     
     # Setup Renderer if not passed (creates a new context)
     if renderer is None:
-        try:
-            renderer = mujoco.Renderer(model, height=24, width=32)
-        except Exception:
-            renderer = None
+        renderer = mujoco.Renderer(model, height=24, width=32) 
     
     timestep = model.opt.timestep
     
@@ -247,19 +212,12 @@ def run_vision_simulation(model,
         # --- CONTROL STEP ---
         # Only run expensive vision and network pass every N steps
         if deduced_step % control_step_freq == 0:
-            if renderer is not None:
-                try:
-                    renderer.update_scene(data, camera=cam_name)
-                    img = renderer.render()
-
-                    # 2. Process Vision
-                    mask = isolate_green(img)
-                    vision_inputs = analyze_sections(mask)
-                except Exception:
-                    # Renderer/camera issues should not crash training.
-                    vision_inputs = [0.0, 0.0, 0.0]
-            else:
-                vision_inputs = [0.0, 0.0, 0.0]
+            renderer.update_scene(data, camera=cam_name)
+            img = renderer.render()
+            
+            # 2. Process Vision
+            mask = isolate_green(img)
+            vision_inputs = analyze_sections(mask)
 
             # 3. Prepare Inputs
             robot_state = get_robot_state(data)
@@ -326,12 +284,8 @@ def evolve(world, model, data) -> List[float]:
     if robot_cam_name is None and model.ncam > 0:
         robot_cam_name = model.camera(0).name
 
-    # Pre-initialize renderer for the evolution loop (optional in headless setups)
-    try:
-        renderer = mujoco.Renderer(model, height=24, width=32)
-    except Exception:
-        renderer = None
-        console.log("[yellow]Could not create evolution renderer; using zero vision fallback.[/yellow]")
+    # Pre-initialize renderer for the evolution loop
+    renderer = mujoco.Renderer(model, height=24, width=32)
 
     # Get Mocap ID for the green target
     try:
@@ -522,22 +476,17 @@ if __name__ == "__main__":
     data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
     
     # 1. Renderer for Robot Vision (Low Res)
-    control_renderer = None
-    if ENABLE_VIDEO:
-        try:
-            control_renderer = mujoco.Renderer(model, height=24, width=32)
-        except Exception:
-            console.log("[yellow]Low-res control renderer unavailable; fallback vision will be used.[/yellow]")
+    control_renderer = mujoco.Renderer(model, height=24, width=32)
+    
+    # 2. Renderer for Video Output (High Res)
+    video_capture_renderer = mujoco.Renderer(model, height=480, width=640)
     
     def get_vision_control_signal(m, d):
-        if robot_cam_name and control_renderer is not None:
-            try:
-                control_renderer.update_scene(d, camera=robot_cam_name)
-                img = control_renderer.render()
-                mask = isolate_green(img)
-                vision_inputs = analyze_sections(mask)
-            except Exception:
-                vision_inputs = [0, 0, 0]
+        if robot_cam_name:
+            control_renderer.update_scene(d, camera=robot_cam_name)
+            img = control_renderer.render()
+            mask = isolate_green(img)
+            vision_inputs = analyze_sections(mask)
         else:
             vision_inputs = [0,0,0]
             
@@ -568,49 +517,45 @@ if __name__ == "__main__":
     
     current_ctrl = np.zeros(model.nu)
 
-    if ENABLE_VIDEO:
-        # --- REPLAY BEST & RECORD VIDEO ---
-        console.log("Rendering Best Video...")
-        path_to_video_folder = str(DATA / "videos")
+# --- REPLAY BEST & RECORD VIDEO ---
+    console.log("Rendering Best Video...")
+    path_to_video_folder = str(DATA / "videos")
+    
+    # 1. Setup VideoRecorder (using your Ariel library class)
+    video_recorder = VideoRecorder(
+        file_name="spider_vision_best", 
+        output_folder=path_to_video_folder
+    )
 
-        # 1. Setup VideoRecorder (using your Ariel library class)
-        video_recorder = VideoRecorder(
-            file_name="spider_vision_best", 
-            output_folder=path_to_video_folder
-        )
+    # 2. Reset Simulation & Target
+    mujoco.mj_resetData(model, data)
+    target_mocap_id = model.body("green_target").mocapid[0]
+    data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
 
-        # 2. Reset Simulation & Target
-        mujoco.mj_resetData(model, data)
-        target_mocap_id = model.body("green_target").mocapid[0]
-        data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
+    # 3. Setup Visualization Options (from your snippet)
+    viz_options = mujoco.MjvOption()
+    viz_options.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
+    viz_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
+    viz_options.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = False
+    viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = False
 
-        # 3. Setup Visualization Options (from your snippet)
-        viz_options = mujoco.MjvOption()
-        viz_options.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
-        viz_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
-        viz_options.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = False
-        viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = False
+    # 4. Get Camera ID ("video_cam" is the one we created earlier)
+    camera_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, "video_cam")
 
-        # 4. Get Camera ID ("video_cam" is the one we created earlier)
-        camera_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, "video_cam")
+    # 5. Timing Variables
+    fps = 30
+    dt = model.opt.timestep
+    steps_per_frame = int(1.0 / (fps * dt))
+    control_step_freq = 50
+    current_ctrl = np.zeros(model.nu)
 
-        # 5. Timing Variables
-        fps = 30
-        dt = model.opt.timestep
-        steps_per_frame = int(1.0 / (fps * dt))
-        control_step_freq = 50
-        current_ctrl = np.zeros(model.nu)
+    # 6. Setup separate renderer for the Robot's Vision (Low Res)
+    # We keep this outside the video loop so we don't recreate it every frame
+    control_renderer = mujoco.Renderer(model, height=24, width=32)
 
-        # 6. Setup separate renderer for the Robot's Vision (Low Res)
-        # We keep this outside the video loop so we don't recreate it every frame
-        try:
-            control_renderer = mujoco.Renderer(model, height=24, width=32)
-        except Exception:
-            control_renderer = None
-
-        # 7. Main Rendering Loop (Using Context Manager as requested)
-        # We use the video_recorder width/height for the output video
-        with mujoco.Renderer(model, height=480, width=640) as renderer:
+    # 7. Main Rendering Loop (Using Context Manager as requested)
+    # We use the video_recorder width/height for the output video
+    with mujoco.Renderer(model, height=480, width=640) as renderer:
         
         while data.time < DURATION:
             
@@ -639,56 +584,53 @@ if __name__ == "__main__":
             # Use the VideoRecorder's write method (handles cv2/saving internally)
             video_recorder.write(frame=renderer.render())
 
-            # 8. Finish
-            video_recorder.release()
-            console.log(f"[green]Video rendering complete. Saved to {path_to_video_folder}[/green]")
+        # 8. Finish
+        video_recorder.release()
+        console.log(f"[green]Video rendering complete. Saved to {path_to_video_folder}[/green]")
 
-            # 9. Save Path Figure
+        # 9. Save Path Figure
 
         # Pick one target position to test on (e.g., the first one)
-            test_target = TARGET_POSITIONS[0]
-            mujoco.mj_resetData(model, data)
-            data.mocap_pos[target_mocap_id] = test_target
+        test_target = TARGET_POSITIONS[0]
+        mujoco.mj_resetData(model, data)
+        data.mocap_pos[target_mocap_id] = test_target
         
         # Run the simulation once more to get the path
-            metrics = run_vision_simulation(
-                model, 
-                data, 
-                network=network, 
-                duration=DURATION, 
-                target_position=np.asarray(test_target),
-                renderer=None, # No need to render video for this
-                cam_name=robot_cam_name,
-                control_step_freq=50
-            )
+        metrics = run_vision_simulation(
+            model, 
+            data, 
+            network=network, 
+            duration=DURATION, 
+            target_position=np.asarray(test_target),
+            renderer=None, # No need to render video for this
+            cam_name=robot_cam_name, # <--- ADD THIS LINE HERE
+            control_step_freq=50
+        )
         
         # Extract X and Y coordinates
-            path = metrics["trajectory"]
-            x_coords = [p[0] for p in path]
-            y_coords = [p[1] for p in path]
+        path = metrics["trajectory"]
+        x_coords = [p[0] for p in path]
+        y_coords = [p[1] for p in path]
         
         # Create the plot
-            if ENABLE_PLOT:
-                plt.figure(figsize=(8, 8))
+        plt.figure(figsize=(8, 8))
         
         # Plot the robot's starting position
-            plt.plot(x_coords[0], y_coords[0], 'go', markersize=10, label='Start')
+        plt.plot(x_coords[0], y_coords[0], 'go', markersize=10, label='Start')
         
         # Plot the Target position
-            plt.plot(test_target[0], test_target[1], 'r*', markersize=15, label='Target')
+        plt.plot(test_target[0], test_target[1], 'r*', markersize=15, label='Target')
         
         # Plot the actual path
-            plt.plot(x_coords, y_coords, 'b-', linewidth=2, label='Robot Path')
+        plt.plot(x_coords, y_coords, 'b-', linewidth=2, label='Robot Path')
         
-            plt.title(f"Robot Trajectory Map (Fitness: {args.fitness})")
-            plt.xlabel("X Position (meters)")
-            plt.ylabel("Y Position (meters)")
-            plt.legend()
-            plt.grid(True)
+        plt.title(f"Robot Trajectory Map (Fitness: {args.fitness})")
+        plt.xlabel("X Position (meters)")
+        plt.ylabel("Y Position (meters)")
+        plt.legend()
+        plt.grid(True)
         
         # Save the plot next to your videos
-                plot_path = os.path.join(path_to_video_folder, f"trajectory_{args.fitness}.png")
-                plt.savefig(plot_path)
-                console.log(f"[green]Trajectory map saved to {plot_path}[/green]")
-    else:
-        console.log("[yellow]Video rendering disabled (--no-video or --headless).[/yellow]")
+        plot_path = os.path.join(path_to_video_folder, f"trajectory_{args.fitness}.png")
+        plt.savefig(plot_path)
+        console.log(f"[green]Trajectory map saved to {plot_path}[/green]")
