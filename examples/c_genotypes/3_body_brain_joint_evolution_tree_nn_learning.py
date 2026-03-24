@@ -14,6 +14,7 @@ candidate morphology.
 import argparse
 import contextlib
 import copy
+import os
 import random
 import time
 from pathlib import Path
@@ -106,6 +107,12 @@ parser.add_argument(
     default=10.0,
     help="Seconds to simulate in passive viewer mode",
 )
+parser.add_argument(
+    "--db-file",
+    type=str,
+    default=None,
+    help="Optional sqlite filename in output folder (default: unique per run).",
+)
 args = parser.parse_args()
 
 POP_SIZE = args.pop
@@ -124,6 +131,13 @@ SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
 DATA = CWD / "__data__" / SCRIPT_NAME
 DATA.mkdir(exist_ok=True, parents=True)
+
+RUN_ID = time.strftime("%Y%m%d_%H%M%S")
+DB_FILE_NAME = (
+    args.db_file
+    if args.db_file is not None
+    else f"database_{RUN_ID}_{os.getpid()}.db"
+)
 
 SPAWN_POSITION = (-0.8, 0.0, 0.1)
 TARGET_POSITION = np.array([2.0, 0.0, 0.1])
@@ -180,8 +194,8 @@ class JointTreeNNLearningEvolution:
             num_steps=BUDGET,
             target_population_size=POP_SIZE,
             output_folder=DATA,
-            db_file_name="database.db",
-            db_handling="delete",
+            db_file_name=DB_FILE_NAME,
+            db_handling="halt",
         )
 
     def map_genotype_to_body(self, genome_data: dict | TreeGenome) -> mujoco.MjSpec | None:
