@@ -1,4 +1,5 @@
 # Standard libraries
+import gc
 import random
 from typing import Literal, cast, List, Optional, Any
 from pathlib import Path
@@ -432,10 +433,11 @@ def main():
     best_weights, final_input_dim = evolve(world, model, data)
     
     return model, data, best_weights, world, final_input_dim
-
 if __name__ == "__main__":
     start = time.time()
     model, data, best_weights, world, input_dim = main()
+    gc.disable()
+
     end = time.time()
 
     console.log(f"Evolution took {(end-start)/60:.2f} minutes")
@@ -443,12 +445,12 @@ if __name__ == "__main__":
     weights_path = "3_spider_vision_new.npy"
     # Unconditionally save the new weights, overwriting any old ones
     np.save(weights_path, best_weights)
-    console.log(f"Best weights saved to {weights_path}")
+    console.log(f"[green]Best weights saved to {weights_path}[/green]")
 
 # ============================================================================ #
 #                           Initialise world and                               #
-#                           load best  performer                               #
-#                           for  video recording                               #
+#                           load best performer                                #
+#                           for video recording                                #
 # ============================================================================ #
     network = Network(
         input_size=input_dim, 
@@ -465,21 +467,17 @@ if __name__ == "__main__":
         if ("camera" in cam_name or "core" in cam_name) and "video" not in cam_name:
             robot_cam_name = cam_name
             break
-            
-    console.log("Rendering Best Video...")
+
     path_to_video_folder = str(DATA / "videos")
+    os.makedirs(path_to_video_folder, exist_ok=True) # Ensure folder exists
     
+    # Reset Simulation & Target
     mujoco.mj_resetData(model, data)
-    
-    # Set target to middle position for the video demo
     target_mocap_id = model.body("green_target").mocapid[0]
     data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
     
-    # 1. Renderer for Robot Vision (Low Res)
+    # 1. Setup separate renderer for the Robot's Vision (Low Res)
     control_renderer = mujoco.Renderer(model, height=24, width=32)
-    
-    # 2. Renderer for Video Output (High Res)
-    video_capture_renderer = mujoco.Renderer(model, height=480, width=640)
     
     def get_vision_control_signal(m, d):
         if robot_cam_name:
@@ -505,73 +503,48 @@ if __name__ == "__main__":
         
         return network.forward(m, d, state)
 
-    # Video Timing Variables
-    fps = 30
-    video_dt = 1.0 / fps
-    next_video_time = 0.0
-    frames = []
-
-    # Simulation Timing Variables (must match evolve/run_vision_simulation exactly)
-    timestep = model.opt.timestep
-    control_step_freq = 50 
-    
-    current_ctrl = np.zeros(model.nu)
-
 # --- REPLAY BEST & RECORD VIDEO ---
-    console.log("Rendering Best Video...")
-    path_to_video_folder = str(DATA / "videos")
+    console.log("[cyan]Rendering Best Video...[/cyan]")
     
-    # 1. Setup VideoRecorder (using your Ariel library class)
+    # Setup VideoRecorder
     video_recorder = VideoRecorder(
         file_name="spider_vision_best", 
         output_folder=path_to_video_folder
     )
 
-    # 2. Reset Simulation & Target
-    mujoco.mj_resetData(model, data)
-    target_mocap_id = model.body("green_target").mocapid[0]
-    data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
-
-    # 3. Setup Visualization Options (from your snippet)
+    # Setup Visualization Options
     viz_options = mujoco.MjvOption()
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = False
     viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = False
 
-    # 4. Get Camera ID ("video_cam" is the one we created earlier)
-    camera_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, "video_cam")
+    # Get Camera ID ("video_cam")
+    try:
+        camera_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, "video_cam")
+    except Exception:
+        camera_id = -1 # Fallback to default free camera if not found
 
-    # 5. Timing Variables
+    # Timing Variables
     fps = 30
     dt = model.opt.timestep
     steps_per_frame = int(1.0 / (fps * dt))
     control_step_freq = 50
     current_ctrl = np.zeros(model.nu)
 
-    # 6. Setup separate renderer for the Robot's Vision (Low Res)
-    # We keep this outside the video loop so we don't recreate it every frame
-    control_renderer = mujoco.Renderer(model, height=24, width=32)
-
-    # 7. Main Rendering Loop (Using Context Manager as requested)
-    # We use the video_recorder width/height for the output video
+    # Main Rendering Loop (Using Context Manager for safe memory handling)
     with mujoco.Renderer(model, height=480, width=640) as renderer:
         
         while data.time < DURATION:
-            
             # INNER LOOP: Step physics N times to match Video FPS
-            # We must loop manually here to inject the Control Logic
             for _ in range(steps_per_frame):
-                
-                # A. Calculate deduced step (Exact same timing as training)
                 deduced_step = int(np.ceil(data.time / dt))
 
-                # B. Run Network if needed
                 if deduced_step % control_step_freq == 0:
                     current_ctrl = get_vision_control_signal(model, data)
 
-                # C. Apply Control & Step
-                data.ctrl[:] = current_ctrl
+                # Safely copy control array
+                np.copyto(data.ctrl, current_ctrl)
                 mujoco.mj_step(model, data)
 
             # OUTER LOOP: Render Frame (Once per 1/30th second)
@@ -580,57 +553,65 @@ if __name__ == "__main__":
                 scene_option=viz_options, 
                 camera=camera_id
             )
-            
-            # Use the VideoRecorder's write method (handles cv2/saving internally)
             video_recorder.write(frame=renderer.render())
 
-        # 8. Finish
+        # Finish Video
         video_recorder.release()
         console.log(f"[green]Video rendering complete. Saved to {path_to_video_folder}[/green]")
 
-        # 9. Save Path Figure
+# ============================================================================ #
+#                           Plotting the Trajectory                            #
+# ============================================================================ #
+    console.log("[cyan]Generating Trajectory Plot...[/cyan]")
+    
+    # Pick one target position to test on (e.g., the first one)
+    test_target = TARGET_POSITIONS[0]
+    mujoco.mj_resetData(model, data)
+    data.mocap_pos[target_mocap_id] = test_target
+    
+    # Run the simulation once more to get the path
+    metrics = run_vision_simulation(
+        model, 
+        data, 
+        network=network, 
+        duration=DURATION, 
+        target_position=np.asarray(test_target),
+        renderer=None, # No need to render video for this
+        cam_name=robot_cam_name, 
+        control_step_freq=50
+    )
+    
+    # Extract X and Y coordinates
+    path = metrics["trajectory"]
+    x_coords = [p[0] for p in path]
+    y_coords = [p[1] for p in path]
+    
+    # Create the plot
+    plt.figure(figsize=(8, 8))
+    
+    # Plot the robot's starting position
+    plt.plot(x_coords[0], y_coords[0], 'go', markersize=10, label='Start')
+    
+    # Plot the Target position
+    plt.plot(test_target[0], test_target[1], 'r*', markersize=15, label='Target')
+    
+    # Plot the actual path
+    plt.plot(x_coords, y_coords, 'b-', linewidth=2, label='Robot Path')
+    
+    plt.title(f"Robot Trajectory Map (Fitness: {args.fitness})")
+    plt.xlabel("X Position (meters)")
+    plt.ylabel("Y Position (meters)")
+    plt.legend()
+    plt.grid(True)
+    
+    # Save the plot next to your videos
+    plot_path = os.path.join(path_to_video_folder, f"trajectory_{args.fitness}.png")
+    plt.savefig(plot_path)
+    console.log(f"[green]Trajectory map saved to {plot_path}[/green]")
 
-        # Pick one target position to test on (e.g., the first one)
-        test_target = TARGET_POSITIONS[0]
-        mujoco.mj_resetData(model, data)
-        data.mocap_pos[target_mocap_id] = test_target
-        
-        # Run the simulation once more to get the path
-        metrics = run_vision_simulation(
-            model, 
-            data, 
-            network=network, 
-            duration=DURATION, 
-            target_position=np.asarray(test_target),
-            renderer=None, # No need to render video for this
-            cam_name=robot_cam_name, # <--- ADD THIS LINE HERE
-            control_step_freq=50
-        )
-        
-        # Extract X and Y coordinates
-        path = metrics["trajectory"]
-        x_coords = [p[0] for p in path]
-        y_coords = [p[1] for p in path]
-        
-        # Create the plot
-        plt.figure(figsize=(8, 8))
-        
-        # Plot the robot's starting position
-        plt.plot(x_coords[0], y_coords[0], 'go', markersize=10, label='Start')
-        
-        # Plot the Target position
-        plt.plot(test_target[0], test_target[1], 'r*', markersize=15, label='Target')
-        
-        # Plot the actual path
-        plt.plot(x_coords, y_coords, 'b-', linewidth=2, label='Robot Path')
-        
-        plt.title(f"Robot Trajectory Map (Fitness: {args.fitness})")
-        plt.xlabel("X Position (meters)")
-        plt.ylabel("Y Position (meters)")
-        plt.legend()
-        plt.grid(True)
-        
-        # Save the plot next to your videos
-        plot_path = os.path.join(path_to_video_folder, f"trajectory_{args.fitness}.png")
-        plt.savefig(plot_path)
-        console.log(f"[green]Trajectory map saved to {plot_path}[/green]")
+    # ======================================================================== #
+    # THE MAGIC BULLET: Bypass Python's Garbage Collector deadlock
+    # This aggressively terminates the process, instantly releasing all locked 
+    # OpenGL threads back to the OS.
+    # ======================================================================== #
+    os._exit(0)
