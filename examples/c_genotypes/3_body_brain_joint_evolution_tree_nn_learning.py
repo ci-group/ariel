@@ -73,6 +73,12 @@ parser.add_argument("--budget", type=int, default=5, help="EA generations")
 parser.add_argument("--pop", type=int, default=10, help="EA population size")
 parser.add_argument("--dur", type=float, default=5.0, help="Simulation duration")
 parser.add_argument(
+    "--eval-delay",
+    type=float,
+    default=1.0,
+    help="Seconds to simulate before scoring (reduces reward from spawn rolling).",
+)
+parser.add_argument(
     "--learn-budget",
     type=int,
     default=6,
@@ -119,6 +125,7 @@ args = parser.parse_args()
 POP_SIZE = args.pop
 BUDGET = args.budget
 DURATION = args.dur
+EVAL_DELAY = max(0.0, args.eval_delay)
 LEARN_BUDGET = args.learn_budget
 LEARN_POP = args.learn_pop
 NUM_MODULES = args.max_modules
@@ -452,11 +459,22 @@ class JointTreeNNLearningEvolution:
                     fill_parameters(net, vec)
 
                     mujoco.mj_resetData(model, data)
+
+                    # Warm-up phase: no control, no reward. This avoids rewarding
+                    # passive rolling immediately after spawn.
+                    if EVAL_DELAY > 0.0:
+                        data.ctrl[:] = 0.0
+                        delay_steps = int(EVAL_DELAY / model.opt.timestep)
+                        if delay_steps > 0:
+                            mujoco.mj_step(model, data, nstep=delay_steps)
+
+                    dist_start = float(np.linalg.norm(TARGET_POSITION - data.qpos[0:3]))
                     thread_safe_runner(model, data, controller, duration=DURATION)
 
-                    xc, yc, zc = data.qpos[0:3].copy()
-                    xt, yt, zt = TARGET_POSITION
-                    fitness = float(np.sqrt((xt - xc) ** 2 + (yt - yc) ** 2 + (zt - zc) ** 2))
+                    dist_end = float(np.linalg.norm(TARGET_POSITION - data.qpos[0:3]))
+                    progress = dist_start - dist_end
+                    # Minimize negative progress: better walkers obtain lower fitness.
+                    fitness = -progress
 
                     learner.tell(candidate, fitness)
 
@@ -614,7 +632,8 @@ class JointTreeNNLearningEvolution:
 def main() -> None:
     console.rule("[bold magenta]Tree Body + NN Brain Joint Evolution (with Learning)[/bold magenta]")
     console.log(
-        f"Pop={POP_SIZE}, Gens={BUDGET}, LearnBudget={LEARN_BUDGET}, LearnPop={LEARN_POP}, Dur={DURATION}s",
+        f"Pop={POP_SIZE}, Gens={BUDGET}, LearnBudget={LEARN_BUDGET}, LearnPop={LEARN_POP}, "
+        f"Dur={DURATION}s, EvalDelay={EVAL_DELAY}s",
     )
 
     evo = JointTreeNNLearningEvolution()
@@ -627,7 +646,7 @@ def main() -> None:
         return
 
     console.rule("[bold green]Final Best[/bold green]")
-    console.log(f"Best fitness (distance to target): {best.fitness:.4f}")
+    console.log(f"Best fitness (negative active-phase progress): {best.fitness:.4f}")
     console.log(f"Elapsed: {elapsed:.2f}s")
 
     if args.visualize:
