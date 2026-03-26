@@ -55,7 +55,7 @@ from ariel.ec.genotypes.tree.validation import validate_genome_dict
 from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.utils.data_get import get_state_from_data
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.utils.runners import simple_runner
+from ariel.utils.runners import thread_safe_runner
 
 # Pretty logs
 install()
@@ -71,7 +71,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("--budget", type=int, default=5, help="EA generations")
 parser.add_argument("--pop", type=int, default=10, help="EA population size")
-parser.add_argument("--dur", type=float, default=3.0, help="Simulation duration")
+parser.add_argument("--dur", type=float, default=5.0, help="Simulation duration")
 parser.add_argument(
     "--learn-budget",
     type=int,
@@ -376,7 +376,6 @@ class JointTreeNNLearningEvolution:
 
     def individual_learn(self, ind: Individual) -> tuple[float, list[float]]:
         """Learn NN controller for one morphology with CMA-ES."""
-        mujoco.set_mjcb_control(None)
         try:
             try:
                 world, model, data = self.spawn_with_fallback(
@@ -424,8 +423,7 @@ class JointTreeNNLearningEvolution:
                     fill_parameters(net, vec)
 
                     mujoco.mj_resetData(model, data)
-                    mujoco.set_mjcb_control(controller.set_control)
-                    simple_runner(model, data, duration=DURATION)
+                    thread_safe_runner(model, data, controller, duration=DURATION)
 
                     xc, yc, zc = data.qpos[0:3].copy()
                     xt, yt, zt = TARGET_POSITION
@@ -528,10 +526,9 @@ class JointTreeNNLearningEvolution:
             )
 
             mujoco.mj_resetData(model, data)
-            mujoco.set_mjcb_control(controller.set_control)
 
             if mode == "simple":
-                simple_runner(model, data, duration=duration)
+                thread_safe_runner(model, data, controller, duration=duration)
                 return
 
             if sys.platform == "darwin" or not hasattr(mujoco.viewer, "launch_passive"):
@@ -541,6 +538,7 @@ class JointTreeNNLearningEvolution:
                 console.log(
                     "[yellow]Close the viewer window to continue.[/yellow]",
                 )
+                mujoco.set_mjcb_control(controller.set_control)
                 mujoco.viewer.launch(model=model, data=data)
                 return
 
@@ -548,6 +546,7 @@ class JointTreeNNLearningEvolution:
                 sim_start = time.time()
                 while v.is_running() and (time.time() - sim_start) < duration:
                     step_start = time.time()
+                    controller.set_control(model, data)
                     mujoco.mj_step(model, data)
                     v.sync()
                     remaining = model.opt.timestep - (time.time() - step_start)
