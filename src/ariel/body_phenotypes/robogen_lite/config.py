@@ -106,21 +106,13 @@ ALLOWED_ROTATIONS: dict[ModuleType, list[ModuleRotationsIdx]] = {
         ModuleRotationsIdx.DEG_0,
         ModuleRotationsIdx.DEG_45,
         ModuleRotationsIdx.DEG_90,
-        ModuleRotationsIdx.DEG_135,
-        ModuleRotationsIdx.DEG_180,
-        ModuleRotationsIdx.DEG_225,
-        ModuleRotationsIdx.DEG_270,
-        ModuleRotationsIdx.DEG_315,
+
     ],
     ModuleType.HINGE: [
         ModuleRotationsIdx.DEG_0,
         ModuleRotationsIdx.DEG_45,
         ModuleRotationsIdx.DEG_90,
-        ModuleRotationsIdx.DEG_135,
-        ModuleRotationsIdx.DEG_180,
-        ModuleRotationsIdx.DEG_225,
-        ModuleRotationsIdx.DEG_270,
-        ModuleRotationsIdx.DEG_315,
+
     ],
     ModuleType.NONE: [ModuleRotationsIdx.DEG_0],
 }
