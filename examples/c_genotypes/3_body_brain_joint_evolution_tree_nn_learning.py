@@ -165,7 +165,18 @@ class Network(nn.Module):
 
     @torch.inference_mode()
     def forward(self, model, data):
-        state = torch.tensor(get_state_from_data(data), dtype=torch.float32)
+        robot_state = get_state_from_data(data)
+        phase_inputs = np.array(
+            [
+                2.0 * np.sin(data.time * 2.0 * np.pi),
+                2.0 * np.cos(data.time * 2.0 * np.pi),
+            ],
+            dtype=np.float32,
+        )
+        state = torch.tensor(
+            np.concatenate([robot_state, phase_inputs]).astype(np.float32),
+            dtype=torch.float32,
+        )
         x = self.hidden_activation(self.fc1(state))
         x = self.hidden_activation(self.fc2(x))
         x = self.output_activation(self.fc_out(x)) * (torch.pi / 2)
@@ -388,17 +399,35 @@ class JointTreeNNLearningEvolution:
             if model.nu == 0:
                 return float("inf"), []
 
+            # net = Network(
+            #     input_size=len(get_state_from_data(data)),
+            #     output_size=model.nu,
+            #     hidden_size=32,
+            # )
+            # num_vars = sum(p.numel() for p in net.parameters())
+
+            # param = ng.p.Array(shape=(num_vars,))
+            # learner = ng.optimizers.registry["CMA"](
+            #     parametrization=param,
+            #     budget=LEARN_BUDGET * LEARN_POP,
+            # )
+
             net = Network(
-                input_size=len(get_state_from_data(data)),
+                input_size=len(get_state_from_data(data)) + 2,
                 output_size=model.nu,
                 hidden_size=32,
             )
-            num_vars = sum(p.numel() for p in net.parameters())
-
-            param = ng.p.Array(shape=(num_vars,))
-            learner = ng.optimizers.registry["CMA"](
+            num_params = sum(p.numel() for p in net.parameters())
+            
+            initial_guess = np.random.uniform(low=-0.5, high=0.5, size=num_params)
+            param = ng.p.Array(init=initial_guess)
+            param.set_mutation(sigma=0.075) 
+            
+            cma_config = ng.optimizers.ParametrizedCMA(popsize=POP_SIZE)
+            learner = cma_config(
                 parametrization=param,
-                budget=LEARN_BUDGET * LEARN_POP,
+                budget=(BUDGET * POP_SIZE),
+                num_workers=POP_SIZE, 
             )
 
             tracker = Tracker(
@@ -504,7 +533,7 @@ class JointTreeNNLearningEvolution:
                 return
 
             net = Network(
-                input_size=len(get_state_from_data(data)),
+                input_size=len(get_state_from_data(data)) + 2,
                 output_size=model.nu,
                 hidden_size=32,
             )
