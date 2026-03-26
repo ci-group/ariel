@@ -16,6 +16,7 @@ import contextlib
 import copy
 import os
 import random
+import sys
 import time
 from pathlib import Path
 from typing import Literal
@@ -86,7 +87,7 @@ parser.add_argument(
 parser.add_argument(
     "--max-modules",
     type=int,
-    default=20,
+    default=10,
     help="Maximum tree modules",
 )
 parser.add_argument(
@@ -377,65 +378,69 @@ class JointTreeNNLearningEvolution:
         """Learn NN controller for one morphology with CMA-ES."""
         mujoco.set_mjcb_control(None)
         try:
-            world, model, data = self.spawn_with_fallback(
-                ind.genotype["morph"],
-                SPAWN_POSITION,
+            try:
+                world, model, data = self.spawn_with_fallback(
+                    ind.genotype["morph"],
+                    SPAWN_POSITION,
+                )
+            except Exception:
+                return float("inf"), []
+
+            if model.nu == 0:
+                return float("inf"), []
+
+            net = Network(
+                input_size=len(get_state_from_data(data)),
+                output_size=model.nu,
+                hidden_size=32,
             )
-        except Exception:
-            return float("inf"), []
+            num_vars = sum(p.numel() for p in net.parameters())
 
-        if model.nu == 0:
-            return float("inf"), []
+            param = ng.p.Array(shape=(num_vars,))
+            learner = ng.optimizers.registry["CMA"](
+                parametrization=param,
+                budget=LEARN_BUDGET * LEARN_POP,
+            )
 
-        net = Network(
-            input_size=len(get_state_from_data(data)),
-            output_size=model.nu,
-            hidden_size=32,
-        )
-        num_vars = sum(p.numel() for p in net.parameters())
+            tracker = Tracker(
+                name_to_bind="core",
+                observable_attributes=["xpos"],
+                quiet=True,
+            )
+            tracker.setup(world.spec, data)
 
-        param = ng.p.Array(shape=(num_vars,))
-        learner = ng.optimizers.registry["CMA"](
-            parametrization=param,
-            budget=LEARN_BUDGET * LEARN_POP,
-        )
+            controller = Controller(
+                controller_callback_function=net.forward,
+                tracker=tracker,
+            )
 
-        tracker = Tracker(
-            name_to_bind="core",
-            observable_attributes=["xpos"],
-            quiet=True,
-        )
-        tracker.setup(world.spec, data)
+            best_fit = float("inf")
+            best_vec: list[float] = []
 
-        controller = Controller(
-            controller_callback_function=net.forward,
-            tracker=tracker,
-        )
+            for _ in range(LEARN_BUDGET):
+                candidates = [learner.ask() for _ in range(LEARN_POP)]
+                for candidate in candidates:
+                    vec = candidate.value
+                    fill_parameters(net, vec)
 
-        best_fit = float("inf")
-        best_vec: list[float] = []
+                    mujoco.mj_resetData(model, data)
+                    mujoco.set_mjcb_control(controller.set_control)
+                    simple_runner(model, data, duration=DURATION)
 
-        for _ in range(LEARN_BUDGET):
-            candidates = [learner.ask() for _ in range(LEARN_POP)]
-            for candidate in candidates:
-                vec = candidate.value
-                fill_parameters(net, vec)
+                    xc, yc, zc = data.qpos[0:3].copy()
+                    xt, yt, zt = TARGET_POSITION
+                    fitness = float(np.sqrt((xt - xc) ** 2 + (yt - yc) ** 2 + (zt - zc) ** 2))
 
-                mujoco.mj_resetData(model, data)
-                mujoco.set_mjcb_control(controller.set_control)
-                simple_runner(model, data, duration=DURATION)
+                    learner.tell(candidate, fitness)
 
-                xc, yc, zc = data.qpos[0:3].copy()
-                xt, yt, zt = TARGET_POSITION
-                fitness = float(np.sqrt((xt - xc) ** 2 + (yt - yc) ** 2 + (zt - zc) ** 2))
+                    if fitness < best_fit:
+                        best_fit = fitness
+                        best_vec = vec.tolist()
 
-                learner.tell(candidate, fitness)
-
-                if fitness < best_fit:
-                    best_fit = fitness
-                    best_vec = vec.tolist()
-
-        return best_fit, best_vec
+            return best_fit, best_vec
+        finally:
+            # MuJoCo control callback is global process state; clear it between runs.
+            mujoco.set_mjcb_control(None)
 
     def evaluate(self, population: Population) -> Population:
         """Evaluate all unevaluated individuals via NN learning."""
@@ -485,57 +490,71 @@ class JointTreeNNLearningEvolution:
         duration: float = 10.0,
     ) -> None:
         """Replay best morphology with its learned NN controller."""
+        mujoco.set_mjcb_control(None)
         try:
-            world, model, data = self.spawn_with_fallback(
-                best.genotype["morph"],
-                SPAWN_POSITION,
+            try:
+                world, model, data = self.spawn_with_fallback(
+                    best.genotype["morph"],
+                    SPAWN_POSITION,
+                )
+            except Exception as exc:
+                console.log(f"[red]Could not spawn best morphology for replay: {exc}[/red]")
+                return
+
+            if model.nu == 0:
+                console.log("[red]Best morphology has no actuators; cannot simulate controller.[/red]")
+                return
+
+            net = Network(
+                input_size=len(get_state_from_data(data)),
+                output_size=model.nu,
+                hidden_size=32,
             )
-        except Exception as exc:
-            console.log(f"[red]Could not spawn best morphology for replay: {exc}[/red]")
-            return
 
-        if model.nu == 0:
-            console.log("[red]Best morphology has no actuators; cannot simulate controller.[/red]")
-            return
+            brain_vec = best.tags.get("last_brain", [])
+            if brain_vec:
+                fill_parameters(net, brain_vec)
 
-        net = Network(
-            input_size=len(get_state_from_data(data)),
-            output_size=model.nu,
-            hidden_size=32,
-        )
+            tracker = Tracker(
+                name_to_bind="core",
+                observable_attributes=["xpos"],
+                quiet=True,
+            )
+            tracker.setup(world.spec, data)
 
-        brain_vec = best.tags.get("last_brain", [])
-        if brain_vec:
-            fill_parameters(net, brain_vec)
+            controller = Controller(
+                controller_callback_function=net.forward,
+                tracker=tracker,
+            )
 
-        tracker = Tracker(
-            name_to_bind="core",
-            observable_attributes=["xpos"],
-            quiet=True,
-        )
-        tracker.setup(world.spec, data)
+            mujoco.mj_resetData(model, data)
+            mujoco.set_mjcb_control(controller.set_control)
 
-        controller = Controller(
-            controller_callback_function=net.forward,
-            tracker=tracker,
-        )
+            if mode == "simple":
+                simple_runner(model, data, duration=duration)
+                return
 
-        mujoco.mj_resetData(model, data)
-        mujoco.set_mjcb_control(controller.set_control)
+            if sys.platform == "darwin" or not hasattr(mujoco.viewer, "launch_passive"):
+                console.log(
+                    "[yellow]Using active MuJoCo viewer fallback (passive viewer unavailable).[/yellow]",
+                )
+                console.log(
+                    "[yellow]Close the viewer window to continue.[/yellow]",
+                )
+                mujoco.viewer.launch(model=model, data=data)
+                return
 
-        if mode == "simple":
-            simple_runner(model, data, duration=duration)
-            return
-
-        with mujoco.viewer.launch_passive(model, data) as v:
-            sim_start = time.time()
-            while v.is_running() and (time.time() - sim_start) < duration:
-                step_start = time.time()
-                mujoco.mj_step(model, data)
-                v.sync()
-                remaining = model.opt.timestep - (time.time() - step_start)
-                if remaining > 0:
-                    time.sleep(remaining)
+            with mujoco.viewer.launch_passive(model, data) as v:
+                sim_start = time.time()
+                while v.is_running() and (time.time() - sim_start) < duration:
+                    step_start = time.time()
+                    mujoco.mj_step(model, data)
+                    v.sync()
+                    remaining = model.opt.timestep - (time.time() - step_start)
+                    if remaining > 0:
+                        time.sleep(remaining)
+        finally:
+            mujoco.set_mjcb_control(None)
 
     def evolve(self) -> Individual | None:
         console.log("Initializing population...")
