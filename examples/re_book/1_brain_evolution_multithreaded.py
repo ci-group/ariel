@@ -7,7 +7,7 @@ import time
 import os
 import threading
 import cv2 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 
 # Pretty little errors and progress bars
 from rich.console import Console
@@ -217,8 +217,9 @@ def run_vision_simulation(model,
             # --- CONTROL STEP ---
             # Only run expensive vision and network pass every N steps
             if deduced_step % control_step_freq == 0:
-                renderer.update_scene(data, camera=cam_name)
-                img = renderer.render()
+                with _RENDER_STEP_LOCK:
+                    renderer.update_scene(data, camera=cam_name)
+                    img = renderer.render()
                 
                 # 2. Process Vision
                 mask = isolate_green(img)
@@ -278,6 +279,7 @@ def run_vision_simulation(model,
 
 _THREAD_LOCAL = threading.local()
 _RENDER_INIT_LOCK = threading.Lock()
+_RENDER_STEP_LOCK = threading.Lock()
 
 
 def _build_simulation_context() -> dict[str, Any]:
@@ -323,14 +325,10 @@ def _build_simulation_context() -> dict[str, Any]:
         hidden_size=32,
     )
 
-    with _RENDER_INIT_LOCK:
-        renderer = mujoco.Renderer(model, height=24, width=32)
-
     return {
         "model": model,
         "data": data,
         "network": network,
-        "renderer": renderer,
         "robot_cam_name": robot_cam_name,
         "target_mocap_id": target_mocap_id,
         "input_dim": input_dim,
@@ -376,42 +374,47 @@ def _evaluate_candidate(weights: np.ndarray) -> float:
     model = cast(mujoco.MjModel, ctx["model"])
     data = cast(mujoco.MjData, ctx["data"])
     network = cast(Network, ctx["network"])
-    renderer = cast(mujoco.Renderer, ctx["renderer"])
     robot_cam_name = cast(Optional[str], ctx["robot_cam_name"])
     target_mocap_id = cast(int, ctx["target_mocap_id"])
 
     fill_parameters(network, torch.as_tensor(weights, dtype=torch.float32))
 
-    total_fitness = 0.0
-    for target_pos in TARGET_POSITIONS:
-        mujoco.mj_resetData(model, data)
-        data.mocap_pos[target_mocap_id] = target_pos
+    with _RENDER_INIT_LOCK:
+        renderer = mujoco.Renderer(model, height=24, width=32)
 
-        initial_pos = np.array(data.qpos[0:3].copy())
-        target_pos_arr = np.array(target_pos)
+    try:
+        total_fitness = 0.0
+        for target_pos in TARGET_POSITIONS:
+            mujoco.mj_resetData(model, data)
+            data.mocap_pos[target_mocap_id] = target_pos
 
-        metrics = run_vision_simulation(
-            model,
-            data,
-            network=network,
-            duration=DURATION,
-            target_position=target_pos_arr,
-            renderer=renderer,
-            cam_name=robot_cam_name,
-            control_step_freq=50,
-        )
+            initial_pos = np.array(data.qpos[0:3].copy())
+            target_pos_arr = np.array(target_pos)
 
-        final_pos = np.array(data.qpos[0:3].copy())
-        final_z_height = final_pos[2]
-        total_fitness += _fitness_from_metrics(
-            initial_pos=initial_pos,
-            final_pos=final_pos,
-            final_z_height=final_z_height,
-            target_pos_arr=target_pos_arr,
-            metrics=metrics,
-        )
+            metrics = run_vision_simulation(
+                model,
+                data,
+                network=network,
+                duration=DURATION,
+                target_position=target_pos_arr,
+                renderer=renderer,
+                cam_name=robot_cam_name,
+                control_step_freq=50,
+            )
 
-    return total_fitness / len(TARGET_POSITIONS)
+            final_pos = np.array(data.qpos[0:3].copy())
+            final_z_height = final_pos[2]
+            total_fitness += _fitness_from_metrics(
+                initial_pos=initial_pos,
+                final_pos=final_pos,
+                final_z_height=final_z_height,
+                target_pos_arr=target_pos_arr,
+                metrics=metrics,
+            )
+
+        return total_fitness / len(TARGET_POSITIONS)
+    finally:
+        renderer.close()
 
 def evolve(world, model, data) -> tuple[np.ndarray, int]:
     """Evolve the robot's movement using multithreaded candidate evaluation."""
@@ -437,11 +440,61 @@ def evolve(world, model, data) -> tuple[np.ndarray, int]:
 
     console.log(f"Population size: {POP_SIZE} | Workers: {NUM_WORKERS}")
 
-    # The context manager handles worker shutdown and joining.
-    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+    eval_timeout_s = max(30, int(DURATION * 8))
+    console.log(f"[cyan]Evaluator mode: generation-deadline ({eval_timeout_s}s) + non-blocking shutdown[/cyan]")
+
+    executor = ThreadPoolExecutor(max_workers=NUM_WORKERS)
+    timed_out = False
+    try:
         for bud in range(BUDGET + 1):
             candidates = [optimizer.ask() for _ in range(POP_SIZE)]
-            fitnesses = list(executor.map(_evaluate_candidate, [c.value for c in candidates]))
+            futures = [executor.submit(_evaluate_candidate, c.value) for c in candidates]
+            fitnesses: list[float] = [float("inf")] * len(candidates)
+            future_to_idx = {future: idx for idx, future in enumerate(futures)}
+
+            start_t = time.monotonic()
+            deadline = start_t + eval_timeout_s
+            pending = set(futures)
+            last_progress_log_t = start_t
+
+            while pending:
+                now = time.monotonic()
+                remaining = deadline - now
+                if remaining <= 0:
+                    break
+
+                done, pending = wait(
+                    pending,
+                    timeout=min(2.0, max(0.1, remaining)),
+                    return_when=FIRST_COMPLETED,
+                )
+
+                for future in done:
+                    idx = future_to_idx[future]
+                    try:
+                        fitnesses[idx] = float(future.result())
+                    except Exception as exc:
+                        console.log(
+                            f"[yellow]Candidate failed at generation {bud}, index {idx}: {exc}; assigning inf fitness.[/yellow]"
+                        )
+                        fitnesses[idx] = float("inf")
+
+                if time.monotonic() - last_progress_log_t >= 10.0:
+                    completed = len(candidates) - len(pending)
+                    elapsed = int(time.monotonic() - start_t)
+                    console.log(
+                        f"[cyan]Gen {bud} eval progress:[/cyan] {completed}/{len(candidates)} completed | elapsed {elapsed}s"
+                    )
+                    last_progress_log_t = time.monotonic()
+
+            if pending:
+                console.log(
+                    f"[yellow]Generation {bud} hit eval deadline ({eval_timeout_s}s). "
+                    f"Marking {len(pending)} pending candidates as inf and stopping evolution early.[/yellow]"
+                )
+                for future in pending:
+                    future.cancel()
+                timed_out = True
 
             for candidate, fit in zip(candidates, fitnesses):
                 optimizer.tell(candidate, fit)
@@ -449,6 +502,12 @@ def evolve(world, model, data) -> tuple[np.ndarray, int]:
             gen_best = float(np.min(fitnesses))
             console.rule(f"Budget: {bud}/{BUDGET}")
             console.log(f"Best Fit (Gen): {gen_best:.4f}")
+
+            if timed_out:
+                break
+    finally:
+        # Never block on thread joins if a worker gets stuck in native code.
+        executor.shutdown(wait=False, cancel_futures=True)
 
     best_ind = optimizer.provide_recommendation().value
     return best_ind, input_dim
