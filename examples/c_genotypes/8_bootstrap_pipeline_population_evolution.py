@@ -820,8 +820,9 @@ def main() -> None:
     best_genome = TreeGenome.from_dict(best.genotype["morph"])
     best_brain = best.tags.get("last_brain", [])
 
-    morph_path = DATA / "best_morphology.json"
-    brain_path = DATA / "best_brain.npy"
+    timestamp = int(time.time())
+    morph_path = DATA / f"best_morphology_{timestamp}.json"
+    brain_path = DATA / f"best_brain_{timestamp}.npy"
 
     morph_path.write_text(json.dumps(best_genome.to_dict(), indent=2), encoding="utf-8")
     np.save(brain_path, np.asarray(best_brain, dtype=np.float32))
