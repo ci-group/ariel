@@ -54,6 +54,7 @@ from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.utils.data_get import get_state_from_data
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
+from ariel.utils.video_recorder import VideoRecorder
 
 install()
 console = Console()
@@ -96,6 +97,18 @@ parser.add_argument(
     action=argparse.BooleanOptionalAction,
     default=True,
     help="Visualize the final best individual",
+)
+parser.add_argument(
+    "--save-video",
+    action=argparse.BooleanOptionalAction,
+    default=True,
+    help="Save a video of the final best individual",
+)
+parser.add_argument(
+    "--video-duration",
+    type=float,
+    default=10.0,
+    help="Duration of saved best-individual video in seconds",
 )
 args = parser.parse_args()
 
@@ -567,24 +580,88 @@ class MinimalJointEvolution:
             controller = Controller(controller_callback_function=net.forward, tracker=tracker)
 
             mujoco.mj_resetData(model, data)
+            total_duration = duration + EVAL_DELAY
 
             if sys.platform == "darwin" or not hasattr(mujoco.viewer, "launch_passive"):
                 console.log("[yellow]Using active MuJoCo viewer fallback (passive viewer unavailable).[/yellow]")
                 console.log("[yellow]Close the viewer window to continue.[/yellow]")
-                mujoco.set_mjcb_control(controller.set_control)
+
+                def _delayed_control(model, data):
+                    if data.time < EVAL_DELAY:
+                        data.ctrl[:] = 0.0
+                        return
+                    controller.set_control(model, data)
+
+                mujoco.set_mjcb_control(_delayed_control)
                 mujoco.viewer.launch(model=model, data=data)
                 return
 
             with mujoco.viewer.launch_passive(model, data) as v:
                 sim_start = time.time()
-                while v.is_running() and (time.time() - sim_start) < duration:
+                while v.is_running() and (time.time() - sim_start) < total_duration:
                     step_start = time.time()
-                    controller.set_control(model, data)
+                    if data.time < EVAL_DELAY:
+                        data.ctrl[:] = 0.0
+                    else:
+                        controller.set_control(model, data)
                     mujoco.mj_step(model, data)
                     v.sync()
                     remaining = model.opt.timestep - (time.time() - step_start)
                     if remaining > 0:
                         time.sleep(remaining)
+        finally:
+            mujoco.set_mjcb_control(None)
+
+    def save_best_video(self, best: Individual, duration: float = 10.0) -> None:
+        mujoco.set_mjcb_control(None)
+        try:
+            try:
+                world, model, data = self.spawn_with_fallback(best.genotype["morph"], SPAWN_POSITION)
+            except Exception as exc:
+                console.log(f"[red]Could not spawn best morphology for video: {exc}[/red]")
+                return
+
+            if model.nu == 0:
+                console.log("[red]No actuators on best morphology (video skipped).[/red]")
+                return
+
+            net = Network(input_size=len(get_state_from_data(data)) + 2, output_size=model.nu, hidden_size=16)
+            brain_vec = best.tags.get("last_brain", [])
+            if brain_vec:
+                fill_parameters(net, brain_vec)
+
+            tracker = Tracker(name_to_bind="core", observable_attributes=["xpos"], quiet=True)
+            tracker.setup(world.spec, data)
+            controller = Controller(controller_callback_function=net.forward, tracker=tracker)
+
+            videos_dir = DATA / "videos"
+            videos_dir.mkdir(exist_ok=True, parents=True)
+            video_recorder = VideoRecorder(file_name="best_individual", output_folder=videos_dir)
+
+            mujoco.mj_resetData(model, data)
+            total_duration = duration + EVAL_DELAY
+            steps_per_frame = max(1, int(round(1.0 / (model.opt.timestep * video_recorder.fps))))
+
+            with mujoco.Renderer(
+                model,
+                width=video_recorder.width,
+                height=video_recorder.height,
+            ) as renderer:
+                while data.time < total_duration:
+                    for _ in range(steps_per_frame):
+                        if data.time < EVAL_DELAY:
+                            data.ctrl[:] = 0.0
+                        else:
+                            controller.set_control(model, data)
+                        mujoco.mj_step(model, data)
+                        if data.time >= total_duration:
+                            break
+
+                    renderer.update_scene(data)
+                    video_recorder.write(renderer.render())
+
+            video_recorder.release()
+            console.log(f"[green]Saved best-individual video to {videos_dir}[/green]")
         finally:
             mujoco.set_mjcb_control(None)
 
@@ -632,6 +709,9 @@ def main() -> None:
     console.rule("[bold green]Final Best[/bold green]")
     console.log(f"Best combined fitness: {best.fitness:.4f}")
     console.log(f"Elapsed: {elapsed:.2f}s")
+
+    if args.save_video:
+        evo.save_best_video(best, duration=args.video_duration)
 
     if args.visualize:
         evo.run_best(best, duration=10.0)
