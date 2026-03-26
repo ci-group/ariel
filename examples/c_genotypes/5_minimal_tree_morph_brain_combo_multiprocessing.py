@@ -61,11 +61,11 @@ console = Console()
 
 parser = argparse.ArgumentParser(description="Minimal tree morphology + brain joint evolution (multiprocessing)")
 parser.add_argument("--budget", type=int, default=20, help="Morphology generations")
-parser.add_argument("--pop", type=int, default=10, help="Morphology population")
+parser.add_argument("--pop", type=int, default=16, help="Morphology population")
 parser.add_argument("--dur", type=float, default=5.0, help="Active control duration")
 parser.add_argument("--eval-delay", type=float, default=1.0, help="Warm-up seconds before scoring")
 parser.add_argument("--learn-budget", type=int, default=4, help="CMA iterations per morphology")
-parser.add_argument("--learn-pop", type=int, default=10, help="CMA population per iteration")
+parser.add_argument("--learn-pop", type=int, default=16, help="CMA population per iteration")
 parser.add_argument(
     "--eval-workers",
     type=int,
@@ -168,7 +168,7 @@ def morphology_fitness_term(genome: TreeGenome) -> float:
             + m.length_of_limbs * 0.20
             + m.module_diversity * 0.20
         )
-        return -float(score)
+        return -float(score)/10
     except Exception:
         return float("inf")
 
