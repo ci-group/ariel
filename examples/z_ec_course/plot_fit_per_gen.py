@@ -5,7 +5,7 @@ import sqlite3
 import numpy as np
 
 def plot_fit_per_gen():
-    data = pd.read_sql("SELECT * FROM individual", sqlite3.connect("__data__/database.db"))
+    data = pd.read_sql("SELECT * FROM individual", sqlite3.connect("__data__/long_database.db"))
 
     # Get minimum and maximum generation number
     min_gen = int(data['time_of_birth'].min())
@@ -86,6 +86,10 @@ def plot_fit_per_gen():
     plt.title('Fitness statistics per generation')
     plt.legend()
     plt.grid(alpha=0.3)
-    plt.yticks(range(0, int(max(df["fitness_mean"]) + 5), 2))
+    plt.yticks(range(0, int(max(df["fitness_mean"]) + 1), 2))
     plt.tight_layout()
-    plt.show()
+    plt.savefig("fitness_per_generation.png")
+
+
+if __name__ == "__main__":
+    plot_fit_per_gen()

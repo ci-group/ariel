@@ -27,16 +27,17 @@ To run the code examples, please do:
 1. Clone the repository
 ```bash
 git clone https://github.com/ci-group/ariel.git
+cd ariel
 ```
-3. Create a uv virtual environment inside the repository folder
+2. Create a uv virtual environment inside the repository folder
 ```bash
   uv venv
 ```
-4. Sync the virtual environment with the requirements
+3. Sync the virtual environment with the requirements
 ```bash
 uv sync
 ```
-5. Run an example, in this case, brain evolution (aka learning) using:
+4. Run an example, in this case, brain evolution (aka learning) using:
 ```bash
 uv run examples/re_book/1_brain_evolution.py
 ```
