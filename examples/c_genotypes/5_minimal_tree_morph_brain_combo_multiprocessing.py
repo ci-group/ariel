@@ -54,7 +54,6 @@ from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.utils.data_get import get_state_from_data
 from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
-from ariel.utils.runners import thread_safe_runner
 
 install()
 console = Console()
@@ -63,7 +62,18 @@ parser = argparse.ArgumentParser(description="Minimal tree morphology + brain jo
 parser.add_argument("--budget", type=int, default=20, help="Morphology generations")
 parser.add_argument("--pop", type=int, default=16, help="Morphology population")
 parser.add_argument("--dur", type=float, default=5.0, help="Active control duration")
-parser.add_argument("--eval-delay", type=float, default=1.0, help="Warm-up seconds before scoring")
+parser.add_argument(
+    "--eval-delay",
+    type=float,
+    default=2.0,
+    help="No-control warm-up seconds before scoring (minimum enforced: 2.0)",
+)
+parser.add_argument(
+    "--z-penalty-weight",
+    type=float,
+    default=2.0,
+    help="Penalty weight for vertical (z-axis) motion during active control",
+)
 parser.add_argument("--learn-budget", type=int, default=4, help="CMA iterations per morphology")
 parser.add_argument("--learn-pop", type=int, default=16, help="CMA population per iteration")
 parser.add_argument(
@@ -92,7 +102,8 @@ args = parser.parse_args()
 POP_SIZE = args.pop
 BUDGET = args.budget
 DURATION = args.dur
-EVAL_DELAY = max(0.0, args.eval_delay)
+EVAL_DELAY = max(2.0, args.eval_delay)
+Z_PENALTY_WEIGHT = max(0.0, args.z_penalty_weight)
 LEARN_BUDGET = args.learn_budget
 LEARN_POP = args.learn_pop
 EVAL_WORKERS = max(1, min(args.eval_workers, POP_SIZE))
@@ -114,7 +125,7 @@ TARGET_POSITION = np.array([2.0, 0.0, 0.1], dtype=np.float32)
 
 
 class Network(nn.Module):
-    def __init__(self, input_size: int, output_size: int, hidden_size: int = 32) -> None:
+    def __init__(self, input_size: int, output_size: int, hidden_size: int = 16) -> None:
         super().__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
@@ -207,6 +218,7 @@ def _learn_brain_progress_for_genome(
     learn_budget: int,
     learn_pop: int,
     target_position: np.ndarray,
+    z_penalty_weight: float,
 ) -> tuple[float, list[float]]:
     try:
         world, model, data = _spawn_with_fallback(genome_dict, SPAWN_POSITION)
@@ -219,7 +231,7 @@ def _learn_brain_progress_for_genome(
     net = Network(
         input_size=len(get_state_from_data(data)) + 2,
         output_size=model.nu,
-        hidden_size=32,
+        hidden_size=16,
     )
     num_params = sum(p.numel() for p in net.parameters())
 
@@ -233,7 +245,7 @@ def _learn_brain_progress_for_genome(
     tracker.setup(world.spec, data)
     controller = Controller(controller_callback_function=net.forward, tracker=tracker)
 
-    best_progress = -float("inf")
+    best_score = -float("inf")
     best_vec: list[float] = []
 
     for _ in range(learn_budget):
@@ -246,41 +258,53 @@ def _learn_brain_progress_for_genome(
             if eval_delay > 0.0:
                 data.ctrl[:] = 0.0
                 delay_steps = int(eval_delay / model.opt.timestep)
-                if delay_steps > 0:
-                    mujoco.mj_step(model, data, nstep=delay_steps)
+                for _ in range(max(0, delay_steps)):
+                    data.ctrl[:] = 0.0
+                    mujoco.mj_step(model, data)
 
             dist_start = float(np.linalg.norm(target_position - data.qpos[0:3]))
-            thread_safe_runner(model, data, controller, duration=duration)
+
+            # Active control starts only after the no-control warm-up.
+            z_ref = float(data.qpos[2])
+            z_dev_accum = 0.0
+            active_steps = max(1, int(duration / model.opt.timestep))
+            for _ in range(active_steps):
+                controller.set_control(model, data)
+                mujoco.mj_step(model, data)
+                z_dev_accum += abs(float(data.qpos[2]) - z_ref)
+
             dist_end = float(np.linalg.norm(target_position - data.qpos[0:3]))
             progress = dist_start - dist_end
+            z_penalty = z_dev_accum / active_steps
+            score = progress - (z_penalty_weight * z_penalty)
 
-            learner.tell(candidate, -progress)
-            if progress > best_progress:
-                best_progress = progress
+            learner.tell(candidate, -score)
+            if score > best_score:
+                best_score = score
                 best_vec = vec.tolist()
 
-    return best_progress, best_vec
+    return best_score, best_vec
 
 
-def _evaluate_individual_process(task: tuple[dict, float, float, int, int, float]) -> tuple[float, list[float]]:
-    genome_dict, duration, eval_delay, learn_budget, learn_pop, morph_weight = task
+def _evaluate_individual_process(task: tuple[dict, float, float, int, int, float, float]) -> tuple[float, list[float]]:
+    genome_dict, duration, eval_delay, learn_budget, learn_pop, morph_weight, z_penalty_weight = task
     try:
         genome = TreeGenome.from_dict(genome_dict)
         morph_term = morphology_fitness_term(genome)
-        progress, best_vec = _learn_brain_progress_for_genome(
+        score, best_vec = _learn_brain_progress_for_genome(
             genome_dict,
             duration,
             eval_delay,
             learn_budget,
             learn_pop,
             TARGET_POSITION,
+            z_penalty_weight,
         )
 
-        if not np.isfinite(morph_term) or not np.isfinite(progress):
+        if not np.isfinite(morph_term) or not np.isfinite(score):
             return float("inf"), best_vec
 
-        displacement_term = -progress
-        fit = displacement_term + morph_weight * morph_term
+        fit = -score + morph_weight * morph_term
         return fit, best_vec
     except Exception:
         return float("inf"), []
@@ -441,6 +465,7 @@ class MinimalJointEvolution:
                 LEARN_BUDGET,
                 LEARN_POP,
                 MORPH_WEIGHT,
+                Z_PENALTY_WEIGHT,
             )
             for ind in to_eval
         ]
@@ -532,7 +557,7 @@ class MinimalJointEvolution:
                 console.log("[red]No actuators on best morphology.[/red]")
                 return
 
-            net = Network(input_size=len(get_state_from_data(data)) + 2, output_size=model.nu, hidden_size=32)
+            net = Network(input_size=len(get_state_from_data(data)) + 2, output_size=model.nu, hidden_size=16)
             brain_vec = best.tags.get("last_brain", [])
             if brain_vec:
                 fill_parameters(net, brain_vec)
@@ -592,7 +617,7 @@ def main() -> None:
     console.log(
         f"Pop={POP_SIZE}, Gens={BUDGET}, LearnBudget={LEARN_BUDGET}, LearnPop={LEARN_POP}, "
         f"EvalWorkers={EVAL_WORKERS}, EvalTimeout={EVAL_TIMEOUT_S}s, "
-        f"Dur={DURATION}s, Delay={EVAL_DELAY}s, MorphWeight={MORPH_WEIGHT}",
+        f"Dur={DURATION}s, Delay={EVAL_DELAY}s, ZPenaltyWeight={Z_PENALTY_WEIGHT}, MorphWeight={MORPH_WEIGHT}",
     )
 
     evo = MinimalJointEvolution()
