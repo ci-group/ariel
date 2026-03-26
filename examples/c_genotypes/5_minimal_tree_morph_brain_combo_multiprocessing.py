@@ -83,12 +83,7 @@ parser.add_argument(
     default=max(1, os.cpu_count() or 1),
     help="Worker processes for parallel individual evaluation",
 )
-parser.add_argument(
-    "--eval-timeout",
-    type=int,
-    default=180,
-    help="Per-generation timeout in seconds for process-based evaluation",
-)
+
 parser.add_argument("--max-modules", type=int, default=10, help="Max modules in tree")
 parser.add_argument("--max-depth", type=int, default=12, help="Max tree depth")
 parser.add_argument("--morph-weight", type=float, default=0.3, help="Weight of morphology term")
@@ -120,7 +115,6 @@ Z_PENALTY_WEIGHT = max(0.0, args.z_penalty_weight)
 LEARN_BUDGET = args.learn_budget
 LEARN_POP = args.learn_pop
 EVAL_WORKERS = max(1, min(args.eval_workers, POP_SIZE))
-EVAL_TIMEOUT_S = max(10, int(args.eval_timeout))
 NUM_MODULES = args.max_modules
 MAX_DEPTH = args.max_depth
 MORPH_WEIGHT = args.morph_weight
@@ -497,48 +491,15 @@ class MinimalJointEvolution:
                 executor.submit(_evaluate_individual_process, task): ind
                 for ind, task in zip(to_eval, tasks)
             }
-
-            pending = set(future_to_ind)
-            start_t = time.monotonic()
-            deadline = start_t + EVAL_TIMEOUT_S
-            completed = 0
-
-            while pending:
-                now = time.monotonic()
-                if now >= deadline:
-                    console.log(
-                        "[yellow]Evaluation timeout reached; assigning inf fitness to "
-                        f"{len(pending)} pending individuals.[/yellow]",
-                    )
-                    for fut in pending:
-                        fut.cancel()
-                        ind = future_to_ind[fut]
-                        ind.fitness = float("inf")
-                        ind.tags["last_brain"] = []
-                        ind.requires_eval = False
-                    break
-
-                done = [f for f in pending if f.done()]
-                if not done:
-                    time.sleep(0.1)
-                    continue
-
-                for fut in done:
-                    pending.remove(fut)
-                    ind = future_to_ind[fut]
-                    try:
-                        fit, best_vec = fut.result()
-                    except Exception:
-                        fit, best_vec = float("inf"), []
-                    ind.fitness = fit
-                    ind.tags["last_brain"] = best_vec
-                    ind.requires_eval = False
-                    completed += 1
-
-            if completed < len(to_eval):
-                console.log(
-                    f"[yellow]Completed {completed}/{len(to_eval)} individual evaluations this generation.[/yellow]",
-                )
+            for fut in as_completed(future_to_ind):
+                ind = future_to_ind[fut]
+                try:
+                    fit, best_vec = fut.result()
+                except Exception:
+                    fit, best_vec = float("inf"), []
+                ind.fitness = fit
+                ind.tags["last_brain"] = best_vec
+                ind.requires_eval = False
 
         return population
 
@@ -693,7 +654,7 @@ def main() -> None:
     console.rule("[bold magenta]Minimal Tree Morph + Brain Evolution (Multiprocessing)[/bold magenta]")
     console.log(
         f"Pop={POP_SIZE}, Gens={BUDGET}, LearnBudget={LEARN_BUDGET}, LearnPop={LEARN_POP}, "
-        f"EvalWorkers={EVAL_WORKERS}, EvalTimeout={EVAL_TIMEOUT_S}s, "
+        f"EvalWorkers={EVAL_WORKERS}, "
         f"Dur={DURATION}s, Delay={EVAL_DELAY}s, ZPenaltyWeight={Z_PENALTY_WEIGHT}, MorphWeight={MORPH_WEIGHT}",
     )
 
