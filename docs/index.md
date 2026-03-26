@@ -34,7 +34,6 @@ See the [installation guide](source/installation_guide.md) for more details.
 :maxdepth: 3
 :caption: Contents:
 
-Introduction to modular robots <source/introduction_to_modular_robots/index>
 Contributing guide <source/contributing_guide/index>
 Installation Guide <source/installation_guide>
 Robot Systems <source/robot_systems/index>
