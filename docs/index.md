@@ -1,31 +1,50 @@
 :layout: landing
-
-# ARIEL - A Robot Evolution Framework
-
+ 
+# ARIEL — A Robot Evolution Framework
+ 
 ![Ariel Logo](resources/ariel_logo.svg)
-
-
-Ariel is a Python package that provides efficient and easy-to-use tools for many aspects of evolutionary computing and evolutionary robotics.  
-It is designed with a clear API, sensible defaults, and support for both beginners and advanced users.
-
+ 
+**ARIEL** is a Python package that provides efficient and easy-to-use tools for evolutionary computing and evolutionary robotics.
+Designed with a clear API, sensible defaults, and support for both beginners and advanced users, ARIEL lets you go from idea to evolving robot with minimal boilerplate.
+ 
 ---
-
+ 
+## Why ARIEL?
+ 
+ARIEL brings together the full evolutionary robotics pipeline in a single, cohesive package:
+ 
+- **End-to-end**: genome encoding → evolution → simulation → result analysis.
+- **Batteries included**: pre-built robot bodies, CPG controllers, and EA operators so you spend time on science, not scaffolding.
+- **Flexible**: swap genotype representations (NDE, CPPN, Tree, Vector) or optimisers without rewriting your experiment.
+- **Scalable**: native support for parallel evaluation via [Ray](source/EA_intro/parallel_ackley).
+- **Reproducible**: built-in database logging and pandas/polars/SQLite export for every run.
+ 
+---
+ 
 ## Features
-
-| Feature                     | Description                                                                                                      |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Evolutionary Algorithms** | Already implemented evolutionary operators.                                                                      |
-| **Evolutionary Robotics**   | Tools for simulating and evolving robots in various environments.                                                |
-
-
-Get started below, or explore the full documentation for more details.
-
+ 
+| Feature | Description |
+|---|---|
+| **Evolutionary Algorithms**       | Ready-to-use EA operators — selection, crossover, mutation — for both continuous and discrete problems.   |
+| **Multiple Genotype Encodings**   | NDE, CPPN, Tree Genome, and Vector representations, each with matching evolutionary operators.            |
+| **Robot Systems**                 | Modular robot morphology and the ARIEL Lynx Arm, simulated in MuJoCo.                                     |
+| **Simulation & Control**          | CPG-based controllers (simple, NA-CPG, normalised) and prebuilt terrains.                   |
+| **Parallelisation**               | Scale evaluations across cores or machines with Ray integration.                                          |
+| **Database & Analysis**           | Automatic SQLite experiment logging with pandas, polars, and sqlite3 query examples.                      |
+| **Visualisation**                 | GUI (in progress) and analysis utilities for plotting fitness progression and robot behaviour.            |
+| **MuJoCo Integration**            | Full access to MuJoCo data variables — forces, sensors, spatial transforms, and more.                     |
+ 
 ---
-
-## Installation Information
-
-See the [installation guide](source/installation_guide.md) for more details.
-
+ 
+## Installation
+ 
+See the [Installation Guide](source/installation_guide) for full details, including:
+ 
+- Supported platforms and prerequisites
+- Installing with `uv` or VS Code Dev Containers (recommended)
+- Verifying your installation
+- Troubleshooting tips
+ 
 ---
 
 ## Contents

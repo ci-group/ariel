@@ -2,6 +2,7 @@
 
 # Third-party libraries
 import mujoco as mj
+from PIL.Image import Image
 
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
@@ -12,8 +13,14 @@ from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.renderers import single_frame_renderer
 
 
-def show_module(module: str):
-    """Entry point."""
+def show_module(module: str) -> Image | None:
+    """Entry point.
+
+    Returns
+    -------
+    Image or None
+        The image of the module the user selected.
+    """
     # World
     world = SimpleFlatWorld()
 
@@ -28,7 +35,7 @@ def show_module(module: str):
         module_geom = HingeModule(0).spec
         zoom = 0.5
     else:
-        return Non
+        return None
 
     # Add object to world
     world.spawn(
