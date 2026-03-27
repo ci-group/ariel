@@ -92,7 +92,7 @@ SPAWN_POSITION = (args.spawn_pos_x, args.spawn_pos_y, args.spawn_pos_z)
 
 
 class Network(nn.Module):
-    def __init__(self, input_size: int, output_size: int, hidden_size: int = 32) -> None:
+    def __init__(self, input_size: int, output_size: int, hidden_size: int = 16) -> None:
         super().__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
@@ -185,7 +185,7 @@ def main() -> None:
     # Create network and fill parameters
     try:
         input_size = len(get_state_from_data(data)) + 2
-        net = Network(input_size=input_size, output_size=model.nu, hidden_size=32)
+        net = Network(input_size=input_size, output_size=model.nu, hidden_size=16)
         fill_parameters(net, brain_vec)
         console.log(f"[green]Initialized network: input={input_size}, output={model.nu}[/green]")
     except Exception as exc:
