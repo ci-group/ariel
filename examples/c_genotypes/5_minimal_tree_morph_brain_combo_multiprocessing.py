@@ -11,6 +11,7 @@ Lower fitness is better.
 import argparse
 import contextlib
 import copy
+import json
 import multiprocessing as mp
 import os
 import random
@@ -60,9 +61,9 @@ install()
 console = Console()
 
 parser = argparse.ArgumentParser(description="Minimal tree morphology + brain joint evolution (multiprocessing)")
-parser.add_argument("--budget", type=int, default=5, help="Morphology generations")
-parser.add_argument("--pop", type=int, default=5, help="Morphology population")
-parser.add_argument("--dur", type=float, default=10.0, help="Active control duration")
+parser.add_argument("--budget", type=int, default=2, help="Morphology generations")
+parser.add_argument("--pop", type=int, default=2, help="Morphology population")
+parser.add_argument("--dur", type=float, default=3, help="Active control duration")
 parser.add_argument(
     "--eval-delay",
     type=float,
@@ -75,8 +76,8 @@ parser.add_argument(
     default=2.0,
     help="Penalty weight for vertical (z-axis) motion during active control",
 )
-parser.add_argument("--learn-budget", type=int, default=20, help="CMA iterations per morphology")
-parser.add_argument("--learn-pop", type=int, default=5, help="CMA population per iteration")
+parser.add_argument("--learn-budget", type=int, default=2, help="CMA iterations per morphology")
+parser.add_argument("--learn-pop", type=int, default=2, help="CMA population per iteration")
 parser.add_argument(
     "--eval-workers",
     type=int,
@@ -683,9 +684,20 @@ def main() -> None:
         console.log("[red]No best individual found.[/red]")
         return
 
+    best_genome = TreeGenome.from_dict(best.genotype["morph"])
+    best_brain = best.tags.get("last_brain", [])
+    timestamp = int(time.time())
+
+    morph_path = DATA / f"best_morphology_{timestamp}.json"
+    brain_path = DATA / f"best_brain_{timestamp}.npy"
+    morph_path.write_text(json.dumps(best_genome.to_dict(), indent=2), encoding="utf-8")
+    np.save(brain_path, np.asarray(best_brain, dtype=np.float32))
+
     console.rule("[bold green]Final Best[/bold green]")
     console.log(f"Best combined fitness: {best.fitness:.4f}")
     console.log(f"Elapsed: {elapsed:.2f}s")
+    console.log(f"Saved best morphology to: {morph_path}")
+    console.log(f"Saved best brain to: {brain_path}")
 
     if args.save_video:
         evo.save_best_video(best, duration=args.video_duration)
