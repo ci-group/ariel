@@ -47,7 +47,7 @@ class StraightTube(Module):
 
         # Build the module
         # Calculate the axis given the attachment point quaternion
-        print(f"st attachment quat: {attachment_point_quat}")
+        # print(f"st attachment quat: {attachment_point_quat}")
         mj_quat1 = attachment_point_quat.to_mujoco_format()
         new_pos1 = Vector3([0,0,self.length/2])
 

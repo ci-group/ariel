@@ -15,7 +15,7 @@ from pathlib import Path
 import mujoco
 
 # Local libraries
-from ariel.simulation.environments import SimpleFlatWorld
+from ariel.simulation.environments import SimpleFlatWorld, BaseWorld
 from ariel.utils.renderers import video_renderer
 from ariel.utils.video_recorder import VideoRecorder
 
@@ -54,7 +54,7 @@ def main() -> None:
     video_renderer(
         model,
         data,
-        duration=5,
+        duration=50,
         video_recorder=video_recorder,
     )
 

@@ -52,9 +52,9 @@ class Base(Module):
         attachment_point_quat = Quaternion(attachment_point_quat)
         attachment_point_quat.normalise()
         if np.all(np.array(attachment_point_quat.xyzw) == 0):
-            print("Warning: Attachment point quaternion is zero, using default orientation.")
+            # print("Warning: Attachment point quaternion is zero, using default orientation.")
             attachment_point_quat = Quaternion()
-        print(f"base attachment quat: {attachment_point_quat}")
+        # print(f"base attachment quat: {attachment_point_quat}")
         quat = attachment_point_quat.to_mujoco_format()
         
         # Build the module

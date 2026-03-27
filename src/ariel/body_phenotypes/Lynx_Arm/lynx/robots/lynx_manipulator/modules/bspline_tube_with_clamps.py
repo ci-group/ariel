@@ -67,9 +67,9 @@ class BSplineTubeWithClamps(BSplineTube):
         # Add STL asset to the MJCF model
         mesh_name = self.clamp_stl.split("/")[-1].replace(".stl", "")
         # Check if mesh already exists in assets to avoid duplicates
-        existing_meshes = [m.name for m in mjcf.asset.find_all("mesh")]
-        if mesh_name not in existing_meshes:
-            mjcf.asset.add("mesh", name=mesh_name, file=self.clamp_stl, scale=[0.001, 0.001, 0.001])
+        # existing_meshes = [m.name for m in mjcf.asset.find_all("mesh")]
+        # if mesh_name not in existing_meshes:
+        #     mjcf.asset.add("mesh", name=mesh_name, file=self.clamp_stl, scale=[0.001, 0.001, 0.001])
 
         # Re-parameterize control points based on end constraints
         self.set_end_constraints(self.end_point_pos, self.end_point_theta, self.dual_point_distance)
@@ -99,7 +99,8 @@ class BSplineTubeWithClamps(BSplineTube):
             is_first = (i == 0)
             is_last = (i == len(self.cylinder_segments) - 1)
 
-            if is_first or is_last:
+            # if is_first or is_last:
+            if False:
                 # Use STL for first and last segments
                 # Rotate the mesh itself by 90 degrees around X axis
                 Quaternion.from_axis_angle([1, 0, 0], np.deg2rad(90))

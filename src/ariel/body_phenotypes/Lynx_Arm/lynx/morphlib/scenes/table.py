@@ -4,7 +4,7 @@ import mujoco
 
 from ariel import ROOT, CWD
 
-print(ROOT)
+# print(ROOT)
 
 @dataclass
 class SimpleFlatWorld:

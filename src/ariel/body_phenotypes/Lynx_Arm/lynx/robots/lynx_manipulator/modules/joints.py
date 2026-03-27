@@ -108,7 +108,7 @@ class JointInline(Module):
         # new_pos1 = Vector3([0,0,self.length/2])
         cylinder2_pos = joint_pos + new_relative_quat * Vector3([0, 0, self.cylinder_radius1+ self.cylinder_length2/2])
         cylinder2_add_pos = joint_pos + new_relative_quat * Vector3([0, 0, self.cylinder_radius1/2])
-        print(f"JointInline build: joint_pos={joint_pos}, cylinder2_pos={cylinder2_pos}")
+        # print(f"JointInline build: joint_pos={joint_pos}, cylinder2_pos={cylinder2_pos}")
 
         body_fixed = entry_point.add("body", name=self.name+"_fixed", pos=pos_list, quat=mj_quat_body)
         body_fixed.add(
@@ -211,7 +211,7 @@ class JointInline(Module):
         tasks = []
 
         attachment_site_pos = cylinder2_pos + new_relative_quat * Vector3([0, 0, self.cylinder_length2 / 2])
-        print(f"JointInline build: attachment_site_pos={attachment_site_pos}")
+        # print(f"JointInline build: attachment_site_pos={attachment_site_pos}")
 
         for child_index, attachment_point in self.attachment_points.items():
             child = self.children.get(child_index)
