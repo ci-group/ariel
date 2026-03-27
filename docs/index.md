@@ -20,38 +20,37 @@ ARIEL brings together the full evolutionary robotics pipeline in a single, cohes
 - **Reproducible**: built-in database logging and pandas/polars/SQLite export for every run.
  
 ---
- 
+
 ## Features
- 
+
 | Feature | Description |
 |---|---|
-| **Evolutionary Algorithms**       | Ready-to-use EA operators — selection, crossover, mutation — for both continuous and discrete problems.   |
-| **Multiple Genotype Encodings**   | NDE, CPPN, Tree Genome, and Vector representations, each with matching evolutionary operators.            |
-| **Robot Systems**                 | Modular robot morphology and the ARIEL Lynx Arm, simulated in MuJoCo.                                     |
-| **Simulation & Control**          | CPG-based controllers (simple, NA-CPG, normalised) and prebuilt terrains.                   |
-| **Parallelisation**               | Scale evaluations across cores or machines with Ray integration.                                          |
-| **Database & Analysis**           | Automatic SQLite experiment logging with pandas, polars, and sqlite3 query examples.                      |
-| **Visualisation**                 | GUI (in progress) and analysis utilities for plotting fitness progression and robot behaviour.            |
-| **MuJoCo Integration**            | Full access to MuJoCo data variables — forces, sensors, spatial transforms, and more.                     |
- 
+| **Evolutionary Algorithms**                       | Ready-to-use EA operators for both continuous and discrete problems.                          |
+| [Multiple Genotype Encodings](source/genoty_docs) | NDE, CPPN, Tree, and Vector representations, each with evolutionary operators.                |
+| [Robot Systems](source/robot_systems)             | Modular robot morphology and the ARIEL Lynx Arm, simulated in MuJoCo.                         |
+| **Simulation & Control**                          | CPG-based controllers (simple, NA-CPG, normalised) and prebuilt terrains.                     |
+| [Parallelisation](source/EA_intro/parallel_ackley)| Scale evaluations across cores or machines with Ray integration.                              |
+| [Database & Analysis](source/Db_examples)         | Automatic SQLite experiment logging with pandas, polars, and sqlite3 query examples.          |
+| **Visualisation**                                 | GUI (in progress) and analysis utilities for plotting fitness progression and robot behaviour.|
+| [MuJoCo Integration](source/Mujoco_docs)          | Full access to MuJoCo data variables — forces, sensors, spatial transforms, and more.         |
+
 ---
  
 ## Installation
  
 See the [Installation Guide](source/installation_guide) for full details, including:
- 
+
 - Supported platforms and prerequisites
 - Installing with `uv` or VS Code Dev Containers (recommended)
 - Verifying your installation
 - Troubleshooting tips
- 
+
 ---
 
 ## Contents
 
 ```{toctree}
 :maxdepth: 3
-:caption: Contents:
 
 Contributing guide <source/contributing_guide/index>
 Installation Guide <source/installation_guide>
@@ -66,7 +65,7 @@ MuJoCo Data Variables Documentation <source/Mujoco_docs/mujoco_docs>
 
 ## License
 
-Copyright (c) 2025, Ariel.  
+Copyright (c) 2025, ARIEL.  
 All rights reserved.
 
 ---
