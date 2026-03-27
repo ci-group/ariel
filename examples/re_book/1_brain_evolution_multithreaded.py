@@ -51,6 +51,8 @@ parser = argparse.ArgumentParser(description='Evolution simulation with configur
 parser.add_argument('--budget', type=int, default=10, help='Number of generations for learning')
 parser.add_argument('--dur', type=int, default=10, help="Duration of an evaluation")
 parser.add_argument('--population', type=int, default=10, help="Population size")
+parser.add_argument('--sigma', type=float, default=0.075, help="CMA-ES initial step size")
+parser.add_argument('--tune', action='store_true', help='Skip video rendering for fast tuning sweeps')
 parser.add_argument('--fitness', type=str, default='distance', choices=['delta', 'efficiency', 'survival', 'direct', 'distance', 'speed'])
 parser.add_argument('--reach-radius', type=float, default=0.25, help='Planar distance threshold for counting target arrival')
 parser.add_argument('--workers', type=int, default=max(1, os.cpu_count() or 1), help='Number of worker threads for parallel candidate evaluation')
@@ -429,7 +431,7 @@ def evolve(world, model, data) -> tuple[np.ndarray, int]:
     
     initial_guess = np.random.uniform(low=-0.5, high=0.5, size=num_params)
     param = ng.p.Array(init=initial_guess)
-    param.set_mutation(sigma=0.075) 
+    param.set_mutation(sigma=args.sigma)
     
     cma_config = ng.optimizers.ParametrizedCMA(popsize=POP_SIZE)
     optimizer = cma_config(
@@ -562,6 +564,9 @@ if __name__ == "__main__":
     # Unconditionally save the new weights, overwriting any old ones
     np.save(weights_path, best_weights)
     console.log(f"[green]Best weights saved to {weights_path}[/green]")
+    if args.tune:
+        console.log("[yellow]Tuning mode active. Skipping video rendering.[/yellow]")
+        os._exit(0)
 
 # ============================================================================ #
 #                           Initialise world and                               #
