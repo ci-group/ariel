@@ -60,9 +60,9 @@ install()
 console = Console()
 
 parser = argparse.ArgumentParser(description="Minimal tree morphology + brain joint evolution (multiprocessing)")
-parser.add_argument("--budget", type=int, default=20, help="Morphology generations")
-parser.add_argument("--pop", type=int, default=16, help="Morphology population")
-parser.add_argument("--dur", type=float, default=5.0, help="Active control duration")
+parser.add_argument("--budget", type=int, default=5, help="Morphology generations")
+parser.add_argument("--pop", type=int, default=5, help="Morphology population")
+parser.add_argument("--dur", type=float, default=10.0, help="Active control duration")
 parser.add_argument(
     "--eval-delay",
     type=float,
@@ -75,8 +75,8 @@ parser.add_argument(
     default=2.0,
     help="Penalty weight for vertical (z-axis) motion during active control",
 )
-parser.add_argument("--learn-budget", type=int, default=4, help="CMA iterations per morphology")
-parser.add_argument("--learn-pop", type=int, default=16, help="CMA population per iteration")
+parser.add_argument("--learn-budget", type=int, default=20, help="CMA iterations per morphology")
+parser.add_argument("--learn-pop", type=int, default=5, help="CMA population per iteration")
 parser.add_argument(
     "--eval-workers",
     type=int,
@@ -84,7 +84,7 @@ parser.add_argument(
     help="Worker processes for parallel individual evaluation",
 )
 
-parser.add_argument("--max-modules", type=int, default=10, help="Max modules in tree")
+parser.add_argument("--max-modules", type=int, default=20, help="Max modules in tree")
 parser.add_argument("--max-depth", type=int, default=12, help="Max tree depth")
 parser.add_argument("--morph-weight", type=float, default=0.3, help="Weight of morphology term")
 parser.add_argument(
@@ -226,14 +226,14 @@ def _learn_brain_progress_for_genome(
     learn_pop: int,
     target_position: np.ndarray,
     z_penalty_weight: float,
-) -> tuple[float, list[float]]:
+) -> tuple[float, list[float], list[float]]:
     try:
         world, model, data = _spawn_with_fallback(genome_dict, SPAWN_POSITION)
     except Exception:
-        return -float("inf"), []
+        return -float("inf"), [], []
 
     if model.nu == 0:
-        return -float("inf"), []
+        return -float("inf"), [], []
 
     net = Network(
         input_size=len(get_state_from_data(data)) + 2,
@@ -254,9 +254,11 @@ def _learn_brain_progress_for_genome(
 
     best_score = -float("inf")
     best_vec: list[float] = []
+    iteration_scores: list[float] = []
 
     for _ in range(learn_budget):
         candidates = [learner.ask() for _ in range(learn_pop)]
+        iteration_best_score = -float("inf")
         for candidate in candidates:
             vec = candidate.value
             fill_parameters(net, vec)
@@ -289,16 +291,20 @@ def _learn_brain_progress_for_genome(
             if score > best_score:
                 best_score = score
                 best_vec = vec.tolist()
+            if score > iteration_best_score:
+                iteration_best_score = score
 
-    return best_score, best_vec
+        iteration_scores.append(iteration_best_score)
+
+    return best_score, best_vec, iteration_scores
 
 
-def _evaluate_individual_process(task: tuple[dict, float, float, int, int, float, float]) -> tuple[float, list[float]]:
+def _evaluate_individual_process(task: tuple[dict, float, float, int, int, float, float]) -> tuple[float, list[float], list[float]]:
     genome_dict, duration, eval_delay, learn_budget, learn_pop, morph_weight, z_penalty_weight = task
     try:
         genome = TreeGenome.from_dict(genome_dict)
         morph_term = morphology_fitness_term(genome)
-        score, best_vec = _learn_brain_progress_for_genome(
+        score, best_vec, iteration_scores = _learn_brain_progress_for_genome(
             genome_dict,
             duration,
             eval_delay,
@@ -309,12 +315,20 @@ def _evaluate_individual_process(task: tuple[dict, float, float, int, int, float
         )
 
         if not np.isfinite(morph_term) or not np.isfinite(score):
-            return float("inf"), best_vec
+            return float("inf"), best_vec, []
 
         fit = -score + morph_weight * morph_term
-        return fit, best_vec
+        # Compute deltas (improvement at each iteration)
+        deltas = []
+        prev_score = -float("inf")
+        for iter_score in iteration_scores:
+            delta = iter_score - prev_score
+            deltas.append(delta)
+            prev_score = iter_score
+        
+        return fit, best_vec, deltas
     except Exception:
-        return float("inf"), []
+        return float("inf"), [], []
 
 
 class MinimalJointEvolution:
@@ -479,9 +493,10 @@ class MinimalJointEvolution:
 
         if EVAL_WORKERS == 1:
             for ind, task in track(zip(to_eval, tasks), total=len(to_eval), description="Learning + Evaluating..."):
-                fit, best_vec = _evaluate_individual_process(task)
+                fit, best_vec, deltas = _evaluate_individual_process(task)
                 ind.fitness = fit
                 ind.tags["last_brain"] = best_vec
+                ind.tags["learning_deltas"] = deltas
                 ind.requires_eval = False
             return population
 
@@ -494,11 +509,12 @@ class MinimalJointEvolution:
             for fut in as_completed(future_to_ind):
                 ind = future_to_ind[fut]
                 try:
-                    fit, best_vec = fut.result()
+                    fit, best_vec, deltas = fut.result()
                 except Exception:
-                    fit, best_vec = float("inf"), []
+                    fit, best_vec, deltas = float("inf"), [], []
                 ind.fitness = fit
                 ind.tags["last_brain"] = best_vec
+                ind.tags["learning_deltas"] = deltas
                 ind.requires_eval = False
 
         return population
