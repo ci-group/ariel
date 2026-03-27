@@ -1,3 +1,5 @@
+"""ONLY RUNS ON MAC."""
+
 # Standard library
 import os
 import random
