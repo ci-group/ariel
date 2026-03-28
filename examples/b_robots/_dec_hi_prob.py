@@ -1,12 +1,4 @@
-"""Example of high-probability-decoding for graphs.
-
-Author:     jmdm
-Date:       2025-06-25
-Py Ver:     3.12
-OS:         macOS  Sequoia 15.3.1
-Hardware:   M4 Pro
-Status:     Completed ✅
-"""
+"""Example of vector-decoding for graphs."""
 
 # Standard library
 from pathlib import Path
@@ -22,7 +14,7 @@ from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
 )
-from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
+from ariel.body_phenotypes.robogen_lite.decoders import (
     HighProbabilityDecoder,
     draw_graph,
     save_graph_as_json,
