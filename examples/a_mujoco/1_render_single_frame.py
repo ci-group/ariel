@@ -1,12 +1,4 @@
-"""Example usage of `render_single_frame` function.
-
-Author:     jmdm
-Date:       2025-04-17
-Py Ver:     3.12
-OS:         macOS  Sequoia 15.3.1
-Hardware:   M4 Pro
-Status:     Completed ✅
-"""
+"""Example usage of `render_single_frame` function."""
 
 # Third-party libraries
 import mujoco

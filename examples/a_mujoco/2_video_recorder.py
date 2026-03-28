@@ -1,12 +1,4 @@
-"""Example usage of `render_single_frame` function.
-
-Author:     jmdm
-Date:       2025-04-17
-Py Ver:     3.12
-OS:         macOS  Sequoia 15.3.1
-Hardware:   M4 Pro
-Status:     Completed ✅
-"""
+"""Example usage of `render_single_frame` function."""
 
 # Standard library
 from pathlib import Path
@@ -15,7 +7,7 @@ from pathlib import Path
 import mujoco
 
 # Local libraries
-from ariel.simulation.environments import SimpleFlatWorld, BaseWorld
+from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.renderers import video_renderer
 from ariel.utils.video_recorder import VideoRecorder
 

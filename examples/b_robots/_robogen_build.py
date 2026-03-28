@@ -1,18 +1,10 @@
 """Robogen robot using MjSpec.
 
-Author:     jmdm
-Date:       2025-07-06
-Py Ver:     3.12
-OS:         macOS  Sequoia 15.3.1
-Hardware:   M4 Pro
-Status:     Completed ✅
-
 References
 ----------
     [1] https://github.com/google-deepmind/dm_control/blob/main/dm_control/mjcf/README.md
     [2] https://mujoco.readthedocs.io/en/stable/python.html#attachment
     [3] https://quaternion.readthedocs.io/en/latest/quaternion/
-
 """
 
 # Standard library

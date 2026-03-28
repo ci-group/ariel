@@ -1,12 +1,4 @@
-"""TODO(jmdm): description of script.
-
-Author:     jmdm
-Date:       2025-06-25
-Py Ver:     3.12
-OS:         macOS  Sequoia 15.3.1
-Hardware:   M4 Pro
-Status:     Completed ✅
-"""
+"""TODO(jmdm): description of script."""
 
 # Standard library
 from pathlib import Path
