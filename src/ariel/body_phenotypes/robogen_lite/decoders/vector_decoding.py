@@ -1,9 +1,4 @@
-"""Highest-probability-decoding algorithm for ARIEL-robots.
-
-Todo
-----
-- [ ] for loops to be replaced with vectorized operations
-"""
+"""Vector-decoding for ARIEL-robots."""
 
 # Evaluate type annotations in a deferred manner (ruff: UP037)
 from __future__ import annotations
@@ -34,26 +29,26 @@ from ariel.body_phenotypes.robogen_lite.config import (
 from ariel.body_phenotypes.robogen_lite.decoders._blueprint import Blueprint
 
 
-class HighProbabilityDecoder(Blueprint):
-    """Implements the high-probability-decoding algorithm."""
+class VectorDecoder(Blueprint):
+    """Implements the vector-decoding algorithm."""
 
-    def probability_matrices_to_graph(
+    def vectors_to_graph(
         self,
-        type_probability_space: npt.NDArray[np.float32],
-        connection_probability_space: npt.NDArray[np.float32],
-        rotation_probability_space: npt.NDArray[np.float32],
+        type_vector: npt.NDArray[np.float32],
+        connection_vector: npt.NDArray[np.float32],
+        rotation_vector: npt.NDArray[np.float32],
     ) -> DiGraph[Any]:
         """
-        Convert probability matrices to a graph.
+        Convert vector to a graph.
 
         Parameters
         ----------
-        type_probability_space
-            Probability space for module types.
-        connection_probability_space
-            Probability space for connections between modules.
-        rotation_probability_space
-            Probability space for module rotations.
+        type_vector
+            Vector for module types.
+        connection_vector
+            Vector for connections between modules.
+        rotation_vector
+            Vector for module rotations.
 
         Returns
         -------
@@ -64,29 +59,34 @@ class HighProbabilityDecoder(Blueprint):
         self._graph: dict[int, ModuleInstance] = {}
         self.graph: DiGraph[Any] = nx.DiGraph()
 
-        # Store the probability spaces
-        self.conn_p_space = connection_probability_space.copy()
-        self.rot_p_space = rotation_probability_space.copy()
-        self.type_p_space = type_probability_space.copy()
-
-        # Apply constraints
-        self.apply_connection_constraints()
+        # Store the vectors
+        self.type_vector = type_vector.copy()
+        self.connection_vector = connection_vector.copy()
+        self.rotation_vector = rotation_vector.copy()
 
         # Initialize module types and rotations
         self.set_module_types_and_rotations()
+        #
+        print(self.type_vector)
+        print(self.connection_vector)
+        print(self.rotation_vector)
+        exit()
 
         # Decode probability spaces into a graph
-        self.decode_probability_to_graph()
+        self.decode_vector_to_graph()
+
+        # Apply constraints
+        self.apply_connection_constraints()
 
         # Create the final graph from the simple graph
         self.generate_networkx_graph()
         return self.graph
 
-    def decode_probability_to_graph(
+    def decode_vector_to_graph(
         self,
     ) -> None:
         """
-        Decode the probability spaces into a graph.
+        Decode the vectors into a graph.
 
         Raises
         ------
@@ -174,8 +174,11 @@ class HighProbabilityDecoder(Blueprint):
         # Nodes and edges of the final graph
         self.nodes = {i for i in pre_nodes if pre_nodes[i] == 1}
 
+    def _types_from_vector(self) -> None:
+        pass
+
     def set_module_types_and_rotations(self) -> None:
-        """Set the module types and rotations using probability spaces."""
+        """Set the module types and rotations using vectors."""
         # Module type from argmax of type probability space
         type_from_argmax = np.argmax(self.type_p_space, axis=1)
         self.type_dict = {
@@ -212,7 +215,7 @@ class HighProbabilityDecoder(Blueprint):
     def apply_connection_constraints(
         self,
     ) -> None:
-        """Apply connection constraints to probability spaces."""
+        """."""
         # Self connection not allowed
         for i in range(NUM_OF_FACES):
             np.fill_diagonal(self.conn_p_space[:, :, i], 0.0)
