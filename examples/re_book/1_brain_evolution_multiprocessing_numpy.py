@@ -28,8 +28,9 @@ import nevergrad as ng
 
 # Local libraries
 from ariel.simulation.environments import SimpleFlatWorld
-from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import body_spider45
+# from ariel.body_phenotypes.robogen_lite.prebuilt_robots.spider_with_blocks import body_spider45
 # from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko as body_spider45
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.random_spider20 import random_spider20 as body_spider45
 
 from ariel.simulation.controllers.utils.data_get import get_state_from_data as get_robot_state
 from ariel.utils.renderers import VideoRecorder, video_renderer
@@ -53,6 +54,7 @@ parser.add_argument('--fitness', type=str, default='distance', choices=['delta',
 parser.add_argument('--reach-radius', type=float, default=0.25, help='Planar distance threshold for counting target arrival')
 parser.add_argument('--workers', type=int, default=max(1, os.cpu_count() or 1), help='Number of worker threads for parallel candidate evaluation')
 parser.add_argument('--seed', type=int, default=42, help='Base random seed for reproducibility')
+parser.add_argument('--vision-decimation', type=int, default=2, help='Update vision every N control updates (1-4) and reuse last vision input in between')
 args = parser.parse_args()
 
 BUDGET = args.budget
@@ -61,6 +63,7 @@ POP_SIZE = args.population
 REACH_RADIUS = max(0.01, args.reach_radius)
 NUM_WORKERS = max(1, args.workers)
 BASE_SEED = int(args.seed)
+VISION_DECIMATION = max(1, min(4, int(args.vision_decimation)))
 
 
 def _seed_everything(seed: int) -> None:
@@ -201,16 +204,22 @@ def run_vision_simulation(
     
     # Default vision inputs in case renderer is disabled
     v1, v2, v3 = 0.0, 0.0, 0.0
+    control_updates = 0
 
     while data.time < duration:
         step = int(np.ceil(data.time / timestep))
         
         # --- CONTROL STEP ---
         if step % control_step_freq == 0:
+            control_updates += 1
+
             # 1. Vision Update
             if renderer is not None:
-                renderer.update_scene(data, camera=cam_name)
-                v1, v2, v3 = get_vision_inputs(renderer.render())
+                # Decimate expensive camera processing but keep control updates frequent.
+                should_update_vision = (control_updates == 1) or (control_updates % VISION_DECIMATION == 0)
+                if should_update_vision:
+                    renderer.update_scene(data, camera=cam_name)
+                    v1, v2, v3 = get_vision_inputs(renderer.render())
 
             # 2. Proprioception Update
             robot_state = get_robot_state(data)
