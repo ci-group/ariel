@@ -141,8 +141,8 @@ class TableWorld:
             size=[self.table_width / 2, self.table_depth / 2, self.table_thickness / 2],
             rgba=[0.95, 0.88, 0.7, 1],  # Yellower: increased R/G, decreased B
             friction=[0.7, 0.1, 0.1],
-            contype=0,
-            conaffinity=0,
+            contype=1,
+            conaffinity=1,
         )
 
         # Table legs (4 corners)
@@ -161,8 +161,8 @@ class TableWorld:
                 size=[self.leg_width / 2, self.leg_width / 2, self.table_height / 2],
                 rgba=[0.3, 0.3, 0.3, 1],
                 friction=[0.7, 0.1, 0.1],
-                contype=0,
-                conaffinity=0,
+                contype=1,
+                conaffinity=1,
             )
 
         # Floor plane
@@ -173,8 +173,8 @@ class TableWorld:
             size=[10, 10, 0.1],
             rgba=[0.79, 0.68, 0.4, 1],
             friction=[0.7, 0.1, 0.1],
-            contype=0,
-            conaffinity=0,
+            contype=1,
+            conaffinity=1,
         )
 
         # Add target site
@@ -188,8 +188,10 @@ class TableWorld:
 
     def spawn(self, other_spec) -> None:
         # Create a spawn site at the specified position (on top of the table)
+        # Keep enough clearance so the default arm does not initialize below the tabletop.
+        robot_spawn_clearance = 0.28
         spawn_site = self.spec.worldbody.add_site(
-            pos=[0, 0, self.table_height + self.table_thickness / 2 + 0.01],  # Slightly above table top
+            pos=[0, 0, self.table_height + self.table_thickness / 2 + robot_spawn_clearance],
             quat=[1, 0, 0, 0],
         )
 
@@ -246,8 +248,8 @@ def table_terrain_mjx(env_mjcf) -> None:
     env_mjcf.worldbody.add(
         "geom",
         friction=[0.7, 0.1, 0.1],
-        conaffinity=0,  # Disable collision
-        contype=0,
+        conaffinity=1,
+        contype=1,
         condim=3,
         name="table_top",
         pos=[0, 0, table_height],
@@ -268,8 +270,8 @@ def table_terrain_mjx(env_mjcf) -> None:
         env_mjcf.worldbody.add(
             "geom",
             friction=[0.7, 0.1, 0.1],
-            conaffinity=0,  # Disable collision
-            contype=0,
+            conaffinity=1,
+            contype=1,
             condim=3,
             name=f"table_leg_{i + 1}",
             pos=[x, y, table_height / 2],

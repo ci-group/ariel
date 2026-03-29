@@ -43,7 +43,6 @@ class MjTube(MjModule):
         )
         # Add attachment site at the end
         self.body.add_site(name="attach", pos=[0, 0, length])
-        print(f"Tube {self.name} actual_end_pos: [0, 0, {length}]")
 
     def _setup_bspline(self, control_points: List[Vector3], degree: int, num_segments: int):
         # ... (sampling logic)

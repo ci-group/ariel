@@ -19,6 +19,8 @@ class MjJointInline(MjModule):
         angle: float = 0.0,
         name: str = "joint_inline",
         control_mode: str = "position",
+        # MuJoCo compiler angle unit is typically degrees; these map to ~+-2.79 rad.
+        joint_range: tuple[float, float] = (-160.0, 160.0),
         armature: Optional[float] = None,
         damping: Optional[float] = None,
         frictionloss: Optional[float] = None,
@@ -57,6 +59,8 @@ class MjJointInline(MjModule):
             pos=joint_pos,
             axis=[0, 0, -1]
         )
+        joint.range = [joint_range[0], joint_range[1]]
+        joint.limited = True
         if armature is not None: joint.armature = armature
         if damping is not None: joint.damping = damping
         if frictionloss is not None: joint.frictionloss = frictionloss
@@ -67,8 +71,9 @@ class MjJointInline(MjModule):
         biasprm = np.zeros(10)
 
         if control_mode == "position":
-            kp = 100000
-            kv = 10000
+            # High gains can cause aggressive penetration in contact-rich scenes.
+            kp = 300
+            kv = 30
             gainprm[0] = kp
             biasprm[:3] = [0, -kp, -kv]
             
@@ -81,7 +86,9 @@ class MjJointInline(MjModule):
                 target=f"{self.name}_joint",
                 dynprm=dynprm,
                 gainprm=gainprm,
-                biasprm=biasprm
+                biasprm=biasprm,
+                ctrllimited=True,
+                ctrlrange=[-2.8, 2.8],
             )
         elif control_mode == "velocity":
             self.spec.add_actuator(
@@ -142,6 +149,8 @@ class MjJointOrthogonal(MjModule):
         angle: float = 0.0,
         name: str = "joint_orthogonal",
         control_mode: str = "position",
+        # MuJoCo compiler angle unit is typically degrees; these map to ~+-2.79 rad.
+        joint_range: tuple[float, float] = (-160.0, 160.0),
         armature: Optional[float] = None,
         damping: Optional[float] = None,
         frictionloss: Optional[float] = None,
@@ -190,6 +199,8 @@ class MjJointOrthogonal(MjModule):
             pos=joint_pos,
             axis=axis
         )
+        joint.range = [joint_range[0], joint_range[1]]
+        joint.limited = True
         if armature is not None: joint.armature = armature
         if damping is not None: joint.damping = damping
         if frictionloss is not None: joint.frictionloss = frictionloss
@@ -200,8 +211,9 @@ class MjJointOrthogonal(MjModule):
         biasprm = np.zeros(10)
 
         if control_mode == "position":
-            kp = 100000
-            kv = 10000
+            # High gains can cause aggressive penetration in contact-rich scenes.
+            kp = 300
+            kv = 30
             gainprm[0] = kp
             biasprm[:3] = [0, -kp, -kv]
             
@@ -214,7 +226,9 @@ class MjJointOrthogonal(MjModule):
                 target=f"{self.name}_joint",
                 dynprm=dynprm,
                 gainprm=gainprm,
-                biasprm=biasprm
+                biasprm=biasprm,
+                ctrllimited=True,
+                ctrlrange=[-2.8, 2.8],
             )
         elif control_mode == "velocity":
             self.spec.add_actuator(

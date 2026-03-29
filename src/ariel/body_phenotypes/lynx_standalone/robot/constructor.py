@@ -43,6 +43,19 @@ def construct_lynx(
             "dual_point_distance": 0.07,
             "num_segments": 100,
         }
+    tube_lengths = robot_description_dict.get("tube_lengths", [0.36, 0.36, 0.36, 0.36, 0.36])
+    tube_lengths = np.asarray(tube_lengths, dtype=np.float64)
+    if tube_lengths.size < 5:
+        # Pad to 5 tubes if a shorter list is provided.
+        tube_lengths = np.pad(tube_lengths, (0, 5 - tube_lengths.size), constant_values=0.36)
+    tube_lengths = np.clip(tube_lengths[:5], 0.05, 0.6)
+
+    # If explicit tube endpoint positions are not supplied, infer from tube_lengths.
+    for idx in range(5):
+        key = f"l{idx + 1}_end_point_pos"
+        if key not in robot_description_dict:
+            robot_description_dict[key] = [0.0, 0.0, float(tube_lengths[idx])]
+
     genotype_tube = robot_description_dict["genotype_tube"]
     genotype_joints = robot_description_dict["genotype_joints"]
     rotation_angles = robot_description_dict["rotation_angles"]
@@ -70,7 +83,7 @@ def construct_lynx(
         cylinder_length2=0.013, cylinder_radius2=0.062,
         angle=np.deg2rad(rotation_angles[0]),
         name="joint1",
-        armature=0.01, damping=100000, frictionloss=0.000001,
+        armature=0.01, damping=20.0, frictionloss=0.01,
     )
 
     # Joint 2
@@ -81,7 +94,7 @@ def construct_lynx(
         cylinder_length2=0.013, cylinder_radius2=0.062,
         angle=np.deg2rad(rotation_angles[1]),
         name="joint2",
-        armature=0.01, damping=100000, frictionloss=0.000001,
+        armature=0.01, damping=20.0, frictionloss=0.01,
     )
 
     # Joint 3
@@ -92,7 +105,7 @@ def construct_lynx(
         cylinder_length2=0.008, cylinder_radius2=0.042,
         angle=np.deg2rad(rotation_angles[2]),
         name="joint3",
-        armature=0.01, damping=100000, frictionloss=0.000001,
+        armature=0.01, damping=20.0, frictionloss=0.01,
     )
 
     # Joint 4
@@ -103,7 +116,7 @@ def construct_lynx(
         cylinder_length2=0.008, cylinder_radius2=0.042,
         angle=np.deg2rad(rotation_angles[3]),
         name="joint4",
-        armature=0.01, damping=100000, frictionloss=0.000001,
+        armature=0.01, damping=20.0, frictionloss=0.01,
     )
 
     # Joint 5
@@ -114,7 +127,7 @@ def construct_lynx(
         cylinder_length2=0.008, cylinder_radius2=0.042,
         angle=np.deg2rad(rotation_angles[4]),
         name="joint5",
-        armature=0.01, damping=100000, frictionloss=0.000001,
+        armature=0.01, damping=20.0, frictionloss=0.01,
     )
 
     # Joint 6
@@ -125,7 +138,7 @@ def construct_lynx(
         cylinder_length2=0.008, cylinder_radius2=0.042,
         angle=np.deg2rad(rotation_angles[5]),
         name="joint6",
-        armature=0.01, damping=100000, frictionloss=0.000001,
+        armature=0.01, damping=20.0, frictionloss=0.01,
     )
 
     # 3. Create Tubes
