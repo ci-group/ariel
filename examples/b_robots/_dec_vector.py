@@ -67,10 +67,10 @@ def main() -> None:
     draw_graph(graph)
 
     # Save the graph to a file
-    save_graph_as_json(
-        graph,
-        DATA / "graph.json",
-    )
+    # save_graph_as_json(
+    #     graph,
+    #     DATA / "graph.json",
+    # )
 
 
 if __name__ == "__main__":

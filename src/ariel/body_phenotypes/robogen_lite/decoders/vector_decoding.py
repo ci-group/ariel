@@ -3,8 +3,10 @@
 # Evaluate type annotations in a deferred manner (ruff: UP037)
 from __future__ import annotations
 
+import sys
+
 # Standard library
-from typing import Any
+from typing import TYPE_CHECKING, Any, TypeVar
 
 # Third-party libraries
 import networkx as nx
@@ -28,15 +30,66 @@ from ariel.body_phenotypes.robogen_lite.config import (
 # Third-party libraries
 from ariel.body_phenotypes.robogen_lite.decoders._blueprint import Blueprint
 
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+T = TypeVar("T")
+
 
 class VectorDecoder(Blueprint):
     """Implements the vector-decoding algorithm."""
 
+    def assign_symbols_from_range(
+        self,
+        vector: npt.NDArray | Sequence[float],
+        symbols: Sequence[T] | Sequence[Sequence[T]],
+        weight: Sequence[float] | Sequence[Sequence[float]] | None = None,
+    ) -> list[T]:
+        vector = np.asarray(vector, dtype=np.float64)
+
+        if np.any(vector < 0) or np.any(vector > 1):
+            msg = "All values in the vector must be within [0, 1]."
+            raise ValueError(msg)
+
+        result: list[T] = []
+
+        # Detect per-element symbols
+        per_element = isinstance(symbols[0], (list, tuple, np.ndarray))
+
+        for i, value in enumerate(vector):
+            current_symbols: Sequence[T] = (
+                symbols[i] if per_element else symbols
+            )  # pyright: ignore[reportAssignmentType]
+
+            num_symbols = len(current_symbols)
+
+            # Handle weights
+            if weight is not None:
+                current_weight = (
+                    np.asarray(weight[i], dtype=np.float64)
+                    if per_element
+                    else np.asarray(weight, dtype=np.float64)
+                )
+                current_weight /= current_weight.sum()
+            else:
+                current_weight = (
+                    np.ones(num_symbols, dtype=np.float64) / num_symbols
+                )
+
+            cumulative_weight = np.cumsum(current_weight)
+
+            symbol_idx = np.searchsorted(cumulative_weight, value)
+            symbol_idx = min(symbol_idx, num_symbols - 1)
+
+            result.append(current_symbols[symbol_idx])
+
+        return result
+
     def vectors_to_graph(
         self,
-        type_vector: npt.NDArray[np.float32],
-        connection_vector: npt.NDArray[np.float32],
-        rotation_vector: npt.NDArray[np.float32],
+        type_vector: npt.NDArray,
+        connection_vector: npt.NDArray,
+        rotation_vector: npt.NDArray,
     ) -> DiGraph[Any]:
         """
         Convert vector to a graph.
@@ -64,13 +117,32 @@ class VectorDecoder(Blueprint):
         self.connection_vector = connection_vector.copy()
         self.rotation_vector = rotation_vector.copy()
 
+        module_types = [i.name for i in ModuleType if i.name not in ("CORE")]
+        self.assign_symbols_from_range(
+            vector=self.type_vector,
+            symbols=module_types,
+        )
+
+        allowed_rot_per_type = [
+            ALLOWED_ROTATIONS[module_type] for module_type in module_types
+        ]
+
+        rotations = self.assign_symbols_from_range(
+            vector=self.rotation_vector,
+            symbols=allowed_per_element,
+        )
+        rot_types = [i.value for i in ModuleRotationsIdx]
+        self.assign_symbols_from_range(
+            vector=self.rotation_vector,
+            symbols=rot_types,
+        )
+
+        # print(self.connection_vector)
+        # print(self.rotation_vector)
+        sys.exit()
+
         # Initialize module types and rotations
-        self.set_module_types_and_rotations()
-        #
-        print(self.type_vector)
-        print(self.connection_vector)
-        print(self.rotation_vector)
-        exit()
+        # self.set_module_types_and_rotations()
 
         # Decode probability spaces into a graph
         self.decode_vector_to_graph()
