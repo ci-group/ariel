@@ -1,0 +1,9 @@
+MorphConfig:
+  robot_description_dict:
+    num_joints: 6
+    genotype_tube: [1, 0, 0, 1, 0]          # 1 = Tube exists, 0 = No tube between joints
+    genotype_joints: 4                      # Number of active joints
+    tube_lengths: [0.1, 0.1, 0.1, 0.1, 0.1] # Length of the B-spline tubes in meters
+    rotation_angles: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Relative joint rotations
+    clamp_stl: null                         # Keep as null to use our safe cylinder fallback!
+    task: "reach"                           # "reach" or "ball in cup" (changes the end-effector)
