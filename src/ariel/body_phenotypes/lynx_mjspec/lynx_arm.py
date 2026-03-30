@@ -1,6 +1,8 @@
 import math
 import mujoco
 import numpy as np
+import mujoco.viewer
+from ariel.body_phenotypes.lynx_mjspec.table import TableWorld
 
 def euler_to_quat(roll, pitch, yaw):
     """Simple ZYX Euler to Quaternion helper."""
@@ -72,12 +74,16 @@ class LynxArm:
                 quat=quat
             )
             
+            # Alternate joint rotation axes: Y, Z, Y, Z, Y, Z
+            # This allows proper 3D reach instead of being constrained to a plane
+            joint_axis = [0, 1, 0] if i % 2 == 0 else [0, 0, 1]
+            
             # Add Joint
             joint_name = f"joint_{i+1}"
             link_body.add_joint(
                 name=joint_name,
                 type=mujoco.mjtJoint.mjJNT_HINGE,
-                axis=[0, 1, 0], # Pitch axis by default
+                axis=joint_axis,
                 range=[-2.8, 2.8],
                 limited=True,
                 damping=0.1,
@@ -147,10 +153,7 @@ class LynxArm:
         )
 
 # Example Usage:
-if __name__ == "__main__":
-    from ariel.body_phenotypes.lynx_standalone.environment.table import TableWorld
-    import mujoco.viewer
-    
+if __name__ == "__main__":   
     # 1. Create the unified arm
     arm = LynxArm()
     
