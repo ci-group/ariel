@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 import argparse
 import json
 from concurrent.futures import ProcessPoolExecutor
@@ -203,9 +204,12 @@ def main() -> None:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    np.save(out_dir / "best_genome.npy", best_genome)
-    np.save(out_dir / "best_tube_lengths.npy", best_tube_lengths)
-    np.save(out_dir / "best_brain_weights.npy", best_weights)
+    t = time.time()
+    print(f"Saving unified artifacts to: {out_dir} at time {t}")
+
+    np.save(out_dir / f"best_genome_{t}.npy", best_genome)
+    np.save(out_dir / f"best_tube_lengths_{t}.npy", best_tube_lengths)
+    np.save(out_dir / f"best_brain_weights_{t}.npy", best_weights)
 
     metadata = {
         "policy": asdict(policy_spec),
@@ -217,7 +221,8 @@ def main() -> None:
         "hold_steps_to_stop": int(args.hold_steps_to_stop),
         "time_bonus_weight": float(args.time_bonus_weight),
     }
-    (out_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    
+    (out_dir / f"metadata_{t}.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
     print(f"Saved unified artifacts to: {out_dir}")
 
