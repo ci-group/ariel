@@ -36,7 +36,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def load_artifacts(artifact_dir: Path) -> tuple[np.ndarray, np.ndarray, PolicySpec, dict[str, object]]:
-    metadata_path = artifact_dir / "metadata.json"
+    metadata_path = artifact_dir / "metadata_1775749770.6571305.json"
     if not metadata_path.exists():
         raise FileNotFoundError(f"Missing metadata file: {metadata_path}")
 
@@ -51,8 +51,8 @@ def load_artifacts(artifact_dir: Path) -> tuple[np.ndarray, np.ndarray, PolicySp
         max_delta=float(policy_dict.get("max_delta", PolicySpec.max_delta)),
     )
 
-    tubes = np.load(artifact_dir / "best_tube_lengths.npy")
-    brain = np.load(artifact_dir / "best_brain_weights.npy")
+    tubes = np.load(artifact_dir / "best_tube_lengths_1775749770.6571305.npy")
+    brain = np.load(artifact_dir / "best_brain_weights_1775749770.6571305.npy")
     return tubes, brain, policy, metadata
 
 

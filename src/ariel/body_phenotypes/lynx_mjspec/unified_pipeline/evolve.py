@@ -17,6 +17,8 @@ from ariel.body_phenotypes.lynx_mjspec.unified_pipeline.common import (
     DEFAULT_TOUCH_THRESHOLD,
     DEFAULT_TARGET,
     NUM_TUBES,
+    TUBE_MIN,
+    TUBE_MAX,
     PolicySpec,
     FastNumpyNetwork,
     apply_position_delta_control,
@@ -44,8 +46,14 @@ def evaluate_candidate(
     time_bonus_weight: float,
 ) -> float:
     try:
-        tube_lengths = genome[:NUM_TUBES]
+        tube_lengths_raw = genome[:NUM_TUBES]
         weights = genome[NUM_TUBES:]
+
+        # Penalize out-of-bounds tubes instead of silently clipping.
+        # Per CMA-ES tutorial (B.5): simple repair violates distributional assumptions.
+        # Evaluate at repaired point, add penalty proportional to violation distance.
+        tube_lengths = np.clip(tube_lengths_raw, TUBE_MIN, TUBE_MAX)
+        boundary_penalty = 2.0 * float(np.sum((tube_lengths_raw - tube_lengths) ** 2))
 
         model, data, tcp_sid, tgt_sid, joint_ids = build_model(tube_lengths)
         set_target_position(model, data, tgt_sid, target)
@@ -93,7 +101,8 @@ def evaluate_candidate(
                 first_touch_step = step
 
             if not np.isfinite(data.qpos).all() or not np.isfinite(data.qvel).all():
-                return INVALID_FITNESS
+                # Return progress-aware penalty so CMA-ES can still rank diverging candidates.
+                return min_distance + 1.0
 
             # End the rollout early once the policy has reached and stably held near target.
             if d <= touch_threshold and consecutive_hold_steps >= hold_steps_to_stop:
@@ -112,6 +121,7 @@ def evaluate_candidate(
             - 0.12 * hold_ratio
             - time_bonus
             + (0.10 if not touched else 0.0)
+            + boundary_penalty
         )
     except Exception:
         return INVALID_FITNESS
@@ -119,13 +129,15 @@ def evaluate_candidate(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Unified Lynx evolution pipeline")
-    parser.add_argument("--generations", type=int, default=60)
-    parser.add_argument("--population", type=int, default=24)
+    parser.add_argument("--generations", type=int, default=200)
+    parser.add_argument("--population", type=int, default=32)
     parser.add_argument("--workers", type=int, default=4)
-    parser.add_argument("--sigma", type=float, default=0.10)
+    parser.add_argument("--weight-sigma", type=float, default=0.10)
+    parser.add_argument("--optimizer", type=str, default="CMA",
+                        choices=["CMA", "TBPSA", "TwoPointsDE", "NGOpt"])
     parser.add_argument("--sim-steps", type=int, default=DEFAULT_SIM_STEPS)
     parser.add_argument("--ctrl-freq", type=int, default=DEFAULT_CTRL_FREQ)
-    parser.add_argument("--hidden-size", type=int, default=8)
+    parser.add_argument("--hidden-size", type=int, default=4)
     parser.add_argument("--action-scale", type=float, default=0.25)
     parser.add_argument("--max-delta", type=float, default=0.12)
     parser.add_argument("--target-x", type=float, default=float(DEFAULT_TARGET[0]))
@@ -153,26 +165,37 @@ def main() -> None:
     )
 
     num_weights = num_network_params(policy_spec)
-    genome_size = NUM_TUBES + num_weights
 
-    init = np.zeros(genome_size, dtype=np.float64)
-    init[:NUM_TUBES] = 0.10
-    init[NUM_TUBES:] = rng.uniform(-0.1, 0.1, size=num_weights)
+    tubes_init   = rng.uniform(TUBE_MIN, TUBE_MAX, size=NUM_TUBES).astype(np.float64)
+    weights_init = rng.uniform(-0.1, 0.1, size=num_weights).astype(np.float64)
 
-    parametrization = ng.p.Array(init=init)
-    parametrization.set_mutation(sigma=float(args.sigma))
+    # Split parametrization so tubes and weights get independent sigma values.
+    # Tube sigma: 0.3 * (TUBE_MAX - TUBE_MIN) = 0.27 (per CMA-ES tutorial Eq. sigma=0.3*(b-a)).
+    # Weight sigma: kept small to avoid tanh saturation in early generations.
+    # set_bounds tells CMA the valid range; clipping keeps proposals in-bounds before penalization.
+    tubes_p = (
+        ng.p.Array(init=tubes_init)
+        .set_bounds(TUBE_MIN, TUBE_MAX, method="clipping")
+        .set_mutation(sigma=0.27)
+    )
+    weights_p = ng.p.Array(init=weights_init).set_mutation(sigma=float(args.weight_sigma))
+    parametrization = ng.p.Tuple(tubes_p, weights_p)
 
-    optimizer = ng.optimizers.CMA(
+    # num_workers must equal population so the optimizer's internal λ matches the batch size.
+    optimizer = ng.optimizers.registry[args.optimizer](
         parametrization=parametrization,
         budget=int(args.generations) * int(args.population),
-        num_workers=min(int(args.population), int(args.workers)),
+        num_workers=int(args.population),
     )
 
     workers = min(int(args.population), int(args.workers))
     with ProcessPoolExecutor(max_workers=workers) as executor:
         for gen in range(1, int(args.generations) + 1):
             candidates = [optimizer.ask() for _ in range(int(args.population))]
-            genomes = [np.asarray(c.value, dtype=np.float64) for c in candidates]
+            genomes = [
+                np.concatenate([np.asarray(c.value[0]), np.asarray(c.value[1])]).astype(np.float64)
+                for c in candidates
+            ]
 
             fitnesses = list(
                 executor.map(
@@ -192,14 +215,25 @@ def main() -> None:
             for cand, fit in zip(candidates, fitnesses):
                 optimizer.tell(cand, float(fit))
 
+            valid = [f for f in fitnesses if f < INVALID_FITNESS]
+            try:
+                sigma_str = f" σ={optimizer.optim.es.sigma:.4f}"
+            except AttributeError:
+                sigma_str = ""
+            best_idx = int(np.argmin(fitnesses))
+            best_tubes = np.round(np.asarray(candidates[best_idx].value[0]), 3)
             print(
                 f"gen={gen:03d} best={np.min(fitnesses):.5f} "
-                f"mean={np.mean(fitnesses):.5f} worst={np.max(fitnesses):.5f}"
+                f"mean={np.mean(fitnesses):.5f} std={np.std(fitnesses):.5f} "
+                f"worst={np.max(fitnesses):.5f} valid={len(valid)}/{len(fitnesses)}"
+                f"{sigma_str}"
             )
+            print(f"         tubes={best_tubes}")
 
-    best_genome = np.asarray(optimizer.provide_recommendation().value, dtype=np.float64)
-    best_tube_lengths = best_genome[:NUM_TUBES]
-    best_weights = best_genome[NUM_TUBES:]
+    rec = optimizer.provide_recommendation()
+    best_tube_lengths = np.asarray(rec.value[0], dtype=np.float64)
+    best_weights      = np.asarray(rec.value[1], dtype=np.float64)
+    best_genome       = np.concatenate([best_tube_lengths, best_weights])
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -207,6 +241,7 @@ def main() -> None:
     t = time.time()
     print(f"Saving unified artifacts to: {out_dir} at time {t}")
 
+    # Timestamped copies for history.
     np.save(out_dir / f"best_genome_{t}.npy", best_genome)
     np.save(out_dir / f"best_tube_lengths_{t}.npy", best_tube_lengths)
     np.save(out_dir / f"best_brain_weights_{t}.npy", best_weights)
@@ -221,8 +256,14 @@ def main() -> None:
         "hold_steps_to_stop": int(args.hold_steps_to_stop),
         "time_bonus_weight": float(args.time_bonus_weight),
     }
-    
+
     (out_dir / f"metadata_{t}.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+    # Latest-run symlinks for replay.py (no timestamp — always points to this run).
+    np.save(out_dir / "best_genome.npy", best_genome)
+    np.save(out_dir / "best_tube_lengths.npy", best_tube_lengths)
+    np.save(out_dir / "best_brain_weights.npy", best_weights)
+    (out_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
     print(f"Saved unified artifacts to: {out_dir}")
 

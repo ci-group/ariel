@@ -96,7 +96,7 @@ class LynxArm:
                 axis=joint_axis,
                 range=[-2.8, 2.8],
                 limited=True,
-                damping=0.1,
+                damping=2.0,
                 frictionloss=0.01,
             )
 
