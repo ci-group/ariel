@@ -125,7 +125,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sigma", type=float, default=0.10)
     parser.add_argument("--sim-steps", type=int, default=DEFAULT_SIM_STEPS)
     parser.add_argument("--ctrl-freq", type=int, default=DEFAULT_CTRL_FREQ)
-    parser.add_argument("--hidden-size", type=int, default=32)
+    parser.add_argument("--hidden-size", type=int, default=8)
     parser.add_argument("--action-scale", type=float, default=0.25)
     parser.add_argument("--max-delta", type=float, default=0.12)
     parser.add_argument("--target-x", type=float, default=float(DEFAULT_TARGET[0]))
