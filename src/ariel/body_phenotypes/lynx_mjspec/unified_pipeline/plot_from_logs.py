@@ -55,25 +55,25 @@ def plot_training_logs(log_files):
     agg_worst_mean = worsts_mat.mean(axis=0)
 
     n_runs = len(runs)
-    plt.figure(figsize=(12, 7))
+    plt.figure(figsize=(16, 10))
 
     # Mean-of-best across runs with ±1σ band.
-    plt.plot(gens, agg_best_mean, label=f'Best (mean of {n_runs} runs)', color='steelblue', linewidth=2)
-    plt.fill_between(gens,
-                     agg_best_mean - agg_best_std,
-                     agg_best_mean + agg_best_std,
-                     color='steelblue', alpha=0.2, label='Best ±1σ across runs')
+    plt.plot(gens, agg_best_mean, label=f'Best (mean of {n_runs} runs)', color='darkorange', linewidth=2, linestyle='--')
+    # plt.fill_between(gens,
+    #                  agg_best_mean - agg_best_std,
+    #                  agg_best_mean + agg_best_std,
+    #                  color='darkorange', alpha=0.2, label='Best ±1σ across runs')
 
     # Mean-of-mean across runs with ±1σ band.
-    plt.plot(gens, agg_mean_mean, label=f'Mean (mean of {n_runs} runs)', color='darkorange', linewidth=2)
+    plt.plot(gens, agg_mean_mean, label=f'Mean (mean of {n_runs} runs)', color='steelblue', linewidth=2)
     plt.fill_between(gens,
                      agg_mean_mean - agg_mean_std,
                      agg_mean_mean + agg_mean_std,
-                     color='darkorange', alpha=0.2, label='Mean ±1σ across runs')
+                     color='steelblue', alpha=0.2, label='Mean ±1σ across runs')
 
-    # Worst envelope (mean across runs) for context.
-    plt.plot(gens, agg_worst_mean, label='Worst (mean across runs)',
-             color='gray', linewidth=1, linestyle=':')
+    # # Worst envelope (mean across runs) for context.
+    # plt.plot(gens, agg_worst_mean, label='Worst (mean across runs)',
+    #          color='gray', linewidth=1, linestyle=':')
 
     # Chart Formatting
     plt.title(f'Training Metrics — {n_runs} runs aggregated', fontsize=14)
