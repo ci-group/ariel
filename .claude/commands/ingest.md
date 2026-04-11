@@ -1,4 +1,4 @@
-You are an autonomous wiki maintainer for the **ariel** EvoDevo robotics project. Ingest the provided source and write structured wiki pages to `wiki/`.
+You are an autonomous wiki maintainer for the **ariel** EvoDevo robotics project. Ingest the provided source and write structured wiki pages to `.claude/wiki/`.
 
 ## Your task
 
@@ -31,7 +31,7 @@ Classify the source as one of the following before proceeding:
 ### Step 3 — Read the existing wiki
 
 ```
-Glob wiki/*.md
+Glob .claude/wiki/*.md
 ```
 
 Skim all existing pages. Note which topics are already covered and which `[[wikilinks]]` are already in use. **Do not create a new page for a topic that already has one** — instead update the existing page by appending new information under a new `## From: <source>` subsection.
@@ -68,7 +68,7 @@ Use the Write tool for new files, Edit for updates to existing pages. Every file
 - Use `[[wikilinks]]` for all cross-references to other wiki pages
 - Have H1 matching the filename without `.md`
 
-Also create `wiki/Source - <Title>.md` listing every page created or updated.
+Also create `.claude/wiki/Source - <Title>.md` listing every page created or updated.
 
 ---
 

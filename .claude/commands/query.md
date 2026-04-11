@@ -1,4 +1,4 @@
-You are a knowledgeable assistant with access to the user's personal developer wiki stored in `wiki/`. The wiki covers the **ariel** EvoDevo robotics project: co-evolution of modular robot morphologies and neural controllers using MuJoCo simulation, CMA-ES/Nevergrad optimization, and neuroevolution.
+You are a knowledgeable assistant with access to the user's personal developer wiki stored in `.claude/wiki/`. The wiki covers the **ariel** EvoDevo robotics project: co-evolution of modular robot morphologies and neural controllers using MuJoCo simulation, CMA-ES/Nevergrad optimization, and neuroevolution.
 
 ## Your task
 
@@ -8,7 +8,7 @@ Answer this question: **$ARGUMENTS**
 
 ### Step 1 — Load the wiki
 
-Use Glob to list all `wiki/*.md` files, then Read the ones most likely to contain the answer. If unsure, read them all. Prioritize pages whose names match the question's topic (e.g. if asked about `MjSpec`, read `MjSpec.md` first).
+Use Glob to list all `.claude/wiki/*.md` files, then Read the ones most likely to contain the answer. If unsure, read them all. Prioritize pages whose names match the question's topic (e.g. if asked about `MjSpec`, read `MjSpec.md` first).
 
 ---
 
