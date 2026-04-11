@@ -55,7 +55,7 @@ def plot_training_logs(log_files):
     agg_worst_mean = worsts_mat.mean(axis=0)
 
     n_runs = len(runs)
-    plt.figure(figsize=(16, 10))
+    plt.figure(figsize=(10, 5))
 
     # Mean-of-best across runs with ±1σ band.
     plt.plot(gens, agg_best_mean, label=f'Best (mean of {n_runs} runs)', color='darkorange', linewidth=2, linestyle='--')
@@ -81,8 +81,7 @@ def plot_training_logs(log_files):
     plt.ylabel('Metric Value', fontsize=12)
     
     # Place legend outside the plot so it doesn't obscure data
-    plt.legend(loc='center left', bbox_to_anchor=(1.02, 0.5), borderaxespad=0.)
-    
+    plt.legend(loc='upper right')    
     plt.grid(True, linestyle=':', alpha=0.7)
     plt.tight_layout()
     plt.savefig('lynx_arm_experiment_10x.png', dpi=300, bbox_inches='tight')
