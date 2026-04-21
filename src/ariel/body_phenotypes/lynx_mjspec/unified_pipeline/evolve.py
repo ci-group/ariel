@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import time
 import argparse
 import json
+from datetime import datetime, timezone
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
@@ -33,6 +33,34 @@ DEFAULT_HOLD_THRESHOLD = 0.02
 DEFAULT_HOLD_STEPS_TO_STOP = 60
 DEFAULT_TIME_BONUS_WEIGHT = 0.08
 
+
+def make_run_name() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Unified Lynx evolution pipeline")
+    parser.add_argument("--generations", type=int, default=10)
+    parser.add_argument("--population", type=int, default=32)
+    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--weight-sigma", type=float, default=0.10)
+    parser.add_argument("--optimizer", type=str, default="CMA",
+                        choices=["CMA", "TBPSA", "TwoPointsDE", "NGOpt"])
+    parser.add_argument("--sim-steps", type=int, default=DEFAULT_SIM_STEPS)
+    parser.add_argument("--ctrl-freq", type=int, default=DEFAULT_CTRL_FREQ)
+    parser.add_argument("--hidden-size", type=int, default=4)
+    parser.add_argument("--action-scale", type=float, default=0.25)
+    parser.add_argument("--max-delta", type=float, default=0.12)
+    parser.add_argument("--target-x", type=float, default=float(DEFAULT_TARGET[0]))
+    parser.add_argument("--target-y", type=float, default=float(DEFAULT_TARGET[1]))
+    parser.add_argument("--target-z", type=float, default=float(DEFAULT_TARGET[2]))
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--out-dir", type=str, default="__data__/lynx_mjspec/unified")
+    parser.add_argument("--touch-threshold", type=float, default=DEFAULT_TOUCH_THRESHOLD)
+    parser.add_argument("--hold-threshold", type=float, default=DEFAULT_HOLD_THRESHOLD)
+    parser.add_argument("--hold-steps-to-stop", type=int, default=DEFAULT_HOLD_STEPS_TO_STOP)
+    parser.add_argument("--time-bonus-weight", type=float, default=DEFAULT_TIME_BONUS_WEIGHT)
+    return parser.parse_args()
 
 def evaluate_candidate(
     genome: np.ndarray,
@@ -126,32 +154,6 @@ def evaluate_candidate(
     except Exception:
         return INVALID_FITNESS
 
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Unified Lynx evolution pipeline")
-    parser.add_argument("--generations", type=int, default=200)
-    parser.add_argument("--population", type=int, default=32)
-    parser.add_argument("--workers", type=int, default=4)
-    parser.add_argument("--weight-sigma", type=float, default=0.10)
-    parser.add_argument("--optimizer", type=str, default="CMA",
-                        choices=["CMA", "TBPSA", "TwoPointsDE", "NGOpt"])
-    parser.add_argument("--sim-steps", type=int, default=DEFAULT_SIM_STEPS)
-    parser.add_argument("--ctrl-freq", type=int, default=DEFAULT_CTRL_FREQ)
-    parser.add_argument("--hidden-size", type=int, default=4)
-    parser.add_argument("--action-scale", type=float, default=0.25)
-    parser.add_argument("--max-delta", type=float, default=0.12)
-    parser.add_argument("--target-x", type=float, default=float(DEFAULT_TARGET[0]))
-    parser.add_argument("--target-y", type=float, default=float(DEFAULT_TARGET[1]))
-    parser.add_argument("--target-z", type=float, default=float(DEFAULT_TARGET[2]))
-    parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--out-dir", type=str, default="__data__/lynx_mjspec/unified")
-    parser.add_argument("--touch-threshold", type=float, default=DEFAULT_TOUCH_THRESHOLD)
-    parser.add_argument("--hold-threshold", type=float, default=DEFAULT_HOLD_THRESHOLD)
-    parser.add_argument("--hold-steps-to-stop", type=int, default=DEFAULT_HOLD_STEPS_TO_STOP)
-    parser.add_argument("--time-bonus-weight", type=float, default=DEFAULT_TIME_BONUS_WEIGHT)
-    return parser.parse_args()
-
-
 def main() -> None:
     args = parse_args()
 
@@ -238,13 +240,15 @@ def main() -> None:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    t = time.time()
-    print(f"Saving unified artifacts to: {out_dir} at time {t}")
+    run_name = make_run_name()
+    run_dir = out_dir / run_name
+    run_dir.mkdir(parents=True, exist_ok=False)
 
-    # Timestamped copies for history.
-    np.save(out_dir / f"best_genome_{t}.npy", best_genome)
-    np.save(out_dir / f"best_tube_lengths_{t}.npy", best_tube_lengths)
-    np.save(out_dir / f"best_brain_weights_{t}.npy", best_weights)
+    print(f"Saving unified artifacts to: {run_dir}")
+
+    np.save(run_dir / "best_genome.npy", best_genome)
+    np.save(run_dir / "best_tube_lengths.npy", best_tube_lengths)
+    np.save(run_dir / "best_brain_weights.npy", best_weights)
 
     metadata = {
         "policy": asdict(policy_spec),
@@ -257,15 +261,9 @@ def main() -> None:
         "time_bonus_weight": float(args.time_bonus_weight),
     }
 
-    (out_dir / f"metadata_{t}.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    (run_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
-    # Latest-run symlinks for replay.py (no timestamp — always points to this run).
-    np.save(out_dir / "best_genome.npy", best_genome)
-    np.save(out_dir / "best_tube_lengths.npy", best_tube_lengths)
-    np.save(out_dir / "best_brain_weights.npy", best_weights)
-    (out_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
-
-    print(f"Saved unified artifacts to: {out_dir}")
+    print(f"Saved unified artifacts to: {run_dir}")
 
 
 if __name__ == "__main__":
