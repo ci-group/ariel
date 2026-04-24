@@ -1,6 +1,5 @@
 # Standard libraries
 import gc
-import os
 import random
 import time
 from pathlib import Path
@@ -17,6 +16,8 @@ install()
 console = Console()
 
 # Third-party libraries
+# Set up command line argument parsing
+# If none given, default values are used.
 # Set up command line argument parsing
 # If none given, default values are used.
 import argparse
