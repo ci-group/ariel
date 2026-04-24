@@ -20,6 +20,8 @@ console = Console()
 # If none given, default values are used.
 # Set up command line argument parsing
 # If none given, default values are used.
+# Set up command line argument parsing
+# If none given, default values are used.
 import argparse
 
 import matplotlib.pyplot as plt
