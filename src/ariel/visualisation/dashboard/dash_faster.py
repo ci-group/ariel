@@ -4,9 +4,13 @@ Interactive Panel dashboard for visualising evolutionary experiment data
 stored in an SQLite database (ARIEL format).
 
 Usage:
-    panel serve dash_faster.py --websocket-max-message-size 209715200  # 200MB
+    panel serve dashboard_new.py --show
 
-OLD VERSION NO LONGER IN USE
+Architecture (query-driven):
+    - No full table loads.  Each metric fetches only the columns it needs.
+    - Per-generation SQL queries are issued inside a single connection context.
+    - Results are cached in _databases so each (label, metric) is computed once.
+    - No Pandas — aggregation uses NumPy only.
 """
 
 import io
@@ -22,9 +26,9 @@ import plotly.graph_objects as go
 
 warnings.filterwarnings("ignore")
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Colour themes  (each entry: list of hex colours assigned to traces in order)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 _COLOUR_THEMES: dict[str, list[str]] = {
     "ARIEL (default)": [
         "#1f77b4",
@@ -62,9 +66,9 @@ _COLOUR_THEMES: dict[str, list[str]] = {
     ],
 }
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Global plot-style widgets  (referenced by _apply_theme at call-time)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 sld_font_size = pn.widgets.IntSlider(
     name="Font size",
     value=12,
@@ -88,9 +92,9 @@ sel_colour_theme = pn.widgets.Select(
 )
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Plotly theme helpers
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 def _apply_theme(fig: go.Figure, font_size: int) -> go.Figure:
     """Apply the shared Plotly layout theme with user-chosen font size."""
     title_size = font_size + 4
@@ -175,17 +179,17 @@ def _pdf_download_btn(fig_getter, filename: str) -> pn.widgets.FileDownload:
     )
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # CSS theme
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 _CSS = """
-/* -- Global -- */
+/* ── Global ── */
 body, html {
     font-family: 'Segoe UI', system-ui, sans-serif !important;
     background: #eef1f8 !important;
 }
 
-/* -- Top navbar -- */
+/* ── Top navbar ── */
 .navbar {
     background: linear-gradient(135deg, #1f2e45 0%, #2d4163 100%) !important;
     box-shadow: 0 2px 12px rgba(31,46,69,0.25) !important;
@@ -196,7 +200,7 @@ body, html {
     color: #e8edf8 !important;
 }
 
-/* -- Sidebar -- */
+/* ── Sidebar ── */
 #sidebar {
     background: #ffffff !important;
     border-right: 1px solid #dce6f4 !important;
@@ -263,7 +267,7 @@ body, html {
     accent-color: #4f8ef7 !important;
 }
 
-/* -- Main content area -- */
+/* ── Main content area ── */
 #main {
     background: #eef1f8 !important;
     padding: 28px 32px !important;
@@ -294,7 +298,7 @@ body, html {
     line-height: 1.6 !important;
 }
 
-/* -- FileInput browse button -- */
+/* ── FileInput browse button ── */
 .bk-btn-default {
     border-radius: 8px !important;
     border: 1.5px dashed #a0b4d0 !important;
@@ -309,7 +313,7 @@ body, html {
     background: #ebf2ff !important;
 }
 
-/* -- Primary "Load selected file" button -- */
+/* ── Primary "Load selected file" button ── */
 .bk-btn-primary {
     background: linear-gradient(135deg, #1f2e45 0%, #2d4163 100%) !important;
     border: none !important;
@@ -328,7 +332,7 @@ body, html {
 
 pn.extension("plotly", sizing_mode="stretch_width", raw_css=[_CSS])
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Global mutable state  — keyed by db label.
 #
 # Each entry stores only lightweight metadata and the path to the on-disk
@@ -346,7 +350,7 @@ pn.extension("plotly", sizing_mode="stretch_width", raw_css=[_CSS])
 #     "_stats":   dict | None, # cached fitness + age + diversity stats
 #     "_novelty": {window: dict},  # cached novelty, one entry per window size
 #   }
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 _databases: dict[str, dict] = {}
 
 # DB-selector widget (populated dynamically as DBs are loaded)
@@ -362,7 +366,7 @@ chk_show_individual = pn.widgets.Checkbox(
 )
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Bulk-fetch compute functions  (1 query per metric — no per-generation loops)
 #
 # Design principles:
@@ -375,7 +379,8 @@ chk_show_individual = pn.widgets.Checkbox(
 #   fitness + age : SELECT time_of_birth, time_of_death, fitness_
 #   diversity     : SELECT time_of_birth, time_of_death, genotype_
 #   novelty       : SELECT time_of_birth, time_of_death, genotype_   (same bulk)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+
 
 def _load_fitness_age_arrays(path: str, sentinel: int) -> tuple:
     """Single query: returns (births, deaths, fits) as NumPy arrays.
@@ -411,9 +416,7 @@ def _load_genotype_arrays(path: str, sentinel: int) -> tuple:
     deaths = np.array(
         [r[1] if r[1] is not None else sentinel for r in rows], dtype=np.int32
     )
-    G = np.array(
-        [np.asarray(json5.loads(r[2]), dtype=float) for r in rows]
-    )
+    G = np.array([np.asarray(json5.loads(r[2]), dtype=float) for r in rows])
     return births, deaths, G
 
 
@@ -432,7 +435,7 @@ def _compute_stats_from_db(path: str, min_gen: int, max_gen: int) -> dict:
     """
     sentinel = max_gen + 1
 
-    # -- Query 1: fitness + age ------------------------------------------------
+    # ── Query 1: fitness + age ────────────────────────────────────────────────
     births_fa, deaths_fa, fits_all = _load_fitness_age_arrays(path, sentinel)
 
     fit_mean, fit_std, fit_max, fit_min = [], [], [], []
@@ -442,8 +445,15 @@ def _compute_stats_from_db(path: str, min_gen: int, max_gen: int) -> dict:
         alive = (births_fa <= gen) & (deaths_fa > gen)
 
         if not alive.any():
-            for lst in (fit_mean, fit_std, fit_max, fit_min,
-                        age_mean, age_max, age_median):
+            for lst in (
+                fit_mean,
+                fit_std,
+                fit_max,
+                fit_min,
+                age_mean,
+                age_max,
+                age_median,
+            ):
                 lst.append(float("nan"))
             continue
 
@@ -464,7 +474,7 @@ def _compute_stats_from_db(path: str, min_gen: int, max_gen: int) -> dict:
         age_max.append(float(np.max(ages)))
         age_median.append(float(np.median(ages)))
 
-    # -- Query 2: diversity ----------------------------------------------------
+    # ── Query 2: diversity ────────────────────────────────────────────────────
     births_g, deaths_g, G_all = _load_genotype_arrays(path, sentinel)
     diversity: list[float] = []
 
@@ -479,21 +489,21 @@ def _compute_stats_from_db(path: str, min_gen: int, max_gen: int) -> dict:
             diversity.append(0.0)
         else:
             diff = G[:, None, :] - G[None, :, :]
-            dist = np.sqrt(np.sum(diff ** 2, axis=-1))
+            dist = np.sqrt(np.sum(diff**2, axis=-1))
             triu = dist[np.triu_indices(n, k=1)]
             diversity.append(float(triu.mean()))
 
     generations = np.arange(min_gen, max_gen + 1)
     return {
         "generations": generations,
-        "fit_mean":    np.asarray(fit_mean),
-        "fit_std":     np.asarray(fit_std),
-        "fit_max":     np.asarray(fit_max),
-        "fit_min":     np.asarray(fit_min),
-        "age_mean":    np.asarray(age_mean),
-        "age_max":     np.asarray(age_max),
-        "age_median":  np.asarray(age_median),
-        "diversity":   np.asarray(diversity),
+        "fit_mean": np.asarray(fit_mean),
+        "fit_std": np.asarray(fit_std),
+        "fit_max": np.asarray(fit_max),
+        "fit_min": np.asarray(fit_min),
+        "age_mean": np.asarray(age_mean),
+        "age_max": np.asarray(age_max),
+        "age_median": np.asarray(age_median),
+        "diversity": np.asarray(diversity),
     }
 
 
@@ -514,11 +524,11 @@ def _compute_novelty_from_db(
     births, deaths, G_all = _load_genotype_arrays(path, sentinel)
 
     nov_mean: list[float] = []
-    nov_max:  list[float] = []
+    nov_max: list[float] = []
 
     for gen in range(min_gen, max_gen + 1):
         # Current population: alive at gen
-        cur_mask  = (births <= gen)     & (deaths > gen)
+        cur_mask = (births <= gen) & (deaths > gen)
         # Archive: alive at any point in [gen-window, gen-1]
         arch_mask = (births <= gen - 1) & (deaths > gen - window)
 
@@ -527,12 +537,12 @@ def _compute_novelty_from_db(
             nov_max.append(float("nan"))
             continue
 
-        g_cur  = G_all[cur_mask]
+        g_cur = G_all[cur_mask]
         g_arch = G_all[arch_mask]
 
         # Distance matrix: (n_cur × n_arch)
-        diff  = g_cur[:, None, :] - g_arch[None, :, :]
-        dist  = np.sqrt(np.sum(diff ** 2, axis=-1))
+        diff = g_cur[:, None, :] - g_arch[None, :, :]
+        dist = np.sqrt(np.sum(diff**2, axis=-1))
         nov_i = dist.mean(axis=1)
 
         nov_mean.append(float(np.mean(nov_i)))
@@ -540,14 +550,15 @@ def _compute_novelty_from_db(
 
     return {
         "generations": np.arange(min_gen, max_gen + 1),
-        "nov_mean":    np.asarray(nov_mean),
-        "nov_max":     np.asarray(nov_max),
+        "nov_mean": np.asarray(nov_mean),
+        "nov_max": np.asarray(nov_max),
     }
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Lazy getters — compute once, cache forever per (label, metric/window)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+
 
 def _get_stats(label: str) -> "dict | None":
     """Return cached stats dict (fitness + age + diversity), computing on first call."""
@@ -577,10 +588,11 @@ def _get_novelty(label: str, window: int) -> "dict | None":
     return cache[window]
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Aggregation helpers  (nanmean across selected DBs on a union generation axis)
 # Implemented with NumPy only — no Pandas.
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+
 
 def _nanmean_series(
     pairs: "list[tuple[np.ndarray, np.ndarray]]",
@@ -625,9 +637,14 @@ def _aggregate_stats(selected_dbs: list) -> "dict | None":
         return None
 
     stat_keys = [
-        "fit_mean", "fit_std", "fit_max", "fit_min",
+        "fit_mean",
+        "fit_std",
+        "fit_max",
+        "fit_min",
         "diversity",
-        "age_mean", "age_max", "age_median",
+        "age_mean",
+        "age_max",
+        "age_median",
     ]
 
     pairs: dict[str, list] = {k: [] for k in stat_keys}
@@ -684,14 +701,14 @@ def _aggregate_novelty(selected_dbs: list, window: int) -> "dict | None":
     union_gens = np.array(sorted(all_gens))
     return {
         "generations": union_gens,
-        "nov_mean":    _nanmean_series(mean_pairs, union_gens),
-        "nov_max":     _nanmean_series(max_pairs, union_gens),
+        "nov_mean": _nanmean_series(mean_pairs, union_gens),
+        "nov_max": _nanmean_series(max_pairs, union_gens),
     }
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Shared helpers
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 def _no_data_msg() -> pn.pane.Markdown:
     return pn.pane.Markdown(
         "⚠️  **No data loaded.**  \n"
@@ -725,14 +742,14 @@ def _parse_yrange(ymin_str: str, ymax_str: str) -> "tuple[float, float] | None":
     return None
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Load-Database page
 #
 # On load we issue a single lightweight metadata query:
 #   SELECT MIN(time_of_birth), MAX(time_of_death), COUNT(*) FROM individual
 # No column data is read into memory.  The temp file is kept on disk so that
 # the lazy query functions can open it later.
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 _file_sel = pn.widgets.FileInput(
     accept=".db",
     multiple=False,
@@ -772,7 +789,7 @@ def _on_load(event: None) -> None:  # noqa: ANN001
             tmp.write(_file_sel.value)
             tmp_path = tmp.name
 
-        # -- Metadata query only — no full table load --------------------------
+        # ── Metadata query only — no full table load ──────────────────────────
         with sqlite3.connect(tmp_path) as conn:
             meta = conn.execute(
                 "SELECT MIN(time_of_birth), MAX(time_of_death), COUNT(*) "
@@ -792,16 +809,16 @@ def _on_load(event: None) -> None:  # noqa: ANN001
 
         label = _unique_label(_file_sel.filename or "database")
         _databases[label] = {
-            "path":     tmp_path,
-            "min_gen":  min_gen,
-            "max_gen":  max_gen,
-            "n":        n,
-            "_stats":   None,   # computed on first plot request
-            "_novelty": {},     # computed on first novelty plot per window
+            "path": tmp_path,
+            "min_gen": min_gen,
+            "max_gen": max_gen,
+            "n": n,
+            "_stats": None,  # computed on first plot request
+            "_novelty": {},  # computed on first novelty plot per window
         }
 
         mc_db_select.options = list(_databases.keys())
-        mc_db_select.value   = list(_databases.keys())
+        mc_db_select.value = list(_databases.keys())
 
         n_gen = max_gen - min_gen + 1
         loaded_list = "\n".join(f"- **{k}**" for k in _databases)
@@ -831,17 +848,19 @@ def _make_load_page() -> pn.Column:
     )
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Sidebar per-plot toggle widgets
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 
 # -- Fitness --
 chk_fit_mean = pn.widgets.Checkbox(name="Mean", value=True)
-chk_fit_std  = pn.widgets.Checkbox(name="Std shading", value=True)
-chk_fit_max  = pn.widgets.Checkbox(name="Max", value=True)
-chk_fit_min  = pn.widgets.Checkbox(name="Min", value=False)
+chk_fit_std = pn.widgets.Checkbox(name="Std shading", value=True)
+chk_fit_max = pn.widgets.Checkbox(name="Max", value=True)
+chk_fit_min = pn.widgets.Checkbox(name="Min", value=False)
 txt_fit_yaxis = pn.widgets.TextInput(
-    name="Y-axis label", value="Fitness  f(x)", width=200,
+    name="Y-axis label",
+    value="Fitness  f(x)",
+    width=200,
 )
 txt_fit_ymin = pn.widgets.TextInput(name="Y min", placeholder="auto", width=95)
 txt_fit_ymax = pn.widgets.TextInput(name="Y max", placeholder="auto", width=95)
@@ -849,7 +868,7 @@ chk_fit_hide_title = pn.widgets.Checkbox(name="Hide title", value=False)
 
 # -- Novelty --
 chk_nov_mean = pn.widgets.Checkbox(name="Mean", value=True)
-chk_nov_max  = pn.widgets.Checkbox(name="Max", value=True)
+chk_nov_max = pn.widgets.Checkbox(name="Max", value=True)
 sld_nov_window = pn.widgets.IntSlider(
     name="Archive window (N prev. generations)",
     value=1,
@@ -858,7 +877,9 @@ sld_nov_window = pn.widgets.IntSlider(
     step=1,
 )
 txt_nov_yaxis = pn.widgets.TextInput(
-    name="Y-axis label", value="Novelty  N(x, archive)", width=200,
+    name="Y-axis label",
+    value="Novelty  N(x, archive)",
+    width=200,
 )
 txt_nov_ymin = pn.widgets.TextInput(name="Y min", placeholder="auto", width=95)
 txt_nov_ymax = pn.widgets.TextInput(name="Y max", placeholder="auto", width=95)
@@ -866,27 +887,31 @@ chk_nov_hide_title = pn.widgets.Checkbox(name="Hide title", value=False)
 
 # -- Diversity --
 txt_div_yaxis = pn.widgets.TextInput(
-    name="Y-axis label", value="Diversity  D(P)", width=200,
+    name="Y-axis label",
+    value="Diversity  D(P)",
+    width=200,
 )
 txt_div_ymin = pn.widgets.TextInput(name="Y min", placeholder="auto", width=95)
 txt_div_ymax = pn.widgets.TextInput(name="Y max", placeholder="auto", width=95)
 chk_div_hide_title = pn.widgets.Checkbox(name="Hide title", value=False)
 
 # -- Age --
-chk_age_mean   = pn.widgets.Checkbox(name="Mean", value=True)
-chk_age_max    = pn.widgets.Checkbox(name="Max", value=True)
+chk_age_mean = pn.widgets.Checkbox(name="Mean", value=True)
+chk_age_max = pn.widgets.Checkbox(name="Max", value=True)
 chk_age_median = pn.widgets.Checkbox(name="Median", value=True)
 txt_age_yaxis = pn.widgets.TextInput(
-    name="Y-axis label", value="Age  L(x)  [generations]", width=200,
+    name="Y-axis label",
+    value="Age  L(x)  [generations]",
+    width=200,
 )
 txt_age_ymin = pn.widgets.TextInput(name="Y min", placeholder="auto", width=95)
 txt_age_ymax = pn.widgets.TextInput(name="Y max", placeholder="auto", width=95)
 chk_age_hide_title = pn.widgets.Checkbox(name="Hide title", value=False)
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Page 1 - Fitness over time  (fully reactive)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 def _fitness_fig(
     show_mean,
     show_std,
@@ -904,7 +929,7 @@ def _fitness_fig(
         return None
 
     colors = _COLOUR_THEMES[theme]
-    fig    = go.Figure()
+    fig = go.Figure()
     yrange = _parse_yrange(ymin, ymax)
 
     if show_individual:
@@ -912,7 +937,7 @@ def _fitness_fig(
             s = _get_stats(label)
             if s is None:
                 continue
-            x   = s["generations"]
+            x = s["generations"]
             col = colors[i % len(colors)]
             if show_mean:
                 if show_std:
@@ -978,7 +1003,7 @@ def _fitness_fig(
         s = _aggregate_stats(selected_dbs)
         if s is None:
             return None
-        x   = s["generations"]
+        x = s["generations"]
         col = colors[0]
         if show_mean:
             if show_std:
@@ -1064,9 +1089,17 @@ def _fitness_plot(
     if not selected_dbs:
         return _no_selection_msg()
     fig = _fitness_fig(
-        show_mean, show_std, show_max, show_min,
-        theme, yaxis_label, ymin, ymax, hide_title,
-        selected_dbs, show_individual,
+        show_mean,
+        show_std,
+        show_max,
+        show_min,
+        theme,
+        yaxis_label,
+        ymin,
+        ymax,
+        hide_title,
+        selected_dbs,
+        show_individual,
     )
     return _wrap_plotly(fig, font_size) if fig is not None else _no_data_msg()
 
@@ -1115,9 +1148,9 @@ def _make_fitness_page() -> pn.Column:
     )
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Page 2 - Diversity over time  (single line, no toggles)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 def _diversity_fig(
     theme,
     yaxis_label,
@@ -1130,7 +1163,7 @@ def _diversity_fig(
     if not selected_dbs:
         return None
     colors = _COLOUR_THEMES[theme]
-    fig    = go.Figure()
+    fig = go.Figure()
     yrange = _parse_yrange(ymin, ymax)
 
     if show_individual:
@@ -1187,7 +1220,13 @@ def _diversity_plot(
     if not selected_dbs:
         return _no_selection_msg()
     fig = _diversity_fig(
-        theme, yaxis_label, ymin, ymax, hide_title, selected_dbs, show_individual,
+        theme,
+        yaxis_label,
+        ymin,
+        ymax,
+        hide_title,
+        selected_dbs,
+        show_individual,
     )
     return _wrap_plotly(fig, font_size) if fig is not None else _no_data_msg()
 
@@ -1228,9 +1267,9 @@ def _make_diversity_page() -> pn.Column:
     )
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Page 3 - Novelty over time  (reactive — window slider + show toggles)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 def _novelty_fig(
     show_mean,
     show_max,
@@ -1246,7 +1285,7 @@ def _novelty_fig(
     if not selected_dbs:
         return None
     colors = _COLOUR_THEMES[theme]
-    fig    = go.Figure()
+    fig = go.Figure()
     yrange = _parse_yrange(ymin, ymax)
 
     if show_individual:
@@ -1334,9 +1373,16 @@ def _novelty_plot(
     if not selected_dbs:
         return _no_selection_msg()
     fig = _novelty_fig(
-        show_mean, show_max, window,
-        theme, yaxis_label, ymin, ymax, hide_title,
-        selected_dbs, show_individual,
+        show_mean,
+        show_max,
+        window,
+        theme,
+        yaxis_label,
+        ymin,
+        ymax,
+        hide_title,
+        selected_dbs,
+        show_individual,
     )
     return _wrap_plotly(fig, font_size) if fig is not None else _no_data_msg()
 
@@ -1385,9 +1431,9 @@ def _make_novelty_page() -> pn.Column:
     )
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Page 4 - Age over time  (reactive)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 def _age_fig(
     show_mean,
     show_max,
@@ -1403,7 +1449,7 @@ def _age_fig(
     if not selected_dbs:
         return None
     colors = _COLOUR_THEMES[theme]
-    fig    = go.Figure()
+    fig = go.Figure()
     yrange = _parse_yrange(ymin, ymax)
 
     if show_individual:
@@ -1507,9 +1553,16 @@ def _age_plot(
     if not selected_dbs:
         return _no_selection_msg()
     fig = _age_fig(
-        show_mean, show_max, show_median,
-        theme, yaxis_label, ymin, ymax, hide_title,
-        selected_dbs, show_individual,
+        show_mean,
+        show_max,
+        show_median,
+        theme,
+        yaxis_label,
+        ymin,
+        ymax,
+        hide_title,
+        selected_dbs,
+        show_individual,
     )
     return _wrap_plotly(fig, font_size) if fig is not None else _no_data_msg()
 
@@ -1557,30 +1610,45 @@ def _make_age_page() -> pn.Column:
     )
 
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Navigation buttons
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 _BTN = {"styles": {"width": "100%"}}
 
 btn_load = pn.widgets.Button(
-    name="Load Database", button_type="warning", icon="database", **_BTN,
+    name="Load Database",
+    button_type="warning",
+    icon="database",
+    **_BTN,
 )
 btn_fit = pn.widgets.Button(
-    name="Fitness", button_type="warning", icon="chart-line", **_BTN,
+    name="Fitness",
+    button_type="warning",
+    icon="chart-line",
+    **_BTN,
 )
 btn_div = pn.widgets.Button(
-    name="Diversity", button_type="warning", icon="arrows-split-2", **_BTN,
+    name="Diversity",
+    button_type="warning",
+    icon="arrows-split-2",
+    **_BTN,
 )
 btn_nov = pn.widgets.Button(
-    name="Novelty", button_type="warning", icon="sparkles", **_BTN,
+    name="Novelty",
+    button_type="warning",
+    icon="sparkles",
+    **_BTN,
 )
 btn_age = pn.widgets.Button(
-    name="Age", button_type="warning", icon="clock", **_BTN,
+    name="Age",
+    button_type="warning",
+    icon="clock",
+    **_BTN,
 )
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Main area & routing
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 main_area = pn.Column(_make_load_page(), styles={"width": "100%"})
 
 
@@ -1604,9 +1672,9 @@ btn_div.on_click(lambda _: _show("diversity"))
 btn_nov.on_click(lambda _: _show("novelty"))
 btn_age.on_click(lambda _: _show("age"))
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Sidebar  (navigation + per-plot controls, always visible)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 sidebar = pn.Column(
     pn.pane.Markdown("## Pages"),
     btn_load,
@@ -1656,9 +1724,9 @@ sidebar = pn.Column(
     styles={"width": "100%", "padding": "15px"},
 )
 
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # App template  (light mode - no DarkTheme kwarg)
-# -----------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 template = pn.template.BootstrapTemplate(
     title="ARIEL - Dashboard",
     sidebar=[sidebar],

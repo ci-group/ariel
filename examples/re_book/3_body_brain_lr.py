@@ -11,7 +11,7 @@ import random
 import shutil
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import Any, Literal
 
 # Third-party libraries
 import mujoco as mj
@@ -39,17 +39,8 @@ from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
-from ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding import (
-    HighProbabilityDecoder,
-)
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
-from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
-from ariel.ec.a000 import IntegerMutator
-from ariel.ec.a001 import Individual
-from ariel.ec.a004 import EA, EASettings, EAStep
-from ariel.ec.a005 import Crossover
-from ariel.ec.genotypes.nde import NeuralDevelopmentalEncoding
-from ariel.simulation.controllers import NaCPG
+from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.simulation.controllers.controller import Controller, Tracker
 from ariel.simulation.controllers.na_cpg import create_fully_connected_adjacency
 from ariel.simulation.controllers.simple_cpg import SimpleCPG
@@ -59,20 +50,18 @@ from ariel.utils.runners import simple_runner
 from ariel.utils.video_recorder import VideoRecorder
 
 # Type Checking
-if TYPE_CHECKING:
-    from networkx import DiGraph
 type ViewerTypes = Literal["launcher", "video", "simple", "no_control", "frame"]
 
 # Type Aliases
-type Population = list[Individual]
 type PopulationFunc = Callable[[Population], Population]
 
 # --- DATA SETUP --- #
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__" / SCRIPT_NAME
-shutil.rmtree(DATA)
-DATA.mkdir(exist_ok=True)
+if DATA.exists():
+    shutil.rmtree(DATA)
+DATA.mkdir(exist_ok=True, parents=True)
 VIDEOS = DATA / "videos"
 VIDEOS.mkdir(exist_ok=True)
 
@@ -94,17 +83,18 @@ SPAWN_POS = (-0.8, 0.0, 0.1)
 TARGET_POSITION = np.array([2.0, 0.0, 0.5])
 
 # EA
-POPULATION_SIZE = 80
-GENERATIONS = 80
-SIMULATION_DURATION = 30
-LEARNING_BUDGET = 80
+POPULATION_SIZE = 10
+GENERATIONS = 2
+SIMULATION_DURATION = 10
+LEARNING_BUDGET = 10
 LEARNING_ALGORITHM = ng.optimizers.PSO
 
 
 # ------------------------------------------------------------------------ #
 # POPULATION OPS
 # ------------------------------------------------------------------------ #
-def parent_selection(population: list[Individual]) -> list[Individual]:
+@EAOperation
+def parent_selection(population: Population) -> Population:
     """
     Perform truncation parent selection by tagging the top 50% of individuals.
 
@@ -119,7 +109,7 @@ def parent_selection(population: list[Individual]) -> list[Individual]:
         The population with updated 'ps' tags.
     """
     # Sort descending: higher fitness (closer to 0) is better
-    population.sort(key=lambda x: x.fitness, reverse=True)
+    population = population.sort(sort="max", attribute="fitness_")
 
     cutoff = len(population) // 2
     for i, ind in enumerate(population):
@@ -128,6 +118,7 @@ def parent_selection(population: list[Individual]) -> list[Individual]:
     return population
 
 
+@EAOperation
 def crossover(population: Population) -> Population:
     """
     Perform joint crossover on morphology (CPPN) and control (vector).
@@ -178,6 +169,7 @@ def crossover(population: Population) -> Population:
     return population
 
 
+@EAOperation
 def mutation(population: Population) -> Population:
     """
     Apply morphology mutations and Gaussian creep to control vectors.
@@ -199,7 +191,7 @@ def mutation(population: Population) -> Population:
         # 1. Morphology Mutation (Structural)
         morph = Genome.from_dict(ind.genotype["morph"])
         morph.mutate(
-            0.8, 0.5, ID_MANAGER.get_next_innov_id, ID_MANAGER.get_next_node_id
+            0.8, 0.5, ID_MANAGER.get_next_innov_id, ID_MANAGER.get_next_node_id,
         )
         ind.genotype["morph"] = morph.to_dict()
 
@@ -215,7 +207,8 @@ def mutation(population: Population) -> Population:
     return population
 
 
-def survivor_selection(population: list[Individual]) -> list[Individual]:
+@EAOperation
+def survivor_selection(population: Population) -> Population:
     """
     Perform truncation survivor selection to maintain a fixed population size.
 
@@ -232,7 +225,7 @@ def survivor_selection(population: list[Individual]) -> list[Individual]:
     # target_population_size from main loop
     target_size = 10
 
-    population.sort(key=lambda x: x.fitness, reverse=True)
+    population = population.sort(sort="max", attribute="fitness_")
 
     for i, ind in enumerate(population):
         ind.alive = i < target_size
@@ -240,6 +233,7 @@ def survivor_selection(population: list[Individual]) -> list[Individual]:
     return population
 
 
+@EAOperation
 def learning(population: Population) -> Population:
     for ind in population:
         if ind.tags["requires_lr"]:
@@ -257,8 +251,9 @@ def learning(population: Population) -> Population:
     return population
 
 
+@EAOperation
 def evaluate(
-    population: Population, mode: ViewerTypes = "simple"
+    population: Population, mode: ViewerTypes = "simple",
 ) -> Population:
     for ind in population:
         if ind.requires_eval:
@@ -307,7 +302,7 @@ def fitness_function(
 
     # 4. Calculate 2D Euclidean distance to target
     dist = np.sqrt(
-        np.sum((effective_pos[:2] - np.array(TARGET_POSITION[:2])) ** 2)
+        np.sum((effective_pos[:2] - np.array(TARGET_POSITION[:2])) ** 2),
     )
 
     # Return negative for maximization compatibility in file 3
@@ -612,24 +607,28 @@ def deserialise_brain_to_numpy(brain: dict[str, list]) -> dict[str, np.ndarray]:
 def main() -> None:
     """Entry point."""
     # Create initial population
-    population_list = [create_individual() for _ in range(POPULATION_SIZE)]
+    population_list = Population([
+        create_individual() for _ in range(POPULATION_SIZE)
+    ])
     population_list = evaluate(population_list)
 
     # Create EA steps
     ops = [
-        EAStep("parent_selection", parent_selection),
-        EAStep("crossover", crossover),
-        EAStep("mutation", mutation),
-        EAStep("learning", learning),
-        EAStep("evaluation", evaluate),
-        EAStep("survivor_selection", survivor_selection),
+        parent_selection(),
+        crossover(),
+        mutation(),
+        learning(),
+        evaluate(),
+        survivor_selection(),
     ]
 
     # Initialize EA
     ea = EA(
         population_list,
         operations=ops,
-        num_of_generations=GENERATIONS,
+        num_steps=GENERATIONS,
+        db_file_path=DATA / "database.db",
+        db_handling="delete",
     )
 
     ea.run()

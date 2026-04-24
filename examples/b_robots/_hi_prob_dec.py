@@ -76,8 +76,10 @@ def main() -> None:
         rotation_probability_space,
     )
 
-    # Visualize the graph
-    draw_graph(graph)
+    # Visualize the graph by saving to file (works in non-interactive backends).
+    graph_plot_path = DATA / "graph.png"
+    draw_graph(graph, save_file=graph_plot_path)
+    console.log(f"Graph image saved to: {graph_plot_path}")
 
     # Save the graph to a file
     save_graph_as_json(

@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>RoboGen Robot Editor</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #eee; }
+#canvas { display: block; }
+
+#toolbar {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(20,20,40,0.92); border-radius: 10px; padding: 14px;
+  width: 220px; box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+#toolbar h2 { font-size: 15px; margin-bottom: 10px; color: #7ecfff; }
+#toolbar h3 { font-size: 12px; margin: 10px 0 6px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+
+.module-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 8px 10px; margin-bottom: 6px;
+  border: 2px solid transparent; border-radius: 6px;
+  background: rgba(255,255,255,0.06); cursor: pointer;
+  color: #ddd; font-size: 13px; transition: all 0.15s;
+}
+.module-btn:hover { background: rgba(255,255,255,0.12); }
+.module-btn.active { border-color: #7ecfff; background: rgba(126,207,255,0.12); }
+.module-btn .swatch {
+  width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0;
+}
+
+.action-btn {
+  width: 100%; padding: 8px; margin-top: 4px;
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
+  background: rgba(255,255,255,0.06); cursor: pointer;
+  color: #ddd; font-size: 12px; transition: all 0.15s;
+}
+.action-btn:hover { background: rgba(255,255,255,0.15); }
+.action-btn.danger { border-color: rgba(255,80,80,0.4); }
+.action-btn.danger:hover { background: rgba(255,80,80,0.2); }
+
+#info-panel {
+  position: absolute; bottom: 10px; left: 10px;
+  background: rgba(20,20,40,0.88); border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; color: #aaa; max-width: 400px;
+}
+#info-panel span { color: #7ecfff; }
+
+#rotation-panel {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(20,20,40,0.92); border-radius: 10px; padding: 14px;
+  width: 220px; box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  display: none;
+}
+#rotation-panel h3 { font-size: 12px; margin-bottom: 8px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+#rotation-panel label { font-size: 12px; display: block; margin: 6px 0 2px; }
+#rotation-panel input[type=range] { width: 100%; }
+#rotation-panel input[type=number] {
+  width: 60px; background: #111; color: #ccc; border: 1px solid #444;
+  border-radius: 4px; padding: 2px 6px; font-size: 12px;
+}
+#rotation-val { font-size: 11px; color: #7ecfff; }
+
+#export-dialog {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center;
+}
+#export-dialog.show { display: flex; }
+#export-content {
+  background: #1e1e3a; border-radius: 12px; padding: 20px; width: 600px; max-height: 80vh;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+#export-content h3 { margin-bottom: 10px; color: #7ecfff; }
+#export-content textarea {
+  width: 100%; height: 300px; background: #111; color: #ccc; border: 1px solid #444;
+  border-radius: 6px; padding: 10px; font-family: 'Consolas', monospace; font-size: 11px;
+  resize: vertical;
+}
+#export-content button { margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="toolbar">
+  <h2>Robot Editor</h2>
+  <h3>Modules</h3>
+  <button class="module-btn active" data-type="core">
+    <div class="swatch" style="background:#fdc940"></div> Core (start)
+  </button>
+  <button class="module-btn" data-type="brick">
+    <div class="swatch" style="background:#1c77c3"></div> Brick
+  </button>
+  <button class="module-btn" data-type="hinge">
+    <div class="swatch" style="background:#df2935"></div> Hinge (joint)
+  </button>
+
+  <h3>Actions</h3>
+  <button class="action-btn" id="btn-delete">Delete selected module</button>
+  <button class="action-btn" id="btn-clear">Clear all</button>
+  <button class="action-btn" id="btn-export">Export Python</button>
+  <button class="action-btn" id="btn-export-xml">Export XML (approx)</button>
+</div>
+
+<div id="rotation-panel">
+  <h3>Hinge Pre-Rotation</h3>
+  <label>Degrees: <input type="number" id="rotation-num" min="-180" max="180" value="0" style="margin-left:4px"/></label>
+  <input type="range" id="rotation-slider" min="-180" max="180" step="1" value="0"/>
+</div>
+
+<div id="info-panel">
+  <span>Click</span> green sphere to place module &nbsp;|&nbsp;
+  <span>Right-click</span> module to select &nbsp;|&nbsp;
+  <span>Scroll</span> zoom &nbsp;|&nbsp;
+  <span>Middle-drag</span> pan &nbsp;|&nbsp;
+  <span>Del</span> delete selected
+</div>
+
+<div id="export-dialog">
+  <div id="export-content">
+    <h3 id="export-title">Export</h3>
+    <textarea id="export-text" readonly></textarea>
+    <button class="action-btn" onclick="navigator.clipboard.writeText(document.getElementById('export-text').value);this.textContent='Copied!'">Copy to clipboard</button>
+    <button class="action-btn" onclick="document.getElementById('export-dialog').classList.remove('show')">Close</button>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Constants matching MuJoCo sizes ──
+const SCALE = 4;
+const CORE_HALF = 0.1 * SCALE;
+const BRICK_HALF = 0.05 * SCALE;
+const STATOR_SIZE = new THREE.Vector3(0.02475 * SCALE, 0.0297 * SCALE, 0.02475 * SCALE);
+const ROTOR_SIZE  = new THREE.Vector3(0.025 * SCALE, 0.02 * SCALE, 0.025 * SCALE);
+const HINGE_GAP_STATOR = 0.03 * SCALE;
+const HINGE_GAP_ROTOR  = 0.08 * SCALE;
+const ROTOR_FRONT = HINGE_GAP_ROTOR + ROTOR_SIZE.y;
+const SITE_RADIUS = 0.018 * SCALE;
+
+const COLORS = {
+  core: 0xfdc940, brick: 0x1c77c3,
+  stator: 0xdf2935, rotor: 0xa01820,
+  site: 0x44ff88, siteHover: 0xffffff, selected: 0xff66ff,
+};
+
+// ── Scene setup ──
+
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a2e);
+
+// const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+// camera.position.set(3, 3, 4);
+
+// const controls = new OrbitControls(camera, canvas);
+// controls.enableDamping = true;
+// controls.dampingFactor = 0.08;
+
+// const amb = new THREE.AmbientLight(0xffffff, 0.5);
+// scene.add(amb);
+// const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+// dirLight.position.set(5, 8, 5);
+// dirLight.castShadow = true;
+// scene.add(dirLight);
+// scene.add(new THREE.HemisphereLight(0x7ecfff, 0x443322, 0.3));
+// scene.add(new THREE.GridHelper(8, 20, 0x333355, 0x222244));
+
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.up.set(0, 0, 1); // Tell Three.js that Z is UP
+camera.position.set(4, -5, 4); // Move camera to look down at the new angle
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+
+const amb = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(amb);
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+dirLight.position.set(5, 5, 8); // Adjust light for Z-up
+dirLight.castShadow = true;
+scene.add(dirLight);
+scene.add(new THREE.HemisphereLight(0x7ecfff, 0x443322, 0.3));
+
+const grid = new THREE.GridHelper(8, 20, 0x333355, 0x222244);
+grid.rotation.x = Math.PI / 2; // Rotate the grid to lay flat on the new XY floor
+scene.add(grid);
+
+// ── State ──
+let selectedTool = 'core';
+let moduleIndex = 0;
+let allModules = [];
+let allSites = [];
+let selectedModule = null;
+let hoveredSite = null;
+let coreExists = false;
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+// ── Face definitions (local space) ──
+// These define the local-space direction and up for each face of a box module.
+// "front" = local +Y (MuJoCo forward), "back" = local -Y, etc.
+// We use Y-forward to match MuJoCo convention where bodies chain along +Y.
+// const BOX_FACES = {
+//   front:  { localDir: new THREE.Vector3(0,  1,  0), localUp: new THREE.Vector3(0, 0, 1) },
+//   back:   { localDir: new THREE.Vector3(0, -1,  0), localUp: new THREE.Vector3(0, 0, 1) },
+//   left:   { localDir: new THREE.Vector3(-1, 0,  0), localUp: new THREE.Vector3(0, 0, 1) },
+//   right:  { localDir: new THREE.Vector3( 1, 0,  0), localUp: new THREE.Vector3(0, 0, 1) },
+//   top:    { localDir: new THREE.Vector3(0,  0,  1), localUp: new THREE.Vector3(0, 1, 0) },
+//   bottom: { localDir: new THREE.Vector3(0,  0, -1), localUp: new THREE.Vector3(0, 1, 0) },
+// };
+
+const BOX_FACES = {
+  front:  { localDir: new THREE.Vector3(0,  1,  0), localUp: new THREE.Vector3(0, 0, 1) },
+  back:   { localDir: new THREE.Vector3(0, -1,  0), localUp: new THREE.Vector3(0, 0, 1) },
+  left:   { localDir: new THREE.Vector3(-1, 0,  0), localUp: new THREE.Vector3(0, 0, 1) },
+  right:  { localDir: new THREE.Vector3( 1, 0,  0), localUp: new THREE.Vector3(0, 0, 1) },
+  top:    { localDir: new THREE.Vector3(0,  0,  1), localUp: new THREE.Vector3(0, 1, 0) },
+  bottom: { localDir: new THREE.Vector3(0,  0, -1), localUp: new THREE.Vector3(0, 1, 0) },
+};
+
+
+const BRICK_FACE_NAMES = ['front', 'left', 'right', 'top', 'bottom']; // no back (attachment side)
+const CORE_FACE_NAMES  = ['front', 'back', 'left', 'right', 'top', 'bottom'];
+
+// ── Helpers ──
+
+/** Create a site sphere at a world position, storing world-space outward normal and up. */
+function createSite(worldPos, worldDir, worldUp, owner, face) {
+  const geo = new THREE.SphereGeometry(SITE_RADIUS, 12, 12);
+  const mat = new THREE.MeshStandardMaterial({
+    color: COLORS.site, emissive: COLORS.site, emissiveIntensity: 0.4,
+    transparent: true, opacity: 0.7,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(worldPos);
+  scene.add(mesh);
+  const site = { mesh, owner, face, occupied: false, worldDir: worldDir.clone(), worldUp: worldUp.clone() };
+  allSites.push(site);
+  return site;
+}
+
+/** Compute world-space site position, direction, and up for a face on a box group. */
+function computeFaceSite(group, halfSize, faceName) {
+  const f = BOX_FACES[faceName];
+  // Local position on the face center
+  const localPos = f.localDir.clone().multiplyScalar(halfSize);
+  const worldPos = localPos.clone().applyMatrix4(group.matrixWorld);
+  // World direction (rotate local direction by group quaternion)
+  const worldDir = f.localDir.clone().applyQuaternion(group.quaternion).normalize();
+  const worldUp  = f.localUp.clone().applyQuaternion(group.quaternion).normalize();
+  return { worldPos, worldDir, worldUp };
+}
+
+/** Orient a group so that its local +Y axis points along worldDir, with local +Z ~ worldUp. */
+function orientAlongY(group, worldDir, worldUp) {
+  // Build a basis where Y = worldDir
+  const y = worldDir.clone().normalize();
+  let z = worldUp.clone();
+  const x = new THREE.Vector3().crossVectors(y, z).normalize();
+  z.crossVectors(x, y).normalize();
+  const m = new THREE.Matrix4().makeBasis(x, y, z);
+  group.quaternion.setFromRotationMatrix(m);
+}
+
+// ── Module creation ──
+
+function createCoreModule(position) {
+  const group = new THREE.Group();
+  group.position.copy(position);
+  group.updateMatrixWorld(true);
+
+  const geo = new THREE.BoxGeometry(CORE_HALF * 2, CORE_HALF * 2, CORE_HALF * 2);
+  
+  // Define materials for all 6 faces in Three.js order:
+  // [ +X (Right), -X (Left), +Y (Top), -Y (Bottom), +Z (Front), -Z (Back) ]
+  const hexColor = '#' + new THREE.Color(COLORS.core).getHexString();
+  // const mats = [
+  //   new THREE.MeshStandardMaterial({ map: createTextTexture('right', hexColor), roughness: 0.4 }),
+  //   new THREE.MeshStandardMaterial({ map: createTextTexture('left', hexColor), roughness: 0.4 }),
+  //   new THREE.MeshStandardMaterial({ map: createTextTexture('bottom', hexColor), roughness: 0.4 }), // Maps to your 'bottom'
+  //   new THREE.MeshStandardMaterial({ map: createTextTexture('top', hexColor), roughness: 0.4 }),    // Maps to your 'top'
+  //   new THREE.MeshStandardMaterial({ map: createTextTexture('back', hexColor), roughness: 0.4 }),   // Maps to your 'back'
+  //   new THREE.MeshStandardMaterial({ map: createTextTexture('front', hexColor), roughness: 0.4 })   // Maps to your 'front'
+  // ];
+
+  // Three.js order: [ +X (Right), -X (Left), +Y (Front), -Y (Back), +Z (Top), -Z (Bottom) ]
+  const mats = [
+    new THREE.MeshStandardMaterial({ map: createTextTexture('right', hexColor), roughness: 0.4 }),
+    new THREE.MeshStandardMaterial({ map: createTextTexture('left', hexColor), roughness: 0.4 }),
+    new THREE.MeshStandardMaterial({ map: createTextTexture('back', hexColor), roughness: 0.4 }),
+    new THREE.MeshStandardMaterial({ map: createTextTexture('front', hexColor), roughness: 0.4 }),
+    new THREE.MeshStandardMaterial({ map: createTextTexture('top', hexColor), roughness: 0.4 }),
+    new THREE.MeshStandardMaterial({ map: createTextTexture('bottom', hexColor), roughness: 0.4 })
+  ];
+
+  const mesh = new THREE.Mesh(geo, mats); // Pass the array here!
+  mesh.castShadow = true;
+  group.add(mesh);
+  scene.add(group);
+  group.updateMatrixWorld(true);
+
+  const mod = { type: 'core', mesh, group, sites: [], parent: null, face: null, rotation: 0, index: moduleIndex++, children: [] };
+  allModules.push(mod);
+
+  for (const faceName of CORE_FACE_NAMES) {
+    const { worldPos, worldDir, worldUp } = computeFaceSite(group, CORE_HALF, faceName);
+    mod.sites.push(createSite(worldPos, worldDir, worldUp, mod, faceName));
+  }
+
+  coreExists = true;
+  return mod;
+}
+
+/** Creates a texture with centered text to map onto a cube face */
+// function createTextTexture(text, backgroundColor) {
+//   const canvas = document.createElement('canvas');
+//   canvas.width = 256;
+//   canvas.height = 256;
+//   const ctx = canvas.getContext('2d');
+
+//   // Background
+//   ctx.fillStyle = backgroundColor;
+//   ctx.fillRect(0, 0, 256, 256);
+
+//   // Subtle border
+//   ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+//   ctx.lineWidth = 10;
+//   ctx.strokeRect(0, 0, 256, 256);
+
+//   // Text styling
+//   ctx.fillStyle = '#ffffff';
+//   ctx.font = 'bold 40px Segoe UI, Arial, sans-serif';
+//   ctx.textAlign = 'center';
+//   ctx.textBaseline = 'middle';
+  
+//   // Draw the text in the center
+//   ctx.fillText(text.toUpperCase(), 128, 128);
+
+//   const texture = new THREE.CanvasTexture(canvas);
+//   return texture;
+// }
+
+function createTextTexture(text, backgroundColor) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = backgroundColor; ctx.fillRect(0, 0, 256, 256);
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 10; ctx.strokeRect(0, 0, 256, 256);
+
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 40px Segoe UI, Arial, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  
+  ctx.save();
+  ctx.translate(128, 128);
+  // Rotate side text so it remains upright in our new Z-up world
+  if (text === 'right') ctx.rotate(-Math.PI / 2);
+  if (text === 'left') ctx.rotate(Math.PI / 2);
+  if (text === 'front') ctx.rotate(Math.PI);
+  
+  ctx.fillText(text.toUpperCase(), 0, 0);
+  ctx.restore();
+
+  return new THREE.CanvasTexture(canvas);
+}
+
+function createBrickModule(siteObj) {
+  const { worldDir, worldUp } = siteObj;
+
+  // Position: site center + outward by BRICK_HALF (so brick's back face touches the site)
+  const pos = siteObj.mesh.position.clone().add(worldDir.clone().multiplyScalar(BRICK_HALF));
+
+  const group = new THREE.Group();
+  group.position.copy(pos);
+  orientAlongY(group, worldDir, worldUp);
+  group.updateMatrixWorld(true);
+
+  const geo = new THREE.BoxGeometry(BRICK_HALF * 2, BRICK_HALF * 2, BRICK_HALF * 2);
+  const mat = new THREE.MeshStandardMaterial({ color: COLORS.brick, roughness: 0.4, metalness: 0.1 });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  group.add(mesh);
+  scene.add(group);
+  group.updateMatrixWorld(true);
+
+  const mod = { type: 'brick', mesh, group, sites: [], parent: siteObj.owner, face: siteObj.face, rotation: 0, index: moduleIndex++, children: [] };
+  siteObj.owner.children.push(mod);
+  allModules.push(mod);
+  siteObj.occupied = true;
+  siteObj.mesh.visible = false;
+
+  // Add sites on all faces except back (local -Y, pointing back to parent)
+  for (const faceName of BRICK_FACE_NAMES) {
+    const { worldPos, worldDir: wd, worldUp: wu } = computeFaceSite(group, BRICK_HALF, faceName);
+    mod.sites.push(createSite(worldPos, wd, wu, mod, faceName));
+  }
+
+  return mod;
+}
+
+function createHingeModule(siteObj, preRotation) {
+  const { worldDir, worldUp } = siteObj;
+
+  const group = new THREE.Group();
+  group.position.copy(siteObj.mesh.position);
+
+  // Orient so local +Y = outward direction from face
+  orientAlongY(group, worldDir, worldUp);
+
+  // Apply pre-rotation: rotate around outward axis (world worldDir = local +Y)
+  if (preRotation) {
+    const localYRot = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0),
+      THREE.MathUtils.degToRad(preRotation)
+    );
+    group.quaternion.multiply(localYRot);
+  }
+
+  group.updateMatrixWorld(true);
+
+  // Stator: along local +Y at offset HINGE_GAP_STATOR
+  const statorGeo = new THREE.BoxGeometry(STATOR_SIZE.x * 2, STATOR_SIZE.y * 2, STATOR_SIZE.z * 2);
+  const statorMat = new THREE.MeshStandardMaterial({ color: COLORS.stator, roughness: 0.35, metalness: 0.15 });
+  const statorMesh = new THREE.Mesh(statorGeo, statorMat);
+  statorMesh.position.set(0, HINGE_GAP_STATOR, 0);
+  statorMesh.castShadow = true;
+  group.add(statorMesh);
+
+  // Rotor: along local +Y at offset HINGE_GAP_ROTOR
+  const rotorGeo = new THREE.BoxGeometry(ROTOR_SIZE.x * 2, ROTOR_SIZE.y * 2, ROTOR_SIZE.z * 2);
+  const rotorMat = new THREE.MeshStandardMaterial({ color: COLORS.rotor, roughness: 0.35, metalness: 0.15 });
+  const rotorMesh = new THREE.Mesh(rotorGeo, rotorMat);
+  rotorMesh.position.set(0, HINGE_GAP_ROTOR, 0);
+  rotorMesh.castShadow = true;
+  group.add(rotorMesh);
+
+  // Joint axis indicator: cylinder along local Z (the joint axis in MuJoCo)
+  const jointGeo = new THREE.CylinderGeometry(0.01 * SCALE, 0.01 * SCALE, STATOR_SIZE.z * 2.5, 8);
+  const jointMat = new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.3 });
+  const jointMesh = new THREE.Mesh(jointGeo, jointMat);
+  jointMesh.position.set(0, (HINGE_GAP_STATOR + HINGE_GAP_ROTOR) / 2, 0);
+  // Cylinder default is along Y; rotate to align along local Z (the joint rotation axis)
+  jointMesh.rotation.x = Math.PI / 2;
+  group.add(jointMesh);
+
+  scene.add(group);
+  group.updateMatrixWorld(true);
+
+  const mod = {
+    type: 'hinge', mesh: statorMesh, group, sites: [],
+    parent: siteObj.owner, face: siteObj.face,
+    rotation: preRotation || 0, index: moduleIndex++, children: [],
+  };
+  siteObj.owner.children.push(mod);
+  allModules.push(mod);
+  siteObj.occupied = true;
+  siteObj.mesh.visible = false;
+
+  // Front attachment site: at the end of the rotor, along local +Y
+  const frontLocalPos = new THREE.Vector3(0, ROTOR_FRONT, 0);
+  const frontWorldPos = frontLocalPos.clone().applyMatrix4(group.matrixWorld);
+  const frontWorldDir = new THREE.Vector3(0, 1, 0).applyQuaternion(group.quaternion).normalize();
+  const frontWorldUp  = new THREE.Vector3(0, 0, 1).applyQuaternion(group.quaternion).normalize();
+  mod.sites.push(createSite(frontWorldPos, frontWorldDir, frontWorldUp, mod, 'front'));
+
+  return mod;
+}
+
+// ── Selection & interaction ──
+
+function selectModule(mod) {
+  if (selectedModule) deselectModule();
+  selectedModule = mod;
+  highlightModule(mod, true);
+  if (mod.type === 'hinge') {
+    document.getElementById('rotation-panel').style.display = 'block';
+    document.getElementById('rotation-slider').value = mod.rotation;
+    document.getElementById('rotation-num').value = mod.rotation;
+  }
+}
+
+function deselectModule() {
+  if (selectedModule) highlightModule(selectedModule, false);
+  selectedModule = null;
+  document.getElementById('rotation-panel').style.display = 'none';
+}
+
+function highlightModule(mod, on) {
+  mod.group.traverse(c => {
+    if (c.isMesh && c.material) {
+      c.material.emissive = on ? new THREE.Color(COLORS.selected) : new THREE.Color(0);
+      c.material.emissiveIntensity = on ? 0.3 : 0;
+    }
+  });
+}
+
+function deleteModule(mod) {
+  if (mod.type === 'core') { clearAll(); return; }
+
+  const toDelete = [];
+  (function collect(m) { toDelete.push(m); for (const c of m.children) collect(c); })(mod);
+
+  for (const m of toDelete) {
+    for (const s of m.sites) { scene.remove(s.mesh); s.mesh.geometry.dispose(); s.mesh.material.dispose(); }
+    allSites = allSites.filter(s => s.owner !== m);
+    scene.remove(m.group);
+    m.group.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+    allModules = allModules.filter(x => x !== m);
+  }
+
+  if (mod.parent) {
+    mod.parent.children = mod.parent.children.filter(c => c !== mod);
+    const parentSite = allSites.find(s => s.owner === mod.parent && s.face === mod.face);
+    if (parentSite) { parentSite.occupied = false; parentSite.mesh.visible = true; }
+  }
+
+  if (selectedModule && toDelete.includes(selectedModule)) {
+    selectedModule = null;
+    document.getElementById('rotation-panel').style.display = 'none';
+  }
+}
+
+function clearAll() {
+  for (const m of [...allModules]) {
+    for (const s of m.sites) scene.remove(s.mesh);
+    scene.remove(m.group);
+  }
+  allModules = []; allSites = []; selectedModule = null;
+  coreExists = false; moduleIndex = 0;
+  document.getElementById('rotation-panel').style.display = 'none';
+}
+
+// ── Serialization for rebuild ──
+
+function serializeSubtree(mod) {
+  return {
+    type: mod.type, face: mod.face, rotation: mod.rotation,
+    children: mod.children.map(c => serializeSubtree(c)),
+  };
+}
+
+function recreateChildren(parent, childrenData) {
+  for (const cd of childrenData) {
+    const site = parent.sites.find(s => s.face === cd.face && !s.occupied);
+    if (!site) continue;
+    let newMod;
+    if (cd.type === 'brick') newMod = createBrickModule(site);
+    else if (cd.type === 'hinge') newMod = createHingeModule(site, cd.rotation);
+    if (newMod && cd.children.length > 0) recreateChildren(newMod, cd.children);
+  }
+}
+
+function rebuildHingeRotation(mod, newRotation) {
+  const treeData = serializeSubtree(mod);
+  treeData.rotation = newRotation;
+  const parentSite = allSites.find(s => s.owner === mod.parent && s.face === mod.face);
+  deleteModule(mod);
+  if (parentSite) {
+    parentSite.occupied = false;
+    parentSite.mesh.visible = true;
+    const newMod = createHingeModule(parentSite, newRotation);
+    recreateChildren(newMod, treeData.children);
+    selectModule(newMod);
+  }
+}
+
+// ── Events ──
+
+document.querySelectorAll('.module-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTool = btn.dataset.type;
+  });
+});
+
+document.getElementById('btn-delete').addEventListener('click', () => { if (selectedModule) deleteModule(selectedModule); });
+document.getElementById('btn-clear').addEventListener('click', clearAll);
+document.getElementById('btn-export').addEventListener('click', exportPython);
+document.getElementById('btn-export-xml').addEventListener('click', exportXML);
+
+function onRotationChange(val) {
+  val = Math.max(-180, Math.min(180, parseInt(val) || 0));
+  document.getElementById('rotation-slider').value = val;
+  document.getElementById('rotation-num').value = val;
+  if (selectedModule && selectedModule.type === 'hinge') {
+    rebuildHingeRotation(selectedModule, val);
+  }
+}
+document.getElementById('rotation-slider').addEventListener('input', (e) => onRotationChange(e.target.value));
+document.getElementById('rotation-num').addEventListener('change', (e) => onRotationChange(e.target.value));
+
+canvas.addEventListener('mousemove', (e) => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+canvas.addEventListener('click', (e) => {
+  if (e.button !== 0) return;
+  raycaster.setFromCamera(mouse, camera);
+
+  const siteMeshes = allSites.filter(s => !s.occupied).map(s => s.mesh);
+  const hits = raycaster.intersectObjects(siteMeshes);
+  if (hits.length > 0) {
+    const site = allSites.find(s => s.mesh === hits[0].object);
+    if (site && !site.occupied) {
+      if (selectedTool === 'brick') selectModule(createBrickModule(site));
+      else if (selectedTool === 'hinge') {
+        const rot = parseInt(document.getElementById('rotation-num').value) || 0;
+        selectModule(createHingeModule(site, rot));
+      }
+    }
+    return;
+  }
+  if (selectedTool === 'core' && !coreExists) {
+    selectModule(createCoreModule(new THREE.Vector3(0, CORE_HALF, 0)));
+  }
+});
+
+canvas.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = [];
+  allModules.forEach(m => m.group.traverse(c => { if (c.isMesh) meshes.push(c); }));
+  const hits = raycaster.intersectObjects(meshes);
+  if (hits.length > 0) {
+    const mod = allModules.find(m => { let f = false; m.group.traverse(c => { if (c === hits[0].object) f = true; }); return f; });
+    if (mod) selectModule(mod);
+  } else {
+    deselectModule();
+  }
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Delete' && selectedModule) deleteModule(selectedModule);
+  if (e.key === 'Escape') deselectModule();
+});
+
+// ── Export ──
+
+function buildTree() {
+  const core = allModules.find(m => m.type === 'core');
+  if (!core) return null;
+  function visit(m) {
+    return { type: m.type, index: m.index, face: m.face, rotation: m.rotation, children: m.children.map(c => visit(c)) };
+  }
+  return visit(core);
+}
+
+const FACE_MAP = { front: 'FRONT', back: 'BACK', left: 'LEFT', right: 'RIGHT', top: 'TOP', bottom: 'BOTTOM' };
+
+function exportPython() {
+  const tree = buildTree();
+  if (!tree) { alert('No robot to export.'); return; }
+  const lines = [
+    'from ariel.body_phenotypes.robogen_lite.config import ModuleFaces',
+    'from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule',
+    'from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule',
+    'from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule',
+    '', '',
+    'def custom_robot() -> CoreModule:',
+    '    """Custom robot body built with the 3D editor."""',
+  ];
+  const varCounter = { core: 0, brick: 0, hinge: 0 };
+  const varNames = {};
+
+  function emitNode(node, parentVar, parentFace) {
+    const n = varCounter[node.type]++;
+    const name = node.type === 'core' ? 'core' : `${node.type}_${n}`;
+    varNames[node.index] = name;
+    if (node.type === 'core') lines.push(`    ${name} = CoreModule(index=${node.index})`);
+    else if (node.type === 'brick') lines.push(`    ${name} = BrickModule(index=${node.index})`);
+    else if (node.type === 'hinge') {
+      lines.push(`    ${name} = HingeModule(index=${node.index})`);
+      if (node.rotation) lines.push(`    ${name}.rotate(${node.rotation})`);
+    }
+    if (parentVar && parentFace) {
+      lines.push(`    ${parentVar}.sites[ModuleFaces.${FACE_MAP[parentFace]}].attach_body(`);
+      lines.push(`        body=${name}.body,`);
+      lines.push(`        prefix="${name}",`);
+      lines.push(`    )`);
+    }
+    for (const child of node.children) emitNode(child, name, child.face);
+  }
+
+  emitNode(tree, null, null);
+  lines.push('    return core');
+  document.getElementById('export-title').textContent = 'Python Export';
+  document.getElementById('export-text').value = lines.join('\n');
+  document.getElementById('export-dialog').classList.add('show');
+}
+
+function exportXML() {
+  const tree = buildTree();
+  if (!tree) { alert('No robot to export.'); return; }
+  let xml = '', indent = 0;
+  const pad = () => '  '.repeat(indent);
+  const contacts = [], actuators = [];
+
+  function emitNode(node, prefix) {
+    if (node.type === 'core') {
+      xml += `${pad()}<body name="core">\n`; indent++;
+      xml += `${pad()}<geom name="core" size="0.1 0.1 0.1" pos="0 0.1 0" type="box" mass="1" rgba="0.992157 0.792157 0.25098 1"/>\n`;
+      for (const c of node.children) emitNode(c, c.face);
+      indent--; xml += `${pad()}</body>\n`;
+    } else if (node.type === 'brick') {
+      xml += `${pad()}<body name="${prefix}brick">\n`; indent++;
+      xml += `${pad()}<geom name="${prefix}brick" size="0.05 0.05 0.05" pos="0 0.05 0" type="box" mass="0.055" rgba="0.109804 0.466667 0.764706 1"/>\n`;
+      for (const c of node.children) emitNode(c, `${prefix}_${c.face}`);
+      indent--; xml += `${pad()}</body>\n`;
+    } else if (node.type === 'hinge') {
+      xml += `${pad()}<body name="${prefix}hinge">\n`; indent++;
+      xml += `${pad()}<body name="${prefix}stator">\n`; indent++;
+      xml += `${pad()}<geom name="${prefix}stator" size="0.02475 0.0297 0.02475" type="box" mass="0.02" rgba="0.87451 0.160784 0.207843 1"/>\n`;
+      indent--; xml += `${pad()}</body>\n`;
+      xml += `${pad()}<body name="${prefix}rotor">\n`; indent++;
+      xml += `${pad()}<joint name="${prefix}servo" axis="0 0 1"/>\n`;
+      xml += `${pad()}<geom name="${prefix}rotor" size="0.025 0.02 0.025" type="box" mass="0.04" rgba="0.627451 0.0941176 0.129412 1"/>\n`;
+      contacts.push(`<exclude body1="${prefix}stator" body2="${prefix}rotor"/>`);
+      actuators.push(`<general name="${prefix}servo" joint="${prefix}servo" ctrlrange="-1.5708 1.5708" dynprm="0 0 0 0 0 0 0 0 0 0" biastype="affine" biasprm="0 -1 -1"/>`);
+      for (const c of node.children) emitNode(c, `${prefix}_${c.face}`);
+      indent--; xml += `${pad()}</body>\n`;
+      indent--; xml += `${pad()}</body>\n`;
+    }
+  }
+
+  let result = '<mujoco model="MuJoCo Model">\n  <compiler angle="radian"/>\n\n  <worldbody>\n';
+  indent = 2;
+  emitNode(tree, '');
+  result += xml + '  </worldbody>\n\n';
+  if (contacts.length) { result += '  <contact>\n'; for (const c of contacts) result += `    ${c}\n`; result += '  </contact>\n\n'; }
+  if (actuators.length) { result += '  <actuator>\n'; for (const a of actuators) result += `    ${a}\n`; result += '  </actuator>\n'; }
+  result += '</mujoco>\n';
+
+  document.getElementById('export-title').textContent = 'XML Export (approximate)';
+  document.getElementById('export-text').value = result;
+  document.getElementById('export-dialog').classList.add('show');
+}
+
+// ── Render loop ──
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+
+  raycaster.setFromCamera(mouse, camera);
+  const siteMeshes = allSites.filter(s => !s.occupied).map(s => s.mesh);
+  const hits = raycaster.intersectObjects(siteMeshes);
+
+  if (hoveredSite) {
+    hoveredSite.mesh.material.color.set(COLORS.site);
+    hoveredSite.mesh.material.emissive.set(COLORS.site);
+    hoveredSite.mesh.scale.setScalar(1);
+    hoveredSite = null;
+  }
+
+  if (hits.length > 0 && selectedTool !== 'core') {
+    const site = allSites.find(s => s.mesh === hits[0].object);
+    if (site) {
+      hoveredSite = site;
+      site.mesh.material.color.set(COLORS.siteHover);
+      site.mesh.material.emissive.set(COLORS.siteHover);
+      site.mesh.scale.setScalar(1.4);
+      canvas.style.cursor = 'pointer';
+    }
+  } else {
+    canvas.style.cursor = 'default';
+  }
+
+  const t = performance.now() * 0.003;
+  for (const s of allSites) {
+    if (!s.occupied && s !== hoveredSite) s.mesh.material.opacity = 0.5 + Math.sin(t) * 0.2;
+  }
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// Auto-place core
+createCoreModule(new THREE.Vector3(0, CORE_HALF, 0));
+selectedTool = 'hinge';
+document.querySelector('[data-type="hinge"]').classList.add('active');
+document.querySelector('[data-type="core"]').classList.remove('active');
+
+</script>
+</body>
+</html>

@@ -153,9 +153,10 @@ class BaseWorld:
         )
 
         # Add ortho camera and normal camera
+        # mujoco >= 3.6.0: orthographic= replaced by proj= (mjtProjection)
         spec.worldbody.add_camera(
             name="ortho-cam",
-            orthographic=True,
+            proj=mj.mjtProjection.mjPROJ_ORTHOGRAPHIC,
             pos=[-5, 0, 5],
             xyaxes=[0, -1, 0, 0.75, 0, 0.75],
             fovy=5,
@@ -163,7 +164,7 @@ class BaseWorld:
 
         spec.worldbody.add_camera(
             name="pretty-cam",
-            orthographic=False,
+            proj=mj.mjtProjection.mjPROJ_PERSPECTIVE,
             pos=[-0.015, -3.003, 1.765],
             xyaxes=[1.000, -0.005, -0.000, 0.002, 0.507, 0.862],
             fovy=45,

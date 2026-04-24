@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 
 # Third-party libraries
+import numpy as np
 import mujoco
 from PIL import Image
 

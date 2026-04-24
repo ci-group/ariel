@@ -145,3 +145,9 @@ def gecko() -> CoreModule:
         prefix="br_flipper",
     )
     return core
+
+if __name__ == "__main__":
+    gecko_rob = gecko()
+    gecko_xml = gecko_rob.spec.to_xml()
+    with open("ariel/src/ariel/body_phenotypes/robogen_lite/prebuilt_robots/gecko.xml", "w", encoding="utf-8") as f:
+        f.write(gecko_xml)
