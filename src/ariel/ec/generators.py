@@ -420,7 +420,7 @@ class IntegerMutator:
     @staticmethod
     def swap(
         individual: Integers,
-        mutation_probability: float,
+        mutation_probability: float = 0.5,
     ) -> Integers:
         """
         Randomly swap pairs of genes within the individual.
