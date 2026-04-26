@@ -2,12 +2,10 @@
     "pythonVersion": "3.12",
     "typeCheckingMode": "strict",
     "deprecateTypingAliases": true,
-    "exclude": [
-        ".venv",
-        ".git",
-        ".typings",
-        "_build",
-        "_autoapi"
+    "include": [
+        "src/**/*.py",
+        "examples/**/*.py",
+        "tests/**/*.py",
     ],
     "stubPath": ".typings",
     // -------------------------------------------------------------------- //
@@ -16,6 +14,7 @@
     "reportUnknownMemberType": false,
     "reportAttributeAccessIssue": false,
     "reportUnknownVariableType": false,
-    "reportUnknownArgumentType": false // + PIL
+    "reportUnknownArgumentType": false, // + PIL
     // -------------------------------------------------------------------- //
+    "reportUnknownLambdaType": false
 }

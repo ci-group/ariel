@@ -1,4 +1,5 @@
 import numpy as np
+import types
 from _typeshed import Incomplete
 from mujoco import _enums as _enums, _functions as _functions, _render as _render, _structs as _structs, gl_context as gl_context
 
@@ -14,7 +15,7 @@ class Renderer:
     _mjr_context: Incomplete
     _depth_rendering: bool
     _segmentation_rendering: bool
-    def __init__(self, model: _structs.MjModel, height: int = 240, width: int = 320, max_geom: int = 10000) -> None:
+    def __init__(self, model: _structs.MjModel, height: int = 240, width: int = 320, max_geom: int = 10000, font_scale: _enums.mjtFontScale = ...) -> None:
         """Initializes a new `Renderer`.
 
     Args:
@@ -24,6 +25,7 @@ class Renderer:
       max_geom: Optional integer specifying the maximum number of geoms that can
         be rendered in the same scene. If None this will be chosen automatically
         based on the estimated maximum number of renderable geoms in the model.
+      font_scale: Optional enum specifying the font scale for text.
 
     Raises:
       ValueError: If `camera_id` is outside the valid range, or if `width` or

@@ -26,18 +26,18 @@ from rich.traceback import install
 # Type Aliases
 ArrayGenotype = npt.NDArray[np.float64]
 
-# --- DATA SETUP ---
+# --- DATA SETUP --- #
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__"
 DATA.mkdir(exist_ok=True)
 
-# --- RANDOM GENERATOR SETUP ---
+# --- RANDOM GENERATOR SETUP --- #
 SEED = 42
 RNG = np.random.default_rng(SEED)
 
-# --- TERMINAL OUTPUT SETUP ---
-install(show_locals=True)
+# --- TERMINAL OUTPUT SETUP --- #
+install(show_locals=False)
 console = Console()
 
 

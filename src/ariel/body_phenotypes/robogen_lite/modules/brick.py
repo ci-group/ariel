@@ -13,18 +13,10 @@ import quaternion as qnp
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import ModuleFaces, ModuleType
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
+from ariel.parameters.ariel_modules import ArielModulesConfig
 
-# Type Aliases
-type WeightType = float
-type DimensionType = tuple[float, float, float]
-
-# --- Robogen Configuration ---
-# Module weights (kg)
-BRICK_MASS: WeightType = 0.055  # 55 grams
-
-# Module dimensions (length, width, height) in meters
-BRICK_DIMENSIONS: DimensionType = (0.05, 0.05, 0.05)
-# ------------------------------
+# Global functions
+ariel_modules_config = ArielModulesConfig()
 
 
 class BrickModule(Module):
@@ -38,7 +30,7 @@ class BrickModule(Module):
 
         Parameters
         ----------
-        index : int
+        index
             The index of the brick module being instantiated
         """
         # Set the index of the module
@@ -47,17 +39,17 @@ class BrickModule(Module):
         # Create the parent spec.
         spec = mujoco.MjSpec()
 
-        # ========= Core =========
-        brick_name = "core"
+        # ========= BRICK =========
+        brick_name = self.module_type.name.lower()
         brick = spec.worldbody.add_body(
             name=brick_name,
         )
         brick.add_geom(
             name=brick_name,
             type=mujoco.mjtGeom.mjGEOM_BOX,
-            mass=BRICK_MASS,
-            size=BRICK_DIMENSIONS,
-            pos=[0, BRICK_DIMENSIONS[0], 0],
+            mass=ariel_modules_config.BRICK_MASS,
+            size=ariel_modules_config.BRICK_DIMENSIONS,
+            pos=[0, ariel_modules_config.BRICK_DIMENSIONS[0], 0],
             rgba=(28 / 255, 119 / 255, 195 / 255, 1),
         )
 
@@ -66,7 +58,7 @@ class BrickModule(Module):
         shift = -1  # mujoco uses xyzw instead of wxyz
         self.sites[ModuleFaces.FRONT] = brick.add_site(
             name=f"{brick_name}-front",
-            pos=[0, BRICK_DIMENSIONS[1] * 2, 0],
+            pos=[0, ariel_modules_config.BRICK_DIMENSIONS[1] * 2, 0],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(
@@ -83,7 +75,11 @@ class BrickModule(Module):
         )
         self.sites[ModuleFaces.LEFT] = brick.add_site(
             name=f"{brick_name}-left",
-            pos=[-BRICK_DIMENSIONS[0], BRICK_DIMENSIONS[1], 0],
+            pos=[
+                -ariel_modules_config.BRICK_DIMENSIONS[0],
+                ariel_modules_config.BRICK_DIMENSIONS[1],
+                0,
+            ],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(
@@ -100,7 +96,11 @@ class BrickModule(Module):
         )
         self.sites[ModuleFaces.RIGHT] = brick.add_site(
             name=f"{brick_name}-right",
-            pos=[BRICK_DIMENSIONS[0], BRICK_DIMENSIONS[1], 0],
+            pos=[
+                ariel_modules_config.BRICK_DIMENSIONS[0],
+                ariel_modules_config.BRICK_DIMENSIONS[1],
+                0,
+            ],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(
@@ -117,7 +117,11 @@ class BrickModule(Module):
         )
         self.sites[ModuleFaces.TOP] = brick.add_site(
             name=f"{brick_name}-top",
-            pos=[0, BRICK_DIMENSIONS[1], BRICK_DIMENSIONS[2]],
+            pos=[
+                0,
+                ariel_modules_config.BRICK_DIMENSIONS[1],
+                ariel_modules_config.BRICK_DIMENSIONS[2],
+            ],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(
@@ -134,7 +138,11 @@ class BrickModule(Module):
         )
         self.sites[ModuleFaces.BOTTOM] = brick.add_site(
             name=f"{brick_name}-bottom",
-            pos=[0, BRICK_DIMENSIONS[1], -BRICK_DIMENSIONS[2]],
+            pos=[
+                0,
+                ariel_modules_config.BRICK_DIMENSIONS[1],
+                -ariel_modules_config.BRICK_DIMENSIONS[2],
+            ],
             quat=np.round(
                 np.roll(
                     qnp.as_float_array(

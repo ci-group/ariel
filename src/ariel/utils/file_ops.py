@@ -29,6 +29,32 @@ def generate_save_path(
     file_extension: str | None = None,
     append_date: bool = True,
 ) -> Path:
+    """
+    Generate a unique file path for saving files.
+    The function generates a file path based on the provided parameters.
+    If `file_name` is not provided, a timestamp-based name is generated.
+
+    Parameters
+    ----------
+    file_name
+        The desired name of the file (without extension). If None, a timestamp-based name is generated.
+    file_path
+        The directory where the file will be saved. If None, defaults to the `DATA` directory.
+    file_extension
+        The file extension (e.g., '.txt', '.csv'). If None, attempts to infer from `file_name` or `file_path`.
+    append_date
+        Whether to append the current date and time to the file name for uniqueness.
+
+    Returns
+    -------
+    Path
+        The generated file path.
+
+    Raises
+    ------
+    ValueError
+        If all of `file_name`, `file_path`, and `file_extension` are None.
+    """
     # Check that at least one argument is valid
     if (file_name is None) and (file_path is None) and (file_extension is None):
         msg = "All arguments of `generate_save_path` are `None`. "

@@ -29,7 +29,7 @@ from genetic_operators import (
 from hyperneat import CPPNNode, CPPNConnection
 from evaluation import evaluate_population
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
-from ariel.simulation.environments.simple_flat_world import SimpleFlatWorld
+from ariel.simulation.environments import SimpleFlatWorld
 from simulation_utils import generate_spawn_positions
 from hyperneat import CPPN, SubstrateNetwork, create_substrate_for_gecko
 

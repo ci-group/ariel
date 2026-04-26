@@ -17,20 +17,20 @@ from ariel.body_phenotypes.robogen_lite.modules.module import Module
 type WeightType = float
 type DimensionType = tuple[float, float, float]
 
-# --- Robogen Configuration ---
+# --- Robogen Configuration --- #
 # Module weights (kg)
 CORE_MASS: WeightType = 1
 
 # Module dimensions (length, width, height) in meters
 CORE_DIMENSIONS: DimensionType = (0.10, 0.10, 0.10)
-# ------------------------------
+# ------------------------------ #
 
 
 class CoreModule(Module):
     """Core module specifications."""
 
     index: int | None = None
-    module_type: str = ModuleType.CORE
+    module_type: ModuleType = ModuleType.CORE
 
     def __init__(self, index: int) -> None:
         """
@@ -58,7 +58,7 @@ class CoreModule(Module):
         spec = mujoco.MjSpec()
 
         # ========= Core =========
-        core_name = "core"
+        core_name = self.module_type.name.lower()
         core = spec.worldbody.add_body(
             name=core_name,
         )
@@ -69,6 +69,12 @@ class CoreModule(Module):
             size=CORE_DIMENSIONS,
             pos=[0, CORE_DIMENSIONS[0], 0],
             rgba=(253 / 255, 202 / 255, 64 / 255, 1),
+        )
+
+        core.add_camera(
+            name=f"{core_name}_mycamera",
+            pos=[0, 0, CORE_DIMENSIONS[0]-0.02],
+            euler=[-90, 0, 180],
         )
 
         # ========= Attachment Points =========

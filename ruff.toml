@@ -56,7 +56,9 @@ ignore = [
     "CPY001", # Requests copyright notice
     "TD003",  # Requests issue-link under TODO
     "INP001", # implicit module __init__ thing
+    "S311", # Cryptographic Purposes, not really needed here
     # --- Annoying (but useful) ---
+    "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
     # "F841", # Variable declared but never used
     # "ANN101",  # Missing type annotation for self in method
     # "ANN102",  # Missing type annotation for cls in classmethod

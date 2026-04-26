@@ -1,31 +1,63 @@
 :layout: landing
-
-# ARIEL - A Robot Evolution Framework
-
+ 
+# ARIEL — A Robot Evolution Framework
+ 
 ![Ariel Logo](resources/ariel_logo.svg)
+ 
+**ARIEL** is a Python package that provides efficient and easy-to-use tools for evolutionary computing and evolutionary robotics.
+Designed with a clear API, sensible defaults, and support for both beginners and advanced users, ARIEL lets you go from idea to evolving robot with minimal boilerplate.
+ 
+---
+ 
+## Why ARIEL?
+ 
+ARIEL brings together the full evolutionary robotics pipeline in a single, cohesive package:
+ 
+- **End-to-end**: genome encoding → evolution → simulation → result analysis.
+- **Batteries included**: pre-built robot bodies, CPG controllers, and EA operators so you spend time on science, not scaffolding.
+- **Flexible**: swap genotype representations (NDE, CPPN, Tree, Vector) or optimisers without rewriting your experiment.
+- **Scalable**: native support for parallel evaluation via [Ray](source/EA_intro/parallel_ackley).
+- **Reproducible**: built-in database logging and pandas/polars/SQLite export for every run.
 
-
-Ariel is a Python package, similar to Revolve, that provides efficient and easy-to-use tools for many aspects of evolutionary computing and evolutionary robotics.  
-It is designed with a clear API, sensible defaults, and support for both beginners and advanced users.
+| Framework        | 🧬 Body–Brain Co-Design | 🧠 Learning | 🤖 Physical Twins | ⚡ Async Evo & Learning | 🧪 Built-in Simulation | 🖥️ GUI | 🗄️ Database Integration | 🧩 Modularity |
+|-----------------|:-----------------------:|:-----------:|:-----------------:|:----------------------:|:----------------------:|:------:|:------------------------:|:-------------:|
+| RoboGen         | ✅                      | ❌          | ✅                | ❌                     | ✅                     | ❌     | ❌                       | ✅            |
+| JBotEvolver     | ✅                      | ✅          | ❌                | ❌                     | ✅                     | ❌     | ❌                       | ✅            |
+| 2D-VSR Sim      | ❌                      | ✅          | ❌                | ❌                     | ✅                     | ❌     | ❌                       | ❌            |
+| Evolution Gym   | ✅                      | ❌          | ❌                | ❌                     | ✅                     | ❌     | ❌                       | ✅            |
+| POEM            | ✅                      | ✅          | ❌                | ❌                     | ❌                     | ❌     | ❌                       | ❌            |
+| Framsticks      | ✅                      | ❌          | ❌                | ❌                     | ✅                     | ✅     | ❌                       | ✅            |
+| EvoSoro/PyroSim | ✅                      | ❌          | ❌                | ❌                     | ✅                     | ❌     | ❌                       | ✅            |
+| Revolve         | ✅                      | ✅          | ✅                | ❌                     | ✅                     | ❌     | ❌                       | ✅            |
+| EvoTorch        | ❌                      | ✅          | ❌                | ❌                     | ❌                     | ❌     | ❌                       | ✅            |
+| DEAP            | ❌                      | ❌          | ❌                | ❌                     | ❌                     | ❌     | ❌                       | ✅            |
+| **ARIEL**       | ✅                      | ✅          | ✅                | ✅                     | ✅                     | ✅     | ✅                       | ✅            |
 
 ---
 
 ## Features
 
-| Feature                     | Description                                                                                                      |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Easy to use GUI**         | Every aspect of the package from EC to ER can be configured and run through a user-friendly graphical interface. |
-| **Evolutionary Algorithms** | Already implemented evolutionary operators.                                                                      |
-| **Evolutionary Robotics**   | Tools for simulating and evolving robots in various environments.                                                |
-
-
-Get started below, or explore the full documentation for more details.
+| Feature | Description |
+|---|---|
+| **Evolutionary Algorithms**                       | Ready-to-use EA operators for both continuous and discrete problems.                          |
+| [Multiple Genotype Encodings](source/genoty_docs) | NDE, CPPN, Tree, and Vector representations, each with evolutionary operators.                |
+| [Robot Systems](source/robot_systems)             | Modular robot morphology and the ARIEL Lynx Arm, simulated in MuJoCo.                         |
+| **Simulation & Control**                          | CPG-based controllers (simple, NA-CPG, normalised) and prebuilt terrains.                     |
+| [Parallelisation](source/EA_intro/parallel_ackley)| Scale evaluations across cores or machines with Ray integration.                              |
+| [Database & Analysis](source/Db_examples)         | Automatic SQLite experiment logging with pandas, polars, and sqlite3 query examples.          |
+| **Visualisation**                                 | GUI (in progress) and analysis utilities for plotting fitness progression and robot behaviour.|
+| [MuJoCo Integration](source/Mujoco_docs)          | Full access to MuJoCo data variables — forces, sensors, spatial transforms, and more.         |
 
 ---
+ 
+## Installation
+ 
+See the [Installation Guide](source/installation_guide) for full details, including:
 
-## Installation Information
-
-See the [installation guide](source/installation_guide.md) for more details.
+- Supported platforms and prerequisites
+- Installing with `uv` or VS Code Dev Containers (recommended)
+- Verifying your installation
+- Troubleshooting tips
 
 ---
 
@@ -33,21 +65,23 @@ See the [installation guide](source/installation_guide.md) for more details.
 
 ```{toctree}
 :maxdepth: 3
-:caption: Contents:
 
-Introduction to modular robots <source/introduction_to_modular_robots/index>
 Contributing guide <source/contributing_guide/index>
 Installation Guide <source/installation_guide>
-Evolutionary Computing Course Documentation <source/ec_course_docs>
+Basic API Usage: NDE + CPG <source/tutorial_nde_cpg>
+Quick Start: Modular Robots <source/quickstart_modular_robots>
+Robot Systems <source/robot_systems/index>
+Genotypes <source/genotype_docs/index>
+EAs with ARIEL Introduction <source/EA_intro/index>
 GUI <source/GUI>
-Your first EA with ARIEL <source/ea_intro/ea_example>
+ARIEL Database Handling <source/Db_examples/index>
 MuJoCo Data Variables Documentation <source/Mujoco_docs/mujoco_docs>
 ```
 ---
 
 ## License
 
-Copyright (c) 2025, Ariel.  
+Copyright (c) 2025, ARIEL.  
 All rights reserved.
 
 ---

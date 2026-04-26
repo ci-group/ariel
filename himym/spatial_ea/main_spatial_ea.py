@@ -25,7 +25,7 @@ from simulation_utils import (
 from visualize_experiment import ExperimentVisualizer
 from incubation import IncubationEvolution, seed_spatial_population_from_incubation
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
-from ariel.simulation.environments.simple_flat_world import SimpleFlatWorld
+from ariel.simulation.environments import SimpleFlatWorld
 from ariel.utils.renderers import video_renderer
 from ariel.utils.video_recorder import VideoRecorder
 from periodic_boundary_utils import apply_periodic_boundaries_to_simulation

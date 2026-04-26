@@ -11,15 +11,26 @@
     },
     "explorerExclude.backup": {},
     "files.exclude": {
-        "**/.git": false,
+        "**/.git": true,
         "**/.svn": false,
         "**/.hg": false,
         "**/.DS_Store": true,
-        "**/Thumbs.db": false
+        "**/Thumbs.db": false,
+        "**/.mypy_cache": true,
+        "**/.nox": true,
+        "**/.pytest_cache": true,
+        "**/__pycache__": true,
+        ".typings": false,
+        ".venv": false
     },
     "python-envs.pythonProjects": [],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
     "ruff.path": [
         "/home/vscode/.local/bin/ruff"
     ],
-    "workbench.iconTheme": "material-icon-theme",
+    "workbench.iconTheme": "material-icon-theme"
 }

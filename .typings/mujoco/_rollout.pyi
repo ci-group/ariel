@@ -1,8 +1,10 @@
 import numpy
+import numpy.typing
+import typing
 
 class Rollout:
-    def __init__(self, *args, **kwargs) -> None:
-        """__init__(self: mujoco._rollout.Rollout, *, nthread: int) -> None
+    def __init__(self, nthread: typing.SupportsInt) -> None:
+        """__init__(self: mujoco._rollout.Rollout, *, nthread: typing.SupportsInt) -> None
 
 
         Construct a rollout object containing a thread pool for parallel rollouts.
@@ -13,8 +15,8 @@ class Rollout:
 
         """
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
-    def rollout(self, model: list, data: list, nstep: int, control_spec: int, state0: numpy.ndarray[numpy.float64], warmstart0: numpy.ndarray[numpy.float64] | None = ..., control: numpy.ndarray[numpy.float64] | None = ..., state: numpy.ndarray[numpy.float64] | None = ..., sensordata: numpy.ndarray[numpy.float64] | None = ..., chunk_size: int | None = ...) -> None:
-        """rollout(self: mujoco._rollout.Rollout, model: list, data: list, nstep: int, control_spec: int, state0: numpy.ndarray[numpy.float64], warmstart0: Optional[numpy.ndarray[numpy.float64]] = None, control: Optional[numpy.ndarray[numpy.float64]] = None, state: Optional[numpy.ndarray[numpy.float64]] = None, sensordata: Optional[numpy.ndarray[numpy.float64]] = None, chunk_size: Optional[int] = None) -> None
+    def rollout(self, model: list, data: list, nstep: typing.SupportsInt, control_spec: typing.SupportsInt, state0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64], warmstart0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., control: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., state: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., sensordata: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., chunk_size: typing.SupportsInt | None = ...) -> None:
+        """rollout(self: mujoco._rollout.Rollout, model: list, data: list, nstep: typing.SupportsInt, control_spec: typing.SupportsInt, state0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64], warmstart0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, control: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, state: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, sensordata: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, chunk_size: typing.SupportsInt | None = None) -> None
 
 
         Roll out batch of trajectories from initial states, get resulting states and sensor values.

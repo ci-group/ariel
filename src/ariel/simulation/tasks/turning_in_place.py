@@ -1,23 +1,29 @@
+"""Turning in place task."""
+
+# Third-party libraries
 import numpy as np
 
 
-def turning_in_place(xy_history) -> float:
+def turning_in_place(xy_history: list[tuple[float, float]]) -> float:
     """
-    Determines the total angle turned by a robot based on its path history.
+    Determine the total angle turned by a robot based on its path history.
 
     Parameters
-    -----------
+    ----------
     xy_history : list[tuple]
         The history of x, y coordinates from a simulation i.e. robot path.
 
     Returns
-    --------
+    -------
     float
         The total angle turned by the robot.
     """
-
+    # Convert to numpy array for easier manipulation
     xy = np.array(xy_history)
-    if len(xy) < 2:
+
+    # Require at least two positions to compute turning
+    min_history_length = 2
+    if len(xy) < min_history_length:
         return 0.0
 
     # Headings from XY positions
@@ -32,6 +38,4 @@ def turning_in_place(xy_history) -> float:
     displacement = np.linalg.norm(xy[-1] - xy[0])
 
     # Penalize if robot drifts away
-    fitness = total_turning_angle / (1.0 + displacement)
-
-    return fitness
+    return total_turning_angle / (1.0 + displacement)

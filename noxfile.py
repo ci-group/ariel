@@ -12,7 +12,7 @@ from pathlib import Path
 # Third-party libraries
 import nox
 
-# --- NOX SETUP ---
+# --- NOX SETUP --- #
 nox.options.default_venv_backend = "uv"
 package = "ariel"
 python_versions = ["3.12", "3.13"]

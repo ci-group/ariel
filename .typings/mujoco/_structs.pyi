@@ -1,28 +1,30 @@
+import collections.abc
 import mujoco._enums
 import numpy
+import numpy.typing
 import typing
 from typing import Callable, ClassVar, overload
 
 class MjContact:
-    H: numpy.ndarray[numpy.float64]
+    H: numpy.typing.NDArray[numpy.float64]
     dim: int
     dist: float
     efc_address: int
-    elem: numpy.ndarray[numpy.int32]
+    elem: numpy.typing.NDArray[numpy.int32]
     exclude: int
-    flex: numpy.ndarray[numpy.int32]
-    frame: numpy.ndarray[numpy.float64]
-    friction: numpy.ndarray[numpy.float64]
-    geom: numpy.ndarray[numpy.int32]
+    flex: numpy.typing.NDArray[numpy.int32]
+    frame: numpy.typing.NDArray[numpy.float64]
+    friction: numpy.typing.NDArray[numpy.float64]
+    geom: numpy.typing.NDArray[numpy.int32]
     geom1: int
     geom2: int
     includemargin: float
     mu: float
-    pos: numpy.ndarray[numpy.float64]
-    solimp: numpy.ndarray[numpy.float64]
-    solref: numpy.ndarray[numpy.float64]
-    solreffriction: numpy.ndarray[numpy.float64]
-    vert: numpy.ndarray[numpy.int32]
+    pos: numpy.typing.NDArray[numpy.float64]
+    solimp: numpy.typing.NDArray[numpy.float64]
+    solref: numpy.typing.NDArray[numpy.float64]
+    solreffriction: numpy.typing.NDArray[numpy.float64]
+    vert: numpy.typing.NDArray[numpy.int32]
     def __init__(self) -> None:
         """__init__(self: mujoco._structs.MjContact) -> None"""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
@@ -35,66 +37,50 @@ class MjContact:
 
 class MjData:
     bind: ClassVar[Callable] = ...
-    B_colind: numpy.ndarray[numpy.int32]
-    B_rowadr: numpy.ndarray[numpy.int32]
-    B_rownnz: numpy.ndarray[numpy.int32]
-    C_colind: numpy.ndarray[numpy.int32]
-    C_rowadr: numpy.ndarray[numpy.int32]
-    C_rownnz: numpy.ndarray[numpy.int32]
-    D_colind: numpy.ndarray[numpy.int32]
-    D_diag: numpy.ndarray[numpy.int32]
-    D_rowadr: numpy.ndarray[numpy.int32]
-    D_rownnz: numpy.ndarray[numpy.int32]
-    M_colind: numpy.ndarray[numpy.int32]
-    M_rowadr: numpy.ndarray[numpy.int32]
-    M_rownnz: numpy.ndarray[numpy.int32]
-    act: numpy.ndarray[numpy.float64]
-    act_dot: numpy.ndarray[numpy.float64]
-    actuator_force: numpy.ndarray[numpy.float64]
-    actuator_length: numpy.ndarray[numpy.float64]
-    actuator_moment: numpy.ndarray[numpy.float64]
-    actuator_velocity: numpy.ndarray[numpy.float64]
-    bvh_aabb_dyn: numpy.ndarray[numpy.float64]
-    bvh_active: numpy.ndarray[numpy.uint8]
-    cacc: numpy.ndarray[numpy.float64]
-    cam_xmat: numpy.ndarray[numpy.float64]
-    cam_xpos: numpy.ndarray[numpy.float64]
-    cdof: numpy.ndarray[numpy.float64]
-    cdof_dot: numpy.ndarray[numpy.float64]
-    cfrc_ext: numpy.ndarray[numpy.float64]
-    cfrc_int: numpy.ndarray[numpy.float64]
-    cinert: numpy.ndarray[numpy.float64]
-    crb: numpy.ndarray[numpy.float64]
-    ctrl: numpy.ndarray[numpy.float64]
-    cvel: numpy.ndarray[numpy.float64]
-    energy: numpy.ndarray[numpy.float64]
-    eq_active: numpy.ndarray[numpy.uint8]
-    flexedge_J: numpy.ndarray[numpy.float64]
-    flexedge_J_colind: numpy.ndarray[numpy.int32]
-    flexedge_J_rowadr: numpy.ndarray[numpy.int32]
-    flexedge_J_rownnz: numpy.ndarray[numpy.int32]
-    flexedge_length: numpy.ndarray[numpy.float64]
-    flexedge_velocity: numpy.ndarray[numpy.float64]
-    flexelem_aabb: numpy.ndarray[numpy.float64]
-    flexvert_xpos: numpy.ndarray[numpy.float64]
-    geom_xmat: numpy.ndarray[numpy.float64]
-    geom_xpos: numpy.ndarray[numpy.float64]
-    light_xdir: numpy.ndarray[numpy.float64]
-    light_xpos: numpy.ndarray[numpy.float64]
-    mapD2M: numpy.ndarray[numpy.int32]
-    mapM2C: numpy.ndarray[numpy.int32]
-    mapM2D: numpy.ndarray[numpy.int32]
-    mapM2M: numpy.ndarray[numpy.int32]
+    M: numpy.typing.NDArray[numpy.float64]
+    act: numpy.typing.NDArray[numpy.float64]
+    act_dot: numpy.typing.NDArray[numpy.float64]
+    actuator_force: numpy.typing.NDArray[numpy.float64]
+    actuator_length: numpy.typing.NDArray[numpy.float64]
+    actuator_moment: numpy.typing.NDArray[numpy.float64]
+    actuator_velocity: numpy.typing.NDArray[numpy.float64]
+    bvh_aabb_dyn: numpy.typing.NDArray[numpy.float64]
+    bvh_active: numpy.typing.NDArray[numpy.uint8]
+    cacc: numpy.typing.NDArray[numpy.float64]
+    cam_xmat: numpy.typing.NDArray[numpy.float64]
+    cam_xpos: numpy.typing.NDArray[numpy.float64]
+    cdof: numpy.typing.NDArray[numpy.float64]
+    cdof_dot: numpy.typing.NDArray[numpy.float64]
+    cfrc_ext: numpy.typing.NDArray[numpy.float64]
+    cfrc_int: numpy.typing.NDArray[numpy.float64]
+    cinert: numpy.typing.NDArray[numpy.float64]
+    crb: numpy.typing.NDArray[numpy.float64]
+    ctrl: numpy.typing.NDArray[numpy.float64]
+    cvel: numpy.typing.NDArray[numpy.float64]
+    energy: numpy.typing.NDArray[numpy.float64]
+    eq_active: numpy.typing.NDArray[numpy.uint8]
+    flexedge_J: numpy.typing.NDArray[numpy.float64]
+    flexedge_J_colind: numpy.typing.NDArray[numpy.int32]
+    flexedge_J_rowadr: numpy.typing.NDArray[numpy.int32]
+    flexedge_J_rownnz: numpy.typing.NDArray[numpy.int32]
+    flexedge_length: numpy.typing.NDArray[numpy.float64]
+    flexedge_velocity: numpy.typing.NDArray[numpy.float64]
+    flexelem_aabb: numpy.typing.NDArray[numpy.float64]
+    flexvert_xpos: numpy.typing.NDArray[numpy.float64]
+    geom_xmat: numpy.typing.NDArray[numpy.float64]
+    geom_xpos: numpy.typing.NDArray[numpy.float64]
+    light_xdir: numpy.typing.NDArray[numpy.float64]
+    light_xpos: numpy.typing.NDArray[numpy.float64]
     maxuse_arena: int
     maxuse_con: int
     maxuse_efc: int
     maxuse_stack: int
-    maxuse_threadstack: numpy.ndarray[numpy.uint64]
-    mocap_pos: numpy.ndarray[numpy.float64]
-    mocap_quat: numpy.ndarray[numpy.float64]
-    moment_colind: numpy.ndarray[numpy.int32]
-    moment_rowadr: numpy.ndarray[numpy.int32]
-    moment_rownnz: numpy.ndarray[numpy.int32]
+    maxuse_threadstack: numpy.typing.NDArray[numpy.uint64]
+    mocap_pos: numpy.typing.NDArray[numpy.float64]
+    mocap_quat: numpy.typing.NDArray[numpy.float64]
+    moment_colind: numpy.typing.NDArray[numpy.int32]
+    moment_rowadr: numpy.typing.NDArray[numpy.int32]
+    moment_rownnz: numpy.typing.NDArray[numpy.int32]
     nA: int
     nJ: int
     narena: int
@@ -103,68 +89,69 @@ class MjData:
     ne: int
     nefc: int
     nf: int
+    nidof: int
     nisland: int
     nl: int
     nplugin: int
     parena: int
     pbase: int
-    plugin: numpy.ndarray[numpy.int32]
-    plugin_data: numpy.ndarray[numpy.uint64]
-    plugin_state: numpy.ndarray[numpy.float64]
+    plugin: numpy.typing.NDArray[numpy.int32]
+    plugin_data: numpy.typing.NDArray[numpy.uint64]
+    plugin_state: numpy.typing.NDArray[numpy.float64]
     pstack: int
-    qDeriv: numpy.ndarray[numpy.float64]
-    qH: numpy.ndarray[numpy.float64]
-    qHDiagInv: numpy.ndarray[numpy.float64]
-    qLD: numpy.ndarray[numpy.float64]
-    qLDiagInv: numpy.ndarray[numpy.float64]
-    qLU: numpy.ndarray[numpy.float64]
-    qM: numpy.ndarray[numpy.float64]
-    qacc: numpy.ndarray[numpy.float64]
-    qacc_smooth: numpy.ndarray[numpy.float64]
-    qacc_warmstart: numpy.ndarray[numpy.float64]
-    qfrc_actuator: numpy.ndarray[numpy.float64]
-    qfrc_applied: numpy.ndarray[numpy.float64]
-    qfrc_bias: numpy.ndarray[numpy.float64]
-    qfrc_constraint: numpy.ndarray[numpy.float64]
-    qfrc_damper: numpy.ndarray[numpy.float64]
-    qfrc_fluid: numpy.ndarray[numpy.float64]
-    qfrc_gravcomp: numpy.ndarray[numpy.float64]
-    qfrc_inverse: numpy.ndarray[numpy.float64]
-    qfrc_passive: numpy.ndarray[numpy.float64]
-    qfrc_smooth: numpy.ndarray[numpy.float64]
-    qfrc_spring: numpy.ndarray[numpy.float64]
-    qpos: numpy.ndarray[numpy.float64]
-    qvel: numpy.ndarray[numpy.float64]
-    sensordata: numpy.ndarray[numpy.float64]
-    site_xmat: numpy.ndarray[numpy.float64]
-    site_xpos: numpy.ndarray[numpy.float64]
-    solver_fwdinv: numpy.ndarray[numpy.float64]
-    solver_niter: numpy.ndarray[numpy.int32]
-    solver_nnz: numpy.ndarray[numpy.int32]
-    subtree_angmom: numpy.ndarray[numpy.float64]
-    subtree_com: numpy.ndarray[numpy.float64]
-    subtree_linvel: numpy.ndarray[numpy.float64]
-    ten_J: numpy.ndarray[numpy.float64]
-    ten_J_colind: numpy.ndarray[numpy.int32]
-    ten_J_rowadr: numpy.ndarray[numpy.int32]
-    ten_J_rownnz: numpy.ndarray[numpy.int32]
-    ten_length: numpy.ndarray[numpy.float64]
-    ten_velocity: numpy.ndarray[numpy.float64]
-    ten_wrapadr: numpy.ndarray[numpy.int32]
-    ten_wrapnum: numpy.ndarray[numpy.int32]
+    qDeriv: numpy.typing.NDArray[numpy.float64]
+    qH: numpy.typing.NDArray[numpy.float64]
+    qHDiagInv: numpy.typing.NDArray[numpy.float64]
+    qLD: numpy.typing.NDArray[numpy.float64]
+    qLDiagInv: numpy.typing.NDArray[numpy.float64]
+    qLU: numpy.typing.NDArray[numpy.float64]
+    qM: numpy.typing.NDArray[numpy.float64]
+    qacc: numpy.typing.NDArray[numpy.float64]
+    qacc_smooth: numpy.typing.NDArray[numpy.float64]
+    qacc_warmstart: numpy.typing.NDArray[numpy.float64]
+    qfrc_actuator: numpy.typing.NDArray[numpy.float64]
+    qfrc_applied: numpy.typing.NDArray[numpy.float64]
+    qfrc_bias: numpy.typing.NDArray[numpy.float64]
+    qfrc_constraint: numpy.typing.NDArray[numpy.float64]
+    qfrc_damper: numpy.typing.NDArray[numpy.float64]
+    qfrc_fluid: numpy.typing.NDArray[numpy.float64]
+    qfrc_gravcomp: numpy.typing.NDArray[numpy.float64]
+    qfrc_inverse: numpy.typing.NDArray[numpy.float64]
+    qfrc_passive: numpy.typing.NDArray[numpy.float64]
+    qfrc_smooth: numpy.typing.NDArray[numpy.float64]
+    qfrc_spring: numpy.typing.NDArray[numpy.float64]
+    qpos: numpy.typing.NDArray[numpy.float64]
+    qvel: numpy.typing.NDArray[numpy.float64]
+    sensordata: numpy.typing.NDArray[numpy.float64]
+    site_xmat: numpy.typing.NDArray[numpy.float64]
+    site_xpos: numpy.typing.NDArray[numpy.float64]
+    solver_fwdinv: numpy.typing.NDArray[numpy.float64]
+    solver_niter: numpy.typing.NDArray[numpy.int32]
+    solver_nnz: numpy.typing.NDArray[numpy.int32]
+    subtree_angmom: numpy.typing.NDArray[numpy.float64]
+    subtree_com: numpy.typing.NDArray[numpy.float64]
+    subtree_linvel: numpy.typing.NDArray[numpy.float64]
+    ten_J: numpy.typing.NDArray[numpy.float64]
+    ten_J_colind: numpy.typing.NDArray[numpy.int32]
+    ten_J_rowadr: numpy.typing.NDArray[numpy.int32]
+    ten_J_rownnz: numpy.typing.NDArray[numpy.int32]
+    ten_length: numpy.typing.NDArray[numpy.float64]
+    ten_velocity: numpy.typing.NDArray[numpy.float64]
+    ten_wrapadr: numpy.typing.NDArray[numpy.int32]
+    ten_wrapnum: numpy.typing.NDArray[numpy.int32]
     threadpool: int
     time: float
-    userdata: numpy.ndarray[numpy.float64]
-    wrap_obj: numpy.ndarray[numpy.int32]
-    wrap_xpos: numpy.ndarray[numpy.float64]
-    xanchor: numpy.ndarray[numpy.float64]
-    xaxis: numpy.ndarray[numpy.float64]
-    xfrc_applied: numpy.ndarray[numpy.float64]
-    ximat: numpy.ndarray[numpy.float64]
-    xipos: numpy.ndarray[numpy.float64]
-    xmat: numpy.ndarray[numpy.float64]
-    xpos: numpy.ndarray[numpy.float64]
-    xquat: numpy.ndarray[numpy.float64]
+    userdata: numpy.typing.NDArray[numpy.float64]
+    wrap_obj: numpy.typing.NDArray[numpy.int32]
+    wrap_xpos: numpy.typing.NDArray[numpy.float64]
+    xanchor: numpy.typing.NDArray[numpy.float64]
+    xaxis: numpy.typing.NDArray[numpy.float64]
+    xfrc_applied: numpy.typing.NDArray[numpy.float64]
+    ximat: numpy.typing.NDArray[numpy.float64]
+    xipos: numpy.typing.NDArray[numpy.float64]
+    xmat: numpy.typing.NDArray[numpy.float64]
+    xpos: numpy.typing.NDArray[numpy.float64]
+    xquat: numpy.typing.NDArray[numpy.float64]
     def __init__(self, arg0: MjModel) -> None:
         """__init__(self: mujoco._structs.MjData, arg0: mujoco._structs.MjModel) -> None"""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
@@ -172,7 +159,7 @@ class MjData:
         """actuator(*args, **kwargs)
         Overloaded function.
 
-        1. actuator(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataActuatorViews
+        1. actuator(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataActuatorViews
 
         2. actuator(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataActuatorViews
         """
@@ -202,7 +189,7 @@ class MjData:
         """body(*args, **kwargs)
         Overloaded function.
 
-        1. body(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataBodyViews
+        1. body(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataBodyViews
 
         2. body(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataBodyViews
         """
@@ -210,7 +197,7 @@ class MjData:
         """cam(*args, **kwargs)
         Overloaded function.
 
-        1. cam(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataCameraViews
+        1. cam(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataCameraViews
 
         2. cam(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataCameraViews
         """
@@ -218,7 +205,7 @@ class MjData:
         """camera(*args, **kwargs)
         Overloaded function.
 
-        1. camera(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataCameraViews
+        1. camera(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataCameraViews
 
         2. camera(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataCameraViews
         """
@@ -226,7 +213,7 @@ class MjData:
         """geom(*args, **kwargs)
         Overloaded function.
 
-        1. geom(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataGeomViews
+        1. geom(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataGeomViews
 
         2. geom(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataGeomViews
         """
@@ -234,7 +221,7 @@ class MjData:
         """jnt(*args, **kwargs)
         Overloaded function.
 
-        1. jnt(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataJointViews
+        1. jnt(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataJointViews
 
         2. jnt(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataJointViews
         """
@@ -242,7 +229,7 @@ class MjData:
         """joint(*args, **kwargs)
         Overloaded function.
 
-        1. joint(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataJointViews
+        1. joint(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataJointViews
 
         2. joint(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataJointViews
         """
@@ -250,7 +237,7 @@ class MjData:
         """light(*args, **kwargs)
         Overloaded function.
 
-        1. light(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataLightViews
+        1. light(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataLightViews
 
         2. light(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataLightViews
         """
@@ -258,7 +245,7 @@ class MjData:
         """sensor(*args, **kwargs)
         Overloaded function.
 
-        1. sensor(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataSensorViews
+        1. sensor(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataSensorViews
 
         2. sensor(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataSensorViews
         """
@@ -266,7 +253,7 @@ class MjData:
         """site(*args, **kwargs)
         Overloaded function.
 
-        1. site(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataSiteViews
+        1. site(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataSiteViews
 
         2. site(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataSiteViews
         """
@@ -274,7 +261,7 @@ class MjData:
         """ten(*args, **kwargs)
         Overloaded function.
 
-        1. ten(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataTendonViews
+        1. ten(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataTendonViews
 
         2. ten(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataTendonViews
         """
@@ -282,7 +269,7 @@ class MjData:
         """tendon(*args, **kwargs)
         Overloaded function.
 
-        1. tendon(self: mujoco._structs.MjData, arg0: int) -> mujoco::python::MjDataTendonViews
+        1. tendon(self: mujoco._structs.MjData, arg0: typing.SupportsInt) -> mujoco::python::MjDataTendonViews
 
         2. tendon(self: mujoco._structs.MjData, name: str = '') -> mujoco::python::MjDataTendonViews
         """
@@ -291,95 +278,206 @@ class MjData:
     def __deepcopy__(self, arg0: dict) -> MjData:
         """__deepcopy__(self: mujoco._structs.MjData, arg0: dict) -> mujoco._structs.MjData"""
     @property
-    def _address(self) -> int: ...
+    def _address(self) -> int:
+        """(arg0: mujoco._structs.MjData) -> int"""
     @property
-    def contact(self) -> _MjContactList: ...
+    def contact(self) -> _MjContactList:
+        """(arg0: mujoco._structs.MjData) -> mujoco._structs._MjContactList"""
     @property
-    def dof_island(self) -> numpy.ndarray[numpy.int32]: ...
+    def dof_island(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def dof_islandind(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_AR(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_AR(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_AR_colind(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_AR_colind(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_AR_rowadr(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_AR_rowadr(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_AR_rownnz(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_AR_rownnz(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_D(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_D(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_J(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_J(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_J_colind(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_JT(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_J_rowadr(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_JT_colind(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_J_rownnz(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_JT_rowadr(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_J_rowsuper(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_JT_rownnz(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_KBIP(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_JT_rowsuper(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_R(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_J_colind(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_aref(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_J_rowadr(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_b(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_J_rownnz(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_diagApprox(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_J_rowsuper(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_force(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_KBIP(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_frictionloss(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_R(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_id(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_aref(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_island(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_b(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_margin(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_diagApprox(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_pos(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_force(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_state(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_frictionloss(self) -> numpy.ndarray[numpy.float64]: ...
+    def efc_type(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_id(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_vel(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_island(self) -> numpy.ndarray[numpy.int32]: ...
+    def iLD(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_margin(self) -> numpy.ndarray[numpy.float64]: ...
+    def iLDiagInv(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_pos(self) -> numpy.ndarray[numpy.float64]: ...
+    def iM(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_state(self) -> numpy.ndarray[numpy.int32]: ...
+    def iM_colind(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_type(self) -> numpy.ndarray[numpy.int32]: ...
+    def iM_rowadr(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def efc_vel(self) -> numpy.ndarray[numpy.float64]: ...
+    def iM_rownnz(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def island_dofadr(self) -> numpy.ndarray[numpy.int32]: ...
+    def iacc(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def island_dofind(self) -> numpy.ndarray[numpy.int32]: ...
+    def iacc_smooth(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def island_dofnum(self) -> numpy.ndarray[numpy.int32]: ...
+    def iefc_D(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def island_efcadr(self) -> numpy.ndarray[numpy.int32]: ...
+    def iefc_J(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def island_efcind(self) -> numpy.ndarray[numpy.int32]: ...
+    def iefc_J_colind(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def island_efcnum(self) -> numpy.ndarray[numpy.int32]: ...
+    def iefc_J_rowadr(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def model(self) -> MjModel: ...
+    def iefc_J_rownnz(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def signature(self) -> int: ...
+    def iefc_J_rowsuper(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def solver(self) -> _MjSolverStatList: ...
+    def iefc_R(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def tendon_efcadr(self) -> numpy.ndarray[numpy.int32]: ...
+    def iefc_aref(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def timer(self) -> _MjTimerStatList: ...
+    def iefc_force(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def warning(self) -> _MjWarningStatList: ...
+    def iefc_frictionloss(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
+    @property
+    def iefc_id(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def iefc_state(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def iefc_type(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def ifrc_constraint(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
+    @property
+    def ifrc_smooth(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.float64]"""
+    @property
+    def island_dofadr(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def island_idofadr(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def island_iefcadr(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def island_ne(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def island_nefc(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def island_nf(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def island_nv(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def map_dof2idof(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def map_efc2iefc(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def map_idof2dof(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def map_iefc2efc(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def model(self) -> MjModel:
+        """(arg0: mujoco._structs.MjData) -> mujoco._structs.MjModel"""
+    @property
+    def signature(self) -> int:
+        """(arg0: mujoco._structs.MjData) -> int"""
+    @property
+    def solver(self) -> _MjSolverStatList:
+        """(arg0: mujoco._structs.MjData) -> mujoco._structs._MjSolverStatList"""
+    @property
+    def tendon_efcadr(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs.MjData) -> numpy.typing.NDArray[numpy.int32]"""
+    @property
+    def timer(self) -> _MjTimerStatList:
+        """(arg0: mujoco._structs.MjData) -> mujoco._structs._MjTimerStatList"""
+    @property
+    def warning(self) -> _MjWarningStatList:
+        """(arg0: mujoco._structs.MjData) -> mujoco._structs._MjWarningStatList"""
 
 class MjLROpt:
     accel: float
@@ -405,416 +503,443 @@ class MjLROpt:
 class MjModel:
     _size_fields: ClassVar[tuple] = ...  # read-only
     bind: ClassVar[Callable] = ...
-    actuator_acc0: numpy.ndarray[numpy.float64]
-    actuator_actadr: numpy.ndarray[numpy.int32]
-    actuator_actearly: numpy.ndarray[numpy.uint8]
-    actuator_actlimited: numpy.ndarray[numpy.uint8]
-    actuator_actnum: numpy.ndarray[numpy.int32]
-    actuator_actrange: numpy.ndarray[numpy.float64]
-    actuator_biasprm: numpy.ndarray[numpy.float64]
-    actuator_biastype: numpy.ndarray[numpy.int32]
-    actuator_cranklength: numpy.ndarray[numpy.float64]
-    actuator_ctrllimited: numpy.ndarray[numpy.uint8]
-    actuator_ctrlrange: numpy.ndarray[numpy.float64]
-    actuator_dynprm: numpy.ndarray[numpy.float64]
-    actuator_dyntype: numpy.ndarray[numpy.int32]
-    actuator_forcelimited: numpy.ndarray[numpy.uint8]
-    actuator_forcerange: numpy.ndarray[numpy.float64]
-    actuator_gainprm: numpy.ndarray[numpy.float64]
-    actuator_gaintype: numpy.ndarray[numpy.int32]
-    actuator_gear: numpy.ndarray[numpy.float64]
-    actuator_group: numpy.ndarray[numpy.int32]
-    actuator_length0: numpy.ndarray[numpy.float64]
-    actuator_lengthrange: numpy.ndarray[numpy.float64]
-    actuator_plugin: numpy.ndarray[numpy.int32]
-    actuator_trnid: numpy.ndarray[numpy.int32]
-    actuator_trntype: numpy.ndarray[numpy.int32]
-    actuator_user: numpy.ndarray[numpy.float64]
-    body_bvhadr: numpy.ndarray[numpy.int32]
-    body_bvhnum: numpy.ndarray[numpy.int32]
-    body_conaffinity: numpy.ndarray[numpy.int32]
-    body_contype: numpy.ndarray[numpy.int32]
-    body_dofadr: numpy.ndarray[numpy.int32]
-    body_dofnum: numpy.ndarray[numpy.int32]
-    body_geomadr: numpy.ndarray[numpy.int32]
-    body_geomnum: numpy.ndarray[numpy.int32]
-    body_gravcomp: numpy.ndarray[numpy.float64]
-    body_inertia: numpy.ndarray[numpy.float64]
-    body_invweight0: numpy.ndarray[numpy.float64]
-    body_ipos: numpy.ndarray[numpy.float64]
-    body_iquat: numpy.ndarray[numpy.float64]
-    body_jntadr: numpy.ndarray[numpy.int32]
-    body_jntnum: numpy.ndarray[numpy.int32]
-    body_margin: numpy.ndarray[numpy.float64]
-    body_mass: numpy.ndarray[numpy.float64]
-    body_mocapid: numpy.ndarray[numpy.int32]
-    body_parentid: numpy.ndarray[numpy.int32]
-    body_plugin: numpy.ndarray[numpy.int32]
-    body_pos: numpy.ndarray[numpy.float64]
-    body_quat: numpy.ndarray[numpy.float64]
-    body_rootid: numpy.ndarray[numpy.int32]
-    body_sameframe: numpy.ndarray[numpy.uint8]
-    body_simple: numpy.ndarray[numpy.uint8]
-    body_subtreemass: numpy.ndarray[numpy.float64]
-    body_treeid: numpy.ndarray[numpy.int32]
-    body_user: numpy.ndarray[numpy.float64]
-    body_weldid: numpy.ndarray[numpy.int32]
-    bvh_aabb: numpy.ndarray[numpy.float64]
-    bvh_child: numpy.ndarray[numpy.int32]
-    bvh_depth: numpy.ndarray[numpy.int32]
-    bvh_nodeid: numpy.ndarray[numpy.int32]
-    cam_bodyid: numpy.ndarray[numpy.int32]
-    cam_fovy: numpy.ndarray[numpy.float64]
-    cam_intrinsic: numpy.ndarray[numpy.float32]
-    cam_ipd: numpy.ndarray[numpy.float64]
-    cam_mat0: numpy.ndarray[numpy.float64]
-    cam_mode: numpy.ndarray[numpy.int32]
-    cam_orthographic: numpy.ndarray[numpy.int32]
-    cam_pos: numpy.ndarray[numpy.float64]
-    cam_pos0: numpy.ndarray[numpy.float64]
-    cam_poscom0: numpy.ndarray[numpy.float64]
-    cam_quat: numpy.ndarray[numpy.float64]
-    cam_resolution: numpy.ndarray[numpy.int32]
-    cam_sensorsize: numpy.ndarray[numpy.float32]
-    cam_targetbodyid: numpy.ndarray[numpy.int32]
-    cam_user: numpy.ndarray[numpy.float64]
-    dof_M0: numpy.ndarray[numpy.float64]
-    dof_Madr: numpy.ndarray[numpy.int32]
-    dof_armature: numpy.ndarray[numpy.float64]
-    dof_bodyid: numpy.ndarray[numpy.int32]
-    dof_damping: numpy.ndarray[numpy.float64]
-    dof_frictionloss: numpy.ndarray[numpy.float64]
-    dof_invweight0: numpy.ndarray[numpy.float64]
-    dof_jntid: numpy.ndarray[numpy.int32]
-    dof_parentid: numpy.ndarray[numpy.int32]
-    dof_simplenum: numpy.ndarray[numpy.int32]
-    dof_solimp: numpy.ndarray[numpy.float64]
-    dof_solref: numpy.ndarray[numpy.float64]
-    dof_treeid: numpy.ndarray[numpy.int32]
-    eq_active0: numpy.ndarray[numpy.uint8]
-    eq_data: numpy.ndarray[numpy.float64]
-    eq_obj1id: numpy.ndarray[numpy.int32]
-    eq_obj2id: numpy.ndarray[numpy.int32]
-    eq_objtype: numpy.ndarray[numpy.int32]
-    eq_solimp: numpy.ndarray[numpy.float64]
-    eq_solref: numpy.ndarray[numpy.float64]
-    eq_type: numpy.ndarray[numpy.int32]
-    exclude_signature: numpy.ndarray[numpy.int32]
-    flex_activelayers: numpy.ndarray[numpy.int32]
-    flex_bvhadr: numpy.ndarray[numpy.int32]
-    flex_bvhnum: numpy.ndarray[numpy.int32]
-    flex_centered: numpy.ndarray[numpy.uint8]
-    flex_conaffinity: numpy.ndarray[numpy.int32]
-    flex_condim: numpy.ndarray[numpy.int32]
-    flex_contype: numpy.ndarray[numpy.int32]
-    flex_damping: numpy.ndarray[numpy.float64]
-    flex_dim: numpy.ndarray[numpy.int32]
-    flex_edge: numpy.ndarray[numpy.int32]
-    flex_edgeadr: numpy.ndarray[numpy.int32]
-    flex_edgedamping: numpy.ndarray[numpy.float64]
-    flex_edgeequality: numpy.ndarray[numpy.uint8]
-    flex_edgenum: numpy.ndarray[numpy.int32]
-    flex_edgestiffness: numpy.ndarray[numpy.float64]
-    flex_elem: numpy.ndarray[numpy.int32]
-    flex_elemadr: numpy.ndarray[numpy.int32]
-    flex_elemdataadr: numpy.ndarray[numpy.int32]
-    flex_elemedge: numpy.ndarray[numpy.int32]
-    flex_elemedgeadr: numpy.ndarray[numpy.int32]
-    flex_elemlayer: numpy.ndarray[numpy.int32]
-    flex_elemnum: numpy.ndarray[numpy.int32]
-    flex_elemtexcoord: numpy.ndarray[numpy.int32]
-    flex_evpair: numpy.ndarray[numpy.int32]
-    flex_evpairadr: numpy.ndarray[numpy.int32]
-    flex_evpairnum: numpy.ndarray[numpy.int32]
-    flex_flatskin: numpy.ndarray[numpy.uint8]
-    flex_friction: numpy.ndarray[numpy.float64]
-    flex_gap: numpy.ndarray[numpy.float64]
-    flex_group: numpy.ndarray[numpy.int32]
-    flex_internal: numpy.ndarray[numpy.uint8]
-    flex_interp: numpy.ndarray[numpy.int32]
-    flex_margin: numpy.ndarray[numpy.float64]
-    flex_matid: numpy.ndarray[numpy.int32]
-    flex_node: numpy.ndarray[numpy.float64]
-    flex_node0: numpy.ndarray[numpy.float64]
-    flex_nodeadr: numpy.ndarray[numpy.int32]
-    flex_nodebodyid: numpy.ndarray[numpy.int32]
-    flex_nodenum: numpy.ndarray[numpy.int32]
-    flex_priority: numpy.ndarray[numpy.int32]
-    flex_radius: numpy.ndarray[numpy.float64]
-    flex_rgba: numpy.ndarray[numpy.float32]
-    flex_rigid: numpy.ndarray[numpy.uint8]
-    flex_selfcollide: numpy.ndarray[numpy.int32]
-    flex_shell: numpy.ndarray[numpy.int32]
-    flex_shelldataadr: numpy.ndarray[numpy.int32]
-    flex_shellnum: numpy.ndarray[numpy.int32]
-    flex_solimp: numpy.ndarray[numpy.float64]
-    flex_solmix: numpy.ndarray[numpy.float64]
-    flex_solref: numpy.ndarray[numpy.float64]
-    flex_stiffness: numpy.ndarray[numpy.float64]
-    flex_texcoord: numpy.ndarray[numpy.float32]
-    flex_texcoordadr: numpy.ndarray[numpy.int32]
-    flex_vert: numpy.ndarray[numpy.float64]
-    flex_vert0: numpy.ndarray[numpy.float64]
-    flex_vertadr: numpy.ndarray[numpy.int32]
-    flex_vertbodyid: numpy.ndarray[numpy.int32]
-    flex_vertnum: numpy.ndarray[numpy.int32]
-    flexedge_invweight0: numpy.ndarray[numpy.float64]
-    flexedge_length0: numpy.ndarray[numpy.float64]
-    flexedge_rigid: numpy.ndarray[numpy.uint8]
-    geom_aabb: numpy.ndarray[numpy.float64]
-    geom_bodyid: numpy.ndarray[numpy.int32]
-    geom_conaffinity: numpy.ndarray[numpy.int32]
-    geom_condim: numpy.ndarray[numpy.int32]
-    geom_contype: numpy.ndarray[numpy.int32]
-    geom_dataid: numpy.ndarray[numpy.int32]
-    geom_fluid: numpy.ndarray[numpy.float64]
-    geom_friction: numpy.ndarray[numpy.float64]
-    geom_gap: numpy.ndarray[numpy.float64]
-    geom_group: numpy.ndarray[numpy.int32]
-    geom_margin: numpy.ndarray[numpy.float64]
-    geom_matid: numpy.ndarray[numpy.int32]
-    geom_plugin: numpy.ndarray[numpy.int32]
-    geom_pos: numpy.ndarray[numpy.float64]
-    geom_priority: numpy.ndarray[numpy.int32]
-    geom_quat: numpy.ndarray[numpy.float64]
-    geom_rbound: numpy.ndarray[numpy.float64]
-    geom_rgba: numpy.ndarray[numpy.float32]
-    geom_sameframe: numpy.ndarray[numpy.uint8]
-    geom_size: numpy.ndarray[numpy.float64]
-    geom_solimp: numpy.ndarray[numpy.float64]
-    geom_solmix: numpy.ndarray[numpy.float64]
-    geom_solref: numpy.ndarray[numpy.float64]
-    geom_type: numpy.ndarray[numpy.int32]
-    geom_user: numpy.ndarray[numpy.float64]
-    hfield_adr: numpy.ndarray[numpy.int32]
-    hfield_data: numpy.ndarray[numpy.float32]
-    hfield_ncol: numpy.ndarray[numpy.int32]
-    hfield_nrow: numpy.ndarray[numpy.int32]
-    hfield_pathadr: numpy.ndarray[numpy.int32]
-    hfield_size: numpy.ndarray[numpy.float64]
-    jnt_actfrclimited: numpy.ndarray[numpy.uint8]
-    jnt_actfrcrange: numpy.ndarray[numpy.float64]
-    jnt_actgravcomp: numpy.ndarray[numpy.uint8]
-    jnt_axis: numpy.ndarray[numpy.float64]
-    jnt_bodyid: numpy.ndarray[numpy.int32]
-    jnt_dofadr: numpy.ndarray[numpy.int32]
-    jnt_group: numpy.ndarray[numpy.int32]
-    jnt_limited: numpy.ndarray[numpy.uint8]
-    jnt_margin: numpy.ndarray[numpy.float64]
-    jnt_pos: numpy.ndarray[numpy.float64]
-    jnt_qposadr: numpy.ndarray[numpy.int32]
-    jnt_range: numpy.ndarray[numpy.float64]
-    jnt_solimp: numpy.ndarray[numpy.float64]
-    jnt_solref: numpy.ndarray[numpy.float64]
-    jnt_stiffness: numpy.ndarray[numpy.float64]
-    jnt_type: numpy.ndarray[numpy.int32]
-    jnt_user: numpy.ndarray[numpy.float64]
-    key_act: numpy.ndarray[numpy.float64]
-    key_ctrl: numpy.ndarray[numpy.float64]
-    key_mpos: numpy.ndarray[numpy.float64]
-    key_mquat: numpy.ndarray[numpy.float64]
-    key_qpos: numpy.ndarray[numpy.float64]
-    key_qvel: numpy.ndarray[numpy.float64]
-    key_time: numpy.ndarray[numpy.float64]
-    light_active: numpy.ndarray[numpy.uint8]
-    light_ambient: numpy.ndarray[numpy.float32]
-    light_attenuation: numpy.ndarray[numpy.float32]
-    light_bodyid: numpy.ndarray[numpy.int32]
-    light_bulbradius: numpy.ndarray[numpy.float32]
-    light_castshadow: numpy.ndarray[numpy.uint8]
-    light_cutoff: numpy.ndarray[numpy.float32]
-    light_diffuse: numpy.ndarray[numpy.float32]
-    light_dir: numpy.ndarray[numpy.float64]
-    light_dir0: numpy.ndarray[numpy.float64]
-    light_directional: numpy.ndarray[numpy.uint8]
-    light_exponent: numpy.ndarray[numpy.float32]
-    light_mode: numpy.ndarray[numpy.int32]
-    light_pos: numpy.ndarray[numpy.float64]
-    light_pos0: numpy.ndarray[numpy.float64]
-    light_poscom0: numpy.ndarray[numpy.float64]
-    light_specular: numpy.ndarray[numpy.float32]
-    light_targetbodyid: numpy.ndarray[numpy.int32]
-    mat_emission: numpy.ndarray[numpy.float32]
-    mat_metallic: numpy.ndarray[numpy.float32]
-    mat_reflectance: numpy.ndarray[numpy.float32]
-    mat_rgba: numpy.ndarray[numpy.float32]
-    mat_roughness: numpy.ndarray[numpy.float32]
-    mat_shininess: numpy.ndarray[numpy.float32]
-    mat_specular: numpy.ndarray[numpy.float32]
-    mat_texid: numpy.ndarray[numpy.int32]
-    mat_texrepeat: numpy.ndarray[numpy.float32]
-    mat_texuniform: numpy.ndarray[numpy.uint8]
-    mesh_bvhadr: numpy.ndarray[numpy.int32]
-    mesh_bvhnum: numpy.ndarray[numpy.int32]
-    mesh_face: numpy.ndarray[numpy.int32]
-    mesh_faceadr: numpy.ndarray[numpy.int32]
-    mesh_facenormal: numpy.ndarray[numpy.int32]
-    mesh_facenum: numpy.ndarray[numpy.int32]
-    mesh_facetexcoord: numpy.ndarray[numpy.int32]
-    mesh_graph: numpy.ndarray[numpy.int32]
-    mesh_graphadr: numpy.ndarray[numpy.int32]
-    mesh_normal: numpy.ndarray[numpy.float32]
-    mesh_normaladr: numpy.ndarray[numpy.int32]
-    mesh_normalnum: numpy.ndarray[numpy.int32]
-    mesh_pathadr: numpy.ndarray[numpy.int32]
-    mesh_polyadr: numpy.ndarray[numpy.int32]
-    mesh_polymap: numpy.ndarray[numpy.int32]
-    mesh_polymapadr: numpy.ndarray[numpy.int32]
-    mesh_polymapnum: numpy.ndarray[numpy.int32]
-    mesh_polynormal: numpy.ndarray[numpy.float64]
-    mesh_polynum: numpy.ndarray[numpy.int32]
-    mesh_polyvert: numpy.ndarray[numpy.int32]
-    mesh_polyvertadr: numpy.ndarray[numpy.int32]
-    mesh_polyvertnum: numpy.ndarray[numpy.int32]
-    mesh_pos: numpy.ndarray[numpy.float64]
-    mesh_quat: numpy.ndarray[numpy.float64]
-    mesh_scale: numpy.ndarray[numpy.float64]
-    mesh_texcoord: numpy.ndarray[numpy.float32]
-    mesh_texcoordadr: numpy.ndarray[numpy.int32]
-    mesh_texcoordnum: numpy.ndarray[numpy.int32]
-    mesh_vert: numpy.ndarray[numpy.float32]
-    mesh_vertadr: numpy.ndarray[numpy.int32]
-    mesh_vertnum: numpy.ndarray[numpy.int32]
-    name_actuatoradr: numpy.ndarray[numpy.int32]
-    name_bodyadr: numpy.ndarray[numpy.int32]
-    name_camadr: numpy.ndarray[numpy.int32]
-    name_eqadr: numpy.ndarray[numpy.int32]
-    name_excludeadr: numpy.ndarray[numpy.int32]
-    name_flexadr: numpy.ndarray[numpy.int32]
-    name_geomadr: numpy.ndarray[numpy.int32]
-    name_hfieldadr: numpy.ndarray[numpy.int32]
-    name_jntadr: numpy.ndarray[numpy.int32]
-    name_keyadr: numpy.ndarray[numpy.int32]
-    name_lightadr: numpy.ndarray[numpy.int32]
-    name_matadr: numpy.ndarray[numpy.int32]
-    name_meshadr: numpy.ndarray[numpy.int32]
-    name_numericadr: numpy.ndarray[numpy.int32]
-    name_pairadr: numpy.ndarray[numpy.int32]
-    name_pluginadr: numpy.ndarray[numpy.int32]
-    name_sensoradr: numpy.ndarray[numpy.int32]
-    name_siteadr: numpy.ndarray[numpy.int32]
-    name_skinadr: numpy.ndarray[numpy.int32]
-    name_tendonadr: numpy.ndarray[numpy.int32]
-    name_texadr: numpy.ndarray[numpy.int32]
-    name_textadr: numpy.ndarray[numpy.int32]
-    name_tupleadr: numpy.ndarray[numpy.int32]
-    names_map: numpy.ndarray[numpy.int32]
-    numeric_adr: numpy.ndarray[numpy.int32]
-    numeric_data: numpy.ndarray[numpy.float64]
-    numeric_size: numpy.ndarray[numpy.int32]
-    pair_dim: numpy.ndarray[numpy.int32]
-    pair_friction: numpy.ndarray[numpy.float64]
-    pair_gap: numpy.ndarray[numpy.float64]
-    pair_geom1: numpy.ndarray[numpy.int32]
-    pair_geom2: numpy.ndarray[numpy.int32]
-    pair_margin: numpy.ndarray[numpy.float64]
-    pair_signature: numpy.ndarray[numpy.int32]
-    pair_solimp: numpy.ndarray[numpy.float64]
-    pair_solref: numpy.ndarray[numpy.float64]
-    pair_solreffriction: numpy.ndarray[numpy.float64]
-    plugin: numpy.ndarray[numpy.int32]
-    plugin_attr: numpy.ndarray[numpy.int8]
-    plugin_attradr: numpy.ndarray[numpy.int32]
-    plugin_stateadr: numpy.ndarray[numpy.int32]
-    plugin_statenum: numpy.ndarray[numpy.int32]
-    qpos0: numpy.ndarray[numpy.float64]
-    qpos_spring: numpy.ndarray[numpy.float64]
-    sensor_adr: numpy.ndarray[numpy.int32]
-    sensor_cutoff: numpy.ndarray[numpy.float64]
-    sensor_datatype: numpy.ndarray[numpy.int32]
-    sensor_dim: numpy.ndarray[numpy.int32]
-    sensor_needstage: numpy.ndarray[numpy.int32]
-    sensor_noise: numpy.ndarray[numpy.float64]
-    sensor_objid: numpy.ndarray[numpy.int32]
-    sensor_objtype: numpy.ndarray[numpy.int32]
-    sensor_plugin: numpy.ndarray[numpy.int32]
-    sensor_refid: numpy.ndarray[numpy.int32]
-    sensor_reftype: numpy.ndarray[numpy.int32]
-    sensor_type: numpy.ndarray[numpy.int32]
-    sensor_user: numpy.ndarray[numpy.float64]
-    site_bodyid: numpy.ndarray[numpy.int32]
-    site_group: numpy.ndarray[numpy.int32]
-    site_matid: numpy.ndarray[numpy.int32]
-    site_pos: numpy.ndarray[numpy.float64]
-    site_quat: numpy.ndarray[numpy.float64]
-    site_rgba: numpy.ndarray[numpy.float32]
-    site_sameframe: numpy.ndarray[numpy.uint8]
-    site_size: numpy.ndarray[numpy.float64]
-    site_type: numpy.ndarray[numpy.int32]
-    site_user: numpy.ndarray[numpy.float64]
-    skin_boneadr: numpy.ndarray[numpy.int32]
-    skin_bonebindpos: numpy.ndarray[numpy.float32]
-    skin_bonebindquat: numpy.ndarray[numpy.float32]
-    skin_bonebodyid: numpy.ndarray[numpy.int32]
-    skin_bonenum: numpy.ndarray[numpy.int32]
-    skin_bonevertadr: numpy.ndarray[numpy.int32]
-    skin_bonevertid: numpy.ndarray[numpy.int32]
-    skin_bonevertnum: numpy.ndarray[numpy.int32]
-    skin_bonevertweight: numpy.ndarray[numpy.float32]
-    skin_face: numpy.ndarray[numpy.int32]
-    skin_faceadr: numpy.ndarray[numpy.int32]
-    skin_facenum: numpy.ndarray[numpy.int32]
-    skin_group: numpy.ndarray[numpy.int32]
-    skin_inflate: numpy.ndarray[numpy.float32]
-    skin_matid: numpy.ndarray[numpy.int32]
-    skin_pathadr: numpy.ndarray[numpy.int32]
-    skin_rgba: numpy.ndarray[numpy.float32]
-    skin_texcoord: numpy.ndarray[numpy.float32]
-    skin_texcoordadr: numpy.ndarray[numpy.int32]
-    skin_vert: numpy.ndarray[numpy.float32]
-    skin_vertadr: numpy.ndarray[numpy.int32]
-    skin_vertnum: numpy.ndarray[numpy.int32]
-    tendon_actfrclimited: numpy.ndarray[numpy.uint8]
-    tendon_actfrcrange: numpy.ndarray[numpy.float64]
-    tendon_adr: numpy.ndarray[numpy.int32]
-    tendon_armature: numpy.ndarray[numpy.float64]
-    tendon_damping: numpy.ndarray[numpy.float64]
-    tendon_frictionloss: numpy.ndarray[numpy.float64]
-    tendon_group: numpy.ndarray[numpy.int32]
-    tendon_invweight0: numpy.ndarray[numpy.float64]
-    tendon_length0: numpy.ndarray[numpy.float64]
-    tendon_lengthspring: numpy.ndarray[numpy.float64]
-    tendon_limited: numpy.ndarray[numpy.uint8]
-    tendon_margin: numpy.ndarray[numpy.float64]
-    tendon_matid: numpy.ndarray[numpy.int32]
-    tendon_num: numpy.ndarray[numpy.int32]
-    tendon_range: numpy.ndarray[numpy.float64]
-    tendon_rgba: numpy.ndarray[numpy.float32]
-    tendon_solimp_fri: numpy.ndarray[numpy.float64]
-    tendon_solimp_lim: numpy.ndarray[numpy.float64]
-    tendon_solref_fri: numpy.ndarray[numpy.float64]
-    tendon_solref_lim: numpy.ndarray[numpy.float64]
-    tendon_stiffness: numpy.ndarray[numpy.float64]
-    tendon_user: numpy.ndarray[numpy.float64]
-    tendon_width: numpy.ndarray[numpy.float64]
-    tex_adr: numpy.ndarray[numpy.int32]
-    tex_data: numpy.ndarray[numpy.uint8]
-    tex_height: numpy.ndarray[numpy.int32]
-    tex_nchannel: numpy.ndarray[numpy.int32]
-    tex_pathadr: numpy.ndarray[numpy.int32]
-    tex_type: numpy.ndarray[numpy.int32]
-    tex_width: numpy.ndarray[numpy.int32]
-    text_adr: numpy.ndarray[numpy.int32]
-    text_size: numpy.ndarray[numpy.int32]
-    tuple_adr: numpy.ndarray[numpy.int32]
-    tuple_objid: numpy.ndarray[numpy.int32]
-    tuple_objprm: numpy.ndarray[numpy.float64]
-    tuple_objtype: numpy.ndarray[numpy.int32]
-    tuple_size: numpy.ndarray[numpy.int32]
-    wrap_objid: numpy.ndarray[numpy.int32]
-    wrap_prm: numpy.ndarray[numpy.float64]
-    wrap_type: numpy.ndarray[numpy.int32]
+    B_colind: numpy.typing.NDArray[numpy.int32]
+    B_rowadr: numpy.typing.NDArray[numpy.int32]
+    B_rownnz: numpy.typing.NDArray[numpy.int32]
+    D_colind: numpy.typing.NDArray[numpy.int32]
+    D_diag: numpy.typing.NDArray[numpy.int32]
+    D_rowadr: numpy.typing.NDArray[numpy.int32]
+    D_rownnz: numpy.typing.NDArray[numpy.int32]
+    M_colind: numpy.typing.NDArray[numpy.int32]
+    M_rowadr: numpy.typing.NDArray[numpy.int32]
+    M_rownnz: numpy.typing.NDArray[numpy.int32]
+    actuator_acc0: numpy.typing.NDArray[numpy.float64]
+    actuator_actadr: numpy.typing.NDArray[numpy.int32]
+    actuator_actearly: numpy.typing.NDArray[numpy.uint8]
+    actuator_actlimited: numpy.typing.NDArray[numpy.uint8]
+    actuator_actnum: numpy.typing.NDArray[numpy.int32]
+    actuator_actrange: numpy.typing.NDArray[numpy.float64]
+    actuator_biasprm: numpy.typing.NDArray[numpy.float64]
+    actuator_biastype: numpy.typing.NDArray[numpy.int32]
+    actuator_cranklength: numpy.typing.NDArray[numpy.float64]
+    actuator_ctrllimited: numpy.typing.NDArray[numpy.uint8]
+    actuator_ctrlrange: numpy.typing.NDArray[numpy.float64]
+    actuator_dynprm: numpy.typing.NDArray[numpy.float64]
+    actuator_dyntype: numpy.typing.NDArray[numpy.int32]
+    actuator_forcelimited: numpy.typing.NDArray[numpy.uint8]
+    actuator_forcerange: numpy.typing.NDArray[numpy.float64]
+    actuator_gainprm: numpy.typing.NDArray[numpy.float64]
+    actuator_gaintype: numpy.typing.NDArray[numpy.int32]
+    actuator_gear: numpy.typing.NDArray[numpy.float64]
+    actuator_group: numpy.typing.NDArray[numpy.int32]
+    actuator_length0: numpy.typing.NDArray[numpy.float64]
+    actuator_lengthrange: numpy.typing.NDArray[numpy.float64]
+    actuator_plugin: numpy.typing.NDArray[numpy.int32]
+    actuator_trnid: numpy.typing.NDArray[numpy.int32]
+    actuator_trntype: numpy.typing.NDArray[numpy.int32]
+    actuator_user: numpy.typing.NDArray[numpy.float64]
+    body_bvhadr: numpy.typing.NDArray[numpy.int32]
+    body_bvhnum: numpy.typing.NDArray[numpy.int32]
+    body_conaffinity: numpy.typing.NDArray[numpy.int32]
+    body_contype: numpy.typing.NDArray[numpy.int32]
+    body_dofadr: numpy.typing.NDArray[numpy.int32]
+    body_dofnum: numpy.typing.NDArray[numpy.int32]
+    body_geomadr: numpy.typing.NDArray[numpy.int32]
+    body_geomnum: numpy.typing.NDArray[numpy.int32]
+    body_gravcomp: numpy.typing.NDArray[numpy.float64]
+    body_inertia: numpy.typing.NDArray[numpy.float64]
+    body_invweight0: numpy.typing.NDArray[numpy.float64]
+    body_ipos: numpy.typing.NDArray[numpy.float64]
+    body_iquat: numpy.typing.NDArray[numpy.float64]
+    body_jntadr: numpy.typing.NDArray[numpy.int32]
+    body_jntnum: numpy.typing.NDArray[numpy.int32]
+    body_margin: numpy.typing.NDArray[numpy.float64]
+    body_mass: numpy.typing.NDArray[numpy.float64]
+    body_mocapid: numpy.typing.NDArray[numpy.int32]
+    body_parentid: numpy.typing.NDArray[numpy.int32]
+    body_plugin: numpy.typing.NDArray[numpy.int32]
+    body_pos: numpy.typing.NDArray[numpy.float64]
+    body_quat: numpy.typing.NDArray[numpy.float64]
+    body_rootid: numpy.typing.NDArray[numpy.int32]
+    body_sameframe: numpy.typing.NDArray[numpy.uint8]
+    body_simple: numpy.typing.NDArray[numpy.uint8]
+    body_subtreemass: numpy.typing.NDArray[numpy.float64]
+    body_treeid: numpy.typing.NDArray[numpy.int32]
+    body_user: numpy.typing.NDArray[numpy.float64]
+    body_weldid: numpy.typing.NDArray[numpy.int32]
+    bvh_aabb: numpy.typing.NDArray[numpy.float64]
+    bvh_child: numpy.typing.NDArray[numpy.int32]
+    bvh_depth: numpy.typing.NDArray[numpy.int32]
+    bvh_nodeid: numpy.typing.NDArray[numpy.int32]
+    cam_bodyid: numpy.typing.NDArray[numpy.int32]
+    cam_fovy: numpy.typing.NDArray[numpy.float64]
+    cam_intrinsic: numpy.typing.NDArray[numpy.float32]
+    cam_ipd: numpy.typing.NDArray[numpy.float64]
+    cam_mat0: numpy.typing.NDArray[numpy.float64]
+    cam_mode: numpy.typing.NDArray[numpy.int32]
+    cam_orthographic: numpy.typing.NDArray[numpy.int32]
+    cam_pos: numpy.typing.NDArray[numpy.float64]
+    cam_pos0: numpy.typing.NDArray[numpy.float64]
+    cam_poscom0: numpy.typing.NDArray[numpy.float64]
+    cam_quat: numpy.typing.NDArray[numpy.float64]
+    cam_resolution: numpy.typing.NDArray[numpy.int32]
+    cam_sensorsize: numpy.typing.NDArray[numpy.float32]
+    cam_targetbodyid: numpy.typing.NDArray[numpy.int32]
+    cam_user: numpy.typing.NDArray[numpy.float64]
+    dof_M0: numpy.typing.NDArray[numpy.float64]
+    dof_Madr: numpy.typing.NDArray[numpy.int32]
+    dof_armature: numpy.typing.NDArray[numpy.float64]
+    dof_bodyid: numpy.typing.NDArray[numpy.int32]
+    dof_damping: numpy.typing.NDArray[numpy.float64]
+    dof_frictionloss: numpy.typing.NDArray[numpy.float64]
+    dof_invweight0: numpy.typing.NDArray[numpy.float64]
+    dof_jntid: numpy.typing.NDArray[numpy.int32]
+    dof_parentid: numpy.typing.NDArray[numpy.int32]
+    dof_simplenum: numpy.typing.NDArray[numpy.int32]
+    dof_solimp: numpy.typing.NDArray[numpy.float64]
+    dof_solref: numpy.typing.NDArray[numpy.float64]
+    dof_treeid: numpy.typing.NDArray[numpy.int32]
+    eq_active0: numpy.typing.NDArray[numpy.uint8]
+    eq_data: numpy.typing.NDArray[numpy.float64]
+    eq_obj1id: numpy.typing.NDArray[numpy.int32]
+    eq_obj2id: numpy.typing.NDArray[numpy.int32]
+    eq_objtype: numpy.typing.NDArray[numpy.int32]
+    eq_solimp: numpy.typing.NDArray[numpy.float64]
+    eq_solref: numpy.typing.NDArray[numpy.float64]
+    eq_type: numpy.typing.NDArray[numpy.int32]
+    exclude_signature: numpy.typing.NDArray[numpy.int32]
+    flex_activelayers: numpy.typing.NDArray[numpy.int32]
+    flex_bending: numpy.typing.NDArray[numpy.float64]
+    flex_bvhadr: numpy.typing.NDArray[numpy.int32]
+    flex_bvhnum: numpy.typing.NDArray[numpy.int32]
+    flex_centered: numpy.typing.NDArray[numpy.uint8]
+    flex_conaffinity: numpy.typing.NDArray[numpy.int32]
+    flex_condim: numpy.typing.NDArray[numpy.int32]
+    flex_contype: numpy.typing.NDArray[numpy.int32]
+    flex_damping: numpy.typing.NDArray[numpy.float64]
+    flex_dim: numpy.typing.NDArray[numpy.int32]
+    flex_edge: numpy.typing.NDArray[numpy.int32]
+    flex_edgeadr: numpy.typing.NDArray[numpy.int32]
+    flex_edgedamping: numpy.typing.NDArray[numpy.float64]
+    flex_edgeequality: numpy.typing.NDArray[numpy.uint8]
+    flex_edgeflap: numpy.typing.NDArray[numpy.int32]
+    flex_edgenum: numpy.typing.NDArray[numpy.int32]
+    flex_edgestiffness: numpy.typing.NDArray[numpy.float64]
+    flex_elem: numpy.typing.NDArray[numpy.int32]
+    flex_elemadr: numpy.typing.NDArray[numpy.int32]
+    flex_elemdataadr: numpy.typing.NDArray[numpy.int32]
+    flex_elemedge: numpy.typing.NDArray[numpy.int32]
+    flex_elemedgeadr: numpy.typing.NDArray[numpy.int32]
+    flex_elemlayer: numpy.typing.NDArray[numpy.int32]
+    flex_elemnum: numpy.typing.NDArray[numpy.int32]
+    flex_elemtexcoord: numpy.typing.NDArray[numpy.int32]
+    flex_evpair: numpy.typing.NDArray[numpy.int32]
+    flex_evpairadr: numpy.typing.NDArray[numpy.int32]
+    flex_evpairnum: numpy.typing.NDArray[numpy.int32]
+    flex_flatskin: numpy.typing.NDArray[numpy.uint8]
+    flex_friction: numpy.typing.NDArray[numpy.float64]
+    flex_gap: numpy.typing.NDArray[numpy.float64]
+    flex_group: numpy.typing.NDArray[numpy.int32]
+    flex_internal: numpy.typing.NDArray[numpy.uint8]
+    flex_interp: numpy.typing.NDArray[numpy.int32]
+    flex_margin: numpy.typing.NDArray[numpy.float64]
+    flex_matid: numpy.typing.NDArray[numpy.int32]
+    flex_node: numpy.typing.NDArray[numpy.float64]
+    flex_node0: numpy.typing.NDArray[numpy.float64]
+    flex_nodeadr: numpy.typing.NDArray[numpy.int32]
+    flex_nodebodyid: numpy.typing.NDArray[numpy.int32]
+    flex_nodenum: numpy.typing.NDArray[numpy.int32]
+    flex_passive: numpy.typing.NDArray[numpy.int32]
+    flex_priority: numpy.typing.NDArray[numpy.int32]
+    flex_radius: numpy.typing.NDArray[numpy.float64]
+    flex_rgba: numpy.typing.NDArray[numpy.float32]
+    flex_rigid: numpy.typing.NDArray[numpy.uint8]
+    flex_selfcollide: numpy.typing.NDArray[numpy.int32]
+    flex_shell: numpy.typing.NDArray[numpy.int32]
+    flex_shelldataadr: numpy.typing.NDArray[numpy.int32]
+    flex_shellnum: numpy.typing.NDArray[numpy.int32]
+    flex_solimp: numpy.typing.NDArray[numpy.float64]
+    flex_solmix: numpy.typing.NDArray[numpy.float64]
+    flex_solref: numpy.typing.NDArray[numpy.float64]
+    flex_stiffness: numpy.typing.NDArray[numpy.float64]
+    flex_texcoord: numpy.typing.NDArray[numpy.float32]
+    flex_texcoordadr: numpy.typing.NDArray[numpy.int32]
+    flex_vert: numpy.typing.NDArray[numpy.float64]
+    flex_vert0: numpy.typing.NDArray[numpy.float64]
+    flex_vertadr: numpy.typing.NDArray[numpy.int32]
+    flex_vertbodyid: numpy.typing.NDArray[numpy.int32]
+    flex_vertnum: numpy.typing.NDArray[numpy.int32]
+    flexedge_invweight0: numpy.typing.NDArray[numpy.float64]
+    flexedge_length0: numpy.typing.NDArray[numpy.float64]
+    flexedge_rigid: numpy.typing.NDArray[numpy.uint8]
+    geom_aabb: numpy.typing.NDArray[numpy.float64]
+    geom_bodyid: numpy.typing.NDArray[numpy.int32]
+    geom_conaffinity: numpy.typing.NDArray[numpy.int32]
+    geom_condim: numpy.typing.NDArray[numpy.int32]
+    geom_contype: numpy.typing.NDArray[numpy.int32]
+    geom_dataid: numpy.typing.NDArray[numpy.int32]
+    geom_fluid: numpy.typing.NDArray[numpy.float64]
+    geom_friction: numpy.typing.NDArray[numpy.float64]
+    geom_gap: numpy.typing.NDArray[numpy.float64]
+    geom_group: numpy.typing.NDArray[numpy.int32]
+    geom_margin: numpy.typing.NDArray[numpy.float64]
+    geom_matid: numpy.typing.NDArray[numpy.int32]
+    geom_plugin: numpy.typing.NDArray[numpy.int32]
+    geom_pos: numpy.typing.NDArray[numpy.float64]
+    geom_priority: numpy.typing.NDArray[numpy.int32]
+    geom_quat: numpy.typing.NDArray[numpy.float64]
+    geom_rbound: numpy.typing.NDArray[numpy.float64]
+    geom_rgba: numpy.typing.NDArray[numpy.float32]
+    geom_sameframe: numpy.typing.NDArray[numpy.uint8]
+    geom_size: numpy.typing.NDArray[numpy.float64]
+    geom_solimp: numpy.typing.NDArray[numpy.float64]
+    geom_solmix: numpy.typing.NDArray[numpy.float64]
+    geom_solref: numpy.typing.NDArray[numpy.float64]
+    geom_type: numpy.typing.NDArray[numpy.int32]
+    geom_user: numpy.typing.NDArray[numpy.float64]
+    hfield_adr: numpy.typing.NDArray[numpy.int32]
+    hfield_data: numpy.typing.NDArray[numpy.float32]
+    hfield_ncol: numpy.typing.NDArray[numpy.int32]
+    hfield_nrow: numpy.typing.NDArray[numpy.int32]
+    hfield_pathadr: numpy.typing.NDArray[numpy.int32]
+    hfield_size: numpy.typing.NDArray[numpy.float64]
+    jnt_actfrclimited: numpy.typing.NDArray[numpy.uint8]
+    jnt_actfrcrange: numpy.typing.NDArray[numpy.float64]
+    jnt_actgravcomp: numpy.typing.NDArray[numpy.uint8]
+    jnt_axis: numpy.typing.NDArray[numpy.float64]
+    jnt_bodyid: numpy.typing.NDArray[numpy.int32]
+    jnt_dofadr: numpy.typing.NDArray[numpy.int32]
+    jnt_group: numpy.typing.NDArray[numpy.int32]
+    jnt_limited: numpy.typing.NDArray[numpy.uint8]
+    jnt_margin: numpy.typing.NDArray[numpy.float64]
+    jnt_pos: numpy.typing.NDArray[numpy.float64]
+    jnt_qposadr: numpy.typing.NDArray[numpy.int32]
+    jnt_range: numpy.typing.NDArray[numpy.float64]
+    jnt_solimp: numpy.typing.NDArray[numpy.float64]
+    jnt_solref: numpy.typing.NDArray[numpy.float64]
+    jnt_stiffness: numpy.typing.NDArray[numpy.float64]
+    jnt_type: numpy.typing.NDArray[numpy.int32]
+    jnt_user: numpy.typing.NDArray[numpy.float64]
+    key_act: numpy.typing.NDArray[numpy.float64]
+    key_ctrl: numpy.typing.NDArray[numpy.float64]
+    key_mpos: numpy.typing.NDArray[numpy.float64]
+    key_mquat: numpy.typing.NDArray[numpy.float64]
+    key_qpos: numpy.typing.NDArray[numpy.float64]
+    key_qvel: numpy.typing.NDArray[numpy.float64]
+    key_time: numpy.typing.NDArray[numpy.float64]
+    light_active: numpy.typing.NDArray[numpy.uint8]
+    light_ambient: numpy.typing.NDArray[numpy.float32]
+    light_attenuation: numpy.typing.NDArray[numpy.float32]
+    light_bodyid: numpy.typing.NDArray[numpy.int32]
+    light_bulbradius: numpy.typing.NDArray[numpy.float32]
+    light_castshadow: numpy.typing.NDArray[numpy.uint8]
+    light_cutoff: numpy.typing.NDArray[numpy.float32]
+    light_diffuse: numpy.typing.NDArray[numpy.float32]
+    light_dir: numpy.typing.NDArray[numpy.float64]
+    light_dir0: numpy.typing.NDArray[numpy.float64]
+    light_exponent: numpy.typing.NDArray[numpy.float32]
+    light_intensity: numpy.typing.NDArray[numpy.float32]
+    light_mode: numpy.typing.NDArray[numpy.int32]
+    light_pos: numpy.typing.NDArray[numpy.float64]
+    light_pos0: numpy.typing.NDArray[numpy.float64]
+    light_poscom0: numpy.typing.NDArray[numpy.float64]
+    light_range: numpy.typing.NDArray[numpy.float32]
+    light_specular: numpy.typing.NDArray[numpy.float32]
+    light_targetbodyid: numpy.typing.NDArray[numpy.int32]
+    light_texid: numpy.typing.NDArray[numpy.int32]
+    light_type: numpy.typing.NDArray[numpy.int32]
+    mapD2M: numpy.typing.NDArray[numpy.int32]
+    mapM2D: numpy.typing.NDArray[numpy.int32]
+    mapM2M: numpy.typing.NDArray[numpy.int32]
+    mat_emission: numpy.typing.NDArray[numpy.float32]
+    mat_metallic: numpy.typing.NDArray[numpy.float32]
+    mat_reflectance: numpy.typing.NDArray[numpy.float32]
+    mat_rgba: numpy.typing.NDArray[numpy.float32]
+    mat_roughness: numpy.typing.NDArray[numpy.float32]
+    mat_shininess: numpy.typing.NDArray[numpy.float32]
+    mat_specular: numpy.typing.NDArray[numpy.float32]
+    mat_texid: numpy.typing.NDArray[numpy.int32]
+    mat_texrepeat: numpy.typing.NDArray[numpy.float32]
+    mat_texuniform: numpy.typing.NDArray[numpy.uint8]
+    mesh_bvhadr: numpy.typing.NDArray[numpy.int32]
+    mesh_bvhnum: numpy.typing.NDArray[numpy.int32]
+    mesh_face: numpy.typing.NDArray[numpy.int32]
+    mesh_faceadr: numpy.typing.NDArray[numpy.int32]
+    mesh_facenormal: numpy.typing.NDArray[numpy.int32]
+    mesh_facenum: numpy.typing.NDArray[numpy.int32]
+    mesh_facetexcoord: numpy.typing.NDArray[numpy.int32]
+    mesh_graph: numpy.typing.NDArray[numpy.int32]
+    mesh_graphadr: numpy.typing.NDArray[numpy.int32]
+    mesh_normal: numpy.typing.NDArray[numpy.float32]
+    mesh_normaladr: numpy.typing.NDArray[numpy.int32]
+    mesh_normalnum: numpy.typing.NDArray[numpy.int32]
+    mesh_octadr: numpy.typing.NDArray[numpy.int32]
+    mesh_octnum: numpy.typing.NDArray[numpy.int32]
+    mesh_pathadr: numpy.typing.NDArray[numpy.int32]
+    mesh_polyadr: numpy.typing.NDArray[numpy.int32]
+    mesh_polymap: numpy.typing.NDArray[numpy.int32]
+    mesh_polymapadr: numpy.typing.NDArray[numpy.int32]
+    mesh_polymapnum: numpy.typing.NDArray[numpy.int32]
+    mesh_polynormal: numpy.typing.NDArray[numpy.float64]
+    mesh_polynum: numpy.typing.NDArray[numpy.int32]
+    mesh_polyvert: numpy.typing.NDArray[numpy.int32]
+    mesh_polyvertadr: numpy.typing.NDArray[numpy.int32]
+    mesh_polyvertnum: numpy.typing.NDArray[numpy.int32]
+    mesh_pos: numpy.typing.NDArray[numpy.float64]
+    mesh_quat: numpy.typing.NDArray[numpy.float64]
+    mesh_scale: numpy.typing.NDArray[numpy.float64]
+    mesh_texcoord: numpy.typing.NDArray[numpy.float32]
+    mesh_texcoordadr: numpy.typing.NDArray[numpy.int32]
+    mesh_texcoordnum: numpy.typing.NDArray[numpy.int32]
+    mesh_vert: numpy.typing.NDArray[numpy.float32]
+    mesh_vertadr: numpy.typing.NDArray[numpy.int32]
+    mesh_vertnum: numpy.typing.NDArray[numpy.int32]
+    name_actuatoradr: numpy.typing.NDArray[numpy.int32]
+    name_bodyadr: numpy.typing.NDArray[numpy.int32]
+    name_camadr: numpy.typing.NDArray[numpy.int32]
+    name_eqadr: numpy.typing.NDArray[numpy.int32]
+    name_excludeadr: numpy.typing.NDArray[numpy.int32]
+    name_flexadr: numpy.typing.NDArray[numpy.int32]
+    name_geomadr: numpy.typing.NDArray[numpy.int32]
+    name_hfieldadr: numpy.typing.NDArray[numpy.int32]
+    name_jntadr: numpy.typing.NDArray[numpy.int32]
+    name_keyadr: numpy.typing.NDArray[numpy.int32]
+    name_lightadr: numpy.typing.NDArray[numpy.int32]
+    name_matadr: numpy.typing.NDArray[numpy.int32]
+    name_meshadr: numpy.typing.NDArray[numpy.int32]
+    name_numericadr: numpy.typing.NDArray[numpy.int32]
+    name_pairadr: numpy.typing.NDArray[numpy.int32]
+    name_pluginadr: numpy.typing.NDArray[numpy.int32]
+    name_sensoradr: numpy.typing.NDArray[numpy.int32]
+    name_siteadr: numpy.typing.NDArray[numpy.int32]
+    name_skinadr: numpy.typing.NDArray[numpy.int32]
+    name_tendonadr: numpy.typing.NDArray[numpy.int32]
+    name_texadr: numpy.typing.NDArray[numpy.int32]
+    name_textadr: numpy.typing.NDArray[numpy.int32]
+    name_tupleadr: numpy.typing.NDArray[numpy.int32]
+    names_map: numpy.typing.NDArray[numpy.int32]
+    numeric_adr: numpy.typing.NDArray[numpy.int32]
+    numeric_data: numpy.typing.NDArray[numpy.float64]
+    numeric_size: numpy.typing.NDArray[numpy.int32]
+    oct_aabb: numpy.typing.NDArray[numpy.float64]
+    oct_child: numpy.typing.NDArray[numpy.int32]
+    oct_coeff: numpy.typing.NDArray[numpy.float64]
+    oct_depth: numpy.typing.NDArray[numpy.int32]
+    pair_dim: numpy.typing.NDArray[numpy.int32]
+    pair_friction: numpy.typing.NDArray[numpy.float64]
+    pair_gap: numpy.typing.NDArray[numpy.float64]
+    pair_geom1: numpy.typing.NDArray[numpy.int32]
+    pair_geom2: numpy.typing.NDArray[numpy.int32]
+    pair_margin: numpy.typing.NDArray[numpy.float64]
+    pair_signature: numpy.typing.NDArray[numpy.int32]
+    pair_solimp: numpy.typing.NDArray[numpy.float64]
+    pair_solref: numpy.typing.NDArray[numpy.float64]
+    pair_solreffriction: numpy.typing.NDArray[numpy.float64]
+    plugin: numpy.typing.NDArray[numpy.int32]
+    plugin_attr: numpy.typing.NDArray[numpy.int8]
+    plugin_attradr: numpy.typing.NDArray[numpy.int32]
+    plugin_stateadr: numpy.typing.NDArray[numpy.int32]
+    plugin_statenum: numpy.typing.NDArray[numpy.int32]
+    qpos0: numpy.typing.NDArray[numpy.float64]
+    qpos_spring: numpy.typing.NDArray[numpy.float64]
+    sensor_adr: numpy.typing.NDArray[numpy.int32]
+    sensor_cutoff: numpy.typing.NDArray[numpy.float64]
+    sensor_datatype: numpy.typing.NDArray[numpy.int32]
+    sensor_dim: numpy.typing.NDArray[numpy.int32]
+    sensor_intprm: numpy.typing.NDArray[numpy.int32]
+    sensor_needstage: numpy.typing.NDArray[numpy.int32]
+    sensor_noise: numpy.typing.NDArray[numpy.float64]
+    sensor_objid: numpy.typing.NDArray[numpy.int32]
+    sensor_objtype: numpy.typing.NDArray[numpy.int32]
+    sensor_plugin: numpy.typing.NDArray[numpy.int32]
+    sensor_refid: numpy.typing.NDArray[numpy.int32]
+    sensor_reftype: numpy.typing.NDArray[numpy.int32]
+    sensor_type: numpy.typing.NDArray[numpy.int32]
+    sensor_user: numpy.typing.NDArray[numpy.float64]
+    site_bodyid: numpy.typing.NDArray[numpy.int32]
+    site_group: numpy.typing.NDArray[numpy.int32]
+    site_matid: numpy.typing.NDArray[numpy.int32]
+    site_pos: numpy.typing.NDArray[numpy.float64]
+    site_quat: numpy.typing.NDArray[numpy.float64]
+    site_rgba: numpy.typing.NDArray[numpy.float32]
+    site_sameframe: numpy.typing.NDArray[numpy.uint8]
+    site_size: numpy.typing.NDArray[numpy.float64]
+    site_type: numpy.typing.NDArray[numpy.int32]
+    site_user: numpy.typing.NDArray[numpy.float64]
+    skin_boneadr: numpy.typing.NDArray[numpy.int32]
+    skin_bonebindpos: numpy.typing.NDArray[numpy.float32]
+    skin_bonebindquat: numpy.typing.NDArray[numpy.float32]
+    skin_bonebodyid: numpy.typing.NDArray[numpy.int32]
+    skin_bonenum: numpy.typing.NDArray[numpy.int32]
+    skin_bonevertadr: numpy.typing.NDArray[numpy.int32]
+    skin_bonevertid: numpy.typing.NDArray[numpy.int32]
+    skin_bonevertnum: numpy.typing.NDArray[numpy.int32]
+    skin_bonevertweight: numpy.typing.NDArray[numpy.float32]
+    skin_face: numpy.typing.NDArray[numpy.int32]
+    skin_faceadr: numpy.typing.NDArray[numpy.int32]
+    skin_facenum: numpy.typing.NDArray[numpy.int32]
+    skin_group: numpy.typing.NDArray[numpy.int32]
+    skin_inflate: numpy.typing.NDArray[numpy.float32]
+    skin_matid: numpy.typing.NDArray[numpy.int32]
+    skin_pathadr: numpy.typing.NDArray[numpy.int32]
+    skin_rgba: numpy.typing.NDArray[numpy.float32]
+    skin_texcoord: numpy.typing.NDArray[numpy.float32]
+    skin_texcoordadr: numpy.typing.NDArray[numpy.int32]
+    skin_vert: numpy.typing.NDArray[numpy.float32]
+    skin_vertadr: numpy.typing.NDArray[numpy.int32]
+    skin_vertnum: numpy.typing.NDArray[numpy.int32]
+    tendon_actfrclimited: numpy.typing.NDArray[numpy.uint8]
+    tendon_actfrcrange: numpy.typing.NDArray[numpy.float64]
+    tendon_adr: numpy.typing.NDArray[numpy.int32]
+    tendon_armature: numpy.typing.NDArray[numpy.float64]
+    tendon_damping: numpy.typing.NDArray[numpy.float64]
+    tendon_frictionloss: numpy.typing.NDArray[numpy.float64]
+    tendon_group: numpy.typing.NDArray[numpy.int32]
+    tendon_invweight0: numpy.typing.NDArray[numpy.float64]
+    tendon_length0: numpy.typing.NDArray[numpy.float64]
+    tendon_lengthspring: numpy.typing.NDArray[numpy.float64]
+    tendon_limited: numpy.typing.NDArray[numpy.uint8]
+    tendon_margin: numpy.typing.NDArray[numpy.float64]
+    tendon_matid: numpy.typing.NDArray[numpy.int32]
+    tendon_num: numpy.typing.NDArray[numpy.int32]
+    tendon_range: numpy.typing.NDArray[numpy.float64]
+    tendon_rgba: numpy.typing.NDArray[numpy.float32]
+    tendon_solimp_fri: numpy.typing.NDArray[numpy.float64]
+    tendon_solimp_lim: numpy.typing.NDArray[numpy.float64]
+    tendon_solref_fri: numpy.typing.NDArray[numpy.float64]
+    tendon_solref_lim: numpy.typing.NDArray[numpy.float64]
+    tendon_stiffness: numpy.typing.NDArray[numpy.float64]
+    tendon_user: numpy.typing.NDArray[numpy.float64]
+    tendon_width: numpy.typing.NDArray[numpy.float64]
+    tex_adr: numpy.typing.NDArray[numpy.int32]
+    tex_colorspace: numpy.typing.NDArray[numpy.int32]
+    tex_data: numpy.typing.NDArray[numpy.uint8]
+    tex_height: numpy.typing.NDArray[numpy.int32]
+    tex_nchannel: numpy.typing.NDArray[numpy.int32]
+    tex_pathadr: numpy.typing.NDArray[numpy.int32]
+    tex_type: numpy.typing.NDArray[numpy.int32]
+    tex_width: numpy.typing.NDArray[numpy.int32]
+    text_adr: numpy.typing.NDArray[numpy.int32]
+    text_size: numpy.typing.NDArray[numpy.int32]
+    tuple_adr: numpy.typing.NDArray[numpy.int32]
+    tuple_objid: numpy.typing.NDArray[numpy.int32]
+    tuple_objprm: numpy.typing.NDArray[numpy.float64]
+    tuple_objtype: numpy.typing.NDArray[numpy.int32]
+    tuple_size: numpy.typing.NDArray[numpy.int32]
+    wrap_objid: numpy.typing.NDArray[numpy.int32]
+    wrap_prm: numpy.typing.NDArray[numpy.float64]
+    wrap_type: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     @staticmethod
-    def _from_model_ptr(arg0: int) -> MjModel:
-        """_from_model_ptr(arg0: int) -> mujoco._structs.MjModel"""
+    def _from_model_ptr(arg0: typing.SupportsInt) -> MjModel:
+        """_from_model_ptr(arg0: typing.SupportsInt) -> mujoco._structs.MjModel"""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     def actuator(self, *args, **kwargs):
         """actuator(*args, **kwargs)
         Overloaded function.
 
-        1. actuator(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelActuatorViews
+        1. actuator(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelActuatorViews
 
         2. actuator(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelActuatorViews
         """
@@ -866,7 +991,7 @@ class MjModel:
         """body(*args, **kwargs)
         Overloaded function.
 
-        1. body(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelBodyViews
+        1. body(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelBodyViews
 
         2. body(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelBodyViews
         """
@@ -874,7 +999,7 @@ class MjModel:
         """cam(*args, **kwargs)
         Overloaded function.
 
-        1. cam(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelCameraViews
+        1. cam(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelCameraViews
 
         2. cam(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelCameraViews
         """
@@ -882,7 +1007,7 @@ class MjModel:
         """camera(*args, **kwargs)
         Overloaded function.
 
-        1. camera(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelCameraViews
+        1. camera(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelCameraViews
 
         2. camera(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelCameraViews
         """
@@ -890,7 +1015,7 @@ class MjModel:
         """eq(*args, **kwargs)
         Overloaded function.
 
-        1. eq(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelEqualityViews
+        1. eq(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelEqualityViews
 
         2. eq(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelEqualityViews
         """
@@ -898,7 +1023,7 @@ class MjModel:
         """equality(*args, **kwargs)
         Overloaded function.
 
-        1. equality(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelEqualityViews
+        1. equality(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelEqualityViews
 
         2. equality(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelEqualityViews
         """
@@ -906,13 +1031,13 @@ class MjModel:
         """exclude(*args, **kwargs)
         Overloaded function.
 
-        1. exclude(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelExcludeViews
+        1. exclude(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelExcludeViews
 
         2. exclude(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelExcludeViews
         """
     @staticmethod
-    def from_binary_path(filename: str, assets: dict[str, bytes] | None = ...) -> MjModel:
-        """from_binary_path(filename: str, assets: Optional[dict[str, bytes]] = None) -> mujoco._structs.MjModel
+    def from_binary_path(filename: str, assets: collections.abc.Mapping[str, bytes] | None = ...) -> MjModel:
+        """from_binary_path(filename: str, assets: collections.abc.Mapping[str, bytes] | None = None) -> mujoco._structs.MjModel
 
         Loads an MjModel from an MJB file and an optional assets dictionary.
 
@@ -920,8 +1045,8 @@ class MjModel:
         This is useful for example when the MJB is not available as a file on disk.
         """
     @staticmethod
-    def from_xml_path(filename: str, assets: dict[str, bytes] | None = ...) -> MjModel:
-        """from_xml_path(filename: str, assets: Optional[dict[str, bytes]] = None) -> mujoco._structs.MjModel
+    def from_xml_path(filename: str, assets: collections.abc.Mapping[str, bytes] | None = ...) -> MjModel:
+        """from_xml_path(filename: str, assets: collections.abc.Mapping[str, bytes] | None = None) -> mujoco._structs.MjModel
 
         Loads an MjModel from an XML file and an optional assets dictionary.
 
@@ -929,8 +1054,8 @@ class MjModel:
         This is useful for example when the XML is not available as a file on disk.
         """
     @staticmethod
-    def from_xml_string(xml: str, assets: dict[str, bytes] | None = ...) -> MjModel:
-        """from_xml_string(xml: str, assets: Optional[dict[str, bytes]] = None) -> mujoco._structs.MjModel
+    def from_xml_string(xml: str, assets: collections.abc.Mapping[str, bytes] | None = ...) -> MjModel:
+        """from_xml_string(xml: str, assets: collections.abc.Mapping[str, bytes] | None = None) -> mujoco._structs.MjModel
 
         Loads an MjModel from an XML string and an optional assets dictionary.
         """
@@ -938,7 +1063,7 @@ class MjModel:
         """geom(*args, **kwargs)
         Overloaded function.
 
-        1. geom(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelGeomViews
+        1. geom(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelGeomViews
 
         2. geom(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelGeomViews
         """
@@ -946,7 +1071,7 @@ class MjModel:
         """hfield(*args, **kwargs)
         Overloaded function.
 
-        1. hfield(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelHfieldViews
+        1. hfield(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelHfieldViews
 
         2. hfield(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelHfieldViews
         """
@@ -954,7 +1079,7 @@ class MjModel:
         """jnt(*args, **kwargs)
         Overloaded function.
 
-        1. jnt(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelJointViews
+        1. jnt(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelJointViews
 
         2. jnt(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelJointViews
         """
@@ -962,7 +1087,7 @@ class MjModel:
         """joint(*args, **kwargs)
         Overloaded function.
 
-        1. joint(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelJointViews
+        1. joint(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelJointViews
 
         2. joint(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelJointViews
         """
@@ -970,7 +1095,7 @@ class MjModel:
         """key(*args, **kwargs)
         Overloaded function.
 
-        1. key(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelKeyframeViews
+        1. key(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelKeyframeViews
 
         2. key(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelKeyframeViews
         """
@@ -978,7 +1103,7 @@ class MjModel:
         """keyframe(*args, **kwargs)
         Overloaded function.
 
-        1. keyframe(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelKeyframeViews
+        1. keyframe(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelKeyframeViews
 
         2. keyframe(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelKeyframeViews
         """
@@ -986,7 +1111,7 @@ class MjModel:
         """light(*args, **kwargs)
         Overloaded function.
 
-        1. light(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelLightViews
+        1. light(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelLightViews
 
         2. light(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelLightViews
         """
@@ -994,7 +1119,7 @@ class MjModel:
         """mat(*args, **kwargs)
         Overloaded function.
 
-        1. mat(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelMaterialViews
+        1. mat(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelMaterialViews
 
         2. mat(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelMaterialViews
         """
@@ -1002,7 +1127,7 @@ class MjModel:
         """material(*args, **kwargs)
         Overloaded function.
 
-        1. material(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelMaterialViews
+        1. material(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelMaterialViews
 
         2. material(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelMaterialViews
         """
@@ -1010,7 +1135,7 @@ class MjModel:
         """mesh(*args, **kwargs)
         Overloaded function.
 
-        1. mesh(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelMeshViews
+        1. mesh(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelMeshViews
 
         2. mesh(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelMeshViews
         """
@@ -1018,7 +1143,7 @@ class MjModel:
         """numeric(*args, **kwargs)
         Overloaded function.
 
-        1. numeric(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelNumericViews
+        1. numeric(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelNumericViews
 
         2. numeric(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelNumericViews
         """
@@ -1026,7 +1151,7 @@ class MjModel:
         """pair(*args, **kwargs)
         Overloaded function.
 
-        1. pair(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelPairViews
+        1. pair(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelPairViews
 
         2. pair(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelPairViews
         """
@@ -1034,7 +1159,7 @@ class MjModel:
         """sensor(*args, **kwargs)
         Overloaded function.
 
-        1. sensor(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelSensorViews
+        1. sensor(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelSensorViews
 
         2. sensor(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelSensorViews
         """
@@ -1042,7 +1167,7 @@ class MjModel:
         """site(*args, **kwargs)
         Overloaded function.
 
-        1. site(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelSiteViews
+        1. site(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelSiteViews
 
         2. site(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelSiteViews
         """
@@ -1050,7 +1175,7 @@ class MjModel:
         """skin(*args, **kwargs)
         Overloaded function.
 
-        1. skin(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelSkinViews
+        1. skin(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelSkinViews
 
         2. skin(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelSkinViews
         """
@@ -1058,7 +1183,7 @@ class MjModel:
         """tendon(*args, **kwargs)
         Overloaded function.
 
-        1. tendon(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelTendonViews
+        1. tendon(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelTendonViews
 
         2. tendon(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelTendonViews
         """
@@ -1066,7 +1191,7 @@ class MjModel:
         """tex(*args, **kwargs)
         Overloaded function.
 
-        1. tex(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelTextureViews
+        1. tex(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelTextureViews
 
         2. tex(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelTextureViews
         """
@@ -1074,7 +1199,7 @@ class MjModel:
         """texture(*args, **kwargs)
         Overloaded function.
 
-        1. texture(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelTextureViews
+        1. texture(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelTextureViews
 
         2. texture(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelTextureViews
         """
@@ -1082,7 +1207,7 @@ class MjModel:
         """tuple(*args, **kwargs)
         Overloaded function.
 
-        1. tuple(self: mujoco._structs.MjModel, arg0: int) -> mujoco::python::MjModelTupleViews
+        1. tuple(self: mujoco._structs.MjModel, arg0: typing.SupportsInt) -> mujoco::python::MjModelTupleViews
 
         2. tuple(self: mujoco._structs.MjModel, name: str = '') -> mujoco::python::MjModelTupleViews
         """
@@ -1091,193 +1216,290 @@ class MjModel:
     def __deepcopy__(self, arg0: dict) -> MjModel:
         """__deepcopy__(self: mujoco._structs.MjModel, arg0: dict) -> mujoco._structs.MjModel"""
     @property
-    def _address(self) -> int: ...
+    def _address(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def _sizes(self) -> numpy.ndarray[numpy.int64]: ...
+    def _sizes(self) -> numpy.typing.NDArray[numpy.int64]:
+        """(arg0: mujoco._structs.MjModel) -> numpy.typing.NDArray[numpy.int64]"""
     @property
-    def nB(self) -> int: ...
+    def nB(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nC(self) -> int: ...
+    def nC(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nD(self) -> int: ...
+    def nD(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nJmom(self) -> int: ...
+    def nJmom(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nM(self) -> int: ...
+    def nM(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def na(self) -> int: ...
+    def na(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def names(self) -> bytes: ...
+    def names(self) -> bytes:
+        """(arg0: mujoco._structs.MjModel) -> bytes"""
     @property
-    def narena(self) -> int: ...
+    def narena(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nbody(self) -> int: ...
+    def nbody(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nbuffer(self) -> int: ...
+    def nbuffer(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nbvh(self) -> int: ...
+    def nbvh(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nbvhdynamic(self) -> int: ...
+    def nbvhdynamic(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nbvhstatic(self) -> int: ...
+    def nbvhstatic(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ncam(self) -> int: ...
+    def ncam(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nconmax(self) -> int: ...
+    def nconmax(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nemax(self) -> int: ...
+    def nemax(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def neq(self) -> int: ...
+    def neq(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nexclude(self) -> int: ...
+    def nexclude(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflex(self) -> int: ...
+    def nflex(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflexedge(self) -> int: ...
+    def nflexedge(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflexelem(self) -> int: ...
+    def nflexelem(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflexelemdata(self) -> int: ...
+    def nflexelemdata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflexelemedge(self) -> int: ...
+    def nflexelemedge(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflexevpair(self) -> int: ...
+    def nflexevpair(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflexnode(self) -> int: ...
+    def nflexnode(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflexshelldata(self) -> int: ...
+    def nflexshelldata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflextexcoord(self) -> int: ...
+    def nflextexcoord(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nflexvert(self) -> int: ...
+    def nflexvert(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ngeom(self) -> int: ...
+    def ngeom(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ngravcomp(self) -> int: ...
+    def ngravcomp(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nhfield(self) -> int: ...
+    def nhfield(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nhfielddata(self) -> int: ...
+    def nhfielddata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def njmax(self) -> int: ...
+    def njmax(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def njnt(self) -> int: ...
+    def njnt(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nkey(self) -> int: ...
+    def nkey(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nlight(self) -> int: ...
+    def nlight(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmat(self) -> int: ...
+    def nmat(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmesh(self) -> int: ...
+    def nmesh(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmeshface(self) -> int: ...
+    def nmeshface(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmeshgraph(self) -> int: ...
+    def nmeshgraph(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmeshnormal(self) -> int: ...
+    def nmeshnormal(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmeshpoly(self) -> int: ...
+    def nmeshpoly(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmeshpolymap(self) -> int: ...
+    def nmeshpolymap(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmeshpolyvert(self) -> int: ...
+    def nmeshpolyvert(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmeshtexcoord(self) -> int: ...
+    def nmeshtexcoord(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmeshvert(self) -> int: ...
+    def nmeshvert(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nmocap(self) -> int: ...
+    def nmocap(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nnames(self) -> int: ...
+    def nnames(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nnames_map(self) -> int: ...
+    def nnames_map(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nnumeric(self) -> int: ...
+    def nnumeric(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nnumericdata(self) -> int: ...
+    def nnumericdata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def npair(self) -> int: ...
+    def noct(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def npaths(self) -> int: ...
+    def npair(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nplugin(self) -> int: ...
+    def npaths(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def npluginattr(self) -> int: ...
+    def nplugin(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def npluginstate(self) -> int: ...
+    def npluginattr(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nq(self) -> int: ...
+    def npluginstate(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nsensor(self) -> int: ...
+    def nq(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nsensordata(self) -> int: ...
+    def nsensor(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nsite(self) -> int: ...
+    def nsensordata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nskin(self) -> int: ...
+    def nsite(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nskinbone(self) -> int: ...
+    def nskin(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nskinbonevert(self) -> int: ...
+    def nskinbone(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nskinface(self) -> int: ...
+    def nskinbonevert(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nskintexvert(self) -> int: ...
+    def nskinface(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nskinvert(self) -> int: ...
+    def nskintexvert(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ntendon(self) -> int: ...
+    def nskinvert(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ntex(self) -> int: ...
+    def ntendon(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ntexdata(self) -> int: ...
+    def ntex(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ntext(self) -> int: ...
+    def ntexdata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ntextdata(self) -> int: ...
+    def ntext(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ntree(self) -> int: ...
+    def ntextdata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ntuple(self) -> int: ...
+    def ntree(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def ntupledata(self) -> int: ...
+    def ntuple(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nu(self) -> int: ...
+    def ntupledata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuser_actuator(self) -> int: ...
+    def nu(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuser_body(self) -> int: ...
+    def nuser_actuator(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuser_cam(self) -> int: ...
+    def nuser_body(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuser_geom(self) -> int: ...
+    def nuser_cam(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuser_jnt(self) -> int: ...
+    def nuser_geom(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuser_sensor(self) -> int: ...
+    def nuser_jnt(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuser_site(self) -> int: ...
+    def nuser_sensor(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuser_tendon(self) -> int: ...
+    def nuser_site(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nuserdata(self) -> int: ...
+    def nuser_tendon(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nv(self) -> int: ...
+    def nuserdata(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def nwrap(self) -> int: ...
+    def nv(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def opt(self) -> MjOption: ...
+    def nwrap(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def paths(self) -> bytes: ...
+    def opt(self) -> MjOption:
+        """(self: mujoco._structs.MjModel) -> mujoco._structs.MjOption"""
     @property
-    def signature(self) -> int: ...
+    def paths(self) -> bytes:
+        """(arg0: mujoco._structs.MjModel) -> bytes"""
     @property
-    def stat(self): ...
+    def signature(self) -> int:
+        """(arg0: mujoco._structs.MjModel) -> int"""
     @property
-    def text_data(self) -> bytes: ...
+    def stat(self):
+        """(self: mujoco._structs.MjModel) -> mujoco::python::_impl::MjWrapper<mjStatistic_>"""
     @property
-    def vis(self) -> MjVisual: ...
+    def text_data(self) -> bytes:
+        """(arg0: mujoco._structs.MjModel) -> bytes"""
+    @property
+    def vis(self) -> MjVisual:
+        """(self: mujoco._structs.MjModel) -> mujoco._structs.MjVisual"""
 
 class MjOption:
     _float_fields: ClassVar[tuple] = ...  # read-only
@@ -1291,27 +1513,27 @@ class MjOption:
     disableactuator: int
     disableflags: int
     enableflags: int
-    gravity: numpy.ndarray[numpy.float64]
+    gravity: numpy.typing.NDArray[numpy.float64]
     impratio: float
     integrator: int
     iterations: int
     jacobian: int
     ls_iterations: int
     ls_tolerance: float
-    magnetic: numpy.ndarray[numpy.float64]
+    magnetic: numpy.typing.NDArray[numpy.float64]
     noslip_iterations: int
     noslip_tolerance: float
-    o_friction: numpy.ndarray[numpy.float64]
+    o_friction: numpy.typing.NDArray[numpy.float64]
     o_margin: float
-    o_solimp: numpy.ndarray[numpy.float64]
-    o_solref: numpy.ndarray[numpy.float64]
+    o_solimp: numpy.typing.NDArray[numpy.float64]
+    o_solref: numpy.typing.NDArray[numpy.float64]
     sdf_initpoints: int
     sdf_iterations: int
     solver: int
     timestep: float
     tolerance: float
     viscosity: float
-    wind: numpy.ndarray[numpy.float64]
+    wind: numpy.typing.NDArray[numpy.float64]
     def __init__(self) -> None:
         """__init__(self: mujoco._structs.MjOption) -> None"""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
@@ -1341,7 +1563,7 @@ class MjSolverStat:
         """__eq__(self: object, arg0: object) -> bool"""
 
 class MjStatistic:
-    center: numpy.ndarray[numpy.float64]
+    center: numpy.typing.NDArray[numpy.float64]
     extent: float
     meaninertia: float
     meanmass: float
@@ -1373,6 +1595,7 @@ class MjVisual:
     class Global:
         azimuth: float
         bvactive: int
+        cameraid: int
         elevation: float
         ellipsoidinertia: int
         fovy: float
@@ -1395,9 +1618,9 @@ class MjVisual:
 
     class Headlight:
         active: int
-        ambient: numpy.ndarray[numpy.float32]
-        diffuse: numpy.ndarray[numpy.float32]
-        specular: numpy.ndarray[numpy.float32]
+        ambient: numpy.typing.NDArray[numpy.float32]
+        diffuse: numpy.typing.NDArray[numpy.float32]
+        specular: numpy.typing.NDArray[numpy.float32]
         def __init__(self, *args, **kwargs) -> None:
             """Initialize self.  See help(type(self)) for accurate signature."""
         def _pybind11_conduit_v1_(self, *args, **kwargs): ...
@@ -1449,31 +1672,31 @@ class MjVisual:
             """__eq__(self: object, arg0: object) -> bool"""
 
     class Rgba:
-        actuator: numpy.ndarray[numpy.float32]
-        actuatornegative: numpy.ndarray[numpy.float32]
-        actuatorpositive: numpy.ndarray[numpy.float32]
-        bv: numpy.ndarray[numpy.float32]
-        bvactive: numpy.ndarray[numpy.float32]
-        camera: numpy.ndarray[numpy.float32]
-        com: numpy.ndarray[numpy.float32]
-        connect: numpy.ndarray[numpy.float32]
-        constraint: numpy.ndarray[numpy.float32]
-        contactforce: numpy.ndarray[numpy.float32]
-        contactfriction: numpy.ndarray[numpy.float32]
-        contactgap: numpy.ndarray[numpy.float32]
-        contactpoint: numpy.ndarray[numpy.float32]
-        contacttorque: numpy.ndarray[numpy.float32]
-        crankbroken: numpy.ndarray[numpy.float32]
-        fog: numpy.ndarray[numpy.float32]
-        force: numpy.ndarray[numpy.float32]
-        frustum: numpy.ndarray[numpy.float32]
-        haze: numpy.ndarray[numpy.float32]
-        inertia: numpy.ndarray[numpy.float32]
-        joint: numpy.ndarray[numpy.float32]
-        light: numpy.ndarray[numpy.float32]
-        rangefinder: numpy.ndarray[numpy.float32]
-        selectpoint: numpy.ndarray[numpy.float32]
-        slidercrank: numpy.ndarray[numpy.float32]
+        actuator: numpy.typing.NDArray[numpy.float32]
+        actuatornegative: numpy.typing.NDArray[numpy.float32]
+        actuatorpositive: numpy.typing.NDArray[numpy.float32]
+        bv: numpy.typing.NDArray[numpy.float32]
+        bvactive: numpy.typing.NDArray[numpy.float32]
+        camera: numpy.typing.NDArray[numpy.float32]
+        com: numpy.typing.NDArray[numpy.float32]
+        connect: numpy.typing.NDArray[numpy.float32]
+        constraint: numpy.typing.NDArray[numpy.float32]
+        contactforce: numpy.typing.NDArray[numpy.float32]
+        contactfriction: numpy.typing.NDArray[numpy.float32]
+        contactgap: numpy.typing.NDArray[numpy.float32]
+        contactpoint: numpy.typing.NDArray[numpy.float32]
+        contacttorque: numpy.typing.NDArray[numpy.float32]
+        crankbroken: numpy.typing.NDArray[numpy.float32]
+        fog: numpy.typing.NDArray[numpy.float32]
+        force: numpy.typing.NDArray[numpy.float32]
+        frustum: numpy.typing.NDArray[numpy.float32]
+        haze: numpy.typing.NDArray[numpy.float32]
+        inertia: numpy.typing.NDArray[numpy.float32]
+        joint: numpy.typing.NDArray[numpy.float32]
+        light: numpy.typing.NDArray[numpy.float32]
+        rangefinder: numpy.typing.NDArray[numpy.float32]
+        selectpoint: numpy.typing.NDArray[numpy.float32]
+        slidercrank: numpy.typing.NDArray[numpy.float32]
         def __init__(self, *args, **kwargs) -> None:
             """Initialize self.  See help(type(self)) for accurate signature."""
         def _pybind11_conduit_v1_(self, *args, **kwargs): ...
@@ -1521,17 +1744,23 @@ class MjVisual:
     def __eq__(self, arg0: object) -> bool:
         """__eq__(self: object, arg0: object) -> bool"""
     @property
-    def global_(self) -> MjVisual.Global: ...
+    def global_(self) -> MjVisual.Global:
+        """(arg0: mujoco._structs.MjVisual) -> mujoco._structs.MjVisual.Global"""
     @property
-    def headlight(self) -> MjVisual.Headlight: ...
+    def headlight(self) -> MjVisual.Headlight:
+        """(self: mujoco._structs.MjVisual) -> mujoco._structs.MjVisual.Headlight"""
     @property
-    def map(self) -> MjVisual.Map: ...
+    def map(self) -> MjVisual.Map:
+        """(arg0: mujoco._structs.MjVisual) -> mujoco._structs.MjVisual.Map"""
     @property
-    def quality(self) -> MjVisual.Quality: ...
+    def quality(self) -> MjVisual.Quality:
+        """(arg0: mujoco._structs.MjVisual) -> mujoco._structs.MjVisual.Quality"""
     @property
-    def rgba(self) -> MjVisual.Rgba: ...
+    def rgba(self) -> MjVisual.Rgba:
+        """(self: mujoco._structs.MjVisual) -> mujoco._structs.MjVisual.Rgba"""
     @property
-    def scale(self) -> MjVisual.Scale: ...
+    def scale(self) -> MjVisual.Scale:
+        """(arg0: mujoco._structs.MjVisual) -> mujoco._structs.MjVisual.Scale"""
 
 class MjWarningStat:
     lastinfo: int
@@ -1551,7 +1780,7 @@ class MjvCamera:
     distance: float
     elevation: float
     fixedcamid: int
-    lookat: numpy.ndarray[numpy.float64]
+    lookat: numpy.typing.NDArray[numpy.float64]
     orthographic: int
     trackbodyid: int
     type: int
@@ -1566,37 +1795,37 @@ class MjvCamera:
         """__eq__(self: object, arg0: object) -> bool"""
 
 class MjvFigure:
-    figurergba: numpy.ndarray[numpy.float32]
+    figurergba: numpy.typing.NDArray[numpy.float32]
     flg_barplot: int
     flg_extend: int
     flg_legend: int
     flg_selection: int
     flg_symmetric: int
-    flg_ticklabel: numpy.ndarray[numpy.int32]
-    gridrgb: numpy.ndarray[numpy.float32]
-    gridsize: numpy.ndarray[numpy.int32]
+    flg_ticklabel: numpy.typing.NDArray[numpy.int32]
+    gridrgb: numpy.typing.NDArray[numpy.float32]
+    gridsize: numpy.typing.NDArray[numpy.int32]
     gridwidth: float
-    highlight: numpy.ndarray[numpy.int32]
+    highlight: numpy.typing.NDArray[numpy.int32]
     highlightid: int
     legendoffset: int
-    legendrgba: numpy.ndarray[numpy.float32]
-    linedata: numpy.ndarray[numpy.float32]
-    linepnt: numpy.ndarray[numpy.int32]
-    linergb: numpy.ndarray[numpy.float32]
+    legendrgba: numpy.typing.NDArray[numpy.float32]
+    linedata: numpy.typing.NDArray[numpy.float32]
+    linepnt: numpy.typing.NDArray[numpy.int32]
+    linergb: numpy.typing.NDArray[numpy.float32]
     linewidth: float
     minwidth: str
-    panergba: numpy.ndarray[numpy.float32]
-    range: numpy.ndarray[numpy.float32]
+    panergba: numpy.typing.NDArray[numpy.float32]
+    range: numpy.typing.NDArray[numpy.float32]
     selection: float
     subplot: int
-    textrgb: numpy.ndarray[numpy.float32]
+    textrgb: numpy.typing.NDArray[numpy.float32]
     title: str
-    xaxisdata: numpy.ndarray[numpy.float32]
-    xaxispixel: numpy.ndarray[numpy.int32]
+    xaxisdata: numpy.typing.NDArray[numpy.float32]
+    xaxispixel: numpy.typing.NDArray[numpy.int32]
     xformat: str
     xlabel: str
-    yaxisdata: numpy.ndarray[numpy.float32]
-    yaxispixel: numpy.ndarray[numpy.int32]
+    yaxisdata: numpy.typing.NDArray[numpy.float32]
+    yaxispixel: numpy.typing.NDArray[numpy.int32]
     yformat: str
     def __init__(self) -> None:
         """__init__(self: mujoco._structs.MjvFigure) -> None"""
@@ -1606,10 +1835,11 @@ class MjvFigure:
     def __deepcopy__(self, arg0: dict) -> MjvFigure:
         """__deepcopy__(self: mujoco._structs.MjvFigure, arg0: dict) -> mujoco._structs.MjvFigure"""
     @property
-    def linename(self) -> numpy.ndarray: ...
+    def linename(self) -> numpy.ndarray:
+        """(self: mujoco._structs.MjvFigure) -> numpy.ndarray"""
 
 class MjvGLCamera:
-    forward: numpy.ndarray[numpy.float32]
+    forward: numpy.typing.NDArray[numpy.float32]
     frustum_bottom: float
     frustum_center: float
     frustum_far: float
@@ -1617,8 +1847,8 @@ class MjvGLCamera:
     frustum_top: float
     frustum_width: float
     orthographic: int
-    pos: numpy.ndarray[numpy.float32]
-    up: numpy.ndarray[numpy.float32]
+    pos: numpy.typing.NDArray[numpy.float32]
+    up: numpy.typing.NDArray[numpy.float32]
     def __init__(self) -> None:
         """__init__(self: mujoco._structs.MjvGLCamera) -> None"""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
@@ -1635,17 +1865,17 @@ class MjvGeom:
     dataid: int
     emission: float
     label: str
-    mat: numpy.ndarray[numpy.float32]
+    mat: numpy.typing.NDArray[numpy.float32]
     matid: int
     modelrbound: float
     objid: int
     objtype: int
-    pos: numpy.ndarray[numpy.float32]
+    pos: numpy.typing.NDArray[numpy.float32]
     reflectance: float
-    rgba: numpy.ndarray[numpy.float32]
+    rgba: numpy.typing.NDArray[numpy.float32]
     segid: int
     shininess: float
-    size: numpy.ndarray[numpy.float32]
+    size: numpy.typing.NDArray[numpy.float32]
     specular: float
     texcoord: int
     transparent: int
@@ -1661,18 +1891,22 @@ class MjvGeom:
         """__eq__(self: object, arg0: object) -> bool"""
 
 class MjvLight:
-    ambient: numpy.ndarray[numpy.float32]
-    attenuation: numpy.ndarray[numpy.float32]
+    ambient: numpy.typing.NDArray[numpy.float32]
+    attenuation: numpy.typing.NDArray[numpy.float32]
     bulbradius: float
     castshadow: int
     cutoff: float
-    diffuse: numpy.ndarray[numpy.float32]
-    dir: numpy.ndarray[numpy.float32]
-    directional: int
+    diffuse: numpy.typing.NDArray[numpy.float32]
+    dir: numpy.typing.NDArray[numpy.float32]
     exponent: float
     headlight: int
-    pos: numpy.ndarray[numpy.float32]
-    specular: numpy.ndarray[numpy.float32]
+    id: int
+    intensity: float
+    pos: numpy.typing.NDArray[numpy.float32]
+    range: float
+    specular: numpy.typing.NDArray[numpy.float32]
+    texid: int
+    type: int
     def __init__(self) -> None:
         """__init__(self: mujoco._structs.MjvLight) -> None"""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
@@ -1684,18 +1918,18 @@ class MjvLight:
         """__eq__(self: object, arg0: object) -> bool"""
 
 class MjvOption:
-    actuatorgroup: numpy.ndarray[numpy.uint8]
+    actuatorgroup: numpy.typing.NDArray[numpy.uint8]
     bvh_depth: int
-    flags: numpy.ndarray[numpy.uint8]
+    flags: numpy.typing.NDArray[numpy.uint8]
     flex_layer: int
-    flexgroup: numpy.ndarray[numpy.uint8]
+    flexgroup: numpy.typing.NDArray[numpy.uint8]
     frame: int
-    geomgroup: numpy.ndarray[numpy.uint8]
-    jointgroup: numpy.ndarray[numpy.uint8]
+    geomgroup: numpy.typing.NDArray[numpy.uint8]
+    jointgroup: numpy.typing.NDArray[numpy.uint8]
     label: int
-    sitegroup: numpy.ndarray[numpy.uint8]
-    skingroup: numpy.ndarray[numpy.uint8]
-    tendongroup: numpy.ndarray[numpy.uint8]
+    sitegroup: numpy.typing.NDArray[numpy.uint8]
+    skingroup: numpy.typing.NDArray[numpy.uint8]
+    tendongroup: numpy.typing.NDArray[numpy.uint8]
     def __init__(self) -> None:
         """__init__(self: mujoco._structs.MjvOption) -> None"""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
@@ -1711,10 +1945,10 @@ class MjvPerturb:
     active2: int
     flexselect: int
     localmass: float
-    localpos: numpy.ndarray[numpy.float64]
-    refpos: numpy.ndarray[numpy.float64]
-    refquat: numpy.ndarray[numpy.float64]
-    refselpos: numpy.ndarray[numpy.float64]
+    localpos: numpy.typing.NDArray[numpy.float64]
+    refpos: numpy.typing.NDArray[numpy.float64]
+    refquat: numpy.typing.NDArray[numpy.float64]
+    refselpos: numpy.typing.NDArray[numpy.float64]
     scale: float
     select: int
     skinselect: int
@@ -1730,40 +1964,40 @@ class MjvPerturb:
 
 class MjvScene:
     enabletransform: int
-    flags: numpy.ndarray[numpy.uint8]
-    flexedge: numpy.ndarray[numpy.int32]
-    flexedgeadr: numpy.ndarray[numpy.int32]
-    flexedgenum: numpy.ndarray[numpy.int32]
+    flags: numpy.typing.NDArray[numpy.uint8]
+    flexedge: numpy.typing.NDArray[numpy.int32]
+    flexedgeadr: numpy.typing.NDArray[numpy.int32]
+    flexedgenum: numpy.typing.NDArray[numpy.int32]
     flexedgeopt: int
-    flexface: numpy.ndarray[numpy.float32]
-    flexfaceadr: numpy.ndarray[numpy.int32]
-    flexfacenum: numpy.ndarray[numpy.int32]
+    flexface: numpy.typing.NDArray[numpy.float32]
+    flexfaceadr: numpy.typing.NDArray[numpy.int32]
+    flexfacenum: numpy.typing.NDArray[numpy.int32]
     flexfaceopt: int
-    flexfaceused: numpy.ndarray[numpy.int32]
-    flexnormal: numpy.ndarray[numpy.float32]
+    flexfaceused: numpy.typing.NDArray[numpy.int32]
+    flexnormal: numpy.typing.NDArray[numpy.float32]
     flexskinopt: int
-    flextexcoord: numpy.ndarray[numpy.float32]
-    flexvert: numpy.ndarray[numpy.float32]
-    flexvertadr: numpy.ndarray[numpy.int32]
-    flexvertnum: numpy.ndarray[numpy.int32]
+    flextexcoord: numpy.typing.NDArray[numpy.float32]
+    flexvert: numpy.typing.NDArray[numpy.float32]
+    flexvertadr: numpy.typing.NDArray[numpy.int32]
+    flexvertnum: numpy.typing.NDArray[numpy.int32]
     flexvertopt: int
-    framergb: numpy.ndarray[numpy.float32]
+    framergb: numpy.typing.NDArray[numpy.float32]
     framewidth: int
-    geomorder: numpy.ndarray[numpy.int32]
+    geomorder: numpy.typing.NDArray[numpy.int32]
     maxgeom: int
     nflex: int
     ngeom: int
     nlight: int
     nskin: int
-    rotate: numpy.ndarray[numpy.float32]
+    rotate: numpy.typing.NDArray[numpy.float32]
     scale: float
-    skinfacenum: numpy.ndarray[numpy.int32]
-    skinnormal: numpy.ndarray[numpy.float32]
-    skinvert: numpy.ndarray[numpy.float32]
-    skinvertadr: numpy.ndarray[numpy.int32]
-    skinvertnum: numpy.ndarray[numpy.int32]
+    skinfacenum: numpy.typing.NDArray[numpy.int32]
+    skinnormal: numpy.typing.NDArray[numpy.float32]
+    skinvert: numpy.typing.NDArray[numpy.float32]
+    skinvertadr: numpy.typing.NDArray[numpy.int32]
+    skinvertnum: numpy.typing.NDArray[numpy.int32]
     stereo: int
-    translate: numpy.ndarray[numpy.float32]
+    translate: numpy.typing.NDArray[numpy.float32]
     @overload
     def __init__(self) -> None:
         """__init__(*args, **kwargs)
@@ -1771,16 +2005,16 @@ class MjvScene:
 
         1. __init__(self: mujoco._structs.MjvScene) -> None
 
-        2. __init__(self: mujoco._structs.MjvScene, model: mujoco._structs.MjModel, maxgeom: int) -> None
+        2. __init__(self: mujoco._structs.MjvScene, model: mujoco._structs.MjModel, maxgeom: typing.SupportsInt) -> None
         """
     @overload
-    def __init__(self, model: MjModel, maxgeom: int) -> None:
+    def __init__(self, model: MjModel, maxgeom: typing.SupportsInt) -> None:
         """__init__(*args, **kwargs)
         Overloaded function.
 
         1. __init__(self: mujoco._structs.MjvScene) -> None
 
-        2. __init__(self: mujoco._structs.MjvScene, model: mujoco._structs.MjModel, maxgeom: int) -> None
+        2. __init__(self: mujoco._structs.MjvScene, model: mujoco._structs.MjModel, maxgeom: typing.SupportsInt) -> None
         """
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     def __copy__(self) -> MjvScene:
@@ -1788,11 +2022,14 @@ class MjvScene:
     def __deepcopy__(self, arg0: dict) -> MjvScene:
         """__deepcopy__(self: mujoco._structs.MjvScene, arg0: dict) -> mujoco._structs.MjvScene"""
     @property
-    def camera(self) -> tuple: ...
+    def camera(self) -> tuple:
+        """(arg0: mujoco._structs.MjvScene) -> tuple"""
     @property
-    def geoms(self) -> tuple: ...
+    def geoms(self) -> tuple:
+        """(arg0: mujoco._structs.MjvScene) -> tuple"""
     @property
-    def lights(self) -> tuple: ...
+    def lights(self) -> tuple:
+        """(arg0: mujoco._structs.MjvScene) -> tuple"""
 
 class _MjContactList:
     def __init__(self, *args, **kwargs) -> None:
@@ -1801,11 +2038,11 @@ class _MjContactList:
     def __eq__(self, arg0: object) -> bool:
         """__eq__(self: object, arg0: object) -> bool"""
     @overload
-    def __getitem__(self, arg0: int) -> MjContact:
+    def __getitem__(self, arg0: typing.SupportsInt) -> MjContact:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjContactList, arg0: int) -> mujoco._structs.MjContact
+        1. __getitem__(self: mujoco._structs._MjContactList, arg0: typing.SupportsInt) -> mujoco._structs.MjContact
 
         2. __getitem__(self: mujoco._structs._MjContactList, arg0: slice) -> mujoco._structs._MjContactList
         """
@@ -1814,595 +2051,670 @@ class _MjContactList:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjContactList, arg0: int) -> mujoco._structs.MjContact
+        1. __getitem__(self: mujoco._structs._MjContactList, arg0: typing.SupportsInt) -> mujoco._structs.MjContact
 
         2. __getitem__(self: mujoco._structs._MjContactList, arg0: slice) -> mujoco._structs._MjContactList
         """
-    def __iter__(self) -> typing.Iterator[MjContact]:
-        """def __iter__(self) -> typing.Iterator[MjContact]"""
     def __len__(self) -> int:
         """__len__(self: mujoco._structs._MjContactList) -> int"""
     @property
-    def H(self) -> numpy.ndarray[numpy.float64]: ...
+    def H(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def dim(self) -> numpy.ndarray[numpy.int32]: ...
+    def dim(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def dist(self) -> numpy.ndarray[numpy.float64]: ...
+    def dist(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def efc_address(self) -> numpy.ndarray[numpy.int32]: ...
+    def efc_address(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def elem(self) -> numpy.ndarray[numpy.int32]: ...
+    def elem(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def exclude(self) -> numpy.ndarray[numpy.int32]: ...
+    def exclude(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def flex(self) -> numpy.ndarray[numpy.int32]: ...
+    def flex(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def frame(self) -> numpy.ndarray[numpy.float64]: ...
+    def frame(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def friction(self) -> numpy.ndarray[numpy.float64]: ...
+    def friction(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def geom(self) -> numpy.ndarray[numpy.int32]: ...
+    def geom(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def geom1(self) -> numpy.ndarray[numpy.int32]: ...
+    def geom1(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def geom2(self) -> numpy.ndarray[numpy.int32]: ...
+    def geom2(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def includemargin(self) -> numpy.ndarray[numpy.float64]: ...
+    def includemargin(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def mu(self) -> numpy.ndarray[numpy.float64]: ...
+    def mu(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def pos(self) -> numpy.ndarray[numpy.float64]: ...
+    def pos(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def solimp(self) -> numpy.ndarray[numpy.float64]: ...
+    def solimp(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def solref(self) -> numpy.ndarray[numpy.float64]: ...
+    def solref(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def solreffriction(self) -> numpy.ndarray[numpy.float64]: ...
+    def solreffriction(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def vert(self) -> numpy.ndarray[numpy.int32]: ...
+    def vert(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(arg0: mujoco._structs._MjContactList) -> numpy.typing.NDArray[numpy.int32]"""
 
 class _MjDataActuatorViews:
-    ctrl: numpy.ndarray[numpy.float64]
-    force: numpy.ndarray[numpy.float64]
-    length: numpy.ndarray[numpy.float64]
-    moment: numpy.ndarray[numpy.float64]
-    velocity: numpy.ndarray[numpy.float64]
+    ctrl: numpy.typing.NDArray[numpy.float64]
+    force: numpy.typing.NDArray[numpy.float64]
+    length: numpy.typing.NDArray[numpy.float64]
+    moment: numpy.typing.NDArray[numpy.float64]
+    velocity: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataActuatorViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataActuatorViews) -> str"""
 
 class _MjDataBodyViews:
-    cacc: numpy.ndarray[numpy.float64]
-    cfrc_ext: numpy.ndarray[numpy.float64]
-    cfrc_int: numpy.ndarray[numpy.float64]
-    cinert: numpy.ndarray[numpy.float64]
-    crb: numpy.ndarray[numpy.float64]
-    cvel: numpy.ndarray[numpy.float64]
-    subtree_angmom: numpy.ndarray[numpy.float64]
-    subtree_com: numpy.ndarray[numpy.float64]
-    subtree_linvel: numpy.ndarray[numpy.float64]
-    xfrc_applied: numpy.ndarray[numpy.float64]
-    ximat: numpy.ndarray[numpy.float64]
-    xipos: numpy.ndarray[numpy.float64]
-    xmat: numpy.ndarray[numpy.float64]
-    xpos: numpy.ndarray[numpy.float64]
-    xquat: numpy.ndarray[numpy.float64]
+    cacc: numpy.typing.NDArray[numpy.float64]
+    cfrc_ext: numpy.typing.NDArray[numpy.float64]
+    cfrc_int: numpy.typing.NDArray[numpy.float64]
+    cinert: numpy.typing.NDArray[numpy.float64]
+    crb: numpy.typing.NDArray[numpy.float64]
+    cvel: numpy.typing.NDArray[numpy.float64]
+    subtree_angmom: numpy.typing.NDArray[numpy.float64]
+    subtree_com: numpy.typing.NDArray[numpy.float64]
+    subtree_linvel: numpy.typing.NDArray[numpy.float64]
+    xfrc_applied: numpy.typing.NDArray[numpy.float64]
+    ximat: numpy.typing.NDArray[numpy.float64]
+    xipos: numpy.typing.NDArray[numpy.float64]
+    xmat: numpy.typing.NDArray[numpy.float64]
+    xpos: numpy.typing.NDArray[numpy.float64]
+    xquat: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataBodyViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataBodyViews) -> str"""
 
 class _MjDataCameraViews:
-    xmat: numpy.ndarray[numpy.float64]
-    xpos: numpy.ndarray[numpy.float64]
+    xmat: numpy.typing.NDArray[numpy.float64]
+    xpos: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataCameraViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataCameraViews) -> str"""
 
 class _MjDataGeomViews:
-    xmat: numpy.ndarray[numpy.float64]
-    xpos: numpy.ndarray[numpy.float64]
+    xmat: numpy.typing.NDArray[numpy.float64]
+    xpos: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataGeomViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataGeomViews) -> str"""
 
 class _MjDataJointViews:
-    cdof: numpy.ndarray[numpy.float64]
-    cdof_dot: numpy.ndarray[numpy.float64]
-    qLDiagInv: numpy.ndarray[numpy.float64]
-    qacc: numpy.ndarray[numpy.float64]
-    qacc_smooth: numpy.ndarray[numpy.float64]
-    qacc_warmstart: numpy.ndarray[numpy.float64]
-    qfrc_actuator: numpy.ndarray[numpy.float64]
-    qfrc_applied: numpy.ndarray[numpy.float64]
-    qfrc_bias: numpy.ndarray[numpy.float64]
-    qfrc_constraint: numpy.ndarray[numpy.float64]
-    qfrc_inverse: numpy.ndarray[numpy.float64]
-    qfrc_passive: numpy.ndarray[numpy.float64]
-    qfrc_smooth: numpy.ndarray[numpy.float64]
-    qpos: numpy.ndarray[numpy.float64]
-    qvel: numpy.ndarray[numpy.float64]
-    xanchor: numpy.ndarray[numpy.float64]
-    xaxis: numpy.ndarray[numpy.float64]
+    cdof: numpy.typing.NDArray[numpy.float64]
+    cdof_dot: numpy.typing.NDArray[numpy.float64]
+    qLDiagInv: numpy.typing.NDArray[numpy.float64]
+    qacc: numpy.typing.NDArray[numpy.float64]
+    qacc_smooth: numpy.typing.NDArray[numpy.float64]
+    qacc_warmstart: numpy.typing.NDArray[numpy.float64]
+    qfrc_actuator: numpy.typing.NDArray[numpy.float64]
+    qfrc_applied: numpy.typing.NDArray[numpy.float64]
+    qfrc_bias: numpy.typing.NDArray[numpy.float64]
+    qfrc_constraint: numpy.typing.NDArray[numpy.float64]
+    qfrc_inverse: numpy.typing.NDArray[numpy.float64]
+    qfrc_passive: numpy.typing.NDArray[numpy.float64]
+    qfrc_smooth: numpy.typing.NDArray[numpy.float64]
+    qpos: numpy.typing.NDArray[numpy.float64]
+    qvel: numpy.typing.NDArray[numpy.float64]
+    xanchor: numpy.typing.NDArray[numpy.float64]
+    xaxis: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataJointViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataJointViews) -> str"""
 
 class _MjDataLightViews:
-    xdir: numpy.ndarray[numpy.float64]
-    xpos: numpy.ndarray[numpy.float64]
+    xdir: numpy.typing.NDArray[numpy.float64]
+    xpos: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataLightViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataLightViews) -> str"""
 
 class _MjDataSensorViews:
-    data: numpy.ndarray[numpy.float64]
+    data: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataSensorViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataSensorViews) -> str"""
 
 class _MjDataSiteViews:
-    xmat: numpy.ndarray[numpy.float64]
-    xpos: numpy.ndarray[numpy.float64]
+    xmat: numpy.typing.NDArray[numpy.float64]
+    xpos: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataSiteViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataSiteViews) -> str"""
 
 class _MjDataTendonViews:
-    J: numpy.ndarray[numpy.float64]
-    J_colind: numpy.ndarray[numpy.int32]
-    J_rowadr: numpy.ndarray[numpy.int32]
-    J_rownnz: numpy.ndarray[numpy.int32]
-    length: numpy.ndarray[numpy.float64]
-    velocity: numpy.ndarray[numpy.float64]
-    wrapadr: numpy.ndarray[numpy.int32]
-    wrapnum: numpy.ndarray[numpy.int32]
+    J: numpy.typing.NDArray[numpy.float64]
+    J_colind: numpy.typing.NDArray[numpy.int32]
+    J_rowadr: numpy.typing.NDArray[numpy.int32]
+    J_rownnz: numpy.typing.NDArray[numpy.int32]
+    length: numpy.typing.NDArray[numpy.float64]
+    velocity: numpy.typing.NDArray[numpy.float64]
+    wrapadr: numpy.typing.NDArray[numpy.int32]
+    wrapnum: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjDataTendonViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjDataTendonViews) -> str"""
 
 class _MjModelActuatorViews:
-    acc0: numpy.ndarray[numpy.float64]
-    actadr: numpy.ndarray[numpy.int32]
-    actlimited: numpy.ndarray[numpy.uint8]
-    actnum: numpy.ndarray[numpy.int32]
-    actrange: numpy.ndarray[numpy.float64]
-    biasprm: numpy.ndarray[numpy.float64]
-    biastype: numpy.ndarray[numpy.int32]
-    cranklength: numpy.ndarray[numpy.float64]
-    ctrllimited: numpy.ndarray[numpy.uint8]
-    ctrlrange: numpy.ndarray[numpy.float64]
-    dynprm: numpy.ndarray[numpy.float64]
-    dyntype: numpy.ndarray[numpy.int32]
-    forcelimited: numpy.ndarray[numpy.uint8]
-    forcerange: numpy.ndarray[numpy.float64]
-    gainprm: numpy.ndarray[numpy.float64]
-    gaintype: numpy.ndarray[numpy.int32]
-    gear: numpy.ndarray[numpy.float64]
-    group: numpy.ndarray[numpy.int32]
-    length0: numpy.ndarray[numpy.float64]
-    lengthrange: numpy.ndarray[numpy.float64]
-    trnid: numpy.ndarray[numpy.int32]
-    trntype: numpy.ndarray[numpy.int32]
-    user: numpy.ndarray[numpy.float64]
+    acc0: numpy.typing.NDArray[numpy.float64]
+    actadr: numpy.typing.NDArray[numpy.int32]
+    actlimited: numpy.typing.NDArray[numpy.uint8]
+    actnum: numpy.typing.NDArray[numpy.int32]
+    actrange: numpy.typing.NDArray[numpy.float64]
+    biasprm: numpy.typing.NDArray[numpy.float64]
+    biastype: numpy.typing.NDArray[numpy.int32]
+    cranklength: numpy.typing.NDArray[numpy.float64]
+    ctrllimited: numpy.typing.NDArray[numpy.uint8]
+    ctrlrange: numpy.typing.NDArray[numpy.float64]
+    dynprm: numpy.typing.NDArray[numpy.float64]
+    dyntype: numpy.typing.NDArray[numpy.int32]
+    forcelimited: numpy.typing.NDArray[numpy.uint8]
+    forcerange: numpy.typing.NDArray[numpy.float64]
+    gainprm: numpy.typing.NDArray[numpy.float64]
+    gaintype: numpy.typing.NDArray[numpy.int32]
+    gear: numpy.typing.NDArray[numpy.float64]
+    group: numpy.typing.NDArray[numpy.int32]
+    length0: numpy.typing.NDArray[numpy.float64]
+    lengthrange: numpy.typing.NDArray[numpy.float64]
+    trnid: numpy.typing.NDArray[numpy.int32]
+    trntype: numpy.typing.NDArray[numpy.int32]
+    user: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelActuatorViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelActuatorViews) -> str"""
 
 class _MjModelBodyViews:
-    dofadr: numpy.ndarray[numpy.int32]
-    dofnum: numpy.ndarray[numpy.int32]
-    geomadr: numpy.ndarray[numpy.int32]
-    geomnum: numpy.ndarray[numpy.int32]
-    inertia: numpy.ndarray[numpy.float64]
-    invweight0: numpy.ndarray[numpy.float64]
-    ipos: numpy.ndarray[numpy.float64]
-    iquat: numpy.ndarray[numpy.float64]
-    jntadr: numpy.ndarray[numpy.int32]
-    jntnum: numpy.ndarray[numpy.int32]
-    mass: numpy.ndarray[numpy.float64]
-    mocapid: numpy.ndarray[numpy.int32]
-    parentid: numpy.ndarray[numpy.int32]
-    pos: numpy.ndarray[numpy.float64]
-    quat: numpy.ndarray[numpy.float64]
-    rootid: numpy.ndarray[numpy.int32]
-    sameframe: numpy.ndarray[numpy.uint8]
-    simple: numpy.ndarray[numpy.uint8]
-    subtreemass: numpy.ndarray[numpy.float64]
-    user: numpy.ndarray[numpy.float64]
-    weldid: numpy.ndarray[numpy.int32]
+    dofadr: numpy.typing.NDArray[numpy.int32]
+    dofnum: numpy.typing.NDArray[numpy.int32]
+    geomadr: numpy.typing.NDArray[numpy.int32]
+    geomnum: numpy.typing.NDArray[numpy.int32]
+    inertia: numpy.typing.NDArray[numpy.float64]
+    invweight0: numpy.typing.NDArray[numpy.float64]
+    ipos: numpy.typing.NDArray[numpy.float64]
+    iquat: numpy.typing.NDArray[numpy.float64]
+    jntadr: numpy.typing.NDArray[numpy.int32]
+    jntnum: numpy.typing.NDArray[numpy.int32]
+    mass: numpy.typing.NDArray[numpy.float64]
+    mocapid: numpy.typing.NDArray[numpy.int32]
+    parentid: numpy.typing.NDArray[numpy.int32]
+    pos: numpy.typing.NDArray[numpy.float64]
+    quat: numpy.typing.NDArray[numpy.float64]
+    rootid: numpy.typing.NDArray[numpy.int32]
+    sameframe: numpy.typing.NDArray[numpy.uint8]
+    simple: numpy.typing.NDArray[numpy.uint8]
+    subtreemass: numpy.typing.NDArray[numpy.float64]
+    user: numpy.typing.NDArray[numpy.float64]
+    weldid: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelBodyViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelBodyViews) -> str"""
 
 class _MjModelCameraViews:
-    bodyid: numpy.ndarray[numpy.int32]
-    fovy: numpy.ndarray[numpy.float64]
-    ipd: numpy.ndarray[numpy.float64]
-    mat0: numpy.ndarray[numpy.float64]
-    mode: numpy.ndarray[numpy.int32]
-    pos: numpy.ndarray[numpy.float64]
-    pos0: numpy.ndarray[numpy.float64]
-    poscom0: numpy.ndarray[numpy.float64]
-    quat: numpy.ndarray[numpy.float64]
-    targetbodyid: numpy.ndarray[numpy.int32]
-    user: numpy.ndarray[numpy.float64]
+    bodyid: numpy.typing.NDArray[numpy.int32]
+    fovy: numpy.typing.NDArray[numpy.float64]
+    ipd: numpy.typing.NDArray[numpy.float64]
+    mat0: numpy.typing.NDArray[numpy.float64]
+    mode: numpy.typing.NDArray[numpy.int32]
+    pos: numpy.typing.NDArray[numpy.float64]
+    pos0: numpy.typing.NDArray[numpy.float64]
+    poscom0: numpy.typing.NDArray[numpy.float64]
+    quat: numpy.typing.NDArray[numpy.float64]
+    targetbodyid: numpy.typing.NDArray[numpy.int32]
+    user: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelCameraViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelCameraViews) -> str"""
 
 class _MjModelEqualityViews:
-    active0: numpy.ndarray[numpy.uint8]
-    data: numpy.ndarray[numpy.float64]
-    obj1id: numpy.ndarray[numpy.int32]
-    obj2id: numpy.ndarray[numpy.int32]
-    solimp: numpy.ndarray[numpy.float64]
-    solref: numpy.ndarray[numpy.float64]
-    type: numpy.ndarray[numpy.int32]
+    active0: numpy.typing.NDArray[numpy.uint8]
+    data: numpy.typing.NDArray[numpy.float64]
+    obj1id: numpy.typing.NDArray[numpy.int32]
+    obj2id: numpy.typing.NDArray[numpy.int32]
+    solimp: numpy.typing.NDArray[numpy.float64]
+    solref: numpy.typing.NDArray[numpy.float64]
+    type: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelEqualityViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelEqualityViews) -> str"""
 
 class _MjModelExcludeViews:
-    signature: numpy.ndarray[numpy.int32]
+    signature: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelExcludeViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelExcludeViews) -> str"""
 
 class _MjModelGeomViews:
-    bodyid: numpy.ndarray[numpy.int32]
-    conaffinity: numpy.ndarray[numpy.int32]
-    condim: numpy.ndarray[numpy.int32]
-    contype: numpy.ndarray[numpy.int32]
-    dataid: numpy.ndarray[numpy.int32]
-    friction: numpy.ndarray[numpy.float64]
-    gap: numpy.ndarray[numpy.float64]
-    group: numpy.ndarray[numpy.int32]
-    margin: numpy.ndarray[numpy.float64]
-    matid: numpy.ndarray[numpy.int32]
-    pos: numpy.ndarray[numpy.float64]
-    priority: numpy.ndarray[numpy.int32]
-    quat: numpy.ndarray[numpy.float64]
-    rbound: numpy.ndarray[numpy.float64]
-    rgba: numpy.ndarray[numpy.float32]
-    sameframe: numpy.ndarray[numpy.uint8]
-    size: numpy.ndarray[numpy.float64]
-    solimp: numpy.ndarray[numpy.float64]
-    solmix: numpy.ndarray[numpy.float64]
-    solref: numpy.ndarray[numpy.float64]
-    type: numpy.ndarray[numpy.int32]
-    user: numpy.ndarray[numpy.float64]
+    bodyid: numpy.typing.NDArray[numpy.int32]
+    conaffinity: numpy.typing.NDArray[numpy.int32]
+    condim: numpy.typing.NDArray[numpy.int32]
+    contype: numpy.typing.NDArray[numpy.int32]
+    dataid: numpy.typing.NDArray[numpy.int32]
+    friction: numpy.typing.NDArray[numpy.float64]
+    gap: numpy.typing.NDArray[numpy.float64]
+    group: numpy.typing.NDArray[numpy.int32]
+    margin: numpy.typing.NDArray[numpy.float64]
+    matid: numpy.typing.NDArray[numpy.int32]
+    pos: numpy.typing.NDArray[numpy.float64]
+    priority: numpy.typing.NDArray[numpy.int32]
+    quat: numpy.typing.NDArray[numpy.float64]
+    rbound: numpy.typing.NDArray[numpy.float64]
+    rgba: numpy.typing.NDArray[numpy.float32]
+    sameframe: numpy.typing.NDArray[numpy.uint8]
+    size: numpy.typing.NDArray[numpy.float64]
+    solimp: numpy.typing.NDArray[numpy.float64]
+    solmix: numpy.typing.NDArray[numpy.float64]
+    solref: numpy.typing.NDArray[numpy.float64]
+    type: numpy.typing.NDArray[numpy.int32]
+    user: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelGeomViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelGeomViews) -> str"""
 
 class _MjModelHfieldViews:
-    adr: numpy.ndarray[numpy.int32]
-    data: numpy.ndarray[numpy.float32]
-    ncol: numpy.ndarray[numpy.int32]
-    nrow: numpy.ndarray[numpy.int32]
-    size: numpy.ndarray[numpy.float64]
+    adr: numpy.typing.NDArray[numpy.int32]
+    data: numpy.typing.NDArray[numpy.float32]
+    ncol: numpy.typing.NDArray[numpy.int32]
+    nrow: numpy.typing.NDArray[numpy.int32]
+    size: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelHfieldViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelHfieldViews) -> str"""
 
 class _MjModelJointViews:
-    M0: numpy.ndarray[numpy.float64]
-    Madr: numpy.ndarray[numpy.int32]
-    armature: numpy.ndarray[numpy.float64]
-    axis: numpy.ndarray[numpy.float64]
-    bodyid: numpy.ndarray[numpy.int32]
-    damping: numpy.ndarray[numpy.float64]
-    dofadr: numpy.ndarray[numpy.int32]
-    frictionloss: numpy.ndarray[numpy.float64]
-    group: numpy.ndarray[numpy.int32]
-    invweight0: numpy.ndarray[numpy.float64]
-    jntid: numpy.ndarray[numpy.int32]
-    limited: numpy.ndarray[numpy.uint8]
-    margin: numpy.ndarray[numpy.float64]
-    parentid: numpy.ndarray[numpy.int32]
-    pos: numpy.ndarray[numpy.float64]
-    qpos0: numpy.ndarray[numpy.float64]
-    qpos_spring: numpy.ndarray[numpy.float64]
-    qposadr: numpy.ndarray[numpy.int32]
-    range: numpy.ndarray[numpy.float64]
-    simplenum: numpy.ndarray[numpy.int32]
-    solimp: numpy.ndarray[numpy.float64]
-    solref: numpy.ndarray[numpy.float64]
-    stiffness: numpy.ndarray[numpy.float64]
-    type: numpy.ndarray[numpy.int32]
-    user: numpy.ndarray[numpy.float64]
+    M0: numpy.typing.NDArray[numpy.float64]
+    Madr: numpy.typing.NDArray[numpy.int32]
+    armature: numpy.typing.NDArray[numpy.float64]
+    axis: numpy.typing.NDArray[numpy.float64]
+    bodyid: numpy.typing.NDArray[numpy.int32]
+    damping: numpy.typing.NDArray[numpy.float64]
+    dofadr: numpy.typing.NDArray[numpy.int32]
+    frictionloss: numpy.typing.NDArray[numpy.float64]
+    group: numpy.typing.NDArray[numpy.int32]
+    invweight0: numpy.typing.NDArray[numpy.float64]
+    jntid: numpy.typing.NDArray[numpy.int32]
+    limited: numpy.typing.NDArray[numpy.uint8]
+    margin: numpy.typing.NDArray[numpy.float64]
+    parentid: numpy.typing.NDArray[numpy.int32]
+    pos: numpy.typing.NDArray[numpy.float64]
+    qpos0: numpy.typing.NDArray[numpy.float64]
+    qpos_spring: numpy.typing.NDArray[numpy.float64]
+    qposadr: numpy.typing.NDArray[numpy.int32]
+    range: numpy.typing.NDArray[numpy.float64]
+    simplenum: numpy.typing.NDArray[numpy.int32]
+    solimp: numpy.typing.NDArray[numpy.float64]
+    solref: numpy.typing.NDArray[numpy.float64]
+    stiffness: numpy.typing.NDArray[numpy.float64]
+    type: numpy.typing.NDArray[numpy.int32]
+    user: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelJointViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelJointViews) -> str"""
 
 class _MjModelKeyframeViews:
-    act: numpy.ndarray[numpy.float64]
-    ctrl: numpy.ndarray[numpy.float64]
-    mpos: numpy.ndarray[numpy.float64]
-    mquat: numpy.ndarray[numpy.float64]
-    qpos: numpy.ndarray[numpy.float64]
-    qvel: numpy.ndarray[numpy.float64]
-    time: numpy.ndarray[numpy.float64]
+    act: numpy.typing.NDArray[numpy.float64]
+    ctrl: numpy.typing.NDArray[numpy.float64]
+    mpos: numpy.typing.NDArray[numpy.float64]
+    mquat: numpy.typing.NDArray[numpy.float64]
+    qpos: numpy.typing.NDArray[numpy.float64]
+    qvel: numpy.typing.NDArray[numpy.float64]
+    time: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelKeyframeViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelKeyframeViews) -> str"""
 
 class _MjModelLightViews:
-    active: numpy.ndarray[numpy.uint8]
-    ambient: numpy.ndarray[numpy.float32]
-    attenuation: numpy.ndarray[numpy.float32]
-    bodyid: numpy.ndarray[numpy.int32]
-    castshadow: numpy.ndarray[numpy.uint8]
-    cutoff: numpy.ndarray[numpy.float32]
-    diffuse: numpy.ndarray[numpy.float32]
-    dir: numpy.ndarray[numpy.float64]
-    dir0: numpy.ndarray[numpy.float64]
-    directional: numpy.ndarray[numpy.uint8]
-    exponent: numpy.ndarray[numpy.float32]
-    mode: numpy.ndarray[numpy.int32]
-    pos: numpy.ndarray[numpy.float64]
-    pos0: numpy.ndarray[numpy.float64]
-    poscom0: numpy.ndarray[numpy.float64]
-    specular: numpy.ndarray[numpy.float32]
-    targetbodyid: numpy.ndarray[numpy.int32]
+    active: numpy.typing.NDArray[numpy.uint8]
+    ambient: numpy.typing.NDArray[numpy.float32]
+    attenuation: numpy.typing.NDArray[numpy.float32]
+    bodyid: numpy.typing.NDArray[numpy.int32]
+    castshadow: numpy.typing.NDArray[numpy.uint8]
+    cutoff: numpy.typing.NDArray[numpy.float32]
+    diffuse: numpy.typing.NDArray[numpy.float32]
+    dir: numpy.typing.NDArray[numpy.float64]
+    dir0: numpy.typing.NDArray[numpy.float64]
+    exponent: numpy.typing.NDArray[numpy.float32]
+    mode: numpy.typing.NDArray[numpy.int32]
+    pos: numpy.typing.NDArray[numpy.float64]
+    pos0: numpy.typing.NDArray[numpy.float64]
+    poscom0: numpy.typing.NDArray[numpy.float64]
+    specular: numpy.typing.NDArray[numpy.float32]
+    targetbodyid: numpy.typing.NDArray[numpy.int32]
+    type: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelLightViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelLightViews) -> str"""
 
 class _MjModelMaterialViews:
-    emission: numpy.ndarray[numpy.float32]
-    reflectance: numpy.ndarray[numpy.float32]
-    rgba: numpy.ndarray[numpy.float32]
-    shininess: numpy.ndarray[numpy.float32]
-    specular: numpy.ndarray[numpy.float32]
-    texid: numpy.ndarray[numpy.int32]
-    texrepeat: numpy.ndarray[numpy.float32]
-    texuniform: numpy.ndarray[numpy.uint8]
+    emission: numpy.typing.NDArray[numpy.float32]
+    reflectance: numpy.typing.NDArray[numpy.float32]
+    rgba: numpy.typing.NDArray[numpy.float32]
+    shininess: numpy.typing.NDArray[numpy.float32]
+    specular: numpy.typing.NDArray[numpy.float32]
+    texid: numpy.typing.NDArray[numpy.int32]
+    texrepeat: numpy.typing.NDArray[numpy.float32]
+    texuniform: numpy.typing.NDArray[numpy.uint8]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelMaterialViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelMaterialViews) -> str"""
 
 class _MjModelMeshViews:
-    faceadr: numpy.ndarray[numpy.int32]
-    facenum: numpy.ndarray[numpy.int32]
-    graphadr: numpy.ndarray[numpy.int32]
-    texcoordadr: numpy.ndarray[numpy.int32]
-    vertadr: numpy.ndarray[numpy.int32]
-    vertnum: numpy.ndarray[numpy.int32]
+    faceadr: numpy.typing.NDArray[numpy.int32]
+    facenum: numpy.typing.NDArray[numpy.int32]
+    graphadr: numpy.typing.NDArray[numpy.int32]
+    texcoordadr: numpy.typing.NDArray[numpy.int32]
+    vertadr: numpy.typing.NDArray[numpy.int32]
+    vertnum: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelMeshViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelMeshViews) -> str"""
 
 class _MjModelNumericViews:
-    adr: numpy.ndarray[numpy.int32]
-    data: numpy.ndarray[numpy.float64]
-    size: numpy.ndarray[numpy.int32]
+    adr: numpy.typing.NDArray[numpy.int32]
+    data: numpy.typing.NDArray[numpy.float64]
+    size: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelNumericViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelNumericViews) -> str"""
 
 class _MjModelPairViews:
-    dim: numpy.ndarray[numpy.int32]
-    friction: numpy.ndarray[numpy.float64]
-    gap: numpy.ndarray[numpy.float64]
-    geom1: numpy.ndarray[numpy.int32]
-    geom2: numpy.ndarray[numpy.int32]
-    margin: numpy.ndarray[numpy.float64]
-    signature: numpy.ndarray[numpy.int32]
-    solimp: numpy.ndarray[numpy.float64]
-    solref: numpy.ndarray[numpy.float64]
+    dim: numpy.typing.NDArray[numpy.int32]
+    friction: numpy.typing.NDArray[numpy.float64]
+    gap: numpy.typing.NDArray[numpy.float64]
+    geom1: numpy.typing.NDArray[numpy.int32]
+    geom2: numpy.typing.NDArray[numpy.int32]
+    margin: numpy.typing.NDArray[numpy.float64]
+    signature: numpy.typing.NDArray[numpy.int32]
+    solimp: numpy.typing.NDArray[numpy.float64]
+    solref: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelPairViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelPairViews) -> str"""
 
 class _MjModelSensorViews:
-    adr: numpy.ndarray[numpy.int32]
-    cutoff: numpy.ndarray[numpy.float64]
-    datatype: numpy.ndarray[numpy.int32]
-    dim: numpy.ndarray[numpy.int32]
-    needstage: numpy.ndarray[numpy.int32]
-    noise: numpy.ndarray[numpy.float64]
-    objid: numpy.ndarray[numpy.int32]
-    objtype: numpy.ndarray[numpy.int32]
-    refid: numpy.ndarray[numpy.int32]
-    reftype: numpy.ndarray[numpy.int32]
-    type: numpy.ndarray[numpy.int32]
-    user: numpy.ndarray[numpy.float64]
+    adr: numpy.typing.NDArray[numpy.int32]
+    cutoff: numpy.typing.NDArray[numpy.float64]
+    datatype: numpy.typing.NDArray[numpy.int32]
+    dim: numpy.typing.NDArray[numpy.int32]
+    needstage: numpy.typing.NDArray[numpy.int32]
+    noise: numpy.typing.NDArray[numpy.float64]
+    objid: numpy.typing.NDArray[numpy.int32]
+    objtype: numpy.typing.NDArray[numpy.int32]
+    refid: numpy.typing.NDArray[numpy.int32]
+    reftype: numpy.typing.NDArray[numpy.int32]
+    type: numpy.typing.NDArray[numpy.int32]
+    user: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelSensorViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelSensorViews) -> str"""
 
 class _MjModelSiteViews:
-    bodyid: numpy.ndarray[numpy.int32]
-    group: numpy.ndarray[numpy.int32]
-    matid: numpy.ndarray[numpy.int32]
-    pos: numpy.ndarray[numpy.float64]
-    quat: numpy.ndarray[numpy.float64]
-    rgba: numpy.ndarray[numpy.float32]
-    sameframe: numpy.ndarray[numpy.uint8]
-    size: numpy.ndarray[numpy.float64]
-    type: numpy.ndarray[numpy.int32]
-    user: numpy.ndarray[numpy.float64]
+    bodyid: numpy.typing.NDArray[numpy.int32]
+    group: numpy.typing.NDArray[numpy.int32]
+    matid: numpy.typing.NDArray[numpy.int32]
+    pos: numpy.typing.NDArray[numpy.float64]
+    quat: numpy.typing.NDArray[numpy.float64]
+    rgba: numpy.typing.NDArray[numpy.float32]
+    sameframe: numpy.typing.NDArray[numpy.uint8]
+    size: numpy.typing.NDArray[numpy.float64]
+    type: numpy.typing.NDArray[numpy.int32]
+    user: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelSiteViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelSiteViews) -> str"""
 
 class _MjModelSkinViews:
-    boneadr: numpy.ndarray[numpy.int32]
-    bonenum: numpy.ndarray[numpy.int32]
-    faceadr: numpy.ndarray[numpy.int32]
-    facenum: numpy.ndarray[numpy.int32]
-    inflate: numpy.ndarray[numpy.float32]
-    matid: numpy.ndarray[numpy.int32]
-    rgba: numpy.ndarray[numpy.float32]
-    texcoordadr: numpy.ndarray[numpy.int32]
-    vertadr: numpy.ndarray[numpy.int32]
-    vertnum: numpy.ndarray[numpy.int32]
+    boneadr: numpy.typing.NDArray[numpy.int32]
+    bonenum: numpy.typing.NDArray[numpy.int32]
+    faceadr: numpy.typing.NDArray[numpy.int32]
+    facenum: numpy.typing.NDArray[numpy.int32]
+    inflate: numpy.typing.NDArray[numpy.float32]
+    matid: numpy.typing.NDArray[numpy.int32]
+    rgba: numpy.typing.NDArray[numpy.float32]
+    texcoordadr: numpy.typing.NDArray[numpy.int32]
+    vertadr: numpy.typing.NDArray[numpy.int32]
+    vertnum: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelSkinViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelSkinViews) -> str"""
 
 class _MjModelTendonViews:
-    _adr: numpy.ndarray[numpy.int32]
-    _damping: numpy.ndarray[numpy.float64]
-    _frictionloss: numpy.ndarray[numpy.float64]
-    _group: numpy.ndarray[numpy.int32]
-    _invweight0: numpy.ndarray[numpy.float64]
-    _length0: numpy.ndarray[numpy.float64]
-    _lengthspring: numpy.ndarray[numpy.float64]
-    _limited: numpy.ndarray[numpy.uint8]
-    _margin: numpy.ndarray[numpy.float64]
-    _matid: numpy.ndarray[numpy.int32]
-    _num: numpy.ndarray[numpy.int32]
-    _range: numpy.ndarray[numpy.float64]
-    _rgba: numpy.ndarray[numpy.float32]
-    _solimp_fri: numpy.ndarray[numpy.float64]
-    _solimp_lim: numpy.ndarray[numpy.float64]
-    _solref_fri: numpy.ndarray[numpy.float64]
-    _solref_lim: numpy.ndarray[numpy.float64]
-    _stiffness: numpy.ndarray[numpy.float64]
-    _user: numpy.ndarray[numpy.float64]
-    _width: numpy.ndarray[numpy.float64]
+    _adr: numpy.typing.NDArray[numpy.int32]
+    _damping: numpy.typing.NDArray[numpy.float64]
+    _frictionloss: numpy.typing.NDArray[numpy.float64]
+    _group: numpy.typing.NDArray[numpy.int32]
+    _invweight0: numpy.typing.NDArray[numpy.float64]
+    _length0: numpy.typing.NDArray[numpy.float64]
+    _lengthspring: numpy.typing.NDArray[numpy.float64]
+    _limited: numpy.typing.NDArray[numpy.uint8]
+    _margin: numpy.typing.NDArray[numpy.float64]
+    _matid: numpy.typing.NDArray[numpy.int32]
+    _num: numpy.typing.NDArray[numpy.int32]
+    _range: numpy.typing.NDArray[numpy.float64]
+    _rgba: numpy.typing.NDArray[numpy.float32]
+    _solimp_fri: numpy.typing.NDArray[numpy.float64]
+    _solimp_lim: numpy.typing.NDArray[numpy.float64]
+    _solref_fri: numpy.typing.NDArray[numpy.float64]
+    _solref_lim: numpy.typing.NDArray[numpy.float64]
+    _stiffness: numpy.typing.NDArray[numpy.float64]
+    _user: numpy.typing.NDArray[numpy.float64]
+    _width: numpy.typing.NDArray[numpy.float64]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelTendonViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelTendonViews) -> str"""
 
 class _MjModelTextureViews:
-    adr: numpy.ndarray[numpy.int32]
-    data: numpy.ndarray[numpy.uint8]
-    height: numpy.ndarray[numpy.int32]
-    nchannel: numpy.ndarray[numpy.int32]
-    type: numpy.ndarray[numpy.int32]
-    width: numpy.ndarray[numpy.int32]
+    adr: numpy.typing.NDArray[numpy.int32]
+    data: numpy.typing.NDArray[numpy.uint8]
+    height: numpy.typing.NDArray[numpy.int32]
+    nchannel: numpy.typing.NDArray[numpy.int32]
+    type: numpy.typing.NDArray[numpy.int32]
+    width: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelTextureViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelTextureViews) -> str"""
 
 class _MjModelTupleViews:
-    adr: numpy.ndarray[numpy.int32]
-    objid: numpy.ndarray[numpy.int32]
-    objprm: numpy.ndarray[numpy.float64]
-    objtype: numpy.ndarray[numpy.int32]
-    size: numpy.ndarray[numpy.int32]
+    adr: numpy.typing.NDArray[numpy.int32]
+    objid: numpy.typing.NDArray[numpy.int32]
+    objprm: numpy.typing.NDArray[numpy.float64]
+    objtype: numpy.typing.NDArray[numpy.int32]
+    size: numpy.typing.NDArray[numpy.int32]
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
     def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     @property
-    def id(self) -> int: ...
+    def id(self) -> int:
+        """(arg0: mujoco._structs._MjModelTupleViews) -> int"""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """(arg0: mujoco._structs._MjModelTupleViews) -> str"""
 
 class _MjSolverStatList:
     def __init__(self, *args, **kwargs) -> None:
@@ -2411,11 +2723,11 @@ class _MjSolverStatList:
     def __eq__(self, arg0: object) -> bool:
         """__eq__(self: object, arg0: object) -> bool"""
     @overload
-    def __getitem__(self, arg0: int) -> MjSolverStat:
+    def __getitem__(self, arg0: typing.SupportsInt) -> MjSolverStat:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjSolverStatList, arg0: int) -> mujoco._structs.MjSolverStat
+        1. __getitem__(self: mujoco._structs._MjSolverStatList, arg0: typing.SupportsInt) -> mujoco._structs.MjSolverStat
 
         2. __getitem__(self: mujoco._structs._MjSolverStatList, arg0: slice) -> mujoco._structs._MjSolverStatList
         """
@@ -2424,28 +2736,33 @@ class _MjSolverStatList:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjSolverStatList, arg0: int) -> mujoco._structs.MjSolverStat
+        1. __getitem__(self: mujoco._structs._MjSolverStatList, arg0: typing.SupportsInt) -> mujoco._structs.MjSolverStat
 
         2. __getitem__(self: mujoco._structs._MjSolverStatList, arg0: slice) -> mujoco._structs._MjSolverStatList
         """
-    def __iter__(self) -> typing.Iterator[MjSolverStat]:
-        """def __iter__(self) -> typing.Iterator[MjSolverStat]"""
     def __len__(self) -> int:
         """__len__(self: mujoco._structs._MjSolverStatList) -> int"""
     @property
-    def gradient(self) -> numpy.ndarray[numpy.float64]: ...
+    def gradient(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(self: mujoco._structs._MjSolverStatList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def improvement(self) -> numpy.ndarray[numpy.float64]: ...
+    def improvement(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(self: mujoco._structs._MjSolverStatList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def lineslope(self) -> numpy.ndarray[numpy.float64]: ...
+    def lineslope(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(self: mujoco._structs._MjSolverStatList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def nactive(self) -> numpy.ndarray[numpy.int32]: ...
+    def nactive(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(self: mujoco._structs._MjSolverStatList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def nchange(self) -> numpy.ndarray[numpy.int32]: ...
+    def nchange(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(self: mujoco._structs._MjSolverStatList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def neval(self) -> numpy.ndarray[numpy.int32]: ...
+    def neval(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(self: mujoco._structs._MjSolverStatList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def nupdate(self) -> numpy.ndarray[numpy.int32]: ...
+    def nupdate(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(self: mujoco._structs._MjSolverStatList) -> numpy.typing.NDArray[numpy.int32]"""
 
 class _MjTimerStatList:
     def __init__(self, *args, **kwargs) -> None:
@@ -2454,11 +2771,11 @@ class _MjTimerStatList:
     def __eq__(self, arg0: object) -> bool:
         """__eq__(self: object, arg0: object) -> bool"""
     @overload
-    def __getitem__(self, arg0: int) -> MjTimerStat:
+    def __getitem__(self, arg0: typing.SupportsInt) -> MjTimerStat:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: int) -> mujoco._structs.MjTimerStat
+        1. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: typing.SupportsInt) -> mujoco._structs.MjTimerStat
 
         2. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: mujoco._enums.mjtTimer) -> mujoco._structs.MjTimerStat
 
@@ -2469,7 +2786,7 @@ class _MjTimerStatList:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: int) -> mujoco._structs.MjTimerStat
+        1. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: typing.SupportsInt) -> mujoco._structs.MjTimerStat
 
         2. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: mujoco._enums.mjtTimer) -> mujoco._structs.MjTimerStat
 
@@ -2480,20 +2797,20 @@ class _MjTimerStatList:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: int) -> mujoco._structs.MjTimerStat
+        1. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: typing.SupportsInt) -> mujoco._structs.MjTimerStat
 
         2. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: mujoco._enums.mjtTimer) -> mujoco._structs.MjTimerStat
 
         3. __getitem__(self: mujoco._structs._MjTimerStatList, arg0: slice) -> mujoco._structs._MjTimerStatList
         """
-    def __iter__(self) -> typing.Iterator[MjTimerStat]:
-        """def __iter__(self) -> typing.Iterator[MjTimerStat]"""
     def __len__(self) -> int:
         """__len__(self: mujoco._structs._MjTimerStatList) -> int"""
     @property
-    def duration(self) -> numpy.ndarray[numpy.float64]: ...
+    def duration(self) -> numpy.typing.NDArray[numpy.float64]:
+        """(self: mujoco._structs._MjTimerStatList) -> numpy.typing.NDArray[numpy.float64]"""
     @property
-    def number(self) -> numpy.ndarray[numpy.int32]: ...
+    def number(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(self: mujoco._structs._MjTimerStatList) -> numpy.typing.NDArray[numpy.int32]"""
 
 class _MjWarningStatList:
     def __init__(self, *args, **kwargs) -> None:
@@ -2502,11 +2819,11 @@ class _MjWarningStatList:
     def __eq__(self, arg0: object) -> bool:
         """__eq__(self: object, arg0: object) -> bool"""
     @overload
-    def __getitem__(self, arg0: int) -> MjWarningStat:
+    def __getitem__(self, arg0: typing.SupportsInt) -> MjWarningStat:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: int) -> mujoco._structs.MjWarningStat
+        1. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: typing.SupportsInt) -> mujoco._structs.MjWarningStat
 
         2. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: mujoco._enums.mjtWarning) -> mujoco._structs.MjWarningStat
 
@@ -2517,7 +2834,7 @@ class _MjWarningStatList:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: int) -> mujoco._structs.MjWarningStat
+        1. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: typing.SupportsInt) -> mujoco._structs.MjWarningStat
 
         2. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: mujoco._enums.mjtWarning) -> mujoco._structs.MjWarningStat
 
@@ -2528,23 +2845,23 @@ class _MjWarningStatList:
         """__getitem__(*args, **kwargs)
         Overloaded function.
 
-        1. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: int) -> mujoco._structs.MjWarningStat
+        1. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: typing.SupportsInt) -> mujoco._structs.MjWarningStat
 
         2. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: mujoco._enums.mjtWarning) -> mujoco._structs.MjWarningStat
 
         3. __getitem__(self: mujoco._structs._MjWarningStatList, arg0: slice) -> mujoco._structs._MjWarningStatList
         """
-    def __iter__(self) -> typing.Iterator[MjWarningStat]:
-        """def __iter__(self) -> typing.Iterator[MjWarningStat]"""
     def __len__(self) -> int:
         """__len__(self: mujoco._structs._MjWarningStatList) -> int"""
     @property
-    def lastinfo(self) -> numpy.ndarray[numpy.int32]: ...
+    def lastinfo(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(self: mujoco._structs._MjWarningStatList) -> numpy.typing.NDArray[numpy.int32]"""
     @property
-    def number(self) -> numpy.ndarray[numpy.int32]: ...
+    def number(self) -> numpy.typing.NDArray[numpy.int32]:
+        """(self: mujoco._structs._MjWarningStatList) -> numpy.typing.NDArray[numpy.int32]"""
 
-def _recompile_spec_addr(arg0: int, arg1: MjModel, arg2: MjData) -> tuple:
-    """_recompile_spec_addr(arg0: int, arg1: mujoco._structs.MjModel, arg2: mujoco._structs.MjData) -> tuple"""
+def _recompile_spec_addr(arg0: typing.SupportsInt, arg1: MjModel, arg2: MjData) -> tuple:
+    """_recompile_spec_addr(arg0: typing.SupportsInt, arg1: mujoco._structs.MjModel, arg2: mujoco._structs.MjData) -> tuple"""
 def mjv_averageCamera(cam1: MjvGLCamera, cam2: MjvGLCamera) -> MjvGLCamera:
     """mjv_averageCamera(cam1: mujoco._structs.MjvGLCamera, cam2: mujoco._structs.MjvGLCamera) -> mujoco._structs.MjvGLCamera
 

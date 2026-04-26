@@ -11,20 +11,23 @@
                 "run",
                 "${file}"
             ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true,
-                "presentation": {
-                    "reveal": "always",
-                    "panel": "new"
-                }
             },
         },
         {
             "label": "Run nox: docs",
             "type": "shell",
-            "command": "nox",
+            "command": "uv",
             "args": [
+                "run",
+                "nox",
                 "--session=docs",
             ],
             "group": {

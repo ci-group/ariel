@@ -79,6 +79,7 @@ bkp
 BKSP
 BLE
 BODYBVH
+bodyid
 bodyname
 Bongard
 booktitle
@@ -111,6 +112,7 @@ chapterpage
 charliermarsh
 charx
 charxstring
+chisquare
 cibuildwheel
 cibw
 CIBW
@@ -181,14 +183,19 @@ dataclasses
 datetimez
 dateutil
 DCONFIG
+deap
 debateable
 debugpy
 deemphasized
 deepcopy
 defenses
 deflist
+defusedxml
+delaxes
 Deniz
 devcontainers
+dfden
+dfnum
 dialog
 dib
 directsearch
@@ -260,12 +267,14 @@ figsize
 filelock
 FILTEREXACT
 firsthead
+fitaabb
 fixedcamid
 FLEXBVH
 FLEXEDGE
 FLEXFACE
 FLEXSKIN
 FLEXVERT
+floatmode
 Floreano
 fontenc
 fontsize
@@ -314,7 +323,9 @@ gprof
 Graphviz
 Grégoire
 Grigoriadis
+gumbel
 Guszti
+Hammersley
 hammerspoon
 hasattr
 hashlib
@@ -360,6 +371,7 @@ iniconfig
 INP
 inproceedings
 Ioannis
+ipykernel
 ipynb
 ipython
 isdigit
@@ -388,6 +400,7 @@ jpf
 jpm
 jpx
 jsburckhardt
+jsonschema
 jupyter
 jxr
 Karine
@@ -440,6 +453,7 @@ libncurses
 libosmesa
 libpango
 libreadline
+libsass
 libsm
 libsqlite
 libx
@@ -466,7 +480,10 @@ lmr
 lnk
 loc
 logfilewarninglist
+lognormal
 logscale
+logseries
+logspace
 longtable
 longtblr
 lookat
@@ -479,6 +496,7 @@ lualatex
 luo
 Luo
 LWR
+lxml
 Maesani
 MAPCMA
 mapfiles
@@ -520,6 +538,7 @@ modificationdate
 modname
 moredelim
 morekeywords
+mpatches
 mpimg
 MRO
 msg
@@ -539,6 +558,7 @@ mypycify
 myst
 nala
 Nala
+nbad
 nbody
 nbsphinx
 nbvh
@@ -554,6 +574,7 @@ newfigname
 newpxtext
 newtablename
 ngeom
+ngood
 nicegui
 Nikolaus
 njpwerner
@@ -563,6 +584,8 @@ nodeeditor
 nodeenv
 nodeid
 nohyp
+nonc
+noncentral
 noncommercially
 nonconvex
 nonstopmode
@@ -579,6 +602,7 @@ npt
 NPY
 nrow
 nrows
+nsample
 nsmallest
 nstep
 Num
@@ -603,6 +627,7 @@ orjson
 osmesa
 outdir
 pandoc
+parentid
 pathlib
 pathspec
 pawlik
@@ -614,6 +639,7 @@ Perflint
 Perlin
 PERTFORCE
 PERTOBJ
+pexpect
 pgfkeys
 pgfplots
 PGH
@@ -626,15 +652,19 @@ PLR
 plt
 pnoise
 podman
+polyfit
 polyglossia
+polyval
 Popen
 posargs
 powerline
 Pradeep
 PRCNT
+pred
 preto
 prg
 printanswers
+printoptions
 prnt
 prob
 propcache
@@ -642,6 +672,7 @@ protogen
 Przemyslaw
 pstats
 PTH
+pvals
 PWR
 pybind
 pybuilder
@@ -747,6 +778,7 @@ seanwu
 SEL
 selectattr
 selectby
+sensorsize
 sessionmaker
 setattr
 setuptools
@@ -760,6 +792,8 @@ sigstore
 Sigstore
 simp
 siunitx
+skipsensor
+skipstage
 SLF
 slvs
 smam
@@ -810,8 +844,10 @@ tabularray
 Taichi
 talltblr
 tamasfe
+tanh
 tasklist
 tblr
+TBPSA
 testmod
 testpypi
 texlive
@@ -850,6 +886,7 @@ typeguard
 typehints
 typeshed
 Tyrrell
+ujson
 underfull
 Underglow
 UNDERGLOW
@@ -868,6 +905,7 @@ Ver
 viridis
 virtualenv
 vmap
+vonmises
 Vrije
 vsc
 Vytas
@@ -880,6 +918,7 @@ Weissl
 worldbody
 WSL
 wxyz
+xaxis
 xbm
 xcb
 xcolor
@@ -887,15 +926,18 @@ xdoctest
 xindy
 xlabel
 xlim
+xlrd
 xmat
 xpos
 xshift
 xspace
 xticks
 xunicode
+xyaxes
 xyflow
 xyzw
 yarl
+yaxis
 Yinyang
 ylabel
 ylim
@@ -908,6 +950,7 @@ Zeeuwe
 Zeina
 zenodo
 Zenodo
+zipf
 zipp
 zmax
 zmin

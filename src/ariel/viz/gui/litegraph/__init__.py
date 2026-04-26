@@ -1,1 +1,0 @@
-"""Litegraph-based GUI."""

@@ -1,1 +1,1 @@
-"""Common utility functions and classes."""
+"""ARIEL common utility functions and classes."""

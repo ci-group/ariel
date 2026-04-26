@@ -1,11 +1,12 @@
 """TODO(jmdm): description of script."""
 
+# Handle forward references in type hints
+from __future__ import annotations
+
 # Standard library
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 # Third-party libraries
-from networkx import Graph
-
 # Local libraries
 from ariel.body_phenotypes.robogen_lite.config import (
     IDX_OF_CORE,
@@ -19,13 +20,17 @@ from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
 # Type checking
 if TYPE_CHECKING:
+    from networkx import DiGraph
+
     from ariel.body_phenotypes.robogen_lite.modules.module import Module
 
 
-def construct_mjspec_from_graph(graph: Graph) -> CoreModule:
+def construct_mjspec_from_graph(graph: DiGraph[Any]) -> CoreModule:
     """
-    Construct a MuJoCo specification from a graph representation. Can be used for
-    constructing the body of a robot after crossover using the graph representation.
+    Construct a MuJoCo specification from a graph representation.
+
+    Can be used for constructing the body of a robot after crossover using the
+    graph representation.
 
     Parameters
     ----------
@@ -84,4 +89,9 @@ def construct_mjspec_from_graph(graph: Graph) -> CoreModule:
                 prefix=f"{modules[from_module].index}-{modules[to_module].index}-{ModuleFaces[face].value}-",
             )
 
-    return modules[IDX_OF_CORE]
+    core_module = modules[IDX_OF_CORE]
+    if isinstance(core_module, CoreModule):
+        return core_module
+
+    msg = "The core module is not of type CoreModule."
+    raise ValueError(msg)

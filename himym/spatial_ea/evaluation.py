@@ -4,7 +4,7 @@ import mujoco
 import numpy as np
 from spatial_individual import SpatialIndividual
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko import gecko
-from ariel.simulation.environments.simple_flat_world import SimpleFlatWorld
+from ariel.simulation.environments import SimpleFlatWorld
 from hyperneat import CPPN, SubstrateNetwork, create_substrate_for_gecko
 
 def evaluate_population(

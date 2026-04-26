@@ -1,5 +1,7 @@
+import collections.abc
 import mujoco._render
 import numpy
+import typing
 from typing import ClassVar
 
 class Mutex:
@@ -44,48 +46,61 @@ class Simulate:
         """lock(self: mujoco._simulate.Simulate) -> mujoco._simulate.Mutex"""
     def render_loop(self) -> None:
         """render_loop(self: mujoco._simulate.Simulate) -> None"""
-    def set_figures(self, viewports_figures: list[tuple[mujoco._render.MjrRect, object]]) -> None:
-        """set_figures(self: mujoco._simulate.Simulate, viewports_figures: list[tuple[mujoco._render.MjrRect, object]]) -> None"""
-    def set_images(self, viewports_images: list[tuple[mujoco._render.MjrRect, numpy.ndarray]]) -> None:
-        """set_images(self: mujoco._simulate.Simulate, viewports_images: list[tuple[mujoco._render.MjrRect, numpy.ndarray]]) -> None"""
-    def set_texts(self, overlay_texts: list[tuple[int, int, str, str]]) -> None:
-        """set_texts(self: mujoco._simulate.Simulate, overlay_texts: list[tuple[int, int, str, str]]) -> None"""
-    def sync(self) -> None:
-        """sync(self: mujoco._simulate.Simulate) -> None"""
+    def set_figures(self, viewports_figures: collections.abc.Sequence[tuple[mujoco._render.MjrRect, object]]) -> None:
+        """set_figures(self: mujoco._simulate.Simulate, viewports_figures: collections.abc.Sequence[tuple[mujoco._render.MjrRect, object]]) -> None"""
+    def set_images(self, viewports_images: collections.abc.Sequence[tuple[mujoco._render.MjrRect, numpy.ndarray]]) -> None:
+        """set_images(self: mujoco._simulate.Simulate, viewports_images: collections.abc.Sequence[tuple[mujoco._render.MjrRect, numpy.ndarray]]) -> None"""
+    def set_texts(self, overlay_texts: collections.abc.Sequence[tuple[typing.SupportsInt, typing.SupportsInt, str, str]]) -> None:
+        """set_texts(self: mujoco._simulate.Simulate, overlay_texts: collections.abc.Sequence[tuple[typing.SupportsInt, typing.SupportsInt, str, str]]) -> None"""
+    def sync(self, state_only: bool = ...) -> None:
+        """sync(self: mujoco._simulate.Simulate, state_only: bool = False) -> None"""
     def uiloadrequest_decrement(self) -> None:
         """uiloadrequest_decrement(self: mujoco._simulate.Simulate) -> None"""
-    def update_hfield(self, arg0: int) -> None:
-        """update_hfield(self: mujoco._simulate.Simulate, arg0: int) -> None"""
-    def update_mesh(self, arg0: int) -> None:
-        """update_mesh(self: mujoco._simulate.Simulate, arg0: int) -> None"""
-    def update_texture(self, arg0: int) -> None:
-        """update_texture(self: mujoco._simulate.Simulate, arg0: int) -> None"""
+    def update_hfield(self, arg0: typing.SupportsInt) -> None:
+        """update_hfield(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt) -> None"""
+    def update_mesh(self, arg0: typing.SupportsInt) -> None:
+        """update_mesh(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt) -> None"""
+    def update_texture(self, arg0: typing.SupportsInt) -> None:
+        """update_texture(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt) -> None"""
     @property
-    def busywait(self) -> int: ...
+    def busywait(self) -> int:
+        """(arg0: mujoco._simulate.Simulate) -> int"""
     @property
-    def ctrl_noise_rate(self) -> float: ...
+    def ctrl_noise_rate(self) -> float:
+        """(arg0: mujoco._simulate.Simulate) -> float"""
     @property
-    def ctrl_noise_std(self) -> float: ...
+    def ctrl_noise_std(self) -> float:
+        """(arg0: mujoco._simulate.Simulate) -> float"""
     @property
-    def d(self) -> object: ...
+    def d(self) -> object:
+        """(arg0: mujoco._simulate.Simulate) -> object"""
     @property
-    def dropfilename(self) -> str: ...
+    def dropfilename(self) -> str:
+        """(arg0: mujoco._simulate.Simulate) -> str"""
     @property
-    def exitrequest(self) -> int: ...
+    def exitrequest(self) -> int:
+        """(arg0: mujoco._simulate.Simulate) -> int"""
     @property
-    def filename(self) -> str: ...
+    def filename(self) -> str:
+        """(arg0: mujoco._simulate.Simulate) -> str"""
     @property
-    def m(self) -> object: ...
+    def m(self) -> object:
+        """(arg0: mujoco._simulate.Simulate) -> object"""
     @property
-    def real_time_index(self) -> int: ...
+    def real_time_index(self) -> int:
+        """(arg0: mujoco._simulate.Simulate) -> int"""
     @property
-    def refresh_rate(self) -> int: ...
+    def refresh_rate(self) -> int:
+        """(arg0: mujoco._simulate.Simulate) -> int"""
     @property
-    def run(self) -> int: ...
+    def run(self) -> int:
+        """(arg0: mujoco._simulate.Simulate) -> int"""
     @property
-    def uiloadrequest(self) -> int: ...
+    def uiloadrequest(self) -> int:
+        """(arg0: mujoco._simulate.Simulate) -> int"""
     @property
-    def viewport(self) -> mujoco._render.MjrRect: ...
+    def viewport(self) -> mujoco._render.MjrRect:
+        """(arg0: mujoco._simulate.Simulate) -> mujoco._render.MjrRect"""
 
-def set_glfw_dlhandle(arg0: int) -> None:
-    """set_glfw_dlhandle(arg0: int) -> None"""
+def set_glfw_dlhandle(arg0: typing.SupportsInt) -> None:
+    """set_glfw_dlhandle(arg0: typing.SupportsInt) -> None"""

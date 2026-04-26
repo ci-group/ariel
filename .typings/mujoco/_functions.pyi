@@ -1,16 +1,18 @@
 import flags
 import mujoco._structs
 import numpy
+import numpy.typing
+import typing
 
-def _realloc_con_efc(d: mujoco._structs.MjData, ncon: int, nefc: int) -> None:
-    """_realloc_con_efc(d: mujoco._structs.MjData, ncon: int, nefc: int) -> None"""
+def _realloc_con_efc(d: mujoco._structs.MjData, ncon: typing.SupportsInt, nefc: typing.SupportsInt, nJ: typing.SupportsInt = ...) -> None:
+    """_realloc_con_efc(d: mujoco._structs.MjData, ncon: typing.SupportsInt, nefc: typing.SupportsInt, nJ: typing.SupportsInt = -1) -> None"""
 def mj_Euler(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_Euler(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
     Euler integrator, semi-implicit in velocity.
     """
-def mj_RungeKutta(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, N: int) -> None:
-    """mj_RungeKutta(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, N: int) -> None
+def mj_RungeKutta(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, N: typing.SupportsInt) -> None:
+    """mj_RungeKutta(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, N: typing.SupportsInt) -> None
 
     Runge-Kutta explicit order-N integrator.
     """
@@ -19,21 +21,21 @@ def mj_addContact(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, con: mu
 
     Add contact to d->contact list; return 0 if success; 1 if buffer full.
     """
-def mj_addM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, dst: numpy.ndarray[numpy.float64[m, 1], flags.writeable], rownnz: numpy.ndarray[numpy.int32[m, 1], flags.writeable], rowadr: numpy.ndarray[numpy.int32[m, 1], flags.writeable], colind: numpy.ndarray[numpy.int32[m, 1], flags.writeable]) -> None:
-    """mj_addM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, dst: numpy.ndarray[numpy.float64[m, 1], flags.writeable], rownnz: numpy.ndarray[numpy.int32[m, 1], flags.writeable], rowadr: numpy.ndarray[numpy.int32[m, 1], flags.writeable], colind: numpy.ndarray[numpy.int32[m, 1], flags.writeable]) -> None
+def mj_addM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, dst: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], rownnz: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable'], rowadr: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable'], colind: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable']) -> None:
+    '''mj_addM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, dst: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], rownnz: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"], rowadr: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"], colind: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"]) -> None
 
-    Add inertia matrix to destination matrix. Destination can be sparse uncompressed, or dense when all int* are NULL
-    """
-def mj_angmomMat(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, mat: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], body: int) -> None:
-    """mj_angmomMat(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, mat: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], body: int) -> None
+    Add inertia matrix to destination matrix (lower triangle only). Destination can be sparse or dense when all int* are NULL.
+    '''
+def mj_angmomMat(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], body: typing.SupportsInt) -> None:
+    '''mj_angmomMat(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], body: typing.SupportsInt) -> None
 
     Compute subtree angular momentum matrix.
-    """
-def mj_applyFT(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, force: numpy.ndarray[numpy.float64[3, 1]], torque: numpy.ndarray[numpy.float64[3, 1]], point: numpy.ndarray[numpy.float64[3, 1]], body: int, qfrc_target: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None:
-    """mj_applyFT(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, force: numpy.ndarray[numpy.float64[3, 1]], torque: numpy.ndarray[numpy.float64[3, 1]], point: numpy.ndarray[numpy.float64[3, 1]], body: int, qfrc_target: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None
+    '''
+def mj_applyFT(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, force: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], torque: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], point: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], body: typing.SupportsInt, qfrc_target: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> None:
+    '''mj_applyFT(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, force: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], torque: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], point: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], body: typing.SupportsInt, qfrc_target: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> None
 
     Apply Cartesian force and torque (outside xfrc_applied mechanism).
-    """
+    '''
 def mj_camlight(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_camlight(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -74,16 +76,16 @@ def mj_compareFwdInv(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> N
 
     Compare forward and inverse dynamics, save results in fwdinv.
     """
-def mj_constraintUpdate(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jar: numpy.ndarray[numpy.float64[m, 1]], cost: numpy.ndarray[numpy.float64[1, 1], flags.writeable] | None, flg_coneHessian: int) -> None:
-    """mj_constraintUpdate(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jar: numpy.ndarray[numpy.float64[m, 1]], cost: Optional[numpy.ndarray[numpy.float64[1, 1], flags.writeable]], flg_coneHessian: int) -> None
+def mj_constraintUpdate(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jar: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], cost: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[1, 1]', 'flags.writeable'] | None, flg_coneHessian: typing.SupportsInt) -> None:
+    '''mj_constraintUpdate(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jar: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], cost: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[1, 1]", "flags.writeable"] | None, flg_coneHessian: typing.SupportsInt) -> None
 
     Compute efc_state, efc_force, qfrc_constraint, and (optionally) cone Hessians. If cost is not NULL, set *cost = s(jar) where jar = Jac*qacc-aref.
-    """
-def mj_contactForce(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, id: int, result: numpy.ndarray[numpy.float64[6, 1], flags.writeable]) -> None:
-    """mj_contactForce(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, id: int, result: numpy.ndarray[numpy.float64[6, 1], flags.writeable]) -> None
+    '''
+def mj_contactForce(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, id: typing.SupportsInt, result: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[6, 1]', 'flags.writeable']) -> None:
+    '''mj_contactForce(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, id: typing.SupportsInt, result: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[6, 1]", "flags.writeable"]) -> None
 
     Extract 6D force:torque given contact id, in the contact frame.
-    """
+    '''
 def mj_crb(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_crb(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -99,8 +101,8 @@ def mj_defaultOption(opt: mujoco._structs.MjOption) -> None:
 
     Set physics options to default values.
     """
-def mj_defaultSolRefImp(solref: float, solimp: float) -> None:
-    """mj_defaultSolRefImp(solref: float, solimp: float) -> None
+def mj_defaultSolRefImp(solref: typing.SupportsFloat, solimp: typing.SupportsFloat) -> None:
+    """mj_defaultSolRefImp(solref: typing.SupportsFloat, solimp: typing.SupportsFloat) -> None
 
     Set solver parameters to default values.
     """
@@ -109,11 +111,11 @@ def mj_defaultVisual(vis: mujoco._structs.MjVisual) -> None:
 
     Set visual options to default values.
     """
-def mj_differentiatePos(m: mujoco._structs.MjModel, qvel: numpy.ndarray[numpy.float64[m, 1], flags.writeable], dt: float, qpos1: numpy.ndarray[numpy.float64[m, 1]], qpos2: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mj_differentiatePos(m: mujoco._structs.MjModel, qvel: numpy.ndarray[numpy.float64[m, 1], flags.writeable], dt: float, qpos1: numpy.ndarray[numpy.float64[m, 1]], qpos2: numpy.ndarray[numpy.float64[m, 1]]) -> None
+def mj_differentiatePos(m: mujoco._structs.MjModel, qvel: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], dt: typing.SupportsFloat, qpos1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], qpos2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mj_differentiatePos(m: mujoco._structs.MjModel, qvel: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], dt: typing.SupportsFloat, qpos1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], qpos2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Compute velocity by finite-differencing two positions.
-    """
+    '''
 def mj_energyPos(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_energyPos(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -139,16 +141,16 @@ def mj_forward(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
 
     Forward dynamics: same as mj_step but do not integrate in time.
     """
-def mj_forwardSkip(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, skipstage: int, skipsensor: int) -> None:
-    """mj_forwardSkip(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, skipstage: int, skipsensor: int) -> None
+def mj_forwardSkip(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, skipstage: typing.SupportsInt, skipsensor: typing.SupportsInt) -> None:
+    """mj_forwardSkip(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, skipstage: typing.SupportsInt, skipsensor: typing.SupportsInt) -> None
 
     Forward dynamics with skip; skipstage is mjtStage.
     """
-def mj_fullM(m: mujoco._structs.MjModel, dst: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], M: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mj_fullM(m: mujoco._structs.MjModel, dst: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], M: numpy.ndarray[numpy.float64[m, 1]]) -> None
+def mj_fullM(m: mujoco._structs.MjModel, dst: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], M: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mj_fullM(m: mujoco._structs.MjModel, dst: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], M: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Convert sparse inertia matrix M into full (i.e. dense) matrix.
-    """
+    '''
 def mj_fwdAcceleration(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_fwdAcceleration(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -174,23 +176,23 @@ def mj_fwdVelocity(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> Non
 
     Run velocity-dependent computations.
     """
-def mj_geomDistance(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geom1: int, geom2: int, distmax: float, fromto: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None) -> float:
-    """mj_geomDistance(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geom1: int, geom2: int, distmax: float, fromto: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]]) -> float
+def mj_geomDistance(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geom1: typing.SupportsInt, geom2: typing.SupportsInt, distmax: typing.SupportsFloat, fromto: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None) -> float:
+    '''mj_geomDistance(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geom1: typing.SupportsInt, geom2: typing.SupportsInt, distmax: typing.SupportsFloat, fromto: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None) -> float
 
     Returns smallest signed distance between two geoms and optionally segment from geom1 to geom2.
-    """
-def mj_getState(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, state: numpy.ndarray[numpy.float64[m, 1], flags.writeable], spec: int) -> None:
-    """mj_getState(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, state: numpy.ndarray[numpy.float64[m, 1], flags.writeable], spec: int) -> None
+    '''
+def mj_getState(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, state: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], sig: typing.SupportsInt) -> None:
+    '''mj_getState(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, state: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], sig: typing.SupportsInt) -> None
 
     Get state.
-    """
+    '''
 def mj_getTotalmass(m: mujoco._structs.MjModel) -> float:
     """mj_getTotalmass(m: mujoco._structs.MjModel) -> float
 
     Sum all body masses.
     """
-def mj_id2name(m: mujoco._structs.MjModel, type: int, id: int) -> str:
-    """mj_id2name(m: mujoco._structs.MjModel, type: int, id: int) -> str
+def mj_id2name(m: mujoco._structs.MjModel, type: typing.SupportsInt, id: typing.SupportsInt) -> str:
+    """mj_id2name(m: mujoco._structs.MjModel, type: typing.SupportsInt, id: typing.SupportsInt) -> str
 
     Get name of object with the specified mjtObj type and id, returns NULL if name not found.
     """
@@ -199,11 +201,11 @@ def mj_implicit(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
 
     Implicit-in-velocity integrators.
     """
-def mj_integratePos(m: mujoco._structs.MjModel, qpos: numpy.ndarray[numpy.float64[m, 1], flags.writeable], qvel: numpy.ndarray[numpy.float64[m, 1]], dt: float) -> None:
-    """mj_integratePos(m: mujoco._structs.MjModel, qpos: numpy.ndarray[numpy.float64[m, 1], flags.writeable], qvel: numpy.ndarray[numpy.float64[m, 1]], dt: float) -> None
+def mj_integratePos(m: mujoco._structs.MjModel, qpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], qvel: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], dt: typing.SupportsFloat) -> None:
+    '''mj_integratePos(m: mujoco._structs.MjModel, qpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], qvel: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], dt: typing.SupportsFloat) -> None
 
     Integrate position with given velocity.
-    """
+    '''
 def mj_invConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_invConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -224,8 +226,8 @@ def mj_inverse(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
 
     Inverse dynamics: qacc must be set before calling.
     """
-def mj_inverseSkip(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, skipstage: int, skipsensor: int) -> None:
-    """mj_inverseSkip(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, skipstage: int, skipsensor: int) -> None
+def mj_inverseSkip(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, skipstage: typing.SupportsInt, skipsensor: typing.SupportsInt) -> None:
+    """mj_inverseSkip(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, skipstage: typing.SupportsInt, skipsensor: typing.SupportsInt) -> None
 
     Inverse dynamics with skip; skipstage is mjtStage.
     """
@@ -249,46 +251,46 @@ def mj_island(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
 
     Find constraint islands.
     """
-def mj_jac(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, jacr: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, point: numpy.ndarray[numpy.float64[3, 1]], body: int) -> None:
-    """mj_jac(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], jacr: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], point: numpy.ndarray[numpy.float64[3, 1]], body: int) -> None
+def mj_jac(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, point: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], body: typing.SupportsInt) -> None:
+    '''mj_jac(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, point: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], body: typing.SupportsInt) -> None
 
     Compute 3/6-by-nv end-effector Jacobian of global point attached to given body.
-    """
-def mj_jacBody(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, jacr: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, body: int) -> None:
-    """mj_jacBody(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], jacr: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], body: int) -> None
+    '''
+def mj_jacBody(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, body: typing.SupportsInt) -> None:
+    '''mj_jacBody(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, body: typing.SupportsInt) -> None
 
     Compute body frame end-effector Jacobian.
-    """
-def mj_jacBodyCom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, jacr: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, body: int) -> None:
-    """mj_jacBodyCom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], jacr: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], body: int) -> None
+    '''
+def mj_jacBodyCom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, body: typing.SupportsInt) -> None:
+    '''mj_jacBodyCom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, body: typing.SupportsInt) -> None
 
     Compute body center-of-mass end-effector Jacobian.
-    """
-def mj_jacDot(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, jacr: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, point: numpy.ndarray[numpy.float64[3, 1]], body: int) -> None:
-    """mj_jacDot(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], jacr: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], point: numpy.ndarray[numpy.float64[3, 1]], body: int) -> None
+    '''
+def mj_jacDot(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, point: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], body: typing.SupportsInt) -> None:
+    '''mj_jacDot(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, point: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], body: typing.SupportsInt) -> None
 
     Compute 3/6-by-nv Jacobian time derivative of global point attached to given body.
-    """
-def mj_jacGeom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, jacr: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, geom: int) -> None:
-    """mj_jacGeom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], jacr: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], geom: int) -> None
+    '''
+def mj_jacGeom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, geom: typing.SupportsInt) -> None:
+    '''mj_jacGeom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, geom: typing.SupportsInt) -> None
 
     Compute geom end-effector Jacobian.
-    """
-def mj_jacPointAxis(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacPoint: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, jacAxis: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, point: numpy.ndarray[numpy.float64[3, 1]], axis: numpy.ndarray[numpy.float64[3, 1]], body: int) -> None:
-    """mj_jacPointAxis(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacPoint: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], jacAxis: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], point: numpy.ndarray[numpy.float64[3, 1]], axis: numpy.ndarray[numpy.float64[3, 1]], body: int) -> None
+    '''
+def mj_jacPointAxis(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacPoint: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, jacAxis: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, point: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], axis: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], body: typing.SupportsInt) -> None:
+    '''mj_jacPointAxis(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacPoint: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, jacAxis: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, point: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], axis: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], body: typing.SupportsInt) -> None
 
     Compute translation end-effector Jacobian of point, and rotation Jacobian of axis.
-    """
-def mj_jacSite(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, jacr: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, site: int) -> None:
-    """mj_jacSite(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], jacr: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], site: int) -> None
+    '''
+def mj_jacSite(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, site: typing.SupportsInt) -> None:
+    '''mj_jacSite(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, jacr: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, site: typing.SupportsInt) -> None
 
     Compute site end-effector Jacobian.
-    """
-def mj_jacSubtreeCom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, body: int) -> None:
-    """mj_jacSubtreeCom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], body: int) -> None
+    '''
+def mj_jacSubtreeCom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, body: typing.SupportsInt) -> None:
+    '''mj_jacSubtreeCom(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, jacp: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, body: typing.SupportsInt) -> None
 
     Compute subtree center-of-mass end-effector Jacobian.
-    """
+    '''
 def mj_kinematics(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_kinematics(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -304,61 +306,66 @@ def mj_loadPluginLibrary(path: str) -> None:
 
     Load a dynamic library. The dynamic library is assumed to register one or more plugins.
     """
-def mj_local2Global(d: mujoco._structs.MjData, xpos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], xmat: numpy.ndarray[numpy.float64[9, 1], flags.writeable], pos: numpy.ndarray[numpy.float64[3, 1]], quat: numpy.ndarray[numpy.float64[4, 1]], body: int, sameframe: int) -> None:
-    """mj_local2Global(d: mujoco._structs.MjData, xpos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], xmat: numpy.ndarray[numpy.float64[9, 1], flags.writeable], pos: numpy.ndarray[numpy.float64[3, 1]], quat: numpy.ndarray[numpy.float64[4, 1]], body: int, sameframe: int) -> None
+def mj_local2Global(d: mujoco._structs.MjData, xpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], xmat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]', 'flags.writeable'], pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], body: typing.SupportsInt, sameframe: typing.SupportsInt) -> None:
+    '''mj_local2Global(d: mujoco._structs.MjData, xpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], xmat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]", "flags.writeable"], pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], body: typing.SupportsInt, sameframe: typing.SupportsInt) -> None
 
     Map from body local to global Cartesian coordinates, sameframe takes values from mjtSameFrame.
-    """
+    '''
 def mj_makeConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_makeConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
     Construct constraints.
     """
-def mj_mulJacTVec(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mj_mulJacTVec(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+def mj_makeM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
+    """mj_makeM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
+
+    Make inertia matrix.
+    """
+def mj_mulJacTVec(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mj_mulJacTVec(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Multiply dense or sparse constraint Jacobian transpose by vector.
-    """
-def mj_mulJacVec(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mj_mulJacVec(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mj_mulJacVec(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mj_mulJacVec(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Multiply dense or sparse constraint Jacobian by vector.
-    """
-def mj_mulM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mj_mulM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mj_mulM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mj_mulM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Multiply vector by inertia matrix.
-    """
-def mj_mulM2(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mj_mulM2(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mj_mulM2(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mj_mulM2(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Multiply vector by (inertia matrix)^(1/2).
-    """
-def mj_multiRay(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[m, 1]], geomgroup: numpy.ndarray[numpy.uint8[6, 1]] | None, flg_static: int, bodyexclude: int, geomid: numpy.ndarray[numpy.int32[m, 1], flags.writeable], dist: numpy.ndarray[numpy.float64[m, 1], flags.writeable], nray: int, cutoff: float) -> None:
-    """mj_multiRay(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[m, 1]], geomgroup: Optional[numpy.ndarray[numpy.uint8[6, 1]]], flg_static: int, bodyexclude: int, geomid: numpy.ndarray[numpy.int32[m, 1], flags.writeable], dist: numpy.ndarray[numpy.float64[m, 1], flags.writeable], nray: int, cutoff: float) -> None
+    '''
+def mj_multiRay(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], geomgroup: typing.Annotated[numpy.typing.NDArray[numpy.uint8], '[6, 1]'] | None, flg_static: typing.SupportsInt, bodyexclude: typing.SupportsInt, geomid: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable'], dist: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], nray: typing.SupportsInt, cutoff: typing.SupportsFloat) -> None:
+    '''mj_multiRay(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], geomgroup: typing.Annotated[numpy.typing.NDArray[numpy.uint8], "[6, 1]"] | None, flg_static: typing.SupportsInt, bodyexclude: typing.SupportsInt, geomid: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"], dist: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], nray: typing.SupportsInt, cutoff: typing.SupportsFloat) -> None
 
     Intersect multiple rays emanating from a single point. Similar semantics to mj_ray, but vec is an array of (nray x 3) directions.
-    """
-def mj_name2id(m: mujoco._structs.MjModel, type: int, name: str) -> int:
-    """mj_name2id(m: mujoco._structs.MjModel, type: int, name: str) -> int
+    '''
+def mj_name2id(m: mujoco._structs.MjModel, type: typing.SupportsInt, name: str) -> int:
+    """mj_name2id(m: mujoco._structs.MjModel, type: typing.SupportsInt, name: str) -> int
 
     Get id of object with the specified mjtObj type and name, returns -1 if id not found.
     """
-def mj_normalizeQuat(m: mujoco._structs.MjModel, qpos: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None:
-    """mj_normalizeQuat(m: mujoco._structs.MjModel, qpos: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None
+def mj_normalizeQuat(m: mujoco._structs.MjModel, qpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> None:
+    '''mj_normalizeQuat(m: mujoco._structs.MjModel, qpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> None
 
     Normalize all quaternions in qpos-type vector.
-    """
-def mj_objectAcceleration(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, objtype: int, objid: int, res: numpy.ndarray[numpy.float64[6, 1], flags.writeable], flg_local: int) -> None:
-    """mj_objectAcceleration(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, objtype: int, objid: int, res: numpy.ndarray[numpy.float64[6, 1], flags.writeable], flg_local: int) -> None
+    '''
+def mj_objectAcceleration(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, objtype: typing.SupportsInt, objid: typing.SupportsInt, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[6, 1]', 'flags.writeable'], flg_local: typing.SupportsInt) -> None:
+    '''mj_objectAcceleration(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, objtype: typing.SupportsInt, objid: typing.SupportsInt, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[6, 1]", "flags.writeable"], flg_local: typing.SupportsInt) -> None
 
     Compute object 6D acceleration (rot:lin) in object-centered frame, world/local orientation.
-    """
-def mj_objectVelocity(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, objtype: int, objid: int, res: numpy.ndarray[numpy.float64[6, 1], flags.writeable], flg_local: int) -> None:
-    """mj_objectVelocity(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, objtype: int, objid: int, res: numpy.ndarray[numpy.float64[6, 1], flags.writeable], flg_local: int) -> None
+    '''
+def mj_objectVelocity(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, objtype: typing.SupportsInt, objid: typing.SupportsInt, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[6, 1]', 'flags.writeable'], flg_local: typing.SupportsInt) -> None:
+    '''mj_objectVelocity(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, objtype: typing.SupportsInt, objid: typing.SupportsInt, res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[6, 1]", "flags.writeable"], flg_local: typing.SupportsInt) -> None
 
     Compute object 6D velocity (rot:lin) in object-centered frame, world/local orientation.
-    """
+    '''
 def mj_passive(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_passive(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -394,21 +401,21 @@ def mj_projectConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) 
 
     Compute inverse constraint inertia efc_AR.
     """
-def mj_ray(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]], geomgroup: numpy.ndarray[numpy.uint8[6, 1]] | None, flg_static: int, bodyexclude: int, geomid: numpy.ndarray[numpy.int32[1, 1], flags.writeable]) -> float:
-    """mj_ray(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]], geomgroup: Optional[numpy.ndarray[numpy.uint8[6, 1]]], flg_static: int, bodyexclude: int, geomid: numpy.ndarray[numpy.int32[1, 1], flags.writeable]) -> float
+def mj_ray(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], geomgroup: typing.Annotated[numpy.typing.NDArray[numpy.uint8], '[6, 1]'] | None, flg_static: typing.SupportsInt, bodyexclude: typing.SupportsInt, geomid: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[1, 1]', 'flags.writeable']) -> float:
+    '''mj_ray(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], geomgroup: typing.Annotated[numpy.typing.NDArray[numpy.uint8], "[6, 1]"] | None, flg_static: typing.SupportsInt, bodyexclude: typing.SupportsInt, geomid: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[1, 1]", "flags.writeable"]) -> float
 
     Intersect ray (pnt+x*vec, x>=0) with visible geoms, except geoms in bodyexclude. Return distance (x) to nearest surface, or -1 if no intersection and output geomid. geomgroup, flg_static are as in mjvOption; geomgroup==NULL skips group exclusion.
-    """
-def mj_rayHfield(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geomid: int, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> float:
-    """mj_rayHfield(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geomid: int, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> float
+    '''
+def mj_rayHfield(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geomid: typing.SupportsInt, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> float:
+    '''mj_rayHfield(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geomid: typing.SupportsInt, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> float
 
     Intersect ray with hfield, return nearest distance or -1 if no intersection.
-    """
-def mj_rayMesh(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geomid: int, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> float:
-    """mj_rayMesh(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geomid: int, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> float
+    '''
+def mj_rayMesh(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geomid: typing.SupportsInt, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> float:
+    '''mj_rayMesh(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, geomid: typing.SupportsInt, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> float
 
     Intersect ray with mesh, return nearest distance or -1 if no intersection.
-    """
+    '''
 def mj_referenceConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_referenceConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -424,21 +431,21 @@ def mj_resetData(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
 
     Reset data to defaults.
     """
-def mj_resetDataDebug(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, debug_value: int) -> None:
-    """mj_resetDataDebug(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, debug_value: int) -> None
+def mj_resetDataDebug(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, debug_value: typing.SupportsInt) -> None:
+    """mj_resetDataDebug(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, debug_value: typing.SupportsInt) -> None
 
     Reset data to defaults, fill everything else with debug_value.
     """
-def mj_resetDataKeyframe(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, key: int) -> None:
-    """mj_resetDataKeyframe(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, key: int) -> None
+def mj_resetDataKeyframe(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, key: typing.SupportsInt) -> None:
+    """mj_resetDataKeyframe(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, key: typing.SupportsInt) -> None
 
     Reset data. If 0 <= key < nkey, set fields from specified keyframe.
     """
-def mj_rne(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, flg_acc: int, result: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None:
-    """mj_rne(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, flg_acc: int, result: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None
+def mj_rne(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, flg_acc: typing.SupportsInt, result: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> None:
+    '''mj_rne(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, flg_acc: typing.SupportsInt, result: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> None
 
     RNE: compute M(qpos)*qacc + C(qpos,qvel); flg_acc=0 removes inertial term.
-    """
+    '''
 def mj_rnePostConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_rnePostConstraint(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -449,11 +456,11 @@ def mj_saveLastXML(filename: str, m: mujoco._structs.MjModel) -> None:
 
     Update XML data structures with info from low-level model created with mj_loadXML, save as MJCF. If error is not NULL, it must have size error_sz.
     """
-def mj_saveModel(m: mujoco._structs.MjModel, filename: str | None = ..., buffer: numpy.ndarray[numpy.uint8[m, 1], flags.writeable] | None = ...) -> None:
-    """mj_saveModel(m: mujoco._structs.MjModel, filename: Optional[str] = None, buffer: Optional[numpy.ndarray[numpy.uint8[m, 1], flags.writeable]] = None) -> None
+def mj_saveModel(m: mujoco._structs.MjModel, filename: str | None = ..., buffer: typing.Annotated[numpy.typing.NDArray[numpy.uint8], '[m, 1]', 'flags.writeable'] | None = ...) -> None:
+    '''mj_saveModel(m: mujoco._structs.MjModel, filename: str | None = None, buffer: typing.Annotated[numpy.typing.NDArray[numpy.uint8], "[m, 1]", "flags.writeable"] | None = None) -> None
 
     Save model to binary MJB file or memory buffer; buffer has precedence when given.
-    """
+    '''
 def mj_sensorAcc(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
     """mj_sensorAcc(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None
 
@@ -474,23 +481,23 @@ def mj_setConst(m: mujoco._structs.MjModel, d: mujoco._structs.MjData) -> None:
 
     Set constant fields of mjModel, corresponding to qpos0 configuration.
     """
-def mj_setKeyframe(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, k: int) -> None:
-    """mj_setKeyframe(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, k: int) -> None
+def mj_setKeyframe(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, k: typing.SupportsInt) -> None:
+    """mj_setKeyframe(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, k: typing.SupportsInt) -> None
 
     Copy current state to the k-th model keyframe.
     """
-def mj_setLengthRange(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, index: int, opt: mujoco._structs.MjLROpt) -> None:
-    """mj_setLengthRange(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, index: int, opt: mujoco._structs.MjLROpt) -> None
+def mj_setLengthRange(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, index: typing.SupportsInt, opt: mujoco._structs.MjLROpt) -> None:
+    """mj_setLengthRange(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, index: typing.SupportsInt, opt: mujoco._structs.MjLROpt) -> None
 
     Set actuator_lengthrange for specified actuator; return 1 if ok, 0 if error.
     """
-def mj_setState(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, state: numpy.ndarray[numpy.float64[m, 1], flags.writeable], spec: int) -> None:
-    """mj_setState(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, state: numpy.ndarray[numpy.float64[m, 1], flags.writeable], spec: int) -> None
+def mj_setState(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, state: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], sig: typing.SupportsInt) -> None:
+    '''mj_setState(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, state: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], sig: typing.SupportsInt) -> None
 
     Set state.
-    """
-def mj_setTotalmass(m: mujoco._structs.MjModel, newmass: float) -> None:
-    """mj_setTotalmass(m: mujoco._structs.MjModel, newmass: float) -> None
+    '''
+def mj_setTotalmass(m: mujoco._structs.MjModel, newmass: typing.SupportsFloat) -> None:
+    """mj_setTotalmass(m: mujoco._structs.MjModel, newmass: typing.SupportsFloat) -> None
 
     Scale body masses and inertias to achieve specified total mass.
     """
@@ -499,23 +506,23 @@ def mj_sizeModel(m: mujoco._structs.MjModel) -> int:
 
     Return size of buffer needed to hold model.
     """
-def mj_solveM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, x: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], y: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None:
-    """mj_solveM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, x: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], y: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None
+def mj_solveM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, x: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], y: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous']) -> None:
+    '''mj_solveM(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, x: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], y: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"]) -> None
 
-    Solve linear system M * x = y using factorization:  x = inv(L'*D*L)*y
-    """
-def mj_solveM2(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, x: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], y: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], sqrtInvD: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None:
-    """mj_solveM2(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, x: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], y: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], sqrtInvD: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None
+    Solve linear system M * x = y using factorization:  x = inv(L\'*D*L)*y
+    '''
+def mj_solveM2(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, x: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], y: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], sqrtInvD: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous']) -> None:
+    '''mj_solveM2(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, x: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], y: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], sqrtInvD: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"]) -> None
 
-    Half of linear solve:  x = sqrt(inv(D))*inv(L')*y
-    """
-def mj_stateSize(m: mujoco._structs.MjModel, spec: int) -> int:
-    """mj_stateSize(m: mujoco._structs.MjModel, spec: int) -> int
+    Half of linear solve:  x = sqrt(inv(D))*inv(L\')*y
+    '''
+def mj_stateSize(m: mujoco._structs.MjModel, sig: typing.SupportsInt) -> int:
+    """mj_stateSize(m: mujoco._structs.MjModel, sig: typing.SupportsInt) -> int
 
-    Return size of state specification.
+    Return size of state signature.
     """
-def mj_step(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, nstep: int = ...) -> None:
-    """mj_step(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, nstep: int = 1) -> None
+def mj_step(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, nstep: typing.SupportsInt = ...) -> None:
+    """mj_step(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, nstep: typing.SupportsInt = 1) -> None
 
     Advance simulation, use control callback to obtain external force and control. Optionally, repeat nstep times.
     """
@@ -554,468 +561,468 @@ def mj_versionString() -> str:
 
     Return the current version of MuJoCo as a null-terminated string.
     """
-def mjd_inverseFD(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, eps: float, flg_actuation: int, DfDq: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, DfDv: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, DfDa: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, DsDq: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, DsDv: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, DsDa: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, DmDq: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None) -> None:
-    """mjd_inverseFD(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, eps: float, flg_actuation: int, DfDq: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], DfDv: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], DfDa: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], DsDq: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], DsDv: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], DsDa: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], DmDq: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]]) -> None
+def mjd_inverseFD(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, eps: typing.SupportsFloat, flg_actuation: typing.SupportsInt, DfDq: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, DfDv: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, DfDa: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, DsDq: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, DsDv: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, DsDa: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, DmDq: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None) -> None:
+    '''mjd_inverseFD(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, eps: typing.SupportsFloat, flg_actuation: typing.SupportsInt, DfDq: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, DfDv: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, DfDa: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, DsDq: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, DsDv: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, DsDa: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, DmDq: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None) -> None
 
     Finite differenced Jacobians of (force, sensors) = mj_inverse(state, acceleration)   All outputs are optional. Output dimensions (transposed w.r.t Control Theory convention):     DfDq: (nv x nv)     DfDv: (nv x nv)     DfDa: (nv x nv)     DsDq: (nv x nsensordata)     DsDv: (nv x nsensordata)     DsDa: (nv x nsensordata)     DmDq: (nv x nM)   single-letter shortcuts:     inputs: q=qpos, v=qvel, a=qacc     outputs: f=qfrc_inverse, s=sensordata, m=qM   notes:     optionally computes mass matrix Jacobian DmDq     flg_actuation specifies whether to subtract qfrc_actuator from qfrc_inverse
-    """
-def mjd_quatIntegrate(vel: numpy.ndarray[numpy.float64[3, 1]], scale: float, Dquat: numpy.ndarray[numpy.float64[9, 1], flags.writeable], Dvel: numpy.ndarray[numpy.float64[9, 1], flags.writeable], Dscale: numpy.ndarray[numpy.float64[3, 1], flags.writeable]) -> None:
-    """mjd_quatIntegrate(vel: numpy.ndarray[numpy.float64[3, 1]], scale: float, Dquat: numpy.ndarray[numpy.float64[9, 1], flags.writeable], Dvel: numpy.ndarray[numpy.float64[9, 1], flags.writeable], Dscale: numpy.ndarray[numpy.float64[3, 1], flags.writeable]) -> None
+    '''
+def mjd_quatIntegrate(vel: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], scale: typing.SupportsFloat, Dquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]', 'flags.writeable'], Dvel: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]', 'flags.writeable'], Dscale: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable']) -> None:
+    '''mjd_quatIntegrate(vel: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], scale: typing.SupportsFloat, Dquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]", "flags.writeable"], Dvel: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]", "flags.writeable"], Dscale: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"]) -> None
 
     Derivatives of mju_quatIntegrate.
-    """
-def mjd_subQuat(qa: numpy.ndarray[numpy.float64[m, 1]], qb: numpy.ndarray[numpy.float64[m, 1]], Da: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, Db: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None) -> None:
-    """mjd_subQuat(qa: numpy.ndarray[numpy.float64[m, 1]], qb: numpy.ndarray[numpy.float64[m, 1]], Da: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], Db: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]]) -> None
+    '''
+def mjd_subQuat(qa: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], qb: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], Da: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, Db: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None) -> None:
+    '''mjd_subQuat(qa: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], qb: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], Da: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, Db: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None) -> None
 
     Derivatives of mju_subQuat.
-    """
-def mjd_transitionFD(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, eps: float, flg_centered: int, A: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, B: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, C: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None, D: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous] | None) -> None:
-    """mjd_transitionFD(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, eps: float, flg_centered: int, A: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], B: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], C: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]], D: Optional[numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]]) -> None
+    '''
+def mjd_transitionFD(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, eps: typing.SupportsFloat, flg_centered: typing.SupportsInt, A: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, B: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, C: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None, D: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'] | None) -> None:
+    '''mjd_transitionFD(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, eps: typing.SupportsFloat, flg_centered: typing.SupportsInt, A: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, B: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, C: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None, D: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"] | None) -> None
 
     Finite differenced transition matrices (control theory notation)   d(x_next) = A*dx + B*du   d(sensor) = C*dx + D*du   required output matrix dimensions:      A: (2*nv+na x 2*nv+na)      B: (2*nv+na x nu)      D: (nsensordata x 2*nv+na)      C: (nsensordata x nu)
-    """
-def mju_Halton(index: int, base: int) -> float:
-    """mju_Halton(index: int, base: int) -> float
+    '''
+def mju_Halton(index: typing.SupportsInt, base: typing.SupportsInt) -> float:
+    """mju_Halton(index: typing.SupportsInt, base: typing.SupportsInt) -> float
 
     Generate Halton sequence.
     """
-def mju_L1(vec: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> float:
-    """mju_L1(vec: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> float
+def mju_L1(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> float:
+    '''mju_L1(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> float
 
     Return L1 norm: sum(abs(vec)).
-    """
-def mju_add(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[m, 1]], vec2: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_add(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[m, 1]], vec2: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mju_add(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_add(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Set res = vec1 + vec2.
-    """
-def mju_add3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[3, 1]], vec2: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_add3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[3, 1]], vec2: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_add3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_add3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Set res = vec1 + vec2.
-    """
-def mju_addScl(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[m, 1]], vec2: numpy.ndarray[numpy.float64[m, 1]], scl: float) -> None:
-    """mju_addScl(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[m, 1]], vec2: numpy.ndarray[numpy.float64[m, 1]], scl: float) -> None
+    '''
+def mju_addScl(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], scl: typing.SupportsFloat) -> None:
+    '''mju_addScl(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], scl: typing.SupportsFloat) -> None
 
     Set res = vec1 + vec2*scl.
-    """
-def mju_addScl3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[3, 1]], vec2: numpy.ndarray[numpy.float64[3, 1]], scl: float) -> None:
-    """mju_addScl3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[3, 1]], vec2: numpy.ndarray[numpy.float64[3, 1]], scl: float) -> None
+    '''
+def mju_addScl3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], scl: typing.SupportsFloat) -> None:
+    '''mju_addScl3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], scl: typing.SupportsFloat) -> None
 
     Set res = vec1 + vec2*scl.
-    """
-def mju_addTo(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_addTo(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mju_addTo(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_addTo(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Set res = res + vec.
-    """
-def mju_addTo3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_addTo3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_addTo3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_addTo3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Set res = res + vec.
-    """
-def mju_addToScl(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]], scl: float) -> None:
-    """mju_addToScl(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]], scl: float) -> None
+    '''
+def mju_addToScl(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], scl: typing.SupportsFloat) -> None:
+    '''mju_addToScl(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], scl: typing.SupportsFloat) -> None
 
     Set res = res + vec*scl.
-    """
-def mju_addToScl3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]], scl: float) -> None:
-    """mju_addToScl3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]], scl: float) -> None
+    '''
+def mju_addToScl3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], scl: typing.SupportsFloat) -> None:
+    '''mju_addToScl3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], scl: typing.SupportsFloat) -> None
 
     Set res = res + vec*scl.
-    """
-def mju_axisAngle2Quat(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], axis: numpy.ndarray[numpy.float64[3, 1]], angle: float) -> None:
-    """mju_axisAngle2Quat(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], axis: numpy.ndarray[numpy.float64[3, 1]], angle: float) -> None
+    '''
+def mju_axisAngle2Quat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], axis: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], angle: typing.SupportsFloat) -> None:
+    '''mju_axisAngle2Quat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], axis: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], angle: typing.SupportsFloat) -> None
 
     Convert axisAngle to quaternion.
-    """
-def mju_band2Dense(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, 1]], ntotal: int, nband: int, ndense: int, flg_sym: int) -> None:
-    """mju_band2Dense(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, 1]], ntotal: int, nband: int, ndense: int, flg_sym: int) -> None
+    '''
+def mju_band2Dense(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt, flg_sym: typing.SupportsInt) -> None:
+    '''mju_band2Dense(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt, flg_sym: typing.SupportsInt) -> None
 
     Convert banded matrix to dense matrix, fill upper triangle if flg_sym>0.
-    """
-def mju_bandDiag(i: int, ntotal: int, nband: int, ndense: int) -> int:
-    """mju_bandDiag(i: int, ntotal: int, nband: int, ndense: int) -> int
+    '''
+def mju_bandDiag(i: typing.SupportsInt, ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt) -> int:
+    """mju_bandDiag(i: typing.SupportsInt, ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt) -> int
 
     Address of diagonal element i in band-dense matrix representation.
     """
-def mju_bandMulMatVec(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], ntotal: int, nband: int, ndense: int, nvec: int, flg_sym: int) -> None:
-    """mju_bandMulMatVec(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], ntotal: int, nband: int, ndense: int, nvec: int, flg_sym: int) -> None
+def mju_bandMulMatVec(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt, nvec: typing.SupportsInt, flg_sym: typing.SupportsInt) -> None:
+    '''mju_bandMulMatVec(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt, nvec: typing.SupportsInt, flg_sym: typing.SupportsInt) -> None
 
     Multiply band-diagonal matrix with nvec vectors, include upper triangle if flg_sym>0.
-    """
-def mju_boxQP(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], R: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], index: numpy.ndarray[numpy.int32[m, 1], flags.writeable] | None, H: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], g: numpy.ndarray[numpy.float64[m, 1]], lower: numpy.ndarray[numpy.float64[m, 1]] | None, upper: numpy.ndarray[numpy.float64[m, 1]] | None) -> int:
-    """mju_boxQP(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], R: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], index: Optional[numpy.ndarray[numpy.int32[m, 1], flags.writeable]], H: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], g: numpy.ndarray[numpy.float64[m, 1]], lower: Optional[numpy.ndarray[numpy.float64[m, 1]]], upper: Optional[numpy.ndarray[numpy.float64[m, 1]]]) -> int
+    '''
+def mju_boxQP(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], R: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], index: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable'] | None, H: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], g: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], lower: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'] | None, upper: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'] | None) -> int:
+    '''mju_boxQP(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], R: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], index: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"] | None, H: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], g: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], lower: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"] | None, upper: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"] | None) -> int
 
-    minimize 0.5*x'*H*x + x'*g  s.t. lower <= x <= upper, return rank or -1 if failed   inputs:     n           - problem dimension     H           - SPD matrix                n*n     g           - bias vector               n     lower       - lower bounds              n     upper       - upper bounds              n     res         - solution warmstart        n   return value:     nfree <= n  - rank of unconstrained subspace, -1 if failure   outputs (required):     res         - solution                  n     R           - subspace Cholesky factor  nfree*nfree    allocated: n*(n+7)   outputs (optional):     index       - set of free dimensions    nfree          allocated: n   notes:     the initial value of res is used to warmstart the solver     R must have allocatd size n*(n+7), but only nfree*nfree values are used in output     index (if given) must have allocated size n, but only nfree values are used in output     only the lower triangles of H and R and are read from and written to, respectively     the convenience function mju_boxQPmalloc allocates the required data structures
-    """
-def mju_cholFactor(mat: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mindiag: float) -> int:
-    """mju_cholFactor(mat: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mindiag: float) -> int
+    minimize 0.5*x\'*H*x + x\'*g  s.t. lower <= x <= upper, return rank or -1 if failed   inputs:     n           - problem dimension     H           - SPD matrix                n*n     g           - bias vector               n     lower       - lower bounds              n     upper       - upper bounds              n     res         - solution warmstart        n   return value:     nfree <= n  - rank of unconstrained subspace, -1 if failure   outputs (required):     res         - solution                  n     R           - subspace Cholesky factor  nfree*nfree    allocated: n*(n+7)   outputs (optional):     index       - set of free dimensions    nfree          allocated: n   notes:     the initial value of res is used to warmstart the solver     R must have allocatd size n*(n+7), but only nfree*nfree values are used in output     index (if given) must have allocated size n, but only nfree values are used in output     only the lower triangles of H and R and are read from and written to, respectively     the convenience function mju_boxQPmalloc allocates the required data structures
+    '''
+def mju_cholFactor(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mindiag: typing.SupportsFloat) -> int:
+    '''mju_cholFactor(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mindiag: typing.SupportsFloat) -> int
 
-    Cholesky decomposition: mat = L*L'; return rank, decomposition performed in-place into mat.
-    """
-def mju_cholFactorBand(mat: numpy.ndarray[numpy.float64[m, 1], flags.writeable], ntotal: int, nband: int, ndense: int, diagadd: float, diagmul: float) -> float:
-    """mju_cholFactorBand(mat: numpy.ndarray[numpy.float64[m, 1], flags.writeable], ntotal: int, nband: int, ndense: int, diagadd: float, diagmul: float) -> float
+    Cholesky decomposition: mat = L*L\'; return rank, decomposition performed in-place into mat.
+    '''
+def mju_cholFactorBand(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt, diagadd: typing.SupportsFloat, diagmul: typing.SupportsFloat) -> float:
+    '''mju_cholFactorBand(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt, diagadd: typing.SupportsFloat, diagmul: typing.SupportsFloat) -> float
 
     Band-dense Cholesky decomposition.  Returns minimum value in the factorized diagonal, or 0 if rank-deficient.  mat has (ntotal-ndense) x nband + ndense x ntotal elements.  The first (ntotal-ndense) x nband store the band part, left of diagonal, inclusive.  The second ndense x ntotal store the band part as entire dense rows.  Add diagadd+diagmul*mat_ii to diagonal before factorization.
-    """
-def mju_cholSolve(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_cholSolve(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mju_cholSolve(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_cholSolve(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
-    Solve (mat*mat') * res = vec, where mat is a Cholesky factor.
-    """
-def mju_cholSolveBand(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, 1]], vec: numpy.ndarray[numpy.float64[m, 1]], ntotal: int, nband: int, ndense: int) -> None:
-    """mju_cholSolveBand(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, 1]], vec: numpy.ndarray[numpy.float64[m, 1]], ntotal: int, nband: int, ndense: int) -> None
+    Solve (mat*mat\') * res = vec, where mat is a Cholesky factor.
+    '''
+def mju_cholSolveBand(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt) -> None:
+    '''mju_cholSolveBand(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt) -> None
 
-    Solve (mat*mat')*res = vec where mat is a band-dense Cholesky factor.
-    """
-def mju_cholUpdate(mat: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], x: numpy.ndarray[numpy.float64[m, 1], flags.writeable], flg_plus: int) -> int:
-    """mju_cholUpdate(mat: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], x: numpy.ndarray[numpy.float64[m, 1], flags.writeable], flg_plus: int) -> int
+    Solve (mat*mat\')*res = vec where mat is a band-dense Cholesky factor.
+    '''
+def mju_cholUpdate(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], x: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], flg_plus: typing.SupportsInt) -> int:
+    '''mju_cholUpdate(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], x: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], flg_plus: typing.SupportsInt) -> int
 
-    Cholesky rank-one update: L*L' +/- x*x'; return rank.
-    """
-def mju_clip(x: float, min: float, max: float) -> float:
-    """mju_clip(x: float, min: float, max: float) -> float
+    Cholesky rank-one update: L*L\' +/- x*x\'; return rank.
+    '''
+def mju_clip(x: typing.SupportsFloat, min: typing.SupportsFloat, max: typing.SupportsFloat) -> float:
+    """mju_clip(x: typing.SupportsFloat, min: typing.SupportsFloat, max: typing.SupportsFloat) -> float
 
     Clip x to the range [min, max].
     """
-def mju_copy(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_copy(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+def mju_copy(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_copy(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Set res = vec.
-    """
-def mju_copy3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], data: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_copy3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], data: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_copy3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], data: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_copy3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], data: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Set res = vec.
-    """
-def mju_copy4(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], data: numpy.ndarray[numpy.float64[4, 1]]) -> None:
-    """mju_copy4(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], data: numpy.ndarray[numpy.float64[4, 1]]) -> None
+    '''
+def mju_copy4(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], data: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]']) -> None:
+    '''mju_copy4(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], data: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"]) -> None
 
     Set res = vec.
-    """
-def mju_cross(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], a: numpy.ndarray[numpy.float64[3, 1]], b: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_cross(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], a: numpy.ndarray[numpy.float64[3, 1]], b: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_cross(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], a: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], b: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_cross(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], a: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], b: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Compute cross-product: res = cross(a, b).
-    """
-def mju_d2n(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_d2n(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mju_d2n(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_d2n(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Convert from double to mjtNum.
-    """
-def mju_decodePyramid(force: numpy.ndarray[numpy.float64[m, 1], flags.writeable], pyramid: numpy.ndarray[numpy.float64[m, 1]], mu: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_decodePyramid(force: numpy.ndarray[numpy.float64[m, 1], flags.writeable], pyramid: numpy.ndarray[numpy.float64[m, 1]], mu: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mju_decodePyramid(force: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], pyramid: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], mu: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_decodePyramid(force: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], pyramid: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], mu: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Convert pyramid representation to contact force.
-    """
-def mju_dense2Band(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], ntotal: int, nband: int, ndense: int) -> None:
-    """mju_dense2Band(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], ntotal: int, nband: int, ndense: int) -> None
+    '''
+def mju_dense2Band(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt) -> None:
+    '''mju_dense2Band(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], ntotal: typing.SupportsInt, nband: typing.SupportsInt, ndense: typing.SupportsInt) -> None
 
     Convert dense matrix to banded matrix.
-    """
-def mju_dense2sparse(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], rownnz: numpy.ndarray[numpy.int32[m, 1], flags.writeable], rowadr: numpy.ndarray[numpy.int32[m, 1], flags.writeable], colind: numpy.ndarray[numpy.int32[m, 1], flags.writeable]) -> int:
-    """mju_dense2sparse(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], rownnz: numpy.ndarray[numpy.int32[m, 1], flags.writeable], rowadr: numpy.ndarray[numpy.int32[m, 1], flags.writeable], colind: numpy.ndarray[numpy.int32[m, 1], flags.writeable]) -> int
+    '''
+def mju_dense2sparse(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], rownnz: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable'], rowadr: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable'], colind: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable']) -> int:
+    '''mju_dense2sparse(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], rownnz: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"], rowadr: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"], colind: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"]) -> int
 
     Convert matrix from dense to sparse.  nnz is size of res and colind, return 1 if too small, 0 otherwise.
-    """
-def mju_derivQuat(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]], vel: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_derivQuat(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]], vel: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_derivQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], vel: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_derivQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], vel: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Compute time-derivative of quaternion, given 3D rotational velocity.
-    """
-def mju_dist3(pos1: numpy.ndarray[numpy.float64[3, 1]], pos2: numpy.ndarray[numpy.float64[3, 1]]) -> float:
-    """mju_dist3(pos1: numpy.ndarray[numpy.float64[3, 1]], pos2: numpy.ndarray[numpy.float64[3, 1]]) -> float
+    '''
+def mju_dist3(pos1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], pos2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> float:
+    '''mju_dist3(pos1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], pos2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> float
 
     Return Cartesian distance between 3D vectors pos1 and pos2.
-    """
-def mju_dot(vec1: numpy.ndarray[numpy.float64[m, 1]], vec2: numpy.ndarray[numpy.float64[m, 1]]) -> float:
-    """mju_dot(vec1: numpy.ndarray[numpy.float64[m, 1]], vec2: numpy.ndarray[numpy.float64[m, 1]]) -> float
+    '''
+def mju_dot(vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> float:
+    '''mju_dot(vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> float
 
     Return dot-product of vec1 and vec2.
-    """
-def mju_dot3(vec1: numpy.ndarray[numpy.float64[3, 1]], vec2: numpy.ndarray[numpy.float64[3, 1]]) -> float:
-    """mju_dot3(vec1: numpy.ndarray[numpy.float64[3, 1]], vec2: numpy.ndarray[numpy.float64[3, 1]]) -> float
+    '''
+def mju_dot3(vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> float:
+    '''mju_dot3(vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> float
 
     Return dot-product of vec1 and vec2.
-    """
-def mju_eig3(eigval: numpy.ndarray[numpy.float64[3, 1], flags.writeable], eigvec: numpy.ndarray[numpy.float64[9, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]]) -> int:
-    """mju_eig3(eigval: numpy.ndarray[numpy.float64[3, 1], flags.writeable], eigvec: numpy.ndarray[numpy.float64[9, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]]) -> int
+    '''
+def mju_eig3(eigval: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], eigvec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]', 'flags.writeable'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]']) -> int:
+    '''mju_eig3(eigval: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], eigvec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]", "flags.writeable"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"]) -> int
 
-    Eigenvalue decomposition of symmetric 3x3 matrix, mat = eigvec * diag(eigval) * eigvec'.
-    """
-def mju_encodePyramid(pyramid: numpy.ndarray[numpy.float64[m, 1], flags.writeable], force: numpy.ndarray[numpy.float64[m, 1]], mu: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_encodePyramid(pyramid: numpy.ndarray[numpy.float64[m, 1], flags.writeable], force: numpy.ndarray[numpy.float64[m, 1]], mu: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    Eigenvalue decomposition of symmetric 3x3 matrix, mat = eigvec * diag(eigval) * eigvec\'.
+    '''
+def mju_encodePyramid(pyramid: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], force: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], mu: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_encodePyramid(pyramid: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], force: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], mu: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Convert contact force to pyramid representation.
-    """
-def mju_euler2Quat(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], euler: numpy.ndarray[numpy.float64[3, 1]], seq: str) -> None:
-    """mju_euler2Quat(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], euler: numpy.ndarray[numpy.float64[3, 1]], seq: str) -> None
+    '''
+def mju_euler2Quat(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], euler: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], seq: str) -> None:
+    '''mju_euler2Quat(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], euler: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], seq: str) -> None
 
-    Convert sequence of Euler angles (radians) to quaternion. seq[0,1,2] must be in 'xyzXYZ', lower/upper-case mean intrinsic/extrinsic rotations.
-    """
-def mju_eye(mat: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]) -> None:
-    """mju_eye(mat: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous]) -> None
+    Convert sequence of Euler angles (radians) to quaternion. seq[0,1,2] must be in \'xyzXYZ\', lower/upper-case mean intrinsic/extrinsic rotations.
+    '''
+def mju_eye(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous']) -> None:
+    '''mju_eye(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"]) -> None
 
     Set mat to the identity matrix.
-    """
-def mju_f2n(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float32[m, 1]]) -> None:
-    """mju_f2n(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float32[m, 1]]) -> None
+    '''
+def mju_f2n(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float32], '[m, 1]']) -> None:
+    '''mju_f2n(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]) -> None
 
     Convert from float to mjtNum.
-    """
-def mju_fill(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], val: float) -> None:
-    """mju_fill(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], val: float) -> None
+    '''
+def mju_fill(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], val: typing.SupportsFloat) -> None:
+    '''mju_fill(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], val: typing.SupportsFloat) -> None
 
     Set res = val.
-    """
-def mju_insertionSort(list: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None:
-    """mju_insertionSort(list: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None
+    '''
+def mju_insertionSort(list: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> None:
+    '''mju_insertionSort(list: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> None
 
     Insertion sort, resulting list is in increasing order.
-    """
-def mju_insertionSortInt(list: numpy.ndarray[numpy.int32[m, 1], flags.writeable]) -> None:
-    """mju_insertionSortInt(list: numpy.ndarray[numpy.int32[m, 1], flags.writeable]) -> None
+    '''
+def mju_insertionSortInt(list: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]', 'flags.writeable']) -> None:
+    '''mju_insertionSortInt(list: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]", "flags.writeable"]) -> None
 
     Integer insertion sort, resulting list is in increasing order.
-    """
-def mju_isBad(x: float) -> int:
-    """mju_isBad(x: float) -> int
+    '''
+def mju_isBad(x: typing.SupportsFloat) -> int:
+    """mju_isBad(x: typing.SupportsFloat) -> int
 
     Return 1 if nan or abs(x)>mjMAXVAL, 0 otherwise. Used by check functions.
     """
-def mju_isZero(vec: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> int:
-    """mju_isZero(vec: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> int
+def mju_isZero(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> int:
+    '''mju_isZero(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> int
 
     Return 1 if all elements are 0.
-    """
-def mju_mat2Quat(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]]) -> None:
-    """mju_mat2Quat(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]]) -> None
+    '''
+def mju_mat2Quat(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]']) -> None:
+    '''mju_mat2Quat(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"]) -> None
 
     Convert 3D rotation matrix to quaternion.
-    """
-def mju_mat2Rot(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]]) -> int:
-    """mju_mat2Rot(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]]) -> int
+    '''
+def mju_mat2Rot(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]']) -> int:
+    '''mju_mat2Rot(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"]) -> int
 
     Extract 3D rotation from an arbitrary 3x3 matrix by refining the input quaternion. Returns the number of iterations required to converge
-    """
-def mju_max(a: float, b: float) -> float:
-    """mju_max(a: float, b: float) -> float
+    '''
+def mju_max(a: typing.SupportsFloat, b: typing.SupportsFloat) -> float:
+    """mju_max(a: typing.SupportsFloat, b: typing.SupportsFloat) -> float
 
     Return max(a,b) with single evaluation of a and b.
     """
-def mju_min(a: float, b: float) -> float:
-    """mju_min(a: float, b: float) -> float
+def mju_min(a: typing.SupportsFloat, b: typing.SupportsFloat) -> float:
+    """mju_min(a: typing.SupportsFloat, b: typing.SupportsFloat) -> float
 
     Return min(a,b) with single evaluation of a and b.
     """
-def mju_mulMatMat(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat1: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], mat2: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None:
-    """mju_mulMatMat(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat1: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], mat2: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None
+def mju_mulMatMat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], mat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous']) -> None:
+    '''mju_mulMatMat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], mat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"]) -> None
 
     Multiply matrices: res = mat1 * mat2.
-    """
-def mju_mulMatMatT(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat1: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], mat2: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None:
-    """mju_mulMatMatT(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat1: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], mat2: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None
+    '''
+def mju_mulMatMatT(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], mat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous']) -> None:
+    '''mju_mulMatMatT(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], mat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"]) -> None
 
-    Multiply matrices, second argument transposed: res = mat1 * mat2'.
-    """
-def mju_mulMatTMat(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat1: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], mat2: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None:
-    """mju_mulMatTMat(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat1: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], mat2: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None
+    Multiply matrices, second argument transposed: res = mat1 * mat2\'.
+    '''
+def mju_mulMatTMat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], mat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous']) -> None:
+    '''mju_mulMatTMat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], mat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"]) -> None
 
-    Multiply matrices, first argument transposed: res = mat1' * mat2.
-    """
-def mju_mulMatTVec(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_mulMatTVec(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    Multiply matrices, first argument transposed: res = mat1\' * mat2.
+    '''
+def mju_mulMatTVec(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_mulMatTVec(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
-    Multiply transposed matrix and vector: res = mat' * vec.
-    """
-def mju_mulMatTVec3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_mulMatTVec3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    Multiply transposed matrix and vector: res = mat\' * vec.
+    '''
+def mju_mulMatTVec3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_mulMatTVec3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
-    Multiply transposed 3-by-3 matrix by vector: res = mat' * vec.
-    """
-def mju_mulMatVec(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_mulMatVec(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    Multiply transposed 3-by-3 matrix by vector: res = mat\' * vec.
+    '''
+def mju_mulMatVec(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_mulMatVec(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Multiply matrix and vector: res = mat * vec.
-    """
-def mju_mulMatVec3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_mulMatVec3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], mat: numpy.ndarray[numpy.float64[9, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_mulMatVec3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_mulMatVec3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Multiply 3-by-3 matrix by vector: res = mat * vec.
-    """
-def mju_mulPose(posres: numpy.ndarray[numpy.float64[3, 1], flags.writeable], quatres: numpy.ndarray[numpy.float64[4, 1], flags.writeable], pos1: numpy.ndarray[numpy.float64[3, 1]], quat1: numpy.ndarray[numpy.float64[4, 1]], pos2: numpy.ndarray[numpy.float64[3, 1]], quat2: numpy.ndarray[numpy.float64[4, 1]]) -> None:
-    """mju_mulPose(posres: numpy.ndarray[numpy.float64[3, 1], flags.writeable], quatres: numpy.ndarray[numpy.float64[4, 1], flags.writeable], pos1: numpy.ndarray[numpy.float64[3, 1]], quat1: numpy.ndarray[numpy.float64[4, 1]], pos2: numpy.ndarray[numpy.float64[3, 1]], quat2: numpy.ndarray[numpy.float64[4, 1]]) -> None
+    '''
+def mju_mulPose(posres: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], quatres: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], pos1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], quat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], pos2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], quat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]']) -> None:
+    '''mju_mulPose(posres: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], quatres: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], pos1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], quat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], pos2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], quat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"]) -> None
 
     Multiply two poses.
-    """
-def mju_mulQuat(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], quat1: numpy.ndarray[numpy.float64[4, 1]], quat2: numpy.ndarray[numpy.float64[4, 1]]) -> None:
-    """mju_mulQuat(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], quat1: numpy.ndarray[numpy.float64[4, 1]], quat2: numpy.ndarray[numpy.float64[4, 1]]) -> None
+    '''
+def mju_mulQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], quat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], quat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]']) -> None:
+    '''mju_mulQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], quat1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], quat2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"]) -> None
 
     Multiply quaternions.
-    """
-def mju_mulQuatAxis(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]], axis: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_mulQuatAxis(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]], axis: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_mulQuatAxis(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], axis: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_mulQuatAxis(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], axis: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Multiply quaternion and axis.
-    """
-def mju_mulVecMatVec(vec1: numpy.ndarray[numpy.float64[m, 1]], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec2: numpy.ndarray[numpy.float64[m, 1]]) -> float:
-    """mju_mulVecMatVec(vec1: numpy.ndarray[numpy.float64[m, 1]], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], vec2: numpy.ndarray[numpy.float64[m, 1]]) -> float
+    '''
+def mju_mulVecMatVec(vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> float:
+    '''mju_mulVecMatVec(vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> float
 
-    Multiply square matrix with vectors on both sides: returns vec1' * mat * vec2.
-    """
-def mju_muscleBias(len: float, lengthrange: numpy.ndarray[numpy.float64[2, 1]], acc0: float, prm: numpy.ndarray[numpy.float64[9, 1]]) -> float:
-    """mju_muscleBias(len: float, lengthrange: numpy.ndarray[numpy.float64[2, 1]], acc0: float, prm: numpy.ndarray[numpy.float64[9, 1]]) -> float
+    Multiply square matrix with vectors on both sides: returns vec1\' * mat * vec2.
+    '''
+def mju_muscleBias(len: typing.SupportsFloat, lengthrange: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[2, 1]'], acc0: typing.SupportsFloat, prm: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]']) -> float:
+    '''mju_muscleBias(len: typing.SupportsFloat, lengthrange: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[2, 1]"], acc0: typing.SupportsFloat, prm: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"]) -> float
 
     Muscle passive force, prm = (range[2], force, scale, lmin, lmax, vmax, fpmax, fvmax).
-    """
-def mju_muscleDynamics(ctrl: float, act: float, prm: numpy.ndarray[numpy.float64[3, 1]]) -> float:
-    """mju_muscleDynamics(ctrl: float, act: float, prm: numpy.ndarray[numpy.float64[3, 1]]) -> float
+    '''
+def mju_muscleDynamics(ctrl: typing.SupportsFloat, act: typing.SupportsFloat, prm: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> float:
+    '''mju_muscleDynamics(ctrl: typing.SupportsFloat, act: typing.SupportsFloat, prm: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> float
 
     Muscle activation dynamics, prm = (tau_act, tau_deact, smoothing_width).
-    """
-def mju_muscleGain(len: float, vel: float, lengthrange: numpy.ndarray[numpy.float64[2, 1]], acc0: float, prm: numpy.ndarray[numpy.float64[9, 1]]) -> float:
-    """mju_muscleGain(len: float, vel: float, lengthrange: numpy.ndarray[numpy.float64[2, 1]], acc0: float, prm: numpy.ndarray[numpy.float64[9, 1]]) -> float
+    '''
+def mju_muscleGain(len: typing.SupportsFloat, vel: typing.SupportsFloat, lengthrange: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[2, 1]'], acc0: typing.SupportsFloat, prm: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]']) -> float:
+    '''mju_muscleGain(len: typing.SupportsFloat, vel: typing.SupportsFloat, lengthrange: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[2, 1]"], acc0: typing.SupportsFloat, prm: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"]) -> float
 
     Muscle active force, prm = (range[2], force, scale, lmin, lmax, vmax, fpmax, fvmax).
-    """
-def mju_n2d(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_n2d(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mju_n2d(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_n2d(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Convert from mjtNum to double.
-    """
-def mju_n2f(res: numpy.ndarray[numpy.float32[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_n2f(res: numpy.ndarray[numpy.float32[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mju_n2f(res: typing.Annotated[numpy.typing.NDArray[numpy.float32], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_n2f(res: typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Convert from mjtNum to float.
-    """
-def mju_negPose(posres: numpy.ndarray[numpy.float64[3, 1], flags.writeable], quatres: numpy.ndarray[numpy.float64[4, 1], flags.writeable], pos: numpy.ndarray[numpy.float64[3, 1]], quat: numpy.ndarray[numpy.float64[4, 1]]) -> None:
-    """mju_negPose(posres: numpy.ndarray[numpy.float64[3, 1], flags.writeable], quatres: numpy.ndarray[numpy.float64[4, 1], flags.writeable], pos: numpy.ndarray[numpy.float64[3, 1]], quat: numpy.ndarray[numpy.float64[4, 1]]) -> None
+    '''
+def mju_negPose(posres: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], quatres: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]']) -> None:
+    '''mju_negPose(posres: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], quatres: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"]) -> None
 
     Conjugate pose, corresponding to the opposite spatial transformation.
-    """
-def mju_negQuat(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]]) -> None:
-    """mju_negQuat(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]]) -> None
+    '''
+def mju_negQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]']) -> None:
+    '''mju_negQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"]) -> None
 
     Conjugate quaternion, corresponding to opposite rotation.
-    """
-def mju_norm(res: numpy.ndarray[numpy.float64[m, 1]]) -> float:
-    """mju_norm(res: numpy.ndarray[numpy.float64[m, 1]]) -> float
+    '''
+def mju_norm(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> float:
+    '''mju_norm(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> float
 
     Return vector length (without normalizing vector).
-    """
-def mju_norm3(vec: numpy.ndarray[numpy.float64[3, 1]]) -> float:
-    """mju_norm3(vec: numpy.ndarray[numpy.float64[3, 1]]) -> float
+    '''
+def mju_norm3(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> float:
+    '''mju_norm3(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> float
 
     Return vector length (without normalizing the vector).
-    """
-def mju_normalize(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> float:
-    """mju_normalize(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> float
+    '''
+def mju_normalize(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> float:
+    '''mju_normalize(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> float
 
     Normalize vector, return length before normalization.
-    """
-def mju_normalize3(vec: numpy.ndarray[numpy.float64[3, 1], flags.writeable]) -> float:
-    """mju_normalize3(vec: numpy.ndarray[numpy.float64[3, 1], flags.writeable]) -> float
+    '''
+def mju_normalize3(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable']) -> float:
+    '''mju_normalize3(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"]) -> float
 
     Normalize vector, return length before normalization.
-    """
-def mju_normalize4(vec: numpy.ndarray[numpy.float64[4, 1], flags.writeable]) -> float:
-    """mju_normalize4(vec: numpy.ndarray[numpy.float64[4, 1], flags.writeable]) -> float
+    '''
+def mju_normalize4(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable']) -> float:
+    '''mju_normalize4(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"]) -> float
 
     Normalize vector, return length before normalization.
-    """
-def mju_printMat(mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None:
-    """mju_printMat(mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None
+    '''
+def mju_printMat(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous']) -> None:
+    '''mju_printMat(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"]) -> None
 
     Print matrix to screen.
-    """
-def mju_printMatSparse(mat: numpy.ndarray[numpy.float64[m, 1]], rownnz: numpy.ndarray[numpy.int32[m, 1]], rowadr: numpy.ndarray[numpy.int32[m, 1]], colind: numpy.ndarray[numpy.int32[m, 1]]) -> None:
-    """mju_printMatSparse(mat: numpy.ndarray[numpy.float64[m, 1]], rownnz: numpy.ndarray[numpy.int32[m, 1]], rowadr: numpy.ndarray[numpy.int32[m, 1]], colind: numpy.ndarray[numpy.int32[m, 1]]) -> None
+    '''
+def mju_printMatSparse(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], rownnz: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]'], rowadr: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]'], colind: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]']) -> None:
+    '''mju_printMatSparse(mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], rownnz: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]"], rowadr: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]"], colind: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]"]) -> None
 
     Print sparse matrix to screen.
-    """
-def mju_quat2Mat(res: numpy.ndarray[numpy.float64[9, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]]) -> None:
-    """mju_quat2Mat(res: numpy.ndarray[numpy.float64[9, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]]) -> None
+    '''
+def mju_quat2Mat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]', 'flags.writeable'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]']) -> None:
+    '''mju_quat2Mat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]", "flags.writeable"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"]) -> None
 
     Convert quaternion to 3D rotation matrix.
-    """
-def mju_quat2Vel(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]], dt: float) -> None:
-    """mju_quat2Vel(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], quat: numpy.ndarray[numpy.float64[4, 1]], dt: float) -> None
+    '''
+def mju_quat2Vel(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], dt: typing.SupportsFloat) -> None:
+    '''mju_quat2Vel(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], dt: typing.SupportsFloat) -> None
 
     Convert quaternion (corresponding to orientation difference) to 3D velocity.
-    """
-def mju_quatIntegrate(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], vel: numpy.ndarray[numpy.float64[3, 1]], scale: float) -> None:
-    """mju_quatIntegrate(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], vel: numpy.ndarray[numpy.float64[3, 1]], scale: float) -> None
+    '''
+def mju_quatIntegrate(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], vel: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], scale: typing.SupportsFloat) -> None:
+    '''mju_quatIntegrate(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], vel: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], scale: typing.SupportsFloat) -> None
 
     Integrate quaternion given 3D angular velocity.
-    """
-def mju_quatZ2Vec(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_quatZ2Vec(quat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_quatZ2Vec(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_quatZ2Vec(quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Construct quaternion performing rotation from z-axis to given vector.
-    """
-def mju_rayFlex(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, flex_layer: int, flg_vert: int, flg_edge: int, flg_face: int, flg_skin: int, flexid: int, pnt: float, vec: float, vertid: numpy.ndarray[numpy.int32[1, 1], flags.writeable]) -> float:
-    """mju_rayFlex(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, flex_layer: int, flg_vert: int, flg_edge: int, flg_face: int, flg_skin: int, flexid: int, pnt: float, vec: float, vertid: numpy.ndarray[numpy.int32[1, 1], flags.writeable]) -> float
+    '''
+def mju_rayFlex(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, flex_layer: typing.SupportsInt, flg_vert: typing.SupportsInt, flg_edge: typing.SupportsInt, flg_face: typing.SupportsInt, flg_skin: typing.SupportsInt, flexid: typing.SupportsInt, pnt: typing.SupportsFloat, vec: typing.SupportsFloat, vertid: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[1, 1]', 'flags.writeable']) -> float:
+    '''mju_rayFlex(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, flex_layer: typing.SupportsInt, flg_vert: typing.SupportsInt, flg_edge: typing.SupportsInt, flg_face: typing.SupportsInt, flg_skin: typing.SupportsInt, flexid: typing.SupportsInt, pnt: typing.SupportsFloat, vec: typing.SupportsFloat, vertid: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[1, 1]", "flags.writeable"]) -> float
 
     Intersect ray with flex, return nearest distance or -1 if no intersection, and also output nearest vertex id.
-    """
-def mju_rayGeom(pos: numpy.ndarray[numpy.float64[3, 1]], mat: numpy.ndarray[numpy.float64[9, 1]], size: numpy.ndarray[numpy.float64[3, 1]], pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]], geomtype: int) -> float:
-    """mju_rayGeom(pos: numpy.ndarray[numpy.float64[3, 1]], mat: numpy.ndarray[numpy.float64[9, 1]], size: numpy.ndarray[numpy.float64[3, 1]], pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]], geomtype: int) -> float
+    '''
+def mju_rayGeom(pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]'], size: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], geomtype: typing.SupportsInt) -> float:
+    '''mju_rayGeom(pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"], size: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], geomtype: typing.SupportsInt) -> float
 
     Intersect ray with pure geom, return nearest distance or -1 if no intersection.
-    """
-def mju_raySkin(nface: int, nvert: int, face: int, vert: float, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]], vertid: numpy.ndarray[numpy.int32[1, 1], flags.writeable]) -> float:
-    """mju_raySkin(nface: int, nvert: int, face: int, vert: float, pnt: numpy.ndarray[numpy.float64[3, 1]], vec: numpy.ndarray[numpy.float64[3, 1]], vertid: numpy.ndarray[numpy.int32[1, 1], flags.writeable]) -> float
+    '''
+def mju_raySkin(nface: typing.SupportsInt, nvert: typing.SupportsInt, face: typing.SupportsInt, vert: typing.SupportsFloat, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vertid: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[1, 1]', 'flags.writeable']) -> float:
+    '''mju_raySkin(nface: typing.SupportsInt, nvert: typing.SupportsInt, face: typing.SupportsInt, vert: typing.SupportsFloat, pnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vertid: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[1, 1]", "flags.writeable"]) -> float
 
     Intersect ray with skin, return nearest distance or -1 if no intersection, and also output nearest vertex id.
-    """
-def mju_rotVecQuat(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]], quat: numpy.ndarray[numpy.float64[4, 1]]) -> None:
-    """mju_rotVecQuat(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]], quat: numpy.ndarray[numpy.float64[4, 1]]) -> None
+    '''
+def mju_rotVecQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]']) -> None:
+    '''mju_rotVecQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"]) -> None
 
     Rotate vector by quaternion.
-    """
-def mju_round(x: float) -> int:
-    """mju_round(x: float) -> int
+    '''
+def mju_round(x: typing.SupportsFloat) -> int:
+    """mju_round(x: typing.SupportsFloat) -> int
 
     Round x to nearest integer.
     """
-def mju_scl(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]], scl: float) -> None:
-    """mju_scl(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]], scl: float) -> None
+def mju_scl(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], scl: typing.SupportsFloat) -> None:
+    '''mju_scl(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], scl: typing.SupportsFloat) -> None
 
     Set res = vec*scl.
-    """
-def mju_scl3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]], scl: float) -> None:
-    """mju_scl3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]], scl: float) -> None
+    '''
+def mju_scl3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], scl: typing.SupportsFloat) -> None:
+    '''mju_scl3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], scl: typing.SupportsFloat) -> None
 
     Set res = vec*scl.
-    """
-def mju_sigmoid(x: float) -> float:
-    """mju_sigmoid(x: float) -> float
+    '''
+def mju_sigmoid(x: typing.SupportsFloat) -> float:
+    """mju_sigmoid(x: typing.SupportsFloat) -> float
 
     Sigmoid function over 0<=x<=1 using quintic polynomial.
     """
-def mju_sign(x: float) -> float:
-    """mju_sign(x: float) -> float
+def mju_sign(x: typing.SupportsFloat) -> float:
+    """mju_sign(x: typing.SupportsFloat) -> float
 
     Return sign of x: +1, -1 or 0.
     """
-def mju_sparse2dense(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, 1]], rownnz: numpy.ndarray[numpy.int32[m, 1]], rowadr: numpy.ndarray[numpy.int32[m, 1]], colind: numpy.ndarray[numpy.int32[m, 1]]) -> None:
-    """mju_sparse2dense(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, 1]], rownnz: numpy.ndarray[numpy.int32[m, 1]], rowadr: numpy.ndarray[numpy.int32[m, 1]], colind: numpy.ndarray[numpy.int32[m, 1]]) -> None
+def mju_sparse2dense(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], rownnz: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]'], rowadr: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]'], colind: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[m, 1]']) -> None:
+    '''mju_sparse2dense(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], rownnz: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]"], rowadr: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]"], colind: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[m, 1]"]) -> None
 
     Convert matrix from sparse to dense.
-    """
-def mju_springDamper(pos0: float, vel0: float, Kp: float, Kv: float, dt: float) -> float:
-    """mju_springDamper(pos0: float, vel0: float, Kp: float, Kv: float, dt: float) -> float
+    '''
+def mju_springDamper(pos0: typing.SupportsFloat, vel0: typing.SupportsFloat, Kp: typing.SupportsFloat, Kv: typing.SupportsFloat, dt: typing.SupportsFloat) -> float:
+    """mju_springDamper(pos0: typing.SupportsFloat, vel0: typing.SupportsFloat, Kp: typing.SupportsFloat, Kv: typing.SupportsFloat, dt: typing.SupportsFloat) -> float
 
     Integrate spring-damper analytically, return pos(dt).
     """
-def mju_sqrMatTD(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], diag: numpy.ndarray[numpy.float64[m, 1], flags.writeable] | None) -> None:
-    """mju_sqrMatTD(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous], diag: Optional[numpy.ndarray[numpy.float64[m, 1], flags.writeable]]) -> None
+def mju_sqrMatTD(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous'], diag: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'] | None) -> None:
+    '''mju_sqrMatTD(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"], diag: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"] | None) -> None
 
-    Set res = mat' * diag * mat if diag is not NULL, and res = mat' * mat otherwise.
-    """
-def mju_standardNormal(num2: float | None) -> float:
-    """mju_standardNormal(num2: Optional[float]) -> float
+    Set res = mat\' * diag * mat if diag is not NULL, and res = mat\' * mat otherwise.
+    '''
+def mju_standardNormal(num2: typing.SupportsFloat | None) -> float:
+    """mju_standardNormal(num2: typing.SupportsFloat | None) -> float
 
     Standard normal random number generator (optional second number).
     """
@@ -1024,68 +1031,68 @@ def mju_str2Type(str: str) -> int:
 
     Convert type name to type id (mjtObj).
     """
-def mju_sub(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[m, 1]], vec2: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_sub(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[m, 1]], vec2: numpy.ndarray[numpy.float64[m, 1]]) -> None
+def mju_sub(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_sub(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Set res = vec1 - vec2.
-    """
-def mju_sub3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[3, 1]], vec2: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_sub3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec1: numpy.ndarray[numpy.float64[3, 1]], vec2: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_sub3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_sub3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec1: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], vec2: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Set res = vec1 - vec2.
-    """
-def mju_subFrom(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None:
-    """mju_subFrom(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[m, 1]]) -> None
+    '''
+def mju_subFrom(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]']) -> None:
+    '''mju_subFrom(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]"]) -> None
 
     Set res = res - vec.
-    """
-def mju_subFrom3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_subFrom3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mju_subFrom3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_subFrom3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Set res = res - vec.
-    """
-def mju_subQuat(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], qa: numpy.ndarray[numpy.float64[4, 1]], qb: numpy.ndarray[numpy.float64[4, 1]]) -> None:
-    """mju_subQuat(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], qa: numpy.ndarray[numpy.float64[4, 1]], qb: numpy.ndarray[numpy.float64[4, 1]]) -> None
+    '''
+def mju_subQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], qa: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], qb: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]']) -> None:
+    '''mju_subQuat(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], qa: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], qb: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"]) -> None
 
     Subtract quaternions, express as 3D velocity: qb*quat(res) = qa.
-    """
-def mju_sum(vec: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> float:
-    """mju_sum(vec: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> float
+    '''
+def mju_sum(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> float:
+    '''mju_sum(vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> float
 
     Return sum(vec).
-    """
-def mju_symmetrize(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None:
-    """mju_symmetrize(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None
+    '''
+def mju_symmetrize(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous']) -> None:
+    '''mju_symmetrize(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"]) -> None
 
-    Symmetrize square matrix res = (mat + mat')/2.
-    """
-def mju_transformSpatial(res: numpy.ndarray[numpy.float64[6, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[6, 1]], flg_force: int, newpos: numpy.ndarray[numpy.float64[3, 1]], oldpos: numpy.ndarray[numpy.float64[3, 1]], rotnew2old: numpy.ndarray[numpy.float64[9, 1]]) -> None:
-    """mju_transformSpatial(res: numpy.ndarray[numpy.float64[6, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[6, 1]], flg_force: int, newpos: numpy.ndarray[numpy.float64[3, 1]], oldpos: numpy.ndarray[numpy.float64[3, 1]], rotnew2old: numpy.ndarray[numpy.float64[9, 1]]) -> None
+    Symmetrize square matrix res = (mat + mat\')/2.
+    '''
+def mju_transformSpatial(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[6, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[6, 1]'], flg_force: typing.SupportsInt, newpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], oldpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], rotnew2old: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]']) -> None:
+    '''mju_transformSpatial(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[6, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[6, 1]"], flg_force: typing.SupportsInt, newpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], oldpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], rotnew2old: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"]) -> None
 
     Coordinate transform of 6D motion or force vector in rotation:translation format. rotnew2old is 3-by-3, NULL means no rotation; flg_force specifies force or motion type.
-    """
-def mju_transpose(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None:
-    """mju_transpose(res: numpy.ndarray[numpy.float64[m, n], flags.writeable, flags.c_contiguous], mat: numpy.ndarray[numpy.float64[m, n], flags.c_contiguous]) -> None
+    '''
+def mju_transpose(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.writeable', 'flags.c_contiguous'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, n]', 'flags.c_contiguous']) -> None:
+    '''mju_transpose(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.writeable", "flags.c_contiguous"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, n]", "flags.c_contiguous"]) -> None
 
-    Transpose matrix: res = mat'.
-    """
-def mju_trnVecPose(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], pos: numpy.ndarray[numpy.float64[3, 1]], quat: numpy.ndarray[numpy.float64[4, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mju_trnVecPose(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], pos: numpy.ndarray[numpy.float64[3, 1]], quat: numpy.ndarray[numpy.float64[4, 1]], vec: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    Transpose matrix: res = mat\'.
+    '''
+def mju_trnVecPose(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mju_trnVecPose(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], quat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Transform vector by pose.
-    """
-def mju_type2Str(type: int) -> str:
-    """mju_type2Str(type: int) -> str
+    '''
+def mju_type2Str(type: typing.SupportsInt) -> str:
+    """mju_type2Str(type: typing.SupportsInt) -> str
 
     Convert type id (mjtObj) to type name.
     """
-def mju_unit4(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable]) -> None:
-    """mju_unit4(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable]) -> None
+def mju_unit4(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable']) -> None:
+    '''mju_unit4(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"]) -> None
 
     Set res = (1,0,0,0).
-    """
-def mju_warningText(warning: int, info: int) -> str:
-    """mju_warningText(warning: int, info: int) -> str
+    '''
+def mju_warningText(warning: typing.SupportsInt, info: typing.SupportsInt) -> str:
+    """mju_warningText(warning: typing.SupportsInt, info: typing.SupportsInt) -> str
 
     Construct a warning message given the warning type and info.
     """
@@ -1094,61 +1101,61 @@ def mju_writeLog(type: str, msg: str) -> None:
 
     Write [datetime, type: message] to MUJOCO_LOG.TXT.
     """
-def mju_writeNumBytes(nbytes: int) -> str:
-    """mju_writeNumBytes(nbytes: int) -> str
+def mju_writeNumBytes(nbytes: typing.SupportsInt) -> str:
+    """mju_writeNumBytes(nbytes: typing.SupportsInt) -> str
 
     Return human readable number of bytes using standard letter suffix.
     """
-def mju_zero(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None:
-    """mju_zero(res: numpy.ndarray[numpy.float64[m, 1], flags.writeable]) -> None
+def mju_zero(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[m, 1]', 'flags.writeable']) -> None:
+    '''mju_zero(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[m, 1]", "flags.writeable"]) -> None
 
     Set res = 0.
-    """
-def mju_zero3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable]) -> None:
-    """mju_zero3(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable]) -> None
+    '''
+def mju_zero3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable']) -> None:
+    '''mju_zero3(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"]) -> None
 
     Set res = 0.
-    """
-def mju_zero4(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable]) -> None:
-    """mju_zero4(res: numpy.ndarray[numpy.float64[4, 1], flags.writeable]) -> None
+    '''
+def mju_zero4(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable']) -> None:
+    '''mju_zero4(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"]) -> None
 
     Set res = 0.
-    """
-def mjv_addGeoms(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, opt: mujoco._structs.MjvOption, pert: mujoco._structs.MjvPerturb, catmask: int, scn: mujoco._structs.MjvScene) -> None:
-    """mjv_addGeoms(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, opt: mujoco._structs.MjvOption, pert: mujoco._structs.MjvPerturb, catmask: int, scn: mujoco._structs.MjvScene) -> None
+    '''
+def mjv_addGeoms(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, opt: mujoco._structs.MjvOption, pert: mujoco._structs.MjvPerturb, catmask: typing.SupportsInt, scn: mujoco._structs.MjvScene) -> None:
+    """mjv_addGeoms(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, opt: mujoco._structs.MjvOption, pert: mujoco._structs.MjvPerturb, catmask: typing.SupportsInt, scn: mujoco._structs.MjvScene) -> None
 
     Add geoms from selected categories.
     """
-def mjv_alignToCamera(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]], forward: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mjv_alignToCamera(res: numpy.ndarray[numpy.float64[3, 1], flags.writeable], vec: numpy.ndarray[numpy.float64[3, 1]], forward: numpy.ndarray[numpy.float64[3, 1]]) -> None
+def mjv_alignToCamera(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], forward: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mjv_alignToCamera(res: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], vec: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], forward: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Rotate 3D vec in horizontal plane by angle between (0,1) and (forward_x,forward_y).
-    """
+    '''
 def mjv_applyPerturbForce(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pert: mujoco._structs.MjvPerturb) -> None:
     """mjv_applyPerturbForce(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pert: mujoco._structs.MjvPerturb) -> None
 
     Set perturb force,torque in d->xfrc_applied, if selected body is dynamic.
     """
-def mjv_applyPerturbPose(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pert: mujoco._structs.MjvPerturb, flg_paused: int) -> None:
-    """mjv_applyPerturbPose(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pert: mujoco._structs.MjvPerturb, flg_paused: int) -> None
+def mjv_applyPerturbPose(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pert: mujoco._structs.MjvPerturb, flg_paused: typing.SupportsInt) -> None:
+    """mjv_applyPerturbPose(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, pert: mujoco._structs.MjvPerturb, flg_paused: typing.SupportsInt) -> None
 
     Set perturb pos,quat in d->mocap when selected body is mocap, and in d->qpos otherwise. Write d->qpos only if flg_paused and subtree root for selected body has free joint.
     """
-def mjv_cameraInModel(headpos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], forward: numpy.ndarray[numpy.float64[3, 1], flags.writeable], up: numpy.ndarray[numpy.float64[3, 1], flags.writeable], scn: mujoco._structs.MjvScene) -> None:
-    """mjv_cameraInModel(headpos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], forward: numpy.ndarray[numpy.float64[3, 1], flags.writeable], up: numpy.ndarray[numpy.float64[3, 1], flags.writeable], scn: mujoco._structs.MjvScene) -> None
+def mjv_cameraInModel(headpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], forward: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], up: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], scn: mujoco._structs.MjvScene) -> None:
+    '''mjv_cameraInModel(headpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], forward: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], up: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], scn: mujoco._structs.MjvScene) -> None
 
     Get camera info in model space; average left and right OpenGL cameras.
-    """
-def mjv_cameraInRoom(headpos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], forward: numpy.ndarray[numpy.float64[3, 1], flags.writeable], up: numpy.ndarray[numpy.float64[3, 1], flags.writeable], scn: mujoco._structs.MjvScene) -> None:
-    """mjv_cameraInRoom(headpos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], forward: numpy.ndarray[numpy.float64[3, 1], flags.writeable], up: numpy.ndarray[numpy.float64[3, 1], flags.writeable], scn: mujoco._structs.MjvScene) -> None
+    '''
+def mjv_cameraInRoom(headpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], forward: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], up: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], scn: mujoco._structs.MjvScene) -> None:
+    '''mjv_cameraInRoom(headpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], forward: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], up: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], scn: mujoco._structs.MjvScene) -> None
 
     Get camera info in room space; average left and right OpenGL cameras.
-    """
-def mjv_connector(geom: mujoco._structs.MjvGeom, type: int, width: float, from_: numpy.ndarray[numpy.float64[3, 1]], to: numpy.ndarray[numpy.float64[3, 1]]) -> None:
-    """mjv_connector(geom: mujoco._structs.MjvGeom, type: int, width: float, from_: numpy.ndarray[numpy.float64[3, 1]], to: numpy.ndarray[numpy.float64[3, 1]]) -> None
+    '''
+def mjv_connector(geom: mujoco._structs.MjvGeom, type: typing.SupportsInt, width: typing.SupportsFloat, from_: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], to: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]']) -> None:
+    '''mjv_connector(geom: mujoco._structs.MjvGeom, type: typing.SupportsInt, width: typing.SupportsFloat, from_: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], to: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"]) -> None
 
     Set (type, size, pos, mat) for connector-type geom between given points. Assume that mjv_initGeom was already called to set all other properties. Width of mjGEOM_LINE is denominated in pixels.
-    """
+    '''
 def mjv_defaultCamera(cam: mujoco._structs.MjvCamera) -> None:
     """mjv_defaultCamera(cam: mujoco._structs.MjvCamera) -> None
 
@@ -1179,11 +1186,11 @@ def mjv_frustumHeight(scn: mujoco._structs.MjvScene) -> float:
 
     Get frustum height at unit distance from camera; average left and right OpenGL cameras.
     """
-def mjv_initGeom(geom: mujoco._structs.MjvGeom, type: int, size: numpy.ndarray[numpy.float64[3, 1]], pos: numpy.ndarray[numpy.float64[3, 1]], mat: numpy.ndarray[numpy.float64[9, 1]], rgba: numpy.ndarray[numpy.float32[4, 1]]) -> None:
-    """mjv_initGeom(geom: mujoco._structs.MjvGeom, type: int, size: numpy.ndarray[numpy.float64[3, 1]], pos: numpy.ndarray[numpy.float64[3, 1]], mat: numpy.ndarray[numpy.float64[9, 1]], rgba: numpy.ndarray[numpy.float32[4, 1]]) -> None
+def mjv_initGeom(geom: mujoco._structs.MjvGeom, type: typing.SupportsInt, size: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[9, 1]'], rgba: typing.Annotated[numpy.typing.NDArray[numpy.float32], '[4, 1]']) -> None:
+    '''mjv_initGeom(geom: mujoco._structs.MjvGeom, type: typing.SupportsInt, size: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], pos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], mat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[9, 1]"], rgba: typing.Annotated[numpy.typing.NDArray[numpy.float32], "[4, 1]"]) -> None
 
     Initialize given geom fields when not NULL, set the rest to their default values.
-    """
+    '''
 def mjv_initPerturb(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, scn: mujoco._structs.MjvScene, pert: mujoco._structs.MjvPerturb) -> None:
     """mjv_initPerturb(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, scn: mujoco._structs.MjvScene, pert: mujoco._structs.MjvPerturb) -> None
 
@@ -1194,43 +1201,43 @@ def mjv_makeLights(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, scn: m
 
     Make list of lights.
     """
-def mjv_model2room(roompos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], roomquat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], modelpos: numpy.ndarray[numpy.float64[3, 1]], modelquat: numpy.ndarray[numpy.float64[4, 1]], scn: mujoco._structs.MjvScene) -> None:
-    """mjv_model2room(roompos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], roomquat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], modelpos: numpy.ndarray[numpy.float64[3, 1]], modelquat: numpy.ndarray[numpy.float64[4, 1]], scn: mujoco._structs.MjvScene) -> None
+def mjv_model2room(roompos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], roomquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], modelpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], modelquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], scn: mujoco._structs.MjvScene) -> None:
+    '''mjv_model2room(roompos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], roomquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], modelpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], modelquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], scn: mujoco._structs.MjvScene) -> None
 
     Transform pose from model to room space.
-    """
-def mjv_moveCamera(m: mujoco._structs.MjModel, action: int, reldx: float, reldy: float, scn: mujoco._structs.MjvScene, cam: mujoco._structs.MjvCamera) -> None:
-    """mjv_moveCamera(m: mujoco._structs.MjModel, action: int, reldx: float, reldy: float, scn: mujoco._structs.MjvScene, cam: mujoco._structs.MjvCamera) -> None
+    '''
+def mjv_moveCamera(m: mujoco._structs.MjModel, action: typing.SupportsInt, reldx: typing.SupportsFloat, reldy: typing.SupportsFloat, scn: mujoco._structs.MjvScene, cam: mujoco._structs.MjvCamera) -> None:
+    """mjv_moveCamera(m: mujoco._structs.MjModel, action: typing.SupportsInt, reldx: typing.SupportsFloat, reldy: typing.SupportsFloat, scn: mujoco._structs.MjvScene, cam: mujoco._structs.MjvCamera) -> None
 
     Move camera with mouse; action is mjtMouse.
     """
-def mjv_moveModel(m: mujoco._structs.MjModel, action: int, reldx: float, reldy: float, roomup: numpy.ndarray[numpy.float64[3, 1]], scn: mujoco._structs.MjvScene) -> None:
-    """mjv_moveModel(m: mujoco._structs.MjModel, action: int, reldx: float, reldy: float, roomup: numpy.ndarray[numpy.float64[3, 1]], scn: mujoco._structs.MjvScene) -> None
+def mjv_moveModel(m: mujoco._structs.MjModel, action: typing.SupportsInt, reldx: typing.SupportsFloat, reldy: typing.SupportsFloat, roomup: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], scn: mujoco._structs.MjvScene) -> None:
+    '''mjv_moveModel(m: mujoco._structs.MjModel, action: typing.SupportsInt, reldx: typing.SupportsFloat, reldy: typing.SupportsFloat, roomup: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], scn: mujoco._structs.MjvScene) -> None
 
     Move model with mouse; action is mjtMouse.
-    """
-def mjv_movePerturb(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, action: int, reldx: float, reldy: float, scn: mujoco._structs.MjvScene, pert: mujoco._structs.MjvPerturb) -> None:
-    """mjv_movePerturb(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, action: int, reldx: float, reldy: float, scn: mujoco._structs.MjvScene, pert: mujoco._structs.MjvPerturb) -> None
+    '''
+def mjv_movePerturb(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, action: typing.SupportsInt, reldx: typing.SupportsFloat, reldy: typing.SupportsFloat, scn: mujoco._structs.MjvScene, pert: mujoco._structs.MjvPerturb) -> None:
+    """mjv_movePerturb(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, action: typing.SupportsInt, reldx: typing.SupportsFloat, reldy: typing.SupportsFloat, scn: mujoco._structs.MjvScene, pert: mujoco._structs.MjvPerturb) -> None
 
     Move perturb object with mouse; action is mjtMouse.
     """
-def mjv_room2model(modelpos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], modelquat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], roompos: numpy.ndarray[numpy.float64[3, 1]], roomquat: numpy.ndarray[numpy.float64[4, 1]], scn: mujoco._structs.MjvScene) -> None:
-    """mjv_room2model(modelpos: numpy.ndarray[numpy.float64[3, 1], flags.writeable], modelquat: numpy.ndarray[numpy.float64[4, 1], flags.writeable], roompos: numpy.ndarray[numpy.float64[3, 1]], roomquat: numpy.ndarray[numpy.float64[4, 1]], scn: mujoco._structs.MjvScene) -> None
+def mjv_room2model(modelpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], modelquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]', 'flags.writeable'], roompos: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]'], roomquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[4, 1]'], scn: mujoco._structs.MjvScene) -> None:
+    '''mjv_room2model(modelpos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], modelquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]", "flags.writeable"], roompos: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]"], roomquat: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[4, 1]"], scn: mujoco._structs.MjvScene) -> None
 
     Transform pose from room to model space.
-    """
-def mjv_select(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, vopt: mujoco._structs.MjvOption, aspectratio: float, relx: float, rely: float, scn: mujoco._structs.MjvScene, selpnt: numpy.ndarray[numpy.float64[3, 1], flags.writeable], geomid: numpy.ndarray[numpy.int32[1, 1], flags.writeable], flexid: numpy.ndarray[numpy.int32[1, 1], flags.writeable], skinid: numpy.ndarray[numpy.int32[1, 1], flags.writeable]) -> int:
-    """mjv_select(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, vopt: mujoco._structs.MjvOption, aspectratio: float, relx: float, rely: float, scn: mujoco._structs.MjvScene, selpnt: numpy.ndarray[numpy.float64[3, 1], flags.writeable], geomid: numpy.ndarray[numpy.int32[1, 1], flags.writeable], flexid: numpy.ndarray[numpy.int32[1, 1], flags.writeable], skinid: numpy.ndarray[numpy.int32[1, 1], flags.writeable]) -> int
+    '''
+def mjv_select(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, vopt: mujoco._structs.MjvOption, aspectratio: typing.SupportsFloat, relx: typing.SupportsFloat, rely: typing.SupportsFloat, scn: mujoco._structs.MjvScene, selpnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], '[3, 1]', 'flags.writeable'], geomid: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[1, 1]', 'flags.writeable'], flexid: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[1, 1]', 'flags.writeable'], skinid: typing.Annotated[numpy.typing.NDArray[numpy.int32], '[1, 1]', 'flags.writeable']) -> int:
+    '''mjv_select(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, vopt: mujoco._structs.MjvOption, aspectratio: typing.SupportsFloat, relx: typing.SupportsFloat, rely: typing.SupportsFloat, scn: mujoco._structs.MjvScene, selpnt: typing.Annotated[numpy.typing.NDArray[numpy.float64], "[3, 1]", "flags.writeable"], geomid: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[1, 1]", "flags.writeable"], flexid: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[1, 1]", "flags.writeable"], skinid: typing.Annotated[numpy.typing.NDArray[numpy.int32], "[1, 1]", "flags.writeable"]) -> int
 
     Select geom, flex or skin with mouse, return bodyid; -1: none selected.
-    """
+    '''
 def mjv_updateCamera(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, cam: mujoco._structs.MjvCamera, scn: mujoco._structs.MjvScene) -> None:
     """mjv_updateCamera(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, cam: mujoco._structs.MjvCamera, scn: mujoco._structs.MjvScene) -> None
 
     Update camera.
     """
-def mjv_updateScene(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, opt: mujoco._structs.MjvOption, pert: mujoco._structs.MjvPerturb | None, cam: mujoco._structs.MjvCamera, catmask: int, scn: mujoco._structs.MjvScene) -> None:
-    """mjv_updateScene(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, opt: mujoco._structs.MjvOption, pert: Optional[mujoco._structs.MjvPerturb], cam: mujoco._structs.MjvCamera, catmask: int, scn: mujoco._structs.MjvScene) -> None
+def mjv_updateScene(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, opt: mujoco._structs.MjvOption, pert: mujoco._structs.MjvPerturb | None, cam: mujoco._structs.MjvCamera, catmask: typing.SupportsInt, scn: mujoco._structs.MjvScene) -> None:
+    """mjv_updateScene(m: mujoco._structs.MjModel, d: mujoco._structs.MjData, opt: mujoco._structs.MjvOption, pert: mujoco._structs.MjvPerturb | None, cam: mujoco._structs.MjvCamera, catmask: typing.SupportsInt, scn: mujoco._structs.MjvScene) -> None
 
     Update entire scene given model state.
     """

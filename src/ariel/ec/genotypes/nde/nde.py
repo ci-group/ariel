@@ -38,33 +38,40 @@ from ariel.body_phenotypes.robogen_lite.config import (
 # Type Checking
 # Type Aliases
 
-# --- DATA SETUP ---
+# --- DATA SETUP --- #
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__"
 DATA.mkdir(exist_ok=True)
 
-# --- RANDOM GENERATOR SETUP ---
+# --- RANDOM GENERATOR SETUP --- #
 SEED = 42
 RNG = np.random.default_rng(SEED)
 
-# --- TERMINAL OUTPUT SETUP ---
-install(show_locals=True)
+# --- TERMINAL OUTPUT SETUP --- #
+install(show_locals=False)
 console = Console()
 
 
 class NeuralDevelopmentalEncoding(nn.Module):
-    def __init__(self, number_of_modules: int) -> None:
+    def __init__(self, number_of_modules: int, genotype_size: int = 64) -> None:
         super().__init__()
+        """
+        Neural developmental encoder.
 
-        # ! ----------------------------------------------------------------- #
-        # self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
-        # self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
-        # self.pool = nn.MaxPool2d(2, 2)
-        # ! ----------------------------------------------------------------- #
+        Given a genotype (list of chromosomes), output the phenotype
+        (probability matrices corresponding to module types, connections, rotations).
+
+        Parameters
+        ----------
+        number_of_modules : int
+            Number of modules in the robot.
+        genotype_size : int, optional
+            Size of each genotype chromosome, by default 64.
+        """
 
         # Hidden Layers
-        self.fc1 = nn.Linear(64, 64)
+        self.fc1 = nn.Linear(genotype_size, 64)
         self.fc2 = nn.Linear(64, 32)
         self.fc3 = nn.Linear(32, 64)
         self.fc4 = nn.Linear(64, 128)
@@ -103,6 +110,7 @@ class NeuralDevelopmentalEncoding(nn.Module):
 
         # Activations
         self.relu = nn.ReLU()
+        self.tanh = nn.Tanh()
         self.sigmoid = nn.Sigmoid()
 
         # Disable gradients for all parameters
@@ -113,16 +121,30 @@ class NeuralDevelopmentalEncoding(nn.Module):
         self,
         genotype: list[npt.NDArray[np.float32]],
     ) -> list[npt.NDArray[np.float32]]:
+        """
+        Forward pass through the neural developmental encoder.
+
+        Parameters
+        ----------
+        genotype : list[npt.NDArray[np.float32]]
+            List of chromosomes (numpy arrays).
+        Returns
+        -------
+        list[npt.NDArray[np.float32]]
+            List of phenotype outputs (numpy arrays).
+        """
+
         outputs: list[npt.NDArray[np.float32]] = []
         for idx, chromosome in enumerate(genotype):
             with torch.no_grad():  # double safety
-                x = torch.from_numpy(chromosome).to(torch.float32)
+                np_chromosome = np.array(chromosome)
+                x = torch.from_numpy(np_chromosome).to(torch.float32)
 
                 x = self.fc1(x)
                 x = self.relu(x)
 
                 x = self.fc2(x)
-                x = self.relu(x)
+                x = self.tanh(x)
 
                 x = self.fc3(x)
                 x = self.relu(x)

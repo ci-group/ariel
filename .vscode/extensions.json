@@ -1,3 +1,6 @@
 {
-    "recommendations": []
+    "recommendations": [
+        "streetsidesoftware.code-spell-checker",
+        "peterschmalfeldt.explorer-exclude",
+    ]
 }

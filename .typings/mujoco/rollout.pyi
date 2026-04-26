@@ -1,4 +1,5 @@
 import mujoco
+import types
 from _typeshed import Incomplete
 from collections.abc import Sequence
 from mujoco import _rollout as _rollout
@@ -120,4 +121,4 @@ def _infer_dimension(dim, value, **kwargs):
   Raises:
     ValueError: If mismatch between array shapes or initial guess.
   """
-def _tile_if_required(array, dim0, dim1: Incomplete | None = None): ...
+def _tile_if_required(array, dim0, dim1=None): ...
