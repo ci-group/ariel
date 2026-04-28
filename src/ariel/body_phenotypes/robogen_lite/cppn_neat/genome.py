@@ -127,9 +127,11 @@ class Genome:
         # Pick two random distinct nodes
         in_id, out_id = random.sample(all_nodes, 2)
 
-        # (I assume a feed-forward structure)
+        # Enforce feed-forward: source must not be output, destination must not be input
         if self.nodes[out_id].typ == "input":
-            in_id, out_id = out_id, in_id  # Swap to ensure input to non-input
+            in_id, out_id = out_id, in_id
+        if self.nodes[in_id].typ == "output":
+            return
 
         # Check if connection already exists (using in_id and out_id)
         for conn in self.connections.values():
