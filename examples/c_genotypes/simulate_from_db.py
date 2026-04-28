@@ -21,7 +21,7 @@ from sqlalchemy import create_engine
 from sqlmodel import Session, col, select
 
 from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
-from ariel.ec.a001 import Individual
+from ariel.ec import Individual
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.controllers.simple_cpg import (
