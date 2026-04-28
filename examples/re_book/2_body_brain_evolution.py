@@ -238,7 +238,7 @@ class Evolution:
 
         # Use the proper NEAT crossover
         # This handles weights AND structural changes (topology)
-        return morph1.crossover(morph2)
+        return morph1.crossover(morph2, is_maximisation=False)
 
     # ------------------------------------------------------------------------ #
     #                          EA OPERATORS                                    #
