@@ -195,19 +195,27 @@ class Genome:
         )
         self.add_connection(conn2)
 
-    def crossover(self, other: "Genome") -> "Genome":
+    def crossover(self, other: "Genome", is_maximisation: bool=True) -> "Genome":
         """
         Creates a new offspring Genome by crossing over this Genome (parent A)
         and another Genome (parent B).
         """
 
         # Determine the fitter parent
-        if self.fitness >= other.fitness:
-            fitter_parent = self
-            less_fit_parent = other
+        if is_maximisation:
+            if self.fitness >= other.fitness:
+                fitter_parent = self
+                less_fit_parent = other
+            else:
+                # make the fitter parent the parent "B"
+                fitter_parent = other
         else:
-            # make the fitter parent the parent "B"
-            fitter_parent = other
+            if self.fitness <= other.fitness:
+                fitter_parent = self
+                less_fit_parent = other
+            else:
+                # make the fitter parent the parent "B"
+                fitter_parent = other
             less_fit_parent = self
 
         # If fitnesses are equal, the shorter genome (fewer genes) should be the 'less_fit_parent'
