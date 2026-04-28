@@ -11,10 +11,14 @@
             "id": "aca771a1fde473b5",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "CMA-ES_Practical_Concerns.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "CMA-ES_Practical_Concerns"
             }
           }
         ]
@@ -176,8 +180,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "aca771a1fde473b5",
+  "active": "e160294adef0b057",
   "lastOpenFiles": [
+    "CMA-ES_Parameters.md",
+    "CMA-ES_Mirrored_Sampling.md",
+    "CMA-ES_Algorithm.md",
+    "Brockhoff_2010.md",
+    "ariel_database.md",
     "Nevergrad_ML_Patterns.md",
     "Nevergrad_Parametrization.md",
     "Source - Nevergrad Optimization API.md.tmp.33821.1775748219703",

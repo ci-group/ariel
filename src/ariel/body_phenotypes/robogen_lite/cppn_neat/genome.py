@@ -127,9 +127,11 @@ class Genome:
         # Pick two random distinct nodes
         in_id, out_id = random.sample(all_nodes, 2)
 
-        # (I assume a feed-forward structure)
+        # Enforce feed-forward: source must not be output, destination must not be input
         if self.nodes[out_id].typ == "input":
-            in_id, out_id = out_id, in_id  # Swap to ensure input to non-input
+            in_id, out_id = out_id, in_id
+        if self.nodes[in_id].typ == "output":
+            return
 
         # Check if connection already exists (using in_id and out_id)
         for conn in self.connections.values():
@@ -193,19 +195,27 @@ class Genome:
         )
         self.add_connection(conn2)
 
-    def crossover(self, other: "Genome") -> "Genome":
+    def crossover(self, other: "Genome", is_maximisation: bool=True) -> "Genome":
         """
         Creates a new offspring Genome by crossing over this Genome (parent A)
         and another Genome (parent B).
         """
 
         # Determine the fitter parent
-        if self.fitness >= other.fitness:
-            fitter_parent = self
-            less_fit_parent = other
+        if is_maximisation:
+            if self.fitness >= other.fitness:
+                fitter_parent = self
+                less_fit_parent = other
+            else:
+                # make the fitter parent the parent "B"
+                fitter_parent = other
         else:
-            # make the fitter parent the parent "B"
-            fitter_parent = other
+            if self.fitness <= other.fitness:
+                fitter_parent = self
+                less_fit_parent = other
+            else:
+                # make the fitter parent the parent "B"
+                fitter_parent = other
             less_fit_parent = self
 
         # If fitnesses are equal, the shorter genome (fewer genes) should be the 'less_fit_parent'

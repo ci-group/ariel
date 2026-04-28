@@ -10,7 +10,7 @@ import copy
 import random
 import time
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import numpy as np
 from rich.console import Console
@@ -31,8 +31,7 @@ from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
 )
-from ariel.ec.a001 import Individual
-from ariel.ec.a004 import EA, EASettings, EAStep
+from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
 from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
 from ariel.simulation.environments._simple_flat_with_target import (
@@ -121,9 +120,10 @@ class CPPNEvolution:
     def __init__(self) -> None:
         self.config = EASettings(
             is_maximisation=False,
-            num_of_generations=BUDGET,
+            num_steps=BUDGET,
             target_population_size=POP_SIZE,
-            db_file_path=DATA / "database.db",
+            output_folder=DATA,
+            db_file_name="database.db",
         )
 
     def create_random_genome(self) -> Genome:
@@ -151,7 +151,7 @@ class CPPNEvolution:
         decoder = MorphologyDecoderBestFirst(cppn_genome=genome, max_modules=NUM_MODULES)
         return decoder.decode()
 
-    def evaluate(self, population: List[Individual]) -> List[Individual]:
+    def evaluate(self, population: Population) -> Population:
         to_eval = [ind for ind in population if ind.alive and ind.tags.get("valid") and ind.requires_eval]
         if not to_eval:
             return population
@@ -171,10 +171,10 @@ class CPPNEvolution:
         return g
 
     def crossover(self, a: Genome, b: Genome) -> Genome:
-        child = a.crossover(b)
+        child = a.crossover(b, is_maximisation=False)
         return child
 
-    def reproduction(self, population: List[Individual]) -> List[Individual]:
+    def reproduction(self, population: Population) -> Population:
         parents = [ind for ind in population if ind.tags.get("ps", False)]
         if not parents:
             parents = population
@@ -198,16 +198,16 @@ class CPPNEvolution:
         population.extend(new_offspring)
         return population
 
-    def parent_selection(self, population: List[Individual]) -> List[Individual]:
-        population.sort(key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"))
+    def parent_selection(self, population: Population) -> Population:
+        population = population.sort(sort="min", attribute="fitness_")
         cutoff = len(population) // 2
         for i, ind in enumerate(population):
             ind.tags["ps"] = i < cutoff
         console.log(f"[cyan]Parent Selection: {sum(1 for ind in population if ind.tags.get('ps', False))}/{len(population)} marked[/cyan]")
         return population
 
-    def survivor_selection(self, population: List[Individual]) -> List[Individual]:
-        population.sort(key=lambda x: x.fitness_ if x.fitness_ is not None else float("inf"))
+    def survivor_selection(self, population: Population) -> Population:
+        population = population.sort(sort="min", attribute="fitness_")
         survivors = population[: self.config.target_population_size]
         for ind in population:
             if ind not in survivors:
@@ -215,15 +215,21 @@ class CPPNEvolution:
         return population
 
     def evolve(self) -> Individual | None:
-        population = [self.create_individual() for _ in range(POP_SIZE)]
+        population = Population([self.create_individual() for _ in range(POP_SIZE)])
         population = self.evaluate(population)
         ops = [
-            EAStep("parent_selection", self.parent_selection),
-            EAStep("reproduction", self.reproduction),
-            EAStep("evaluation", self.evaluate),
-            EAStep("survivor_selection", self.survivor_selection),
+            EAOperation(self.parent_selection),
+            EAOperation(self.reproduction),
+            EAOperation(self.evaluate),
+            EAOperation(self.survivor_selection),
         ]
-        ea = EA(population, operations=ops, num_of_generations=BUDGET)
+        ea = EA(
+            population,
+            operations=ops,
+            num_steps=BUDGET,
+            db_file_path=self.config.db_file_path,
+            db_handling=self.config.db_handling,
+        )
         ea.run()
         return ea.get_solution("best", only_alive=False)
 

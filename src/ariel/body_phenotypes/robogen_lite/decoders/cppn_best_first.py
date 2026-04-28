@@ -80,12 +80,12 @@ class MorphologyDecoderBestFirst:
                 parent_type = module_data[parent_id]["type"]
                 for face in ModuleFaces:
                     if face not in ALLOWED_FACES[parent_type]:
-                        break
+                        continue
 
                     child_pos = self._get_child_coords(parent_pos, face)
 
                     if child_pos in occupied_coords:
-                        break
+                        continue
 
                     cppn_inputs = list(parent_pos) + list(child_pos)
                     raw_outputs = self.cppn_genome.activate(cppn_inputs)
