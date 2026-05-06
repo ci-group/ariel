@@ -520,7 +520,7 @@ def actor_fitness(net) -> float:
         )
         total_fitness += score
 
-    return total_fitness / len(TARGET_POSITIONS)
+    return total_fitness / len(eval_targets)
 
 
 # ============================================================================ #
