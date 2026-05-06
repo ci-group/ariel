@@ -75,16 +75,14 @@ POP_SIZE = args.population
 REACH_RADIUS = max(0.01, args.reach_radius)
 
 # 1. Defined random target positions to prevent overfitting
-
+# FIXME target within 0.5 m (achievable with threshold=0.3, duration=20)
 TARGET_POSITIONS = [
-    [-0.8, -2.0, 0.1],
-    [-0.4, -1.5, 0.1],
-    [0.0, -2.0, 0.1],
-    [0.0, -1.0, 0.1],
-    [0.4, -1.5, 0.1],
-    [0.8, -2.0, 0.1],
-    [-0.3, -2.5, 0.1],
-    [0.3, -2.5, 0.1],
+    [-0.3, -0.4, 0.1],
+    [0.0, -0.5, 0.1],
+    [0.3, -0.4, 0.1],
+    [-0.2, -0.3, 0.1],
+    [0.2, -0.3, 0.1],
+    [0.0, -0.3, 0.1],
 ]
 TARGETS_PER_EVAL = 2
 
