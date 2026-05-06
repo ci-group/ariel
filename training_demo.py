@@ -339,6 +339,8 @@ def run_vision_simulation(
 
         current_pos = np.array(data.qpos[0:3].copy())
         total_path_length += np.linalg.norm(current_pos - last_pos)
+        if battery > battery_threshold:
+            charged_path_length += np.linalg.norm(current_pos - last_pos)
         last_pos = current_pos
 
         if target_position is not None:
