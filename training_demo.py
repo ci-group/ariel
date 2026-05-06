@@ -18,10 +18,7 @@ from pathlib import Path
 import time, os, cv2
 
 # Setting MUJOCO_GL to "egl" before importing mujoco to enable headless render
-# With GPU acceleration
-# (for vision processing in evolution)
 # os.environ["MUJOCO_GL"] = "egl"
-
 # Third-party libraries
 import numpy as np
 import mujoco
@@ -42,14 +39,6 @@ from ariel.simulation.controllers.utils.data_get import get_state_from_data as g
 from ariel.simulation.controllers.na_cpg import (NaCPG, create_fully_connected_adjacency)
 from ariel.utils.tracker import Tracker
 from ariel.utils.renderers import VideoRecorder, video_renderer
-from ariel.simulation.tasks.targeted_locomotion import (
-    fitness_delta_distance,
-    fitness_distance_and_efficiency,
-    fitness_survival_and_locomotion,
-    fitness_direct_path,
-    distance_to_target,
-    fitness_speed_to_target,
-)
 from baby_robot import baby_robot
 
 from matplotlib.collections import LineCollection
@@ -58,15 +47,19 @@ from matplotlib.colors import LinearSegmentedColormap
 # Set up command line argument parsing
 # If none given, default values are used.
 import argparse
-parser = argparse.ArgumentParser(description='Evolution simulation with configurable budget')
-parser.add_argument('--budget', type=int, default=200,
-                    help='Number of generations for learning')
-parser.add_argument('--dur', type=int, default=20,
+parser = argparse.ArgumentParser(description="Evolution simulation with configurable budget")
+parser.add_argument("--budget", type=int, default=200,
+                    help="Number of generations for learning")
+parser.add_argument("--dur", type=int, default=20,
                     help="Duration of an evaluation")
-parser.add_argument('--population', type=int, default=50, help="Population size")
-parser.add_argument('--fitness', type=str, default='distance', choices=['delta', 'efficiency', 'survival', 'direct', 'distance', 'speed'])
-parser.add_argument('--reach-radius', type=float, default=0.25, help='Planar distance threshold for counting target arrival')
-parser.add_argument('--num-actors', type=int, default=1, help='Number of parallel actors (CPUs) to use; set >1 to enable')
+parser.add_argument("--population", type=int, default=50,
+                    help="Population size")
+parser.add_argument("--fitness", type=str, default="distance",
+                    choices=["delta", "efficiency", "survival",
+                             "direct", "distance", "speed"])
+parser.add_argument("--reach-radius", type=float, default=0.1,
+                    help="Distance threshold for counting target reached")
+parser.add_argument("--num-actors", type=int, default=1, help="Number of parallel actors (CPUs) to use; set >1 to enable")
 args = parser.parse_args()
 
 BUDGET = args.budget
@@ -325,6 +318,9 @@ def run_vision_simulation(
 
             # 4. Network Forward Pass
             current_action = network.forward(model, data, state_input)
+            # avoid NaN samples from extreme weight vectors
+            if not np.all(np.isfinite(current_action)):
+                current_action = np.zeros(model.nu)
             trajectory.append((data.qpos[0], data.qpos[1], battery))
 
         # 5. Apply Control (Hold previous action if not a control step)
@@ -455,7 +451,7 @@ def _init_actor_env_once() -> None:
 def actor_fitness(net) -> float:
     """Top-level evaluator used by NEProblem in distributed mode.
 
-    Receives a parameterised PyTorch module `net` and returns a scalar
+    Receives a parameterized PyTorch module `net` and returns a scalar
     fitness. This mirrors the logic previously implemented in the
     `fitness_function` nested inside `evolve` but builds a local Mujoco
     environment per actor so evaluations are independent and parallel.
@@ -464,18 +460,18 @@ def actor_fitness(net) -> float:
 
     model = _ACTOR_ENV["model"]
     data = _ACTOR_ENV["data"]
-    renderer = _ACTOR_ENV.get("renderer", None)
-    robot_cam_name = _ACTOR_ENV.get("robot_cam_name", None)
+    renderer = _ACTOR_ENV.get("renderer")
+    robot_cam_name = _ACTOR_ENV.get("robot_cam_name")
     target_mocap_id = _ACTOR_ENV.get("target_mocap_id", 0)
 
-     # Sample a subset of targets for this evaluation
+    # Sample a subset of targets for this evaluation
     rng = np.random.default_rng()
     eval_targets = [
         TARGET_POSITIONS[i]
-        for i in rng.choice(len(TARGET_POSITIONS), size=TARGETS_PER_EVAL, replace=False)
+        for i in rng.choice(len(TARGET_POSITIONS),
+                            size=TARGETS_PER_EVAL, replace=False)
     ]
 
-    
     total_fitness = 0.0
 
     for target_pos in eval_targets:
@@ -545,7 +541,6 @@ def actor_fitness(net) -> float:
 # ============================================================================ #
 
 def evolve(world, model, data) -> list[float]:
-
     """Evolve the robot's movement using an evolutionary algorithm."""
 
     # Identify Camera for ROBOT VISION (on the robot)
@@ -748,69 +743,70 @@ if __name__ == "__main__":
             robot_cam_name = cam_name
             break
 
-    print("Rendering Best Video...")
-    path_to_video_folder = str(DATA / "videos")
+# FIXME: remove if not useful
+    # print("Rendering Best Video...")
+    # path_to_video_folder = str(DATA / "videos")
 
-    mujoco.mj_resetData(model, data)
-    network.reset_hidden()
+    # mujoco.mj_resetData(model, data)
+    # network.reset_hidden()
 
-    # Set target to middle position for the video demo
-    target_mocap_id = model.body("charging_station").mocapid[0]
-    data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
+    # # Set target to middle position for the video demo
+    # target_mocap_id = model.body("charging_station").mocapid[0]
+    # data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
 
-    # 1. Renderer for Robot Vision (Low Res)
-    try:
-        control_renderer = mujoco.Renderer(model, height=24, width=32)
-    except Exception:
-        print("[yellow]control_renderer init failed; replay will run without low-res vision.[/yellow]")
-        control_renderer = None
+    # # 1. Renderer for Robot Vision (Low Res)
+    # try:
+    #     control_renderer = mujoco.Renderer(model, height=24, width=32)
+    # except Exception:
+    #     print("[yellow]control_renderer init failed; replay will run without low-res vision.[/yellow]")
+    #     control_renderer = None
 
-    # 2. Renderer for Video Output (High Res)
-    # (use context-managed renderer below; avoid creating an extra EGL context here)
+    # # 2. Renderer for Video Output (High Res)
+    # # (use context-managed renderer below; avoid creating an extra EGL context here)
 
-    def get_vision_control_signal(m, d):
-        if robot_cam_name and control_renderer is not None:
-            try:
-                control_renderer.update_scene(d, camera=robot_cam_name)
-                img = control_renderer.render()
-                mask = isolate_green(img)
-                vision_inputs = analyze_sections(mask)
-            except Exception:
-                vision_inputs =[0.0] * 7
-        else:
-            vision_inputs = [0.0] * 7
+    # def get_vision_control_signal(m, d):
+    #     if robot_cam_name and control_renderer is not None:
+    #         try:
+    #             control_renderer.update_scene(d, camera=robot_cam_name)
+    #             img = control_renderer.render()
+    #             mask = isolate_green(img)
+    #             vision_inputs = analyze_sections(mask)
+    #         except Exception:
+    #             vision_inputs =[0.0] * 7
+    #     else:
+    #         vision_inputs = [0.0] * 7
 
-        robot_state = get_robot_state(d)
+    #     robot_state = get_robot_state(d)
 
-        phase_inputs = [
-            2 * np.sin(d.time * 2.0 * np.pi),
-            2 * np.cos(d.time * 2.0 * np.pi),
-        ]
+    #     phase_inputs = [
+    #         2 * np.sin(d.time * 2.0 * np.pi),
+    #         2 * np.cos(d.time * 2.0 * np.pi),
+    #     ]
 
-        # Approximate battery for replay: drains linearly with time
-        battery = max(0.0, 1.0 - (d.time / max(float(DURATION), 1.0)))
+    #     # Approximate battery for replay: drains linearly with time
+    #     battery = max(0.0, 1.0 - (d.time / max(float(DURATION), 1.0)))
 
-        state = np.concatenate([
-            robot_state,
-            vision_inputs,
-            phase_inputs,
-            [battery],
-        ]).astype(np.float32)
+    #     state = np.concatenate([
+    #         robot_state,
+    #         vision_inputs,
+    #         phase_inputs,
+    #         [battery],
+    #     ]).astype(np.float32)
 
-        return network.forward(m, d, state)
+    #     return network.forward(m, d, state)
 
-    # Video Timing Variables
-    fps = 30
-    video_dt = 1.0 / fps
-    next_video_time = 0.0
-    frames = []
+    # # Video Timing Variables
+    # fps = 30
+    # video_dt = 1.0 / fps
+    # next_video_time = 0.0
+    # frames = []
 
-    # Simulation Timing Variables
-    # (must match evolve/run_vision_simulation exactly)
-    timestep = model.opt.timestep
-    control_step_freq = 50
+    # # Simulation Timing Variables
+    # # (must match evolve/run_vision_simulation exactly)
+    # timestep = model.opt.timestep
+    # control_step_freq = 50
 
-    current_ctrl = np.zeros(model.nu)
+    # current_ctrl = np.zeros(model.nu)
 
 # --- REPLAY BEST & RECORD VIDEO ---
     print("Rendering Best Video...")
@@ -824,6 +820,7 @@ if __name__ == "__main__":
 
     # 2. Reset Simulation & Target
     mujoco.mj_resetData(model, data)
+    network.reset_hidden()  # reset network state for replay
     target_mocap_id = model.body("charging_station").mocapid[0]
     data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
 

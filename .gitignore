@@ -1,8 +1,4 @@
 ### PROJECT #####################################################################
-# Videos
-*.mp4
-# Dirs
-__data__
 # Mujoco
 MUJOCO_LOG.TXT
 # DrawIo
