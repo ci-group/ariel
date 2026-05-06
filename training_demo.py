@@ -260,6 +260,7 @@ def run_vision_simulation(
 
     # Initialize control placeholder
     current_action = np.zeros(model.nu)
+    charged_path_length = 0.0
 
     last_pos = np.array(data.qpos[0:3].copy())
     total_path_length = 0.0
@@ -367,6 +368,7 @@ def run_vision_simulation(
 
     results = {
         "path_length": total_path_length,
+        "charged_path_length": charged_path_length,
         "trajectory": trajectory,
         "min_distance_to_target": min_distance_to_target,
         "time_to_target": time_to_target,
@@ -485,40 +487,55 @@ def actor_fitness(net) -> float:
         data.mocap_pos[target_mocap_id] = target_pos
 
         metrics = run_vision_simulation(
-            model,
-            data,
+            model, data,
             network=net,
             duration=DURATION,
             target_position=np.asarray(target_pos),
             renderer=renderer,
             cam_name=robot_cam_name,
-             initial_battery=1.0,
+            initial_battery=1.0,
             control_step_freq=50,
         )
-        
-        # Exploration (minimize )
-        exploration = -float(metrics.get("path_length", 0.0))
-        
-        # Homing quality (shaped approach when low)
-        # shaped_homing accumulates distance-reductions → negate
+
+        # ── Component 1: Exploration while charged ──
+        # Only count path length during the "charged" phase (battery > 0.3)
+        # This requires a new metric from run_vision_simulation (see below)
+        charged_exploration = -float(metrics.get("charged_path_length", 0.0))
+
+        # ── Component 2: Homing when battery is low ──
+        # shaped_homing already only accumulates when battery <= 0.3
         homing = -float(metrics.get("shaped_homing", 0.0))
 
-        # bComponent 3: Final proximity to target
-        final_dist = float(metrics["min_distance_to_target"])
+        # ── Component 3: Final distance at END of episode ──
+        # Use final distance, not minimum-ever distance
+        # This rewards being AT the station when the episode ends
+        final_pos = np.array([data.qpos[0], data.qpos[1]])
+        final_dist = float(np.linalg.norm(final_pos
+                                          - np.asarray(target_pos)[:2]))
 
-        # Component 4: Arrival bonus
-        arrival = -5.0 if metrics["time_to_target"] is not None else 0.0
+        # ── Component 4: Arrival bonus ──
+        arrival = -10.0 if metrics["time_to_target"] is not None else 0.0
 
-        # Stability (penalise flipping)
+        # ── Component 5: Stability ──
         final_z = float(data.qpos[2])
-        flip_penalty = 2.0 if final_z < 0.02 else 0.0
+        flip_penalty = 3.0 if final_z < 0.02 else 0.0
+
+        # ── Component 6: Stopping bonus ──
+        # If the robot is near the target at the end, reward low velocity
+        # (encourages "stop there" rather than "run past")
+        final_speed = float(np.linalg.norm(data.qvel[:3]))
+        if final_dist < REACH_RADIUS * 2:
+            stop_bonus = -2.0 * max(0, 1.0 - final_speed)  # reward low speed near target
+        else:
+            stop_bonus = 0.0
 
         score = (
-            0.3 * exploration
-            + 1.0 * homing
-            + 2.0 * final_dist
-            + arrival
+            0.2 * charged_exploration    # mild reward for moving while charged
+            + 2.0 * homing              # strong reward for approaching when low
+            + 3.0 * final_dist          # strong reward for ending near target
+            + arrival                    # large bonus for reaching target
             + flip_penalty
+            + stop_bonus
         )
         total_fitness += score
 
