@@ -647,19 +647,6 @@ def evolve(world, model, data) -> list[float]:
     np.save(str(DATA / "fitness_history.npy"),
             np.array(gen_best_history))
 
-    # Plot fitness curve
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(gen_best_history, "b-", linewidth=2, label="Best fitness")
-    ax.set_xlabel("Generation")
-    ax.set_ylabel("Fitness (lower = better)")
-    ax.set_title("Fitness Over Generations")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    fig.savefig(str(DATA / "fitness_curve.png"),
-                dpi=150, bbox_inches="tight")
-    plt.close(fig)
-    print(f"[green]Fitness curve saved → {DATA / 'fitness_curve.png'}[/green]")
-
     # Close the renderer pre-initialized for evolution to free EGL resources
     if renderer is not None:
         try:
@@ -714,6 +701,9 @@ if __name__ == "__main__":
     start = time.time()
     model, data, best_weights, world, input_dim = main()
     end = time.time()
+    # Generate a timestamp for all output files in this run
+    from datetime import datetime
+    RUN_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     print(f"Evolution took {(end - start) / 60:.2f} minutes")
 
@@ -787,12 +777,12 @@ if __name__ == "__main__":
 
 # --- REPLAY BEST & RECORD VIDEO ---
     print("Rendering Best Video...")
-    path_to_video_folder = str(DATA / "videos")
+    path_to_data = str(DATA)
 
     # 1. Setup VideoRecorder (using your Ariel library class)
     video_recorder = VideoRecorder(
         file_name="baby_vision_best",
-        output_folder=path_to_video_folder,
+        output_folder="DATA/",
     )
 
     # 2. Reset Simulation & Target
@@ -853,7 +843,7 @@ if __name__ == "__main__":
 
         # Finish recording
         video_recorder.release()
-        print(f"[green]Video rendering complete. Saved to {path_to_video_folder}[/green]")
+        print(f"[green]Video rendering complete.Save to DATA/.")
 
     else:
         print("[yellow]High-res renderer unavailable; skipped video rendering.[/yellow]")
@@ -928,10 +918,26 @@ if __name__ == "__main__":
     ax2.grid(True, alpha=0.3)
 
     fig.tight_layout()
-    plot_path = os.path.join(path_to_video_folder, "trajectory_battery.png")
-    fig.savefig(plot_path, dpi=150, bbox_inches="tight")
+    fig.savefig(str(DATA / f"trajectory_battery_{RUN_TIMESTAMP}.png"), dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"[green]Trajectory + battery plot saved → {plot_path}[/green]")
+    print(f"[green]Trajectory + battery plot saved → {str(DATA / f"trajectory_battery{RUN_TIMESTAMP}.png")}")
+
+
+
+    # Plot fitness curve
+    gen_best_history = np.load("__data__/training_demo/fitness_history.npy")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(gen_best_history, "b-", linewidth=2, label="Best fitness")
+    ax.set_xlabel("Generation")
+    ax.set_ylabel("Fitness (lower = better)")
+    ax.set_title("Fitness Over Generations")
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    fig.savefig(str(DATA / f"fitness_curve_{RUN_TIMESTAMP}.png"),
+                dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"[green]Fitness curve saved → {DATA / 'fitness_curve.png'}[/green]")
+
 
     # Cleanup control renderer used for low-res vision
     try:
