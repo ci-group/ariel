@@ -782,7 +782,7 @@ if __name__ == "__main__":
     # 1. Setup VideoRecorder (using your Ariel library class)
     video_recorder = VideoRecorder(
         file_name="baby_vision_best",
-        output_folder="DATA/",
+        output_folder=str(DATA / "videos")
     )
 
     # 2. Reset Simulation & Target
@@ -843,7 +843,7 @@ if __name__ == "__main__":
 
         # Finish recording
         video_recorder.release()
-        print(f"[green]Video rendering complete.Save to DATA/.")
+        print(f"Video rendering complete. Save to DATA /")
 
     else:
         print("[yellow]High-res renderer unavailable; skipped video rendering.[/yellow]")
@@ -920,7 +920,7 @@ if __name__ == "__main__":
     fig.tight_layout()
     fig.savefig(str(DATA / f"trajectory_battery_{RUN_TIMESTAMP}.png"), dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"[green]Trajectory + battery plot saved → {str(DATA / f"trajectory_battery{RUN_TIMESTAMP}.png")}")
+    print(f"Trajectory + battery plot saved to {str(DATA / "trajectory_battery_{RUN_TIMESTAMP}.png")}")
 
 
 
@@ -936,7 +936,7 @@ if __name__ == "__main__":
     fig.savefig(str(DATA / f"fitness_curve_{RUN_TIMESTAMP}.png"),
                 dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"[green]Fitness curve saved → {DATA / 'fitness_curve.png'}[/green]")
+    print(f"Fitness curve saved to {str(DATA / "fitness_curve_{RUN_TIMESTAMP}.png")}.")
 
 
     # Cleanup control renderer used for low-res vision
