@@ -50,14 +50,14 @@ import argparse
 parser = argparse.ArgumentParser(description="Evolution simulation with configurable budget")
 parser.add_argument("--budget", type=int, default=200,
                     help="Number of generations for learning")
-parser.add_argument("--dur", type=int, default=20,
+parser.add_argument("--dur", type=int, default=30
                     help="Duration of an evaluation")
 parser.add_argument("--population", type=int, default=50,
                     help="Population size")
 parser.add_argument("--fitness", type=str, default="distance",
                     choices=["delta", "efficiency", "survival",
                              "direct", "distance", "speed"])
-parser.add_argument("--reach-radius", type=float, default=0.1,
+parser.add_argument("--reach-radius", type=float, default=0.15,
                     help="Distance threshold for counting target reached")
 parser.add_argument("--num-actors", type=int, default=1, help="Number of parallel actors (CPUs) to use; set >1 to enable")
 args = parser.parse_args()
@@ -70,14 +70,11 @@ REACH_RADIUS = max(0.01, args.reach_radius)
 # 1. Defined random target positions to prevent overfitting
 # FIXME target within 0.5 m (achievable with threshold=0.3, duration=20)
 TARGET_POSITIONS = [
-    [-0.3, -0.4, 0.1],
-    [0.0, -0.5, 0.1],
-    [0.3, -0.4, 0.1],
-    [-0.2, -0.3, 0.1],
-    [0.2, -0.3, 0.1],
-    [0.0, -0.3, 0.1],
+    [0.0, -1.0, 0.1],     # straight ahead, 1m
+    [-0.7, -0.7, 0.1],    # left, ~1m
+    [0.7, -0.7, 0.1],     # right, ~1m
 ]
-TARGETS_PER_EVAL = 2
+TARGETS_PER_EVAL = None  # use all
 
 # Global constants
 # Get file name and location to create data save folder.
@@ -464,20 +461,11 @@ def actor_fitness(net) -> float:
     robot_cam_name = _ACTOR_ENV.get("robot_cam_name")
     target_mocap_id = _ACTOR_ENV.get("target_mocap_id", 0)
 
-    # Sample a subset of targets for this evaluation
-    rng = np.random.default_rng()
-    eval_targets = [
-        TARGET_POSITIONS[i]
-        for i in rng.choice(len(TARGET_POSITIONS),
-                            size=TARGETS_PER_EVAL, replace=False)
-    ]
-
+    eval_targets = TARGET_POSITIONS
     total_fitness = 0.0
 
     for target_pos in eval_targets:
         mujoco.mj_resetData(model, data)
-
-        # Place target for this episode
         data.mocap_pos[target_mocap_id] = target_pos
 
         metrics = run_vision_simulation(
@@ -491,45 +479,29 @@ def actor_fitness(net) -> float:
             control_step_freq=50,
         )
 
-        # ── Component 1: Exploration while charged ──
-        # Only count path length during the "charged" phase (battery > 0.3)
-        # This requires a new metric from run_vision_simulation (see below)
-        charged_exploration = -float(metrics.get("charged_path_length", 0.0))
+        # ── THE ONLY THING THAT MATTERS: final distance to target ──
+        # This single objective forces the robot to:
+        #   1. Learn to walk (can't reduce distance without moving)
+        #   2. Walk TOWARD the target (random walking doesn't reduce distance)
+        #   3. Use vision (the target position isn't in the inputs)
+        final_pos = np.array([data.qpos[0], data.qpos[1]])
+        final_dist = float(np.linalg.norm(final_pos - np.asarray(target_pos)[:2]))
 
-        # ── Component 2: Homing when battery is low ──
-        # shaped_homing already only accumulates when battery <= 0.3
+        # ── Shaped homing bonus (helps bootstrap) ──
         homing = -float(metrics.get("shaped_homing", 0.0))
 
-        # ── Component 3: Final distance at END of episode ──
-        # Use final distance, not minimum-ever distance
-        # This rewards being AT the station when the episode ends
-        final_pos = np.array([data.qpos[0], data.qpos[1]])
-        final_dist = float(np.linalg.norm(final_pos
-                                          - np.asarray(target_pos)[:2]))
+        # ── Arrival bonus ──
+        arrival = -5.0 if metrics["time_to_target"] is not None else 0.0
 
-        # ── Component 4: Arrival bonus ──
-        arrival = -10.0 if metrics["time_to_target"] is not None else 0.0
-
-        # ── Component 5: Stability ──
+        # ── Stability ──
         final_z = float(data.qpos[2])
-        flip_penalty = 3.0 if final_z < 0.02 else 0.0
-
-        # ── Component 6: Stopping bonus ──
-        # If the robot is near the target at the end, reward low velocity
-        # (encourages "stop there" rather than "run past")
-        final_speed = float(np.linalg.norm(data.qvel[:3]))
-        if final_dist < REACH_RADIUS * 2:
-            stop_bonus = -2.0 * max(0, 1.0 - final_speed)  # reward low speed near target
-        else:
-            stop_bonus = 0.0
+        flip_penalty = 5.0 if final_z < 0.02 else 0.0
 
         score = (
-            0.2 * charged_exploration    # mild reward for moving while charged
-            + 2.0 * homing              # strong reward for approaching when low
-            + 3.0 * final_dist          # strong reward for ending near target
-            + arrival                    # large bonus for reaching target
-            + flip_penalty
-            + stop_bonus
+            5.0 * final_dist       # DOMINANT: end near target
+            + 1.0 * homing         # secondary: reward approach during low battery
+            + arrival              # bonus for actually arriving
+            + flip_penalty         # don't flip
         )
         total_fitness += score
 
