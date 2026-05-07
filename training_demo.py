@@ -743,70 +743,47 @@ if __name__ == "__main__":
             robot_cam_name = cam_name
             break
 
-# FIXME: remove if not useful
-    # print("Rendering Best Video...")
-    # path_to_video_folder = str(DATA / "videos")
+    # 1. Renderer for Robot Vision (Low Res)
+    try:
+        control_renderer = mujoco.Renderer(model, height=24, width=32)
+    except Exception:
+        print("[yellow]control_renderer init failed; replay will run without low-res vision.[/yellow]")
+        control_renderer = None
 
-    # mujoco.mj_resetData(model, data)
-    # network.reset_hidden()
+    # 2. Renderer for Video Output (High Res)
+    # (use context-managed renderer below; avoid creating an extra EGL context here)
 
-    # # Set target to middle position for the video demo
-    # target_mocap_id = model.body("charging_station").mocapid[0]
-    # data.mocap_pos[target_mocap_id] = TARGET_POSITIONS[0]
+    def get_vision_control_signal(m, d):
+        if robot_cam_name and control_renderer is not None:
+            try:
+                control_renderer.update_scene(d, camera=robot_cam_name)
+                img = control_renderer.render()
+                mask = isolate_green(img)
+                vision_inputs = analyze_sections(mask)
+            except Exception:
+                vision_inputs =[0.0] * 7
+        else:
+            vision_inputs = [0.0] * 7
 
-    # # 1. Renderer for Robot Vision (Low Res)
-    # try:
-    #     control_renderer = mujoco.Renderer(model, height=24, width=32)
-    # except Exception:
-    #     print("[yellow]control_renderer init failed; replay will run without low-res vision.[/yellow]")
-    #     control_renderer = None
+        robot_state = get_robot_state(d)
 
-    # # 2. Renderer for Video Output (High Res)
-    # # (use context-managed renderer below; avoid creating an extra EGL context here)
+        phase_inputs = [
+            2 * np.sin(d.time * 2.0 * np.pi),
+            2 * np.cos(d.time * 2.0 * np.pi),
+        ]
 
-    # def get_vision_control_signal(m, d):
-    #     if robot_cam_name and control_renderer is not None:
-    #         try:
-    #             control_renderer.update_scene(d, camera=robot_cam_name)
-    #             img = control_renderer.render()
-    #             mask = isolate_green(img)
-    #             vision_inputs = analyze_sections(mask)
-    #         except Exception:
-    #             vision_inputs =[0.0] * 7
-    #     else:
-    #         vision_inputs = [0.0] * 7
+        # Approximate battery for replay: drains linearly with time
+        battery = max(0.0, 1.0 - (d.time / max(float(DURATION), 1.0)))
 
-    #     robot_state = get_robot_state(d)
+        state = np.concatenate([
+            robot_state,
+            vision_inputs,
+            phase_inputs,
+            [battery],
+        ]).astype(np.float32)
 
-    #     phase_inputs = [
-    #         2 * np.sin(d.time * 2.0 * np.pi),
-    #         2 * np.cos(d.time * 2.0 * np.pi),
-    #     ]
+        return network.forward(m, d, state)
 
-    #     # Approximate battery for replay: drains linearly with time
-    #     battery = max(0.0, 1.0 - (d.time / max(float(DURATION), 1.0)))
-
-    #     state = np.concatenate([
-    #         robot_state,
-    #         vision_inputs,
-    #         phase_inputs,
-    #         [battery],
-    #     ]).astype(np.float32)
-
-    #     return network.forward(m, d, state)
-
-    # # Video Timing Variables
-    # fps = 30
-    # video_dt = 1.0 / fps
-    # next_video_time = 0.0
-    # frames = []
-
-    # # Simulation Timing Variables
-    # # (must match evolve/run_vision_simulation exactly)
-    # timestep = model.opt.timestep
-    # control_step_freq = 50
-
-    # current_ctrl = np.zeros(model.nu)
 
 # --- REPLAY BEST & RECORD VIDEO ---
     print("Rendering Best Video...")
