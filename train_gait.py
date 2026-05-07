@@ -82,8 +82,8 @@ class GaitNetwork(nn.Module):
         x = torch.tensor(state, dtype=torch.float32)
         if self._h is None:
             self.reset_hidden()
-        h = torch.elu(self.fc1(x) + self.fc_rec(self._h))
-        h = torch.elu(self.fc2(h))
+        h = torch.nn.functional.elu(self.fc1(x) + self.fc_rec(self._h))
+        h = torch.nn.functional.elu(self.fc2(h))
         self._h = torch.tanh(h).detach().clone()
         return (torch.tanh(self.fc_out(h)) * (torch.pi / 2)).detach().numpy()
 

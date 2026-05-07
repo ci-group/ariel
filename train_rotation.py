@@ -42,6 +42,7 @@ parser.add_argument("--gait-weights", type=str,
                     default="__data__/train_gait/gait_best.npy",
                     help="Path to Stage 1 gait weights")
 args = parser.parse_args()
+args.gait_weights = str(Path(args.gait_weights).resolve())
 
 BUDGET = args.budget
 DURATION = args.dur
@@ -87,8 +88,8 @@ class GaitNetwork(nn.Module):
         x = torch.tensor(state, dtype=torch.float32)
         if self._h is None:
             self.reset_hidden()
-        h = torch.elu(self.fc1(x) + self.fc_rec(self._h))
-        h = torch.elu(self.fc2(h))
+        h = torch.nn.functional.elu(self.fc1(x) + self.fc_rec(self._h))
+        h = torch.nn.functional.elu(self.fc2(h))
         self._h = torch.tanh(h).detach().clone()
         return (torch.tanh(self.fc_out(h)) * (torch.pi / 2)).detach().numpy()
 
@@ -141,7 +142,7 @@ class SteeringNetwork(nn.Module):
         )
         if self._h is None:
             self.reset_hidden()
-        h = torch.elu(self.fc1(x) + self.fc_rec(self._h))
+        h = torch.nn.functional.elu(self.fc1(x) + self.fc_rec(self._h))
         self._h = torch.tanh(h).detach().clone()
         raw = self.fc2(h)
         
@@ -312,7 +313,7 @@ def _init_homing_env():
     mocap_id = model.body("charging_station").mocapid[0]
     
     # Load frozen gait network
-    meta = np.load("__data__/train_gait/gait_meta.npz")
+    meta = np.load(str(Path("__data__/train_gait/gait_meta.npz").resolve()))
     gait_net = load_frozen_gait(
         args.gait_weights,
         int(meta["input_dim"]),
