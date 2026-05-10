@@ -121,19 +121,18 @@ class NeuralDevelopmentalEncoding(nn.Module):
         self,
         genotype: list[npt.NDArray[np.float32]],
     ) -> list[npt.NDArray[np.float32]]:
-        """
-        Forward pass through the neural developmental encoder.
+        """Forward pass through the neural developmental encoder.
 
         Parameters
         ----------
         genotype : list[npt.NDArray[np.float32]]
             List of chromosomes (numpy arrays).
+
         Returns
         -------
         list[npt.NDArray[np.float32]]
             List of phenotype outputs (numpy arrays).
         """
-
         outputs: list[npt.NDArray[np.float32]] = []
         for idx, chromosome in enumerate(genotype):
             with torch.no_grad():  # double safety

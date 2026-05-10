@@ -55,6 +55,47 @@ def euler_to_quat_conversion(
     return rotation_as_quat
 
 
+def has_self_collision(
+    robot_spec: mujoco.MjSpec,
+    penetration_threshold: float = -0.005,
+) -> bool:
+    """Return True if any geom pair in the robot spec penetrates each other.
+
+    Compiles the spec as a standalone model (no world/floor), runs a single
+    forward step to populate contacts, and checks whether any contact has a
+    distance below ``penetration_threshold``.  Negative distance = overlap.
+
+    Parameters
+    ----------
+    robot_spec
+        The robot-only MjSpec (as returned by construct_mjspec_from_graph).
+    penetration_threshold
+        Contacts with dist < this value are treated as collisions.
+        Default -0.005 (5 mm) avoids false positives from numerical noise.
+
+    Returns
+    -------
+    bool
+        True if self-collision is detected or if compilation fails.
+
+    Raises
+    ------
+    ValueError
+        If the robot specification cannot be compiled by MuJoCo.
+    """
+    try:
+        model = robot_spec.compile()
+        data = mujoco.MjData(model)
+        mujoco.mj_forward(model, data)
+        return any(
+            data.contact[i].dist < penetration_threshold
+            for i in range(data.ncon)
+        )
+    except mujoco.FatalError:
+        msg = "Failed to compile robot specification (mujoco spec)"
+        raise ValueError(msg) from None
+
+
 def mjspec_deep_copy(spec: mujoco.MjSpec) -> mujoco.MjSpec:
     """Create a copy of a MuJoCo specification.
 
