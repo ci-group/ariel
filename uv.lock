@@ -273,7 +273,6 @@ dependencies = [
     { name = "numpy" },
     { name = "numpy-quaternion" },
     { name = "omegaconf" },
-    { name = "ompl" },
     { name = "opencv-python" },
     { name = "panel" },
     { name = "pillow" },
@@ -363,7 +362,6 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.0.2" },
     { name = "numpy-quaternion", specifier = ">=2023.0.3" },
     { name = "omegaconf", specifier = ">=2.3.0" },
-    { name = "ompl", specifier = ">=1.7.0" },
     { name = "opencv-python", specifier = ">=4.11.0.86" },
     { name = "panel", specifier = ">=1.8.9" },
     { name = "pillow", specifier = ">=11.3.0" },
@@ -3102,21 +3100,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/09/48/6388f1bb9da707110532cb70ec4d2822858ddfb44f1cdf1233c20a80ea4b/omegaconf-2.3.0.tar.gz", hash = "sha256:d5d4b6d29955cc50ad50c46dc269bcd92c6e00f5f90d23ab5fee7bfca4ba4cc7", size = 3298120, upload-time = "2022-12-08T20:59:22.753Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/94/1843518e420fa3ed6919835845df698c7e27e183cb997394e4a670973a65/omegaconf-2.3.0-py3-none-any.whl", hash = "sha256:7b4df175cdb08ba400f45cae3bdcae7ba8365db4d165fc65fd04b050ab63b46b", size = 79500, upload-time = "2022-12-08T20:59:19.686Z" },
-]
-
-[[package]]
-name = "ompl"
-version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/9b/34b978e0261458059924c41228bd2cee82dee696d5559d5de00dc6a949fc/ompl-2.0.0-cp312-cp312-macosx_15_0_arm64.whl", hash = "sha256:942b3eb71e1abe15fe5a949066c85fc9218f2d1891e7a3e7d97805723eb562a1", size = 2279012, upload-time = "2026-04-07T01:33:01.007Z" },
-    { url = "https://files.pythonhosted.org/packages/42/5b/3505e3629e0ba7688eb2151dd2195af0c30d73c8ebe0b5759795c3d2ddef/ompl-2.0.0-cp312-cp312-macosx_15_0_x86_64.whl", hash = "sha256:aea718b378e1e15e4c9be82fbce3dfa47a106eb39de945ba9c727913b27189d0", size = 3026765, upload-time = "2026-04-07T01:33:02.409Z" },
-    { url = "https://files.pythonhosted.org/packages/0e/a7/e8ce31dc80a8b4d49bcd8c435c2a7d33330945c30909ddbff6fa7b64c7b5/ompl-2.0.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e83c16b0f6aa4fea352279edc2de4b930374c0a4d1a71bad1124cd0580a4b6ed", size = 4359434, upload-time = "2026-04-07T01:33:03.992Z" },
-    { url = "https://files.pythonhosted.org/packages/15/ba/013871b70529f4c720306df48c70c2bb1f34480711a1956c9b20282d6343/ompl-2.0.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8f2e2e9487e8f4e7e8bd86a0d9b60cd0a781dddee11d7883bde1bb003e1dda06", size = 4533405, upload-time = "2026-04-07T01:33:05.793Z" },
-    { url = "https://files.pythonhosted.org/packages/69/a9/0e60f0405b4b1395b947fa21bcd3458814317975fda4b3293581e5f4e5e0/ompl-2.0.0-cp313-cp313-macosx_15_0_arm64.whl", hash = "sha256:ea0a705a674b7f18f0848bd84f9da496a545616397815ca4f991bf25beef90bf", size = 2278914, upload-time = "2026-04-07T01:33:07.319Z" },
-    { url = "https://files.pythonhosted.org/packages/11/d9/42e7d8d458729e7ecfa4eea476c13333c75804f5b41b4900b5cc2297b148/ompl-2.0.0-cp313-cp313-macosx_15_0_x86_64.whl", hash = "sha256:99a7e68790bdf589dbf4431a62996c0f40295e242a682e8cb169acb16fc4e647", size = 3026722, upload-time = "2026-04-07T01:33:08.667Z" },
-    { url = "https://files.pythonhosted.org/packages/69/0c/1e3cc86d1c13c40c748fccc58b3b323b134de1bac1b792c67380c52ec67d/ompl-2.0.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:db978d8aa6223253bb98b37e994cc7fbc8153954fea7340f253894d17b043946", size = 4359332, upload-time = "2026-04-07T01:33:10.081Z" },
-    { url = "https://files.pythonhosted.org/packages/96/9e/555580cf478880124160d6d0562945974d3aca485791ff4596ecb3b407dc/ompl-2.0.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1b59d2ac36dee0f00a17bcc592fe30425d1c6f56c5f60eee2d989f2287ea05b7", size = 4533303, upload-time = "2026-04-07T01:33:11.462Z" },
 ]
 
 [[package]]

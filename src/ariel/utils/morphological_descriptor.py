@@ -1,123 +1,94 @@
 """
 MorphologicalMeasures class for robot phenotype digraph analysis.
-Mostly based on the revolve implementation: https://github.com/ci-group/revolve2/blob/master/standards/revolve2/standards/morphological_measures.py
+
+Mostly based on the revolve2 implementation:
+https://github.com/ci-group/revolve2/blob/master/standards/revolve2/standards/morphological_measures.py
 """
 
 from itertools import product
-from typing import Generic, TypeVar, Any
+from typing import Any
 
+import networkx as nx
 import numpy as np
 from numpy.typing import NDArray
-import networkx as nx
 
-from ariel.body_phenotypes.robogen_lite.config import ModuleType
-
-TModule = TypeVar("TModule", bound=np.generic)
+# ruff ignore: PLR0904 (too-many-public-methods)
+#   This class is a collection of measures, so many properties are expected
 
 
-class MorphologicalMeasures(Generic[TModule]):  # noqa: PLR0904
-    """
-    Modular robot morphological measures for robot phenotype digraph.
+class MorphologicalMeasures:  # noqa: PLR0904
+    """Modular robot morphological measures computed from a tree (blueprint).
 
     Works with a NetworkX directed graph representation of a robot.
-    Only works for robot with only right angle module rotations (90 degrees).
-    Some measures only work for 2d robots, which is noted in their docstring.
 
-    The measures are based on the following paper:
-    Miras, K., Haasdijk, E., Glette, K., Eiben, A.E. (2018).
-    Search Space Analysis of Evolvable Robot Morphologies.
-    In: Sim, K., Kaufmann, P. (eds) Applications of Evolutionary Computation.
-    EvoApplications 2018. Lecture Notes in Computer Science(), vol 10784. Springer, Cham.
-    https://doi.org/10.1007/978-3-319-77538-8_47
+    Inspired by the measures defined in:
+        Miras, K., Haasdijk, E., Glette, K., Eiben, A.E. (2018).
+        Search Space Analysis of Evolvable Robot Morphologies.
+        EvoApplications 2018. LNCS vol 10784. Springer, Cham.
+        https://doi.org/10.1007/978-3-319-77538-8_47
+
+    Implementation adapted from the revolve2 implementation, with
+    some measures renamed and others added for clarity and
+    relevance to our experiments.
+
+    Parameters
+    ----------
+    robot_graph : nx.DiGraph
+        Directed graph of the robot phenotype.  Nodes require ``'type'`` and
+        ``'rotation'`` attributes; edges require a ``'face'`` attribute.
+
+    Raises
+    ------
+    ValueError
+        If robot_graph is empty or contains more than one root node.
+
+    Attributes
+    ----------
+    graph : nx.DiGraph
+        The input robot graph.
+    grid : NDArray
+        3D object array placing each node at its integer grid position.
+    symmetry_grid : NDArray
+        Padded version of grid centred on the core, used for symmetry checks.
+    core_grid_position : np.ndarray
+        Integer (x, y, z) index of the core module inside grid.
+    is_2d : bool
+        ``True`` when every module's rotation is a multiple of 90° in the XY
+        plane (i.e. the robot has no vertical extent beyond its flat layout).
+    core_node : Any
+        The unique root node of graph (in-degree == 0).
+    modules : list
+        All nodes in graph.
+    bricks : list
+        Nodes whose ``'type'`` is ``'BRICK'``.
+    active_hinges : list
+        Nodes whose ``'type'`` is ``'HINGE'``.
+    core_is_filled : bool
+        ``True`` if every allowed face of the core has a child module.
+    filled_bricks : list
+        Bricks that have all their allowed faces occupied by children.
+    filled_active_hinges : list
+        Active hinges that have their one allowed face occupied by a child.
+    single_neighbour_modules : list
+        Non-core modules connected to exactly one other module (leaf nodes).
+    single_neighbour_bricks : list
+        Bricks with no children (leaf bricks).
+    double_neighbour_bricks : list
+        Bricks with exactly one child (internal chain nodes).
+    double_neighbour_active_hinges : list
+        Active hinges with exactly one child (internal chain nodes).
+    xy_symmetry : float
+        Degree of symmetry across the XY plane (Z-axis mirror), in [0, 1].
+    xz_symmetry : float
+        Degree of symmetry across the XZ plane (Y-axis mirror), in [0, 1].
+    yz_symmetry : float
+        Degree of symmetry across the YZ plane (X-axis mirror), in [0, 1].
     """
-
-    """Represents the modules of a body in a 3D tensor."""
-    grid: NDArray[TModule]
-    symmetry_grid: NDArray[TModule]
-    """Position of the core in 'body_as_grid'."""
-    core_grid_position: np.ndarray
-
-    """If the robot is two dimensional, i.e. all module rotations are 0 degrees."""
-    is_2d: bool
-
-    """The robot graph structure."""
-    graph: nx.DiGraph
-    core_node: Any
-    modules: list[Any]
-    bricks: list[Any]
-    active_hinges: list[Any]
-
-    """If all slots of the core are filled with other modules."""
-    core_is_filled: bool
-
-    """Bricks which have all slots filled with other modules."""
-    filled_bricks: list[Any]
-
-    """Active hinges which have all slots filled with other modules."""
-    filled_active_hinges: list[Any]
-
-    """
-    Modules that only connect to one other module.
-
-    This includes children and parents.
-    """
-    single_neighbour_modules: list[Any]
-
-    """
-    Bricks that are only connected to one other module.
-
-    Both children and parent are counted.
-    """
-    single_neighbour_bricks: list[Any]
-
-    """
-    Bricks that are connected to exactly two other modules.
-
-    Both children and parent are counted.
-    """
-    double_neighbour_bricks: list[Any]
-
-    """
-    Active hinges that are connected to exactly two other modules.
-
-    Both children and parent are counted.
-    """
-    double_neighbour_active_hinges: list[Any]
-
-    """
-    X/Y-plane symmetry according to the paper but in 3D.
-
-    X-axis is defined as forward/backward for the core module
-    Y-axis is defined as left/right for the core module.
-    """
-    xy_symmetry: float
-
-    """
-    X/Z-plane symmetry according to the paper but in 3D.
-
-    X-axis is defined as forward/backward for the core module
-    Z-axis is defined as up/down for the core module.
-    """
-    xz_symmetry: float
-
-    """
-    Y/Z-plane symmetry according to the paper but in 3D.
-
-    Y-axis is defined as left/right for the core module.
-    Z-axis is defined as up/down for the core module.
-    """
-    yz_symmetry: float
 
     def __init__(self, robot_graph: nx.DiGraph) -> None:
-        """
-        Initialize this object.
-
-        :param robot_graph: The NetworkX directed graph representing the robot phenotype.
-                           Expected to have node attributes 'type' and 'rotation'.
-                           Expected to have edge attributes 'face'.
-        """
         if robot_graph.number_of_nodes() == 0:
-            raise ValueError("Cannot analyze empty robot graph")
+            msg = "Cannot analyze empty robot graph"
+            raise ValueError(msg)
 
         self.graph = robot_graph
         self.grid, self.core_grid_position = self._graph_to_grid(robot_graph)
@@ -130,351 +101,319 @@ class MorphologicalMeasures(Generic[TModule]):  # noqa: PLR0904
         self.filled_bricks = self._calculate_filled_bricks()
         self.filled_active_hinges = self._calculate_filled_active_hinges()
         self.single_neighbour_bricks = self._calculate_single_neighbour_bricks()
-        self.single_neighbour_modules = (
-            self._calculate_single_neighbour_modules()
-        )
+        self.single_neighbour_modules = self._calculate_single_neighbour_modules()
         self.double_neighbour_bricks = self._calculate_double_neighbour_bricks()
         self.double_neighbour_active_hinges = (
             self._calculate_double_neighbour_active_hinges()
         )
-
         self._pad_grid()
         self.xy_symmetry = self._calculate_xy_symmetry()
         self.xz_symmetry = self._calculate_xz_symmetry()
         self.yz_symmetry = self._calculate_yz_symmetry()
 
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
     def _find_core_node(self) -> Any:
-        """Find the core node (root of the tree) in the graph."""
-        # Find node with no predecessors (root)
-        roots = [
-            node
-            for node in self.graph.nodes()
-            if self.graph.in_degree(node) == 0
-        ]
+        roots = [n for n in self.graph.nodes() if self.graph.in_degree(n) == 0]
         if len(roots) != 1:
-            raise ValueError(
-                f"Expected exactly one root node, found {len(roots)}"
-            )
+            msg = f"Expected exactly one root node, found {len(roots)}"
+            raise ValueError(msg)
         return roots[0]
 
-    def _get_nodes_by_type(self, module_type: str) -> list[Any]:
-        """Get all nodes of a specific module type."""
+    def _get_nodes_by_type(self, module_type: str) -> list:
         return [
-            node
-            for node in self.graph.nodes()
-            if self.graph.nodes[node].get("type") == module_type
+            n for n in self.graph.nodes()
+            if self.graph.nodes[n].get("type") == module_type
         ]
 
     def _calculate_is_2d(self) -> bool:
-        """Check if all modules use only 90-degree rotations."""
-        valid_rotations = {"DEG_0", "DEG_90", "DEG_180", "DEG_270"}
+        valid = {"DEG_0", "DEG_90", "DEG_180", "DEG_270"}
         return all(
-            self.graph.nodes[node].get("rotation", "DEG_0") in valid_rotations
-            for node in self.graph.nodes()
+            self.graph.nodes[n].get("rotation", "DEG_0") in valid
+            for n in self.graph.nodes()
         )
 
     def _get_node_type(self, node: Any) -> str:
-        """Get the module type of a node."""
         return self.graph.nodes[node].get("type", "UNKNOWN")
 
     def _get_allowed_faces(self, node: Any) -> list[str]:
-        """Get allowed faces for a node based on its type."""
-        module_type = self._get_node_type(node)
-        if module_type == "CORE":
+        t = self._get_node_type(node)
+        if t == "CORE":
             return ["FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM"]
-        elif module_type == "BRICK":
+        if t == "BRICK":
             return ["FRONT", "RIGHT", "LEFT", "TOP", "BOTTOM"]
-        elif module_type == "HINGE":
+        if t == "HINGE":
             return ["FRONT"]
-        else:
-            return []
+        return []
 
     def _get_node_connections(self, node: Any) -> list[str]:
-        """Get the faces that are connected for a node."""
-        connected_faces = []
-        # Check outgoing edges (children)
+        faces = []
         for successor in self.graph.successors(node):
-            edge_data = self.graph.get_edge_data(node, successor)
-            if edge_data and "face" in edge_data:
-                connected_faces.append(edge_data["face"])
-        return connected_faces
+            data = self.graph.get_edge_data(node, successor)
+            if data and "face" in data:
+                faces.append(data["face"])
+        return faces
 
     def _count_neighbors(self, node: Any) -> int:
-        """Count total neighbors (predecessors + successors)."""
         return self.graph.in_degree(node) + self.graph.out_degree(node)
 
     def _graph_to_grid(
-        self, robot_graph: nx.DiGraph
-    ) -> tuple[NDArray[TModule], np.ndarray]:
-        """Convert robot graph to 3D grid representation."""
+        self, robot_graph: nx.DiGraph,
+    ) -> tuple[NDArray, np.ndarray]:
         if robot_graph.number_of_nodes() == 0:
-            raise ValueError("Cannot convert empty robot graph to grid")
+            msg = "Cannot convert empty robot graph to grid"
+            raise ValueError(msg)
 
-        # Calculate positions of all nodes relative to core
-        positions = {}
+        positions: dict[Any, np.ndarray] = {}
         core_node = self._find_core_node()
-        self._calculate_graph_positions(
-            core_node, positions, np.array([0, 0, 0])
-        )
+        self._calculate_graph_positions(core_node, positions, np.array([0, 0, 0]))
 
-        # Find bounds
         if not positions:
-            # Single core only
             positions[core_node] = np.array([0, 0, 0])
 
         pos_array = np.array(list(positions.values()))
         min_pos = pos_array.min(axis=0)
-        max_pos = pos_array.max(axis=0)
 
-        # Create grid with proper size
-        grid_size = max_pos - min_pos + 1
-        grid = np.full(grid_size, None, dtype=object)
-
-        # Place nodes in grid
-        core_pos = positions[core_node] - min_pos
+        grid = np.full(pos_array.max(axis=0) - min_pos + 1, None, dtype=object)
         for node in robot_graph.nodes():
-            node_pos = positions[node] - min_pos
-            grid[tuple(node_pos)] = node
+            grid[tuple(positions[node] - min_pos)] = node
 
-        return grid, core_pos
+        return grid, positions[core_node] - min_pos
 
     def _calculate_graph_positions(
-        self, node: Any, positions: dict, pos: np.ndarray
+        self, node: Any, positions: dict, pos: np.ndarray,
     ) -> None:
-        """Recursively calculate 3D positions of all nodes in the graph."""
         positions[node] = pos.copy()
-
-        # Define face direction vectors (assuming standard orientation)
         face_directions = {
-            "FRONT": np.array([1, 0, 0]),
-            "BACK": np.array([-1, 0, 0]),
-            "RIGHT": np.array([0, 1, 0]),
-            "LEFT": np.array([0, -1, 0]),
-            "TOP": np.array([0, 0, 1]),
+            "FRONT":  np.array([1, 0, 0]),
+            "BACK":   np.array([-1, 0, 0]),
+            "RIGHT":  np.array([0, 1, 0]),
+            "LEFT":   np.array([0, -1, 0]),
+            "TOP":    np.array([0, 0, 1]),
             "BOTTOM": np.array([0, 0, -1]),
         }
-
-        # Process children (successors in the graph)
         for child in self.graph.successors(node):
-            edge_data = self.graph.get_edge_data(node, child)
-            if edge_data and "face" in edge_data:
-                face = edge_data["face"]
-                if face in face_directions:
-                    child_pos = pos + face_directions[face]
-                    if child not in positions:  # Avoid cycles
-                        self._calculate_graph_positions(
-                            child, positions, child_pos
-                        )
+            data = self.graph.get_edge_data(node, child)
+            if data and "face" in data and data["face"] in face_directions:
+                child_pos = pos + face_directions[data["face"]]
+                if child not in positions:
+                    self._calculate_graph_positions(child, positions, child_pos)
 
     def _calculate_core_is_filled(self) -> bool:
-        """Check if the core has all its allowed faces filled."""
-        allowed_faces = self._get_allowed_faces(self.core_node)
-        connected_faces = self._get_node_connections(self.core_node)
-        return len(connected_faces) == len(allowed_faces)
+        return len(self._get_node_connections(self.core_node)) == len(
+            self._get_allowed_faces(self.core_node),
+        )
 
-    def _calculate_filled_bricks(self) -> list[Any]:
-        """Get bricks that have all their allowed faces filled."""
+    def _calculate_filled_bricks(self) -> list:
         return [
-            brick
-            for brick in self.bricks
-            if len(self._get_node_connections(brick))
-            == len(self._get_allowed_faces(brick))
+            b for b in self.bricks
+            if len(self._get_node_connections(b)) == len(self._get_allowed_faces(b))
         ]
 
-    def _calculate_filled_active_hinges(self) -> list[Any]:
-        """Get active hinges that have all their allowed faces filled."""
+    def _calculate_filled_active_hinges(self) -> list:
         return [
-            hinge
-            for hinge in self.active_hinges
-            if len(self._get_node_connections(hinge))
-            == len(self._get_allowed_faces(hinge))
+            h for h in self.active_hinges
+            if len(self._get_node_connections(h)) == len(self._get_allowed_faces(h))
         ]
 
-    def _calculate_single_neighbour_bricks(self) -> list[Any]:
-        """Get bricks that have no children (leaf nodes)."""
+    def _calculate_single_neighbour_bricks(self) -> list:
+        return [b for b in self.bricks if self.graph.out_degree(b) == 0]
+
+    def _calculate_single_neighbour_modules(self) -> list:
         return [
-            brick for brick in self.bricks if self.graph.out_degree(brick) == 0
+            n for n in self.modules
+            if self._get_node_type(n) != "CORE" and self._count_neighbors(n) == 1
         ]
 
-    def _calculate_single_neighbour_modules(self) -> list[Any]:
-        """Get non-core modules that have only one neighbor (leaf nodes)."""
-        non_core_modules = [
-            node for node in self.modules if self._get_node_type(node) != "CORE"
-        ]
-        return [
-            module
-            for module in non_core_modules
-            if self._count_neighbors(module) == 1
-        ]
+    def _calculate_double_neighbour_bricks(self) -> list:
+        return [b for b in self.bricks if self.graph.out_degree(b) == 1]
 
-    def _calculate_double_neighbour_bricks(self) -> list[Any]:
-        """Get bricks that have exactly one child (connecting two modules)."""
-        return [
-            brick for brick in self.bricks if self.graph.out_degree(brick) == 1
-        ]
-
-    def _calculate_double_neighbour_active_hinges(self) -> list[Any]:
-        """Get active hinges that have exactly one child (connecting two modules)."""
-        return [
-            hinge
-            for hinge in self.active_hinges
-            if self.graph.out_degree(hinge) == 1
-        ]
+    def _calculate_double_neighbour_active_hinges(self) -> list:
+        return [h for h in self.active_hinges if self.graph.out_degree(h) == 1]
 
     def _pad_grid(self) -> None:
         x, y, z = self.grid.shape
-        xoffs, yoffs, zoffs = self.core_grid_position
-        self.symmetry_grid = np.empty(
-            shape=(x + xoffs, y + yoffs, z + zoffs), dtype=object
-        )
-        self.symmetry_grid.fill(None)
+        xo, yo, zo = self.core_grid_position
+        self.symmetry_grid = np.full((x + xo, y + yo, z + zo),
+                                     None,
+                                     dtype=object,
+                                     )
         self.symmetry_grid[:x, :y, :z] = self.grid
 
     def _calculate_xy_symmetry(self) -> float:
-        """Calculate XY-plane symmetry."""
-        num_along_plane = 0
-        num_symmetrical = 0
+        on_plane = off_sym = 0
+        cz = self.core_grid_position[2]
         for x, y, z in product(
             range(self.bounding_box_depth),
             range(self.bounding_box_width),
             range(1, (self.bounding_box_height - 1) // 2),
         ):
-            if self.symmetry_grid[x, y, self.core_grid_position[2]] is not None:
-                num_along_plane += 1
-            pos_z = self.symmetry_grid[x, y, self.core_grid_position[2] + z]
-            neg_z = self.symmetry_grid[x, y, self.core_grid_position[2] - z]
-            if pos_z is not None and neg_z is not None:
-                # Check if module types match
-                if self._get_node_type(pos_z) == self._get_node_type(neg_z):
-                    num_symmetrical += 2
-
-        difference = self.num_modules - num_along_plane
-        return num_symmetrical / difference if difference > 0.0 else 0.0
+            if self.symmetry_grid[x, y, cz] is not None:
+                on_plane += 1
+            pos = self.symmetry_grid[x, y, cz + z]
+            neg = self.symmetry_grid[x, y, cz - z]
+            if pos is not None and neg is not None:
+                if self._get_node_type(pos) == self._get_node_type(neg):
+                    off_sym += 2
+        diff = self.num_modules - on_plane
+        return off_sym / diff if diff > 0 else 0.0
 
     def _calculate_xz_symmetry(self) -> float:
-        """Calculate XZ-plane symmetry."""
-        num_along_plane = 0
-        num_symmetrical = 0
+        on_plane = off_sym = 0
+        cy = self.core_grid_position[1]
         for x, y, z in product(
             range(self.bounding_box_depth),
             range(1, (self.bounding_box_width - 1) // 2),
             range(self.bounding_box_height),
         ):
-            if self.symmetry_grid[x, self.core_grid_position[1], z] is not None:
-                num_along_plane += 1
-            pos_y = self.symmetry_grid[x, self.core_grid_position[1] + y, z]
-            neg_y = self.symmetry_grid[x, self.core_grid_position[1] - y, z]
-            if pos_y is not None and neg_y is not None:
-                # Check if module types match
-                if self._get_node_type(pos_y) == self._get_node_type(neg_y):
-                    num_symmetrical += 2
-        difference = self.num_modules - num_along_plane
-        return num_symmetrical / difference if difference > 0.0 else 0.0
+            if self.symmetry_grid[x, cy, z] is not None:
+                on_plane += 1
+            pos = self.symmetry_grid[x, cy + y, z]
+            neg = self.symmetry_grid[x, cy - y, z]
+            if pos is not None and neg is not None:
+                if self._get_node_type(pos) == self._get_node_type(neg):
+                    off_sym += 2
+        diff = self.num_modules - on_plane
+        return off_sym / diff if diff > 0 else 0.0
 
     def _calculate_yz_symmetry(self) -> float:
-        """Calculate YZ-plane symmetry."""
-        num_along_plane = 0
-        num_symmetrical = 0
+        on_plane = off_sym = 0
+        cx = self.core_grid_position[0]
         for x, y, z in product(
             range(1, (self.bounding_box_depth - 1) // 2),
             range(self.bounding_box_width),
             range(self.bounding_box_height),
         ):
-            if self.symmetry_grid[self.core_grid_position[0], y, z] is not None:
-                num_along_plane += 1
-            pos_x = self.symmetry_grid[self.core_grid_position[0] + x, y, z]
-            neg_x = self.symmetry_grid[self.core_grid_position[0] - x, y, z]
-            if pos_x is not None and neg_x is not None:
-                # Check if module types match
-                if self._get_node_type(pos_x) == self._get_node_type(neg_x):
-                    num_symmetrical += 2
-        difference = self.num_modules - num_along_plane
-        return num_symmetrical / difference if difference > 0.0 else 0.0
+            if self.symmetry_grid[cx, y, z] is not None:
+                on_plane += 1
+            pos = self.symmetry_grid[cx + x, y, z]
+            neg = self.symmetry_grid[cx - x, y, z]
+            if pos is not None and neg is not None:
+                if self._get_node_type(pos) == self._get_node_type(neg):
+                    off_sym += 2
+        diff = self.num_modules - on_plane
+        return off_sym / diff if diff > 0 else 0.0
+
+    # ------------------------------------------------------------------
+    # Bounding-box geometry
+    # ------------------------------------------------------------------
 
     @property
     def bounding_box_depth(self) -> int:
-        """
-        Get the depth of the bounding box around the body.
+        """Extent along the forward/backward (X) axis in module-grid units.
 
-        Forward/backward axis for the core module.
-
-        :returns: The depth.
+        Returns
+        -------
+        int
         """
         return self.grid.shape[0]
 
     @property
     def bounding_box_width(self) -> int:
-        """
-        Get the width of the bounding box around the body.
+        """Extent along the left/right (Y) axis in module-grid units.
 
-        Right/left axis for the core module.
-
-        :returns: The width.
+        Returns
+        -------
+        int
         """
         return self.grid.shape[1]
 
     @property
     def bounding_box_height(self) -> int:
-        """
-        Get the height of the bounding box around the body.
+        """Extent along the up/down (Z) axis in module-grid units.
 
-        Up/down axis for the core module.
-
-        :returns: The height.
+        Returns
+        -------
+        int
         """
         return self.grid.shape[2]
 
     @property
-    def num_modules(self) -> int:
-        """
-        Get the number of modules.
+    def bounding_box_volume(self) -> int:
+        """Product of all three bounding-box dimensions (m_area in the paper).
 
-        :returns: The number of modules.
+        Returns
+        -------
+        int
+        """
+        return (self.bounding_box_depth *
+                self.bounding_box_width *
+                self.bounding_box_height
+                )
+
+    # ------------------------------------------------------------------
+    # Raw counts
+    # ------------------------------------------------------------------
+
+    @property
+    def num_modules(self) -> int:
+        """Total number of modules.
+
+        Returns
+        -------
+        int
         """
         return len(self.modules)
 
     @property
     def num_bricks(self) -> int:
-        """
-        Get the number of bricks.
+        """Number of BRICK-type modules.
 
-        :returns: The number of bricks.
+        Returns
+        -------
+        int
         """
         return len(self.bricks)
 
     @property
     def num_active_hinges(self) -> int:
-        """
-        Get the number of active hinges.
+        """Number of HINGE-type modules.
 
-        :returns: The number of active hinges.
+        Returns
+        -------
+        int
         """
         return len(self.active_hinges)
 
     @property
-    def num_filled_bricks(self) -> int:
-        """
-        Get the number of bricks which have all slots filled with other modules.
+    def num_joints(self) -> int:
+        """Alias for ``num_active_hinges``.
 
-        :returns: The number of bricks.
+        Returns
+        -------
+        int
+        """
+        return self.num_active_hinges
+
+    @property
+    def num_filled_bricks(self) -> int:
+        """Number of bricks with every allowed face occupied.
+
+        Returns
+        -------
+        int
         """
         return len(self.filled_bricks)
 
     @property
     def num_filled_active_hinges(self) -> int:
-        """
-        Get the number of bricks which have all slots filled with other modules.
+        """Number of active hinges with their allowed face occupied.
 
-        :returns: The number of bricks.
+        Returns
+        -------
+        int
         """
         return len(self.filled_active_hinges)
 
     @property
     def num_filled_modules(self) -> int:
-        """
-        Get the number of modules which have all slots filled with other modules, including the core.
+        """Total fully-saturated modules (filled bricks + filled hinges + filled core).
 
-        :returns: The number of modules.
+        Returns
+        -------
+        int
         """
         return (
             self.num_filled_bricks
@@ -483,266 +422,276 @@ class MorphologicalMeasures(Generic[TModule]):  # noqa: PLR0904
         )
 
     @property
-    def max_potentionally_filled_core_and_bricks(self) -> int:
-        """
-        Get the maximum number of core and bricks that could potentially be filled with this set of modules if rearranged in an optimal way.
-
-        This calculates 'b_max' from the paper.
-
-        :returns: The calculated number.
-        """
-        pot_max_filled = max(0, (self.num_modules - 2) // 3)
-        pot_max_filled = min(pot_max_filled, 1 + self.num_bricks)
-        return pot_max_filled
-
-    @property
-    def filled_core_and_bricks_proportion(self) -> float:
-        """
-        Get the ratio between filled cores and bricks and how many that potentially could have been if this set of modules was rearranged in an optimal way.
-
-        This calculates 'branching' from the paper.
-
-        :returns: The proportion.
-        """
-        if self.max_potentionally_filled_core_and_bricks == 0:
-            return 0.0
-
-        return (
-            len(self.filled_bricks) + (1 if self.core_is_filled else 0)
-        ) / self.max_potentionally_filled_core_and_bricks
-
-    @property
     def num_single_neighbour_modules(self) -> int:
-        """
-        Get the number of bricks that are only connected to one other module.
+        """Number of non-core leaf modules (connected to exactly one module).
 
-        Both children and parent are counted.
-
-        :returns: The number of bricks.
+        Returns
+        -------
+        int
         """
         return len(self.single_neighbour_modules)
 
     @property
-    def max_potential_single_neighbour_modules(self) -> int:
-        """
-        Get the maximum number of bricks that could potentially have only one neighbour if this set of modules was rearranged in an optimal way.
-
-        This calculates "l_max" from the paper.
-
-        :returns: The calculated number.
-        """
-        return self.num_modules - 1 - max(0, (self.num_modules - 3) // 3)
-
-    @property
     def num_double_neighbour_bricks(self) -> int:
-        """
-        Get the number of bricks that are connected to exactly two other modules.
+        """Number of bricks connected to exactly two modules.
 
-        Both children and parent are counted.
-
-        :returns: The number of bricks.
+        Returns
+        -------
+        int
         """
         return len(self.double_neighbour_bricks)
 
     @property
     def num_double_neighbour_active_hinges(self) -> int:
-        """
-        Get the number of active hinges that are connected to exactly two other modules.
+        """Number of active hinges connected to exactly two modules.
 
-        Both children and parent are counted.
-
-        :returns: The number of active hinges.
+        Returns
+        -------
+        int
         """
         return len(self.double_neighbour_active_hinges)
 
+    # ------------------------------------------------------------------
+    # Theoretical maxima
+    # ------------------------------------------------------------------
+
+    @property
+    def max_potentionally_filled_core_and_bricks(self) -> int:
+        """Upper bound on filled core+bricks given this module set (b_max).
+
+        Returns
+        -------
+        int
+        """
+        return min(max(0, (self.num_modules - 2) // 3), 1 + self.num_bricks)
+
+    @property
+    def max_potential_single_neighbour_modules(self) -> int:
+        """Upper bound on single-neighbour modules given this module set (l_max).
+
+        Returns
+        -------
+        int
+        """
+        return self.num_modules - 1 - max(0, (self.num_modules - 3) // 3)
+
+    @property
+    def max_potential_joints(self) -> int:
+        """Maximum possible joints if every inter-module connection were a hinge.
+
+        Returns
+        -------
+        int
+            ``num_modules - 1``, or 0 for a single-module robot.
+        """
+        return max(0, self.num_modules - 1)
+
     @property
     def potential_double_neighbour_bricks_and_active_hinges(self) -> int:
-        """
-        Get the maximum number of bricks and active hinges that could potentially have exactly two neighbours if this set of modules was rearranged in an optimal way.
+        """Upper bound on double-neighbour bricks+hinges given this module set (e_max).
 
-        This calculates e_max from the paper.
-
-        :returns: The calculated number.
+        Returns
+        -------
+        int
         """
         return max(0, self.num_bricks + self.num_active_hinges - 1)
 
+    # ------------------------------------------------------------------
+    # Named proportions (intermediate, kept for backwards compatibility)
+    # ------------------------------------------------------------------
+
+    @property
+    def filled_core_and_bricks_proportion(self) -> float:
+        """Ratio of filled core+bricks to their theoretical maximum (branching).
+
+        Returns
+        -------
+        float
+            Value in [0, 1].
+        """
+        if self.max_potentionally_filled_core_and_bricks == 0:
+            return 0.0
+        return (
+            len(self.filled_bricks) + (1 if self.core_is_filled else 0)
+        ) / self.max_potentionally_filled_core_and_bricks
+
     @property
     def double_neighbour_brick_and_active_hinge_proportion(self) -> float:
-        """
-        Get the ratio between the number of bricks and active hinges with exactly two neighbours and how many that could potentially have been if this set of modules was rearranged in an optimal way.
+        """Ratio of double-neighbour bricks+hinges to their theoretical maximum.
 
-        This calculate length of limbs proportion(extensiveness) from the paper.
-
-        :returns: The proportion.
+        Returns
+        -------
+        float
+            Value in [0, 1].
         """
         if self.potential_double_neighbour_bricks_and_active_hinges == 0:
             return 0.0
-
         return (
-            self.num_double_neighbour_bricks
-            + self.num_double_neighbour_active_hinges
+            self.num_double_neighbour_bricks + self.num_double_neighbour_active_hinges
         ) / self.potential_double_neighbour_bricks_and_active_hinges
 
     @property
-    def bounding_box_volume(self) -> int:
-        """
-        Get the volume of the bounding box.
-
-        This calculates m_area from the paper.
-
-        :returns: The volume.
-        """
-        return (
-            self.bounding_box_width
-            * self.bounding_box_height
-            * self.bounding_box_depth
-        )
-
-    @property
     def bounding_box_volume_coverage(self) -> float:
-        """
-        Get the proportion of the bounding box that is filled with modules.
+        """Fraction of the bounding-box volume occupied by modules.
 
-        This calculates 'coverage' from the paper.
-
-        :returns: The proportion.
+        Returns
+        -------
+        float
+            Value in (0, 1].
         """
         return self.num_modules / self.bounding_box_volume
 
     @property
     def branching(self) -> float:
-        """
-        Get the 'branching' measurement from the paper.
+        """Alias for ``filled_core_and_bricks_proportion``.
 
-        Alias for filled_core_and_bricks_proportion.
-
-        :returns: Branching measurement.
+        Returns
+        -------
+        float
         """
         return self.filled_core_and_bricks_proportion
 
     @property
     def limbs(self) -> float:
-        """
-        Get the 'limbs' measurement from the paper.
+        """Fraction of non-core leaf modules, normalised by l_max.
 
-        Alias for single_neighbour_brick_proportion.
-
-        :returns: Limbs measurement.
+        Returns
+        -------
+        float
+            Value in [0, 1].
         """
         if self.max_potential_single_neighbour_modules == 0:
             return 0.0
         return (
-            self.num_single_neighbour_modules
-            / self.max_potential_single_neighbour_modules
+            self.num_single_neighbour_modules / self.max_potential_single_neighbour_modules
         )
 
     @property
     def length_of_limbs(self) -> float:
-        """
-        Get the 'length of limbs' measurement from the paper.
+        """Alias for ``double_neighbour_brick_and_active_hinge_proportion``.
 
-        Alias for double_neighbour_brick_and_active_hinge_proportion.
-
-        :returns: Length of limbs measurement.
+        Returns
+        -------
+        float
         """
         return self.double_neighbour_brick_and_active_hinge_proportion
 
     @property
     def coverage(self) -> float:
-        """
-        Get the 'coverage' measurement from the paper.
+        """Alias for ``bounding_box_volume_coverage``.
 
-        Alias for bounding_box_volume_coverage.
-
-        :returns: Coverage measurement.
+        Returns
+        -------
+        float
         """
         return self.bounding_box_volume_coverage
 
     @property
     def proportion_2d(self) -> float:
+        """Proportion measure for 2D robots only.
+
+        Returns
+        -------
+        float
+            min(depth, width) / max(depth, width), in (0, 1].
         """
-        Get the 'proportion' measurement from the paper.
-
-        Only for 2d robots.
-
-        :returns: Proportion measurement.
-        """
-        assert self.is_2d
-
         return min(self.bounding_box_depth, self.bounding_box_width) / max(
-            self.bounding_box_depth, self.bounding_box_width
+            self.bounding_box_depth, self.bounding_box_width,
         )
 
     @property
-    def symmetry(self) -> float:
-        """
-        Get the 'symmetry' measurement from the paper, but extended to 3d.
+    def proportion(self) -> float:
+        """Ground-plane footprint proportion; delegates to ``P``.
 
-        :returns: Symmetry measurement.
+        Returns
+        -------
+        float
+            min(depth, width) / max(depth, width), in (0, 1].
+        """
+        return self.P
+
+    @property
+    def symmetry(self) -> float:
+        """Best-of-three plane symmetry score.
+
+        Returns
+        -------
+        float
+            max(xy_symmetry, xz_symmetry, yz_symmetry).
         """
         return max(self.xy_symmetry, self.xz_symmetry, self.yz_symmetry)
 
     @property
     def module_diversity(self) -> float:
-        """
-        Measure module-type alternation (BRICK <-> HINGE) along connections.
+        """Fraction of BRICK/HINGE edges that alternate module type.
 
-        Returns the fraction of edges connecting BRICK and HINGE out of all
-        edges that connect BRICK/HINGE module pairs. Value in [0, 1].
+        Returns
+        -------
+        float
+            Value in [0, 1]; 0.0 if no BRICK/HINGE edge exists.
         """
-        alt = 0
-        total = 0
+        alt = total = 0
         for u, v in self.graph.edges():
-            t1 = self._get_node_type(u)
-            t2 = self._get_node_type(v)
-            if t1 in ("BRICK", "HINGE") and t2 in ("BRICK", "HINGE"):
+            t1, t2 = self._get_node_type(u), self._get_node_type(v)
+            if t1 in {"BRICK", "HINGE"} and t2 in {"BRICK", "HINGE"}:
                 total += 1
-                if (t1 == "BRICK" and t2 == "HINGE") or (
-                    t1 == "HINGE" and t2 == "BRICK"
-                ):
+                if t1 != t2:
                     alt += 1
         return alt / total if total > 0 else 0.0
 
     @property
-    def D(self) -> float:
-        """Alias for module_diversity (diversity metric)."""
-        return self.module_diversity
-
-    @property
-    def num_joints(self) -> int:
-        """Number of joints (active hinges)."""
-        return self.num_active_hinges
-
-    @property
-    def max_potential_joints(self) -> int:
-        """Maximum possible joints (if every connection were a hinge)."""
-        return max(0, self.num_modules - 1)
-
-    @property
     def joints(self) -> float:
-        """Get the 'number of joints' measurement J = j / j_max."""
+        """Joint ratio J = num_joints / max_potential_joints.
+
+        Returns
+        -------
+        float
+            Value in [0, 1].
+        """
         if self.max_potential_joints == 0:
             return 0.0
         return self.num_joints / self.max_potential_joints
 
     @property
     def size(self) -> float:
-        # TODO check if m_max is fine like this!!
-        """Size S = m / m_max (proportion of occupied volume).
+        """Size = num_modules / bounding_box_volume.
 
-        m = number of modules
-        m_max = bounding box volume (max possible occupancy)
-
-        Equivalent to 'coverage' in Miras et al. (2018) if volume is used as reference.
+        Returns
+        -------
+        float
+            Value in (0, 1].
         """
+        # TODO: verify that bounding_box_volume is the right normaliser here
         if self.bounding_box_volume == 0:
             return 0.0
         return self.num_modules / self.bounding_box_volume
 
     @property
-    def proportion(self) -> float:
-        """Proportion P = p_s / p_l (only valid for 2D morphologies)."""
-        return self.proportion_2d
+    def brick_cluster_ratio(self) -> float:
+        """Fraction of brick-involved edges that connect two bricks.
+
+        Complements ``D``: ``D`` measures global alternation; this penalises
+        dense brick-to-brick clusters.
+
+        Returns
+        -------
+        float
+            0.0 = every brick connects only to hinges.
+            1.0 = every brick connects only to other bricks.
+        """
+        brick_set = set(self.bricks)
+        brick_total = brick_brick = 0
+        for u, v in self.graph.edges():
+            u_b, v_b = u in brick_set, v in brick_set
+            if u_b or v_b:
+                brick_total += 1
+                if u_b and v_b:
+                    brick_brick += 1
+        return brick_brick / brick_total if brick_total > 0 else 0.0
+
+    # ------------------------------------------------------------------
+    # Paper-letter aliases
+    # ------------------------------------------------------------------
 
     @property
     def B(self) -> float:
@@ -751,17 +700,17 @@ class MorphologicalMeasures(Generic[TModule]):  # noqa: PLR0904
 
     @property
     def L(self) -> float:
-        """Length of limbs L = e / e_max."""
+        """Limbs L = l / l_max."""
         return self.limbs
 
     @property
-    def S(self) -> float:
-        """Symmetry S = s."""
-        return self.symmetry
+    def E(self) -> float:
+        """Extensiveness (length of limbs) E = e / e_max."""
+        return self.length_of_limbs
 
     @property
     def C(self) -> float:
-        """Coverage C = c."""
+        """Coverage C = num_modules / bounding_box_volume."""
         return self.coverage
 
     @property
@@ -770,14 +719,25 @@ class MorphologicalMeasures(Generic[TModule]):  # noqa: PLR0904
         return self.joints
 
     @property
-    def E(self) -> float:
-        """Extensiveness E = e / e_max."""
-        return self.length_of_limbs
+    def S(self) -> float:
+        """Symmetry S = max(xy, xz, yz symmetry)."""
+        return self.symmetry
+
+    @property
+    def D(self) -> float:
+        """Module diversity D = alternating BRICK/HINGE fraction."""
+        return self.module_diversity
 
     @property
     def P(self) -> float:
-        """Proportion P = p_s / p_l (only valid for 2D morphologies)."""
-        if self.is_2d:
-            return self.proportion_2d
-        else:
-            return 0.0  # Return 0 for 3D robots where proportion is not defined
+        """Proportion P of the ground-plane (depth x width) footprint.
+
+        Uses depth and width only, valid for both 2D and 3D robots.
+
+        Returns
+        -------
+        float
+            min(depth, width) / max(depth, width), in (0, 1].
+        """
+        d, w = self.bounding_box_depth, self.bounding_box_width
+        return min(d, w) / max(d, w) if max(d, w) > 0 else 0.0
