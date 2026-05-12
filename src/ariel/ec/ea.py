@@ -16,7 +16,7 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 from rich.traceback import install
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, func
 from sqlmodel import Session, SQLModel, col, select
 
 from ariel.ec.individual import Individual
@@ -261,10 +261,16 @@ class EA:
 
     Parameters
     ----------
-    population : Population
-        Initial population. Committed to the database on construction.
+    population : Population or None, optional
+        Initial population. Required unless ``restart`` is given.
     operations : list[EAOperation]
         Ordered pipeline of operations executed once per generation.
+    restart : (Path | str, int) or Path | str or None, optional
+        Resume from a previous run's database. Pass a path alone to
+        restart from the latest recorded generation, or a
+        ``(path, generation)`` tuple to restart from a specific
+        generation. Overrides ``population`` and auto-sets
+        ``first_generation_id`` when not specified. Default is ``None``.
     num_steps : int or None, optional
         Total number of generational steps to run. Falls back to
         ``config.num_steps`` when ``None``. Default is ``None``.
@@ -283,26 +289,96 @@ class EA:
 
     Examples
     --------
-    >>> ops = [
-    ...     EAOperation(evaluate),
-    ...     EAOperation(survivor_selection),
-    ... ]
+    Fresh run:
+
+    >>> ops = [EAOperation(evaluate), EAOperation(survivor_selection)]
     >>> ea = EA(Population(initial_individuals), ops, num_steps=200)
     >>> ea.run()
-    >>> winner = ea.best()
+
+    Restart from latest generation in an existing database:
+
+    >>> ea = EA(None, ops, restart="__data__/run_1/database.db")
+    >>> ea.run()
+
+    Restart from a specific generation:
+
+    >>> ea = EA(None, ops, restart=("__data__/run_1/database.db", 50))
     """
 
     def __init__(
         self,
-        population: Population,
-        operations: list[EAOperation],
+        population: Population | None = None,
+        operations: list[EAOperation] | None = None,
         *,
+        restart: "tuple[Path | str, int] | Path | str | None" = None,
         num_steps: int | None = None,
         first_generation_id: int | None = None,
         quiet: bool | None = None,
         db_file_path: Path | None = None,
         db_handling: DBHandlingMode | None = None,
     ) -> None:
+        if operations is None:
+            msg = "'operations' is required."
+            raise ValueError(msg)
+
+        if restart is not None:
+            source_db, restart_gen = (
+                (Path(restart), None)
+                if isinstance(restart, (Path, str))
+                else (Path(restart[0]), int(restart[1]))
+            )
+            if not source_db.exists():
+                msg = f"Restart database not found: {source_db}"
+                raise FileNotFoundError(msg)
+
+            source_engine = create_engine(f"sqlite:///{source_db}")
+            with Session(source_engine) as session:
+                if restart_gen is None:
+                    restart_gen = session.exec(
+                        select(func.max(Individual.time_of_death))
+                    ).one()
+                    if restart_gen is None:
+                        msg = "Source database contains no individuals."
+                        raise ValueError(msg)
+
+                rows = list(
+                    session.exec(
+                        select(Individual)
+                        .where(Individual.time_of_birth <= restart_gen)
+                        .where(Individual.time_of_death >= restart_gen)
+                        .where(Individual.requires_eval == False)  # noqa: E712
+                    ).all()
+                )
+
+            if not rows:
+                msg = (
+                    f"No evaluated individuals at generation {restart_gen} "
+                    f"in {source_db}."
+                )
+                raise ValueError(msg)
+
+            population = Population(
+                [
+                    Individual(
+                        alive=True,
+                        time_of_birth=ind.time_of_birth,
+                        time_of_death=-1,
+                        requires_eval=False,
+                        fitness_=ind.fitness_,
+                        requires_init=ind.requires_init,
+                        genotype_=ind.genotype_,
+                        tags_=dict(ind.tags_),
+                    )
+                    for ind in rows
+                ]
+            )
+            if first_generation_id is None:
+                first_generation_id = restart_gen + 1
+
+        elif population is None:
+            msg = "Provide either 'population' or 'restart'."
+            raise ValueError(msg)
+
         self.operations: list[EAOperation] = operations
         self.is_maximisation: bool = config.is_maximisation
         self.target_population_size: int = config.target_population_size

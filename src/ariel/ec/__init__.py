@@ -1,5 +1,6 @@
 """EC module for ARIEL."""
 
+from ariel.ec.archive import Archive
 from ariel.ec.crossover import Crossover
 from ariel.ec.ea import EA, DBHandlingMode, EAOperation, EASettings, config
 from ariel.ec.generators import (
@@ -20,6 +21,9 @@ from ariel.ec.individual import (
 from ariel.ec.population import Population
 
 __all__: list[str] = [
+
+    # Archive
+    "Archive",
 
     # EA engine
     "EA",
