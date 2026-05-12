@@ -70,7 +70,7 @@ class CustomPlotRegistry:
         mode: str = "per_generation",
         y_label: str = "",
     ) -> Callable:
-        """Decorator that registers a custom plot function.
+        """Register the custom plot function.
 
         Parameters
         ----------
@@ -86,7 +86,8 @@ class CustomPlotRegistry:
         mode:
             ``"per_generation"`` — callback signature::
 
-                def fn(generation: int, data: dict[str, np.ndarray]) -> dict[str, float]
+                def fn(generation: int,
+                       data: dict[str, np.ndarray]) -> dict[str, float]
 
             ``"full_figure"`` — callback signature::
 
@@ -95,6 +96,11 @@ class CustomPlotRegistry:
 
         y_label:
             Y-axis label (only used in ``per_generation`` mode).
+
+        Returns
+        -------
+        Callable
+            Decorator that registers the decorated function as a custom plot.
         """
 
         def decorator(fn: Callable) -> Callable:

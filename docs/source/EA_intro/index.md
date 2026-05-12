@@ -1,6 +1,4 @@
-# This section contains some EA examples using ARIEL. 
-
-And an example on how to parallelise evaluation using [Ray](https://docs.ray.io/en/latest/ray-core/walkthrough.html)
+# This section contains some EA examples using ARIEL.
 
 ### Examples: 
 ```{toctree}
@@ -9,5 +7,4 @@ And an example on how to parallelise evaluation using [Ray](https://docs.ray.io/
 ea_example_ackley
 ea_example_queens
 robot_evolution
-parallel_ackley
 ```
