@@ -1,0 +1,1193 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="ARIEL Robot Systems" href="robot_systems/index.html"><link rel="prev" title="Basic API Usage: NDE Body + CPG Controller" href="tutorial_nde_cpg.html">
+
+    <link rel="shortcut icon" href="../_static/ariel_favicon.ico"><!-- Generated with Sphinx 8.1.3 and Furo 2025.12.19 -->
+        <title>Quick Start: Modular Robots - ARIEL</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #4A90D9;
+  --color-brand-content: #4A90D9;
+  --color-admonition-background: rgba(74, 144, 217, 0.05);
+  --font-stack: Inter, system-ui, sans-serif;
+  --font-stack--monospace: JetBrains Mono, monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #79B8FF;
+  --color-brand-content: #79B8FF;
+  --color-admonition-background: rgba(121, 184, 255, 0.05);
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #79B8FF;
+  --color-brand-content: #79B8FF;
+  --color-admonition-background: rgba(121, 184, 255, 0.05);
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     <b>🚀 New release coming soon!</b> Check out what's new in v0.1 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">ARIEL</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">ARIEL</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing_guide/index.html">Contributing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_nde_cpg.html">Basic API Usage: NDE + CPG</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Quick Start: Modular Robots</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="robot_systems/index.html">Robot Systems</a><input aria-label="Toggle navigation of Robot Systems" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="robot_systems/modular_robots.html">ARIEL Modular Robot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="robot_systems/modular_robots.html#An-introduction-to-modular-robots">An introduction to modular robots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="robot_systems/lynx_arm.html">ARIEL Lynx Arm</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="genotype_docs/index.html">Genotypes</a><input aria-label="Toggle navigation of Genotypes" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="genotype_docs/nde_docs.html">Neuro Developmental Encoding (NDE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="genotype_docs/cppn_docs.html">Compositional Pattern Producing Network (CPPN)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="genotype_docs/tree_docs.html">Tree Genome Genotype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="genotype_docs/vector_docs.html">Vector representation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="EA_intro/index.html">EAs with ARIEL Introduction</a><input aria-label="Toggle navigation of EAs with ARIEL Introduction" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="EA_intro/ea_example_ackley.html">Continuous Optimisation (Ackley Function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EA_intro/ea_example_queens.html">Discrete Optimisation (N-Queens Problem)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EA_intro/robot_evolution.html">Robot Evolution</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="parallel_robot_eval/index.html">Parallelising Robot Simulations</a><input aria-label="Toggle navigation of Parallelising Robot Simulations" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="parallel_robot_eval/mujoco_worker.html">Parallelising Robot Evaluation with MuJoCo Worker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parallel_robot_eval/parallel_ackley.html">Parallelising ARIEL with Ray</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="Db_examples/index.html">ARIEL Database Handling</a><input aria-label="Toggle navigation of ARIEL Database Handling" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="Db_examples/db_with_pandas.html">Database manipulation with pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Db_examples/db_with_polars.html">Database manipulation with polars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Db_examples/db_with_sqlite3.html">Database manipulation with sqlite3</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Mujoco_docs/mujoco_docs.html">MuJoCo Data Variables Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/ariel/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></a><input aria-label="Toggle navigation of ariel" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">body_phenotypes</span></code></a><input aria-label="Toggle navigation of body_phenotypes" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">robogen_lite</span></code></a><input aria-label="Toggle navigation of robogen_lite" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_neat</span></code></a><input aria-label="Toggle navigation of cppn_neat" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/activations/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">activations</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/connection/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">connection</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/genome/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genome</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/id_manager/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">id_manager</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/node/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">node</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/tests/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tests</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/decoders/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">decoders</span></code></a><input aria-label="Toggle navigation of decoders" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/decoders/cppn_best_first/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_best_first</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hi_prob_decoding</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/decoders/vector_decoding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vector_decoding</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/modules/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">modules</span></code></a><input aria-label="Toggle navigation of modules" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">brick</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hinge</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">module</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prebuilt_robots</span></code></a><input aria-label="Toggle navigation of prebuilt_robots" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/gecko/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gecko</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/random_20/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">random_20</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/spider/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spider</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/spider_with_blocks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spider_with_blocks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/config/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/body_phenotypes/robogen_lite/constructor/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">constructor</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../autoapi/ariel/ec/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></a><input aria-label="Toggle navigation of ec" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genotypes</span></code></a><input aria-label="Toggle navigation of genotypes" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/cppn/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn</span></code></a><input aria-label="Toggle navigation of cppn" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/cppn/cppn_decoding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_decoding</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/nde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nde</span></code></a><input aria-label="Toggle navigation of nde" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/nde/nde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nde</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/tree/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tree</span></code></a><input aria-label="Toggle navigation of tree" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/tree/io/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/tree/operators/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">operators</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/tree/tree_genome/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tree_genome</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../autoapi/ariel/ec/genotypes/tree/validation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">validation</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/ec/archive/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">archive</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/ec/crossover/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">crossover</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/ec/ea/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ea</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/ec/generators/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">generators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/ec/generators%20copy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">generators</span> <span class="pre">copy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/ec/individual/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">individual</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/ec/population/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">population</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../autoapi/ariel/parameters/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">parameters</span></code></a><input aria-label="Toggle navigation of parameters" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/parameters/ariel_modules/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_modules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/parameters/ariel_types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/parameters/mujoco_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_params</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../autoapi/ariel/simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a><input aria-label="Toggle navigation of simulation" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../autoapi/ariel/simulation/controllers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></a><input aria-label="Toggle navigation of controllers" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/controllers/controller/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controller</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/controllers/na_cpg/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/controllers/na_cpg_beta/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_beta</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/controllers/na_cpg_norm/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_norm</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/controllers/simple_cpg/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simple_cpg</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../autoapi/ariel/simulation/environments/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a><input aria-label="Toggle navigation of environments" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/environments/compile_terrains/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">compile_terrains</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/environments/heightmap_functions/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">heightmap_functions</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/environments/olympic_arena/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">olympic_arena</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../autoapi/ariel/simulation/tasks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tasks</span></code></a><input aria-label="Toggle navigation of tasks" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/tasks/gait_learning/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gait_learning</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/tasks/targeted_locomotion/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">targeted_locomotion</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/simulation/tasks/turning_in_place/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">turning_in_place</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/simulation/example_usage/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">example_usage</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/simulation/mujoco_worker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_worker</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../autoapi/ariel/utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a><input aria-label="Toggle navigation of utils" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../autoapi/ariel/utils/optimizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a><input aria-label="Toggle navigation of optimizers" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/ariel/utils/optimizers/revde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">revde</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/utils/file_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">file_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/utils/morphological_descriptor/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">morphological_descriptor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/utils/mujoco_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/utils/noise_gen/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">noise_gen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/utils/renderers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">renderers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/utils/runners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runners</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/utils/tracker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/utils/video_recorder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">video_recorder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../autoapi/ariel/visualisation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualisation</span></code></a><input aria-label="Toggle navigation of visualisation" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/ariel/visualisation/analysis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/table/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">table</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/data_get/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">data_get</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/lynx_arm/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lynx_arm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/dash_faster/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dash_faster</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/custom_plots/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custom_plots</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/plot_registry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_registry</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/dash_fast_mod/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dash_fast_mod</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/dashboard_new/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dashboard_new</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/unified_pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unified_pipeline</span></code></a><input aria-label="Toggle navigation of unified_pipeline" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/unified_pipeline/common/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">common</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/unified_pipeline/evolve/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">evolve</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/unified_pipeline/plot_from_logs/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_from_logs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/unified_pipeline/replay/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">replay</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="Quick-Start:-Modular-Robots">
+<h1>Quick Start: Modular Robots<a class="headerlink" href="#Quick-Start:-Modular-Robots" title="Link to this heading">¶</a></h1>
+<section id="Overview">
+<h2>Overview<a class="headerlink" href="#Overview" title="Link to this heading">¶</a></h2>
+<p>This guide walks through the essentials of setting up a modular robot in ARIEL and running it in simulation. By the end you will know how to:</p>
+<ol class="arabic simple">
+<li><p><strong>Choose or build a robot body</strong> — use a prebuilt robot, assemble one from modules, or generate one randomly from a genotype.</p></li>
+<li><p><strong>Create a simulation environment</strong> — pick a world and spawn your robot in it.</p></li>
+<li><p><strong>Write a controller</strong> — use the NA-CPG and the <code class="docutils literal notranslate"><span class="pre">Controller</span></code> class to drive the robot’s joints.</p></li>
+<li><p><strong>Run and visualise</strong> — launch an interactive viewer or record a headless run.</p></li>
+<li><p><strong>Track and plot results</strong> — record position history and produce a trajectory plot.</p></li>
+</ol>
+<hr class="docutils" />
+</section>
+<section id="1.-Imports">
+<h2>1. Imports<a class="headerlink" href="#1.-Imports" title="Link to this heading">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Standard library</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Third-party libraries</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mujoco</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mujoco</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
+
+<span class="c1"># ARIEL — module primitives (for manual assembly)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.body_phenotypes.robogen_lite.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleFaces</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.body_phenotypes.robogen_lite.constructor</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">construct_mjspec_from_graph</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.body_phenotypes.robogen_lite.decoders.hi_prob_decoding</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">HighProbabilityDecoder</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.body_phenotypes.robogen_lite.modules.brick</span><span class="w"> </span><span class="kn">import</span> <span class="n">BrickModule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.body_phenotypes.robogen_lite.modules.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoreModule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.body_phenotypes.robogen_lite.modules.hinge</span><span class="w"> </span><span class="kn">import</span> <span class="n">HingeModule</span>
+
+<span class="c1"># ARIEL — prebuilt robot bodies</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.body_phenotypes.robogen_lite.prebuilt_robots.gecko</span><span class="w"> </span><span class="kn">import</span> <span class="n">gecko</span>
+
+<span class="c1"># ARIEL — genotype-to-phenotype pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.ec.genotypes.nde</span><span class="w"> </span><span class="kn">import</span> <span class="n">NeuralDevelopmentalEncoding</span>
+
+<span class="c1"># ARIEL — controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.simulation.controllers.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.simulation.controllers.na_cpg</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">NaCPG</span><span class="p">,</span>
+    <span class="n">create_fully_connected_adjacency</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># ARIEL — simulation environments</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.simulation.environments</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleFlatWorld</span>
+
+<span class="c1"># ARIEL — utilities</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.utils.runners</span><span class="w"> </span><span class="kn">import</span> <span class="n">simple_runner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ariel.utils.tracker</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tracker</span>
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="2.-The-Robot-Body">
+<h2>2. The Robot Body<a class="headerlink" href="#2.-The-Robot-Body" title="Link to this heading">¶</a></h2>
+<p>ARIEL provides three ways to get a robot body:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Approach</p></th>
+<th class="head"><p>When to use</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Prebuilt robot</strong></p></td>
+<td><p>Quickest way to get started — body is already wired up.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Manual assembly</strong></p></td>
+<td><p>Full control over morphology using <code class="docutils literal notranslate"><span class="pre">CoreModule</span></code>, <code class="docutils literal notranslate"><span class="pre">HingeModule</span></code>, and <code class="docutils literal notranslate"><span class="pre">BrickModule</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Genotype decoding</strong></p></td>
+<td><p>Generate a random (or evolved) morphology from a numeric genotype via the NDE pipeline.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For a deeper introduction to the module types (core, brick, hinge) see the <a class="reference external" href="robot_systems/modular_robots">Modular Robots</a> reference page.</p>
+<section id="2a.-Using-a-prebuilt-robot">
+<h3>2a. Using a prebuilt robot<a class="headerlink" href="#2a.-Using-a-prebuilt-robot" title="Link to this heading">¶</a></h3>
+<p>The <strong>gecko</strong> is a prebuilt robot that ships with ARIEL. It has a core, a spine, four legs, and several active hinges.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># gecko() returns a CoreModule — the root of the robot tree.</span>
+<span class="n">gecko_body</span> <span class="o">=</span> <span class="n">gecko</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">gecko_body</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2b.-Assembling-a-robot-manually">
+<h3>2b. Assembling a robot manually<a class="headerlink" href="#2b.-Assembling-a-robot-manually" title="Link to this heading">¶</a></h3>
+<p>You can build any morphology by attaching modules to the core’s sites. Every module exposes attachment sites on its <strong>FRONT</strong>, <strong>LEFT</strong>, <strong>RIGHT</strong>, and <strong>BACK</strong> faces (where physically available).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start with a core (the robot&#39;s brain)</span>
+<span class="n">core</span> <span class="o">=</span> <span class="n">CoreModule</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Add active hinges on left and right</span>
+<span class="n">left_arm</span> <span class="o">=</span> <span class="n">HingeModule</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">right_arm</span> <span class="o">=</span> <span class="n">HingeModule</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">right_arm</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="mi">180</span><span class="p">)</span>  <span class="c1"># Flip so it points the other way</span>
+
+<span class="c1"># Add passive brick modules as feet</span>
+<span class="n">left_foot</span> <span class="o">=</span> <span class="n">BrickModule</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">right_foot</span> <span class="o">=</span> <span class="n">BrickModule</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Wire them together</span>
+<span class="n">core</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">ModuleFaces</span><span class="o">.</span><span class="n">LEFT</span><span class="p">]</span><span class="o">.</span><span class="n">attach_body</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">left_arm</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;left_arm&quot;</span><span class="p">)</span>
+<span class="n">core</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">ModuleFaces</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">]</span><span class="o">.</span><span class="n">attach_body</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">right_arm</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;right_arm&quot;</span><span class="p">)</span>
+<span class="n">left_arm</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">ModuleFaces</span><span class="o">.</span><span class="n">FRONT</span><span class="p">]</span><span class="o">.</span><span class="n">attach_body</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">left_foot</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;left_foot&quot;</span><span class="p">)</span>
+<span class="n">right_arm</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">ModuleFaces</span><span class="o">.</span><span class="n">FRONT</span><span class="p">]</span><span class="o">.</span><span class="n">attach_body</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">right_foot</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;right_foot&quot;</span><span class="p">)</span>
+
+<span class="n">custom_body</span> <span class="o">=</span> <span class="n">core</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Custom robot assembled.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2c.-Generating-a-random-robot-from-a-genotype">
+<h3>2c. Generating a random robot from a genotype<a class="headerlink" href="#2c.-Generating-a-random-robot-from-a-genotype" title="Link to this heading">¶</a></h3>
+<p>The <strong>Neural Developmental Encoding (NDE)</strong> pipeline turns a numeric genotype into a robot morphology. This is the foundation of body evolution in ARIEL.</p>
+<p>The pipeline has three stages:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Genotype  ──►  NDE network  ──►  Probability matrices  ──►  HighProbabilityDecoder  ──►  Robot graph  ──►  MjSpec
+</pre></div>
+</div>
+<p>The <strong>genotype</strong> is a list of three float arrays (chromosomes) — one each for:</p>
+<ul class="simple">
+<li><p><strong>module types</strong> (core / brick / hinge)</p></li>
+<li><p><strong>connection topology</strong> (which module attaches to which face)</p></li>
+<li><p><strong>rotations</strong> (orientation of each attachment)</p></li>
+</ul>
+<p>The NDE network maps each chromosome to a probability matrix. The <code class="docutils literal notranslate"><span class="pre">HighProbabilityDecoder</span></code> then greedily picks the most probable configuration to produce a concrete robot graph.</p>
+<p>For full details on the NDE representation and how to evolve it, see the <a class="reference external" href="genotype_docs/nde_docs">NDE Genotype</a> documentation.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">RNG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># --- Hyperparameters ---</span>
+<span class="n">NUM_MODULES</span>   <span class="o">=</span> <span class="mi">20</span>   <span class="c1"># maximum number of modules in the decoded robot</span>
+<span class="n">GENOTYPE_SIZE</span> <span class="o">=</span> <span class="mi">64</span>   <span class="c1"># length of each chromosome</span>
+
+<span class="c1"># --- Step 1: create a random genotype ---</span>
+<span class="c1"># Each chromosome is a float32 array of length GENOTYPE_SIZE.</span>
+<span class="n">type_genes</span> <span class="o">=</span> <span class="n">RNG</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">GENOTYPE_SIZE</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>   <span class="c1"># module-type chromosome</span>
+<span class="n">conn_genes</span> <span class="o">=</span> <span class="n">RNG</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">GENOTYPE_SIZE</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>   <span class="c1"># connectivity chromosome</span>
+<span class="n">rot_genes</span>  <span class="o">=</span> <span class="n">RNG</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">GENOTYPE_SIZE</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>   <span class="c1"># rotation chromosome</span>
+
+<span class="n">genotype</span> <span class="o">=</span> <span class="p">[</span><span class="n">type_genes</span><span class="p">,</span> <span class="n">conn_genes</span><span class="p">,</span> <span class="n">rot_genes</span><span class="p">]</span>
+
+<span class="c1"># --- Step 2: run genotype through the NDE to get probability matrices ---</span>
+<span class="n">nde</span> <span class="o">=</span> <span class="n">NeuralDevelopmentalEncoding</span><span class="p">(</span><span class="n">number_of_modules</span><span class="o">=</span><span class="n">NUM_MODULES</span><span class="p">)</span>
+<span class="n">p_matrices</span> <span class="o">=</span> <span class="n">nde</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">genotype</span><span class="p">)</span>
+<span class="c1"># p_matrices is a list of three 2-D arrays:</span>
+<span class="c1">#   p_matrices[0] — module-type probabilities</span>
+<span class="c1">#   p_matrices[1] — connectivity probabilities</span>
+<span class="c1">#   p_matrices[2] — rotation probabilities</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Probability matrix shapes: </span><span class="si">{</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">shape</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">p_matrices</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># --- Step 3: decode into a robot graph ---</span>
+<span class="n">decoder</span> <span class="o">=</span> <span class="n">HighProbabilityDecoder</span><span class="p">(</span><span class="n">num_modules</span><span class="o">=</span><span class="n">NUM_MODULES</span><span class="p">)</span>
+<span class="n">robot_graph</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">probability_matrices_to_graph</span><span class="p">(</span>
+    <span class="n">p_matrices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">p_matrices</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">p_matrices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Robot graph: </span><span class="si">{</span><span class="n">robot_graph</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">()</span><span class="si">}</span><span class="s2"> nodes, </span><span class="si">{</span><span class="n">robot_graph</span><span class="o">.</span><span class="n">number_of_edges</span><span class="p">()</span><span class="si">}</span><span class="s2"> edges&quot;</span><span class="p">)</span>
+
+<span class="c1"># --- Step 4: build the ARIEL robot from the graph ---</span>
+<span class="n">random_robot</span> <span class="o">=</span> <span class="n">construct_mjspec_from_graph</span><span class="p">(</span><span class="n">robot_graph</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Robot body type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">random_robot</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The resulting <code class="docutils literal notranslate"><span class="pre">random_robot</span></code> is a <code class="docutils literal notranslate"><span class="pre">CoreModule</span></code>, identical in interface to the prebuilt gecko or a manually assembled body — you can spawn it in a world exactly the same way.</p>
+<p>In an EA the genotype arrays are replaced by the genes of an individual, so evolving the body is simply a matter of evolving those three float arrays.</p>
+<p>For the rest of this guide we use the prebuilt gecko for consistency.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="3.-Simulation-Environment">
+<h2>3. Simulation Environment<a class="headerlink" href="#3.-Simulation-Environment" title="Link to this heading">¶</a></h2>
+<p>An <strong>environment</strong> defines the world geometry (floor, terrain, obstacles). ARIEL ships several ready-to-use worlds:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Class</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SimpleFlatWorld</span></code></p></td>
+<td><p>Flat chequerboard floor — great for locomotion experiments.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SimpleTiltedWorld</span></code></p></td>
+<td><p>Gently sloped flat floor.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RuggedTerrainWorld</span></code></p></td>
+<td><p>Procedurally generated rough terrain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CraterTerrainWorld</span></code></p></td>
+<td><p>Terrain with a central crater.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">OlympicArena</span></code></p></td>
+<td><p>Rectangular arena with walls and a target marker.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>All worlds expose the same <code class="docutils literal notranslate"><span class="pre">spawn()</span></code> interface, so you can swap them out without changing the rest of your code.</p>
+<section id="Spawning-the-robot">
+<h3>Spawning the robot<a class="headerlink" href="#Spawning-the-robot" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">world.spawn()</span></code> merges the robot’s XML specification into the world’s MuJoCo spec. Always reset the MuJoCo control callback before spawning.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Always reset the control callback before building a new simulation.</span>
+<span class="n">mujoco</span><span class="o">.</span><span class="n">set_mjcb_control</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># Create the world</span>
+<span class="n">world</span> <span class="o">=</span> <span class="n">SimpleFlatWorld</span><span class="p">()</span>
+
+<span class="c1"># Create the robot body</span>
+<span class="n">robot</span> <span class="o">=</span> <span class="n">gecko</span><span class="p">()</span>
+
+<span class="c1"># Spawn the robot at the origin</span>
+<span class="n">world</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Compile into a MuJoCo model and initialise data</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">mujoco</span><span class="o">.</span><span class="n">MjData</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of actuators (joints): </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">nu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of degrees of freedom: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">nv</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="4.-Controller">
+<h2>4. Controller<a class="headerlink" href="#4.-Controller" title="Link to this heading">¶</a></h2>
+<p>ARIEL separates the <strong>control logic</strong> from the <strong>MuJoCo callback</strong> using two classes:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Class</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NaCPG</span></code></p></td>
+<td><p>Computes joint-angle targets using the Normalized Asymmetric CPG equations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Controller</span></code></p></td>
+<td><p>Wraps any callable into a MuJoCo-compatible callback; handles control frequency, smoothing, joint-limit clamping, and data tracking.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="4a.-The-NA-CPG">
+<h3>4a. The NA-CPG<a class="headerlink" href="#4a.-The-NA-CPG" title="Link to this heading">¶</a></h3>
+<p>The <strong>Normalized Asymmetric CPG</strong> (NA-CPG) is a biologically inspired oscillator network where each joint is driven by one CPG node. The nodes are coupled via an adjacency graph; a fully-connected graph is a reasonable default.</p>
+<p>Its learnable parameters — <code class="docutils literal notranslate"><span class="pre">phase</span></code>, <code class="docutils literal notranslate"><span class="pre">w</span></code> (frequency), <code class="docutils literal notranslate"><span class="pre">amplitudes</span></code>, <code class="docutils literal notranslate"><span class="pre">ha</span></code>, and <code class="docutils literal notranslate"><span class="pre">b</span></code> — are initialized randomly, so an untrained CPG already produces movement. In an evolutionary setting these parameters become the controller genotype to evolve.</p>
+<p><code class="docutils literal notranslate"><span class="pre">NaCPG.forward(time)</span></code> returns a <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code> of joint angles, one per actuator.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the CPG — one node per actuator, fully connected.</span>
+<span class="n">adj_dict</span> <span class="o">=</span> <span class="n">create_fully_connected_adjacency</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nu</span><span class="p">)</span>
+<span class="n">cpg</span> <span class="o">=</span> <span class="n">NaCPG</span><span class="p">(</span>
+    <span class="n">adjacency_dict</span><span class="o">=</span><span class="n">adj_dict</span><span class="p">,</span>
+    <span class="n">hard_bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>  <span class="c1"># keep angles within hinge limits</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CPG nodes (= actuators): </span><span class="si">{</span><span class="n">cpg</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total learnable parameters: </span><span class="si">{</span><span class="n">cpg</span><span class="o">.</span><span class="n">num_of_parameters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="4b.-Wrapping-the-CPG-with-Controller">
+<h3>4b. Wrapping the CPG with <code class="docutils literal notranslate"><span class="pre">Controller</span></code><a class="headerlink" href="#4b.-Wrapping-the-CPG-with-Controller" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Controller</span></code> class bridges any callable with MuJoCo’s control callback system. Its <code class="docutils literal notranslate"><span class="pre">set_control</span></code> method is the function you hand to <code class="docutils literal notranslate"><span class="pre">mujoco.set_mjcb_control()</span></code>.</p>
+<p>Internally <code class="docutils literal notranslate"><span class="pre">Controller</span></code>:</p>
+<ul class="simple">
+<li><p>Calls your function every <code class="docutils literal notranslate"><span class="pre">time_steps_per_ctrl_step</span></code> physics steps (control frequency).</p></li>
+<li><p>Blends the new output with the old <code class="docutils literal notranslate"><span class="pre">data.ctrl</span></code> via a smoothing factor <code class="docutils literal notranslate"><span class="pre">alpha</span></code> to avoid jitter.</p></li>
+<li><p>Clips all values to <code class="docutils literal notranslate"><span class="pre">[-π/2,</span> <span class="pre">π/2]</span></code> automatically.</p></li>
+<li><p>Calls <code class="docutils literal notranslate"><span class="pre">tracker.update(data)</span></code> every <code class="docutils literal notranslate"><span class="pre">time_steps_per_save</span></code> steps so you never have to do it manually.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">controller_callback_function</span></code> must accept <code class="docutils literal notranslate"><span class="pre">(model,</span> <span class="pre">data)</span></code> and return an array-like of length <code class="docutils literal notranslate"><span class="pre">model.nu</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up the tracker — Controller will call tracker.update() automatically.</span>
+<span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span>
+    <span class="n">mujoco_obj_to_find</span><span class="o">=</span><span class="n">mujoco</span><span class="o">.</span><span class="n">mjtObj</span><span class="o">.</span><span class="n">mjOBJ_GEOM</span><span class="p">,</span>
+    <span class="n">name_to_bind</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span>
+    <span class="n">observable_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">tracker</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">world</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Wrap the CPG: the callback receives (model, data) and returns joint angles.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cpg_callback</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">mujoco</span><span class="o">.</span><span class="n">MjModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">mujoco</span><span class="o">.</span><span class="n">MjData</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">cpg</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+
+<span class="c1"># Create the Controller.</span>
+<span class="n">controller</span> <span class="o">=</span> <span class="n">Controller</span><span class="p">(</span>
+    <span class="n">controller_callback_function</span><span class="o">=</span><span class="n">cpg_callback</span><span class="p">,</span>
+    <span class="n">time_steps_per_ctrl_step</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>   <span class="c1"># call CPG every 50 physics steps</span>
+    <span class="n">time_steps_per_save</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>        <span class="c1"># record tracker data every 500 steps</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>                      <span class="c1"># smoothing: 0 = never update, 1 = immediate update</span>
+    <span class="n">tracker</span><span class="o">=</span><span class="n">tracker</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Register with MuJoCo — controller.set_control IS the callback.</span>
+<span class="n">mujoco</span><span class="o">.</span><span class="n">set_mjcb_control</span><span class="p">(</span><span class="n">controller</span><span class="o">.</span><span class="n">set_control</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Controller registered.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="5.-Running-the-Simulation">
+<h2>5. Running the Simulation<a class="headerlink" href="#5.-Running-the-Simulation" title="Link to this heading">¶</a></h2>
+<p>ARIEL offers three ways to run a simulation:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Interactive viewer</strong> (<code class="docutils literal notranslate"><span class="pre">viewer.launch</span></code>)</p></td>
+<td><p>Opens the MuJoCo GUI — great for debugging and demos.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Headless runner</strong> (<code class="docutils literal notranslate"><span class="pre">simple_runner</span></code>)</p></td>
+<td><p>Fastest option; no window, no rendering. Use this inside an EA evaluation loop.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Video renderer</strong> (<code class="docutils literal notranslate"><span class="pre">video_renderer</span></code>)</p></td>
+<td><p>Records an MP4 — good for logging and presentations.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Because <code class="docutils literal notranslate"><span class="pre">controller.set_control</span></code> is registered as the MuJoCo callback, all three modes automatically drive the robot and record tracker data — no extra wiring needed.</p>
+<p>For full details on MuJoCo’s data variables accessible during simulation see the <a class="reference external" href="Mujoco_docs/mujoco_docs">MuJoCo Data Variables</a> documentation.</p>
+<section id="5a.-Headless-run-(recommended-for-evaluation-loops)">
+<h3>5a. Headless run (recommended for evaluation loops)<a class="headerlink" href="#5a.-Headless-run-(recommended-for-evaluation-loops)" title="Link to this heading">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run for 15 simulated seconds — controller and tracker work automatically.</span>
+<span class="n">simple_runner</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simulation finished at t = </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> s&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final core position: </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">qpos</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Recorded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;xpos&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> position snapshots.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="5b.-Manual-step-loop">
+<h3>5b. Manual step loop<a class="headerlink" href="#5b.-Manual-step-loop" title="Link to this heading">¶</a></h3>
+<p>If you need finer control over when things happen (e.g., logging extra diagnostics mid-run), step the simulation manually.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fresh simulation</span>
+<span class="n">mujoco</span><span class="o">.</span><span class="n">set_mjcb_control</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">world</span> <span class="o">=</span> <span class="n">SimpleFlatWorld</span><span class="p">()</span>
+<span class="n">robot</span> <span class="o">=</span> <span class="n">gecko</span><span class="p">()</span>
+<span class="n">world</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">mujoco</span><span class="o">.</span><span class="n">MjData</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+<span class="c1"># Re-create tracker and controller for the new model</span>
+<span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span>
+    <span class="n">mujoco_obj_to_find</span><span class="o">=</span><span class="n">mujoco</span><span class="o">.</span><span class="n">mjtObj</span><span class="o">.</span><span class="n">mjOBJ_GEOM</span><span class="p">,</span>
+    <span class="n">name_to_bind</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span>
+    <span class="n">observable_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">tracker</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">world</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<span class="n">adj_dict</span> <span class="o">=</span> <span class="n">create_fully_connected_adjacency</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nu</span><span class="p">)</span>
+<span class="n">cpg</span> <span class="o">=</span> <span class="n">NaCPG</span><span class="p">(</span><span class="n">adjacency_dict</span><span class="o">=</span><span class="n">adj_dict</span><span class="p">,</span> <span class="n">hard_bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="n">controller</span> <span class="o">=</span> <span class="n">Controller</span><span class="p">(</span>
+    <span class="n">controller_callback_function</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">cpg</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>
+    <span class="n">tracker</span><span class="o">=</span><span class="n">tracker</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">mujoco</span><span class="o">.</span><span class="n">set_mjcb_control</span><span class="p">(</span><span class="n">controller</span><span class="o">.</span><span class="n">set_control</span><span class="p">)</span>
+
+<span class="c1"># Step loop — tracker updates are handled inside controller.set_control</span>
+<span class="n">mujoco</span><span class="o">.</span><span class="n">mj_resetData</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="k">while</span> <span class="n">data</span><span class="o">.</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">duration</span><span class="p">:</span>
+    <span class="n">mujoco</span><span class="o">.</span><span class="n">mj_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Recorded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;xpos&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> position snapshots.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="5c.-Interactive-viewer">
+<h3>5c. Interactive viewer<a class="headerlink" href="#5c.-Interactive-viewer" title="Link to this heading">¶</a></h3>
+<p>The interactive viewer opens a window where you can rotate the camera and observe the robot in real time. It blocks until the window is closed.</p>
+<blockquote>
+<div><p><strong>Tip:</strong> Pass <code class="docutils literal notranslate"><span class="pre">mujoco.set_mjcb_control(None)</span></code> before <code class="docutils literal notranslate"><span class="pre">viewer.launch</span></code> to disable the controller and drag joints manually.</p>
+</div></blockquote>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment to open the interactive viewer</span>
+<span class="c1"># mujoco.set_mjcb_control(controller.set_control)</span>
+<span class="c1"># viewer.launch(model=model, data=data)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="6.-Visualising-the-Trajectory">
+<h2>6. Visualising the Trajectory<a class="headerlink" href="#6.-Visualising-the-Trajectory" title="Link to this heading">¶</a></h2>
+<p>After a run, <code class="docutils literal notranslate"><span class="pre">tracker.history['xpos'][0]</span></code> contains a list of <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">z]</span></code> positions for the core geom. We can plot the 2-D (x, y) path to see how far the robot travelled.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_trajectory</span><span class="p">(</span><span class="n">history</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot the XY trajectory of the robot&#39;s core module.&quot;&quot;&quot;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>  <span class="c1"># shape: (T, 3)</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;b-&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Path&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;go&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Start&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;ro&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;End&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;X position (m)&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Y position (m)&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Robot trajectory (XY plane)&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Centre the view</span>
+    <span class="n">margin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pos</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="n">margin</span><span class="p">,</span> <span class="n">margin</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="n">margin</span><span class="p">,</span> <span class="n">margin</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+<span class="n">plot_trajectory</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="7.-Defining-a-Fitness-Function">
+<h2>7. Defining a Fitness Function<a class="headerlink" href="#7.-Defining-a-Fitness-Function" title="Link to this heading">¶</a></h2>
+<p>In an evolutionary context you typically summarise a trajectory as a single <strong>fitness score</strong>. A common choice is the 2-D displacement from the spawn position.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">displacement_fitness</span><span class="p">(</span><span class="n">history</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the 2-D Euclidean distance from start to end position.&quot;&quot;&quot;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+    <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">xf</span><span class="p">,</span> <span class="n">yf</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">xf</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">yf</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+
+<span class="n">fitness</span> <span class="o">=</span> <span class="n">displacement_fitness</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fitness (displacement): </span><span class="si">{</span><span class="n">fitness</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="8.-Putting-It-All-Together">
+<h2>8. Putting It All Together<a class="headerlink" href="#8.-Putting-It-All-Together" title="Link to this heading">¶</a></h2>
+<p>The snippet below wraps everything into a single reusable <code class="docutils literal notranslate"><span class="pre">evaluate()</span></code> function — the natural building block for an EA evaluation loop.</p>
+<p>To see how this plugs into a full evolutionary algorithm that co-evolves bodies and controllers, see the <a class="reference external" href="EA_intro/robot_evolution">Robot Evolution</a> guide.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+    <span class="n">cpg</span><span class="p">:</span> <span class="n">NaCPG</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">15.0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate a CPG controller on the gecko robot and return displacement fitness.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cpg:</span>
+<span class="sd">        A configured NaCPG instance whose parameters define the controller.</span>
+<span class="sd">    duration:</span>
+<span class="sd">        How many simulated seconds to run.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        2-D displacement from start to end (metres).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># --- Build world + robot ---</span>
+    <span class="n">mujoco</span><span class="o">.</span><span class="n">set_mjcb_control</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">world</span> <span class="o">=</span> <span class="n">SimpleFlatWorld</span><span class="p">()</span>
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">gecko</span><span class="p">()</span>
+    <span class="n">world</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">mujoco</span><span class="o">.</span><span class="n">MjData</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="c1"># --- Tracker + Controller ---</span>
+    <span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span>
+        <span class="n">mujoco_obj_to_find</span><span class="o">=</span><span class="n">mujoco</span><span class="o">.</span><span class="n">mjtObj</span><span class="o">.</span><span class="n">mjOBJ_GEOM</span><span class="p">,</span>
+        <span class="n">name_to_bind</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span>
+        <span class="n">observable_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">tracker</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">world</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="n">controller</span> <span class="o">=</span> <span class="n">Controller</span><span class="p">(</span>
+        <span class="n">controller_callback_function</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">cpg</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>
+        <span class="n">tracker</span><span class="o">=</span><span class="n">tracker</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">mujoco</span><span class="o">.</span><span class="n">set_mjcb_control</span><span class="p">(</span><span class="n">controller</span><span class="o">.</span><span class="n">set_control</span><span class="p">)</span>
+
+    <span class="c1"># --- Run ---</span>
+    <span class="n">simple_runner</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+
+    <span class="c1"># --- Score ---</span>
+    <span class="k">return</span> <span class="n">displacement_fitness</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;xpos&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="c1"># Create a CPG with random parameters and evaluate it</span>
+<span class="n">mujoco</span><span class="o">.</span><span class="n">set_mjcb_control</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">world_tmp</span> <span class="o">=</span> <span class="n">SimpleFlatWorld</span><span class="p">()</span>
+<span class="n">robot_tmp</span> <span class="o">=</span> <span class="n">gecko</span><span class="p">()</span>
+<span class="n">world_tmp</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">robot_tmp</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">model_tmp</span> <span class="o">=</span> <span class="n">world_tmp</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+
+<span class="n">cpg_to_eval</span> <span class="o">=</span> <span class="n">NaCPG</span><span class="p">(</span>
+    <span class="n">adjacency_dict</span><span class="o">=</span><span class="n">create_fully_connected_adjacency</span><span class="p">(</span><span class="n">model_tmp</span><span class="o">.</span><span class="n">nu</span><span class="p">),</span>
+    <span class="n">hard_bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">score</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">cpg_to_eval</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Displacement: </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="Summary">
+<h2>Summary<a class="headerlink" href="#Summary" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Step</p></th>
+<th class="head"><p>Key call</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Reset MuJoCo callback</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mujoco.set_mjcb_control(None)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Create world</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">world</span> <span class="pre">=</span> <span class="pre">SimpleFlatWorld()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Get robot body (prebuilt)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">robot</span> <span class="pre">=</span> <span class="pre">gecko()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Get robot body (manual)</p></td>
+<td><p>assemble <code class="docutils literal notranslate"><span class="pre">CoreModule</span></code> / <code class="docutils literal notranslate"><span class="pre">HingeModule</span></code> / <code class="docutils literal notranslate"><span class="pre">BrickModule</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Get robot body (genotype)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nde.forward(genotype)</span></code> → <code class="docutils literal notranslate"><span class="pre">decoder.probability_matrices_to_graph(...)</span></code> → <code class="docutils literal notranslate"><span class="pre">construct_mjspec_from_graph(graph)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Spawn robot</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">world.spawn(robot.spec,</span> <span class="pre">position=[x,</span> <span class="pre">y,</span> <span class="pre">z])</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Compile</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">model</span> <span class="pre">=</span> <span class="pre">world.spec.compile();</span> <span class="pre">data</span> <span class="pre">=</span> <span class="pre">mujoco.MjData(model)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Create CPG</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NaCPG(create_fully_connected_adjacency(model.nu))</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Create controller</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Controller(controller_callback_function=...,</span> <span class="pre">tracker=tracker)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Register controller</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mujoco.set_mjcb_control(controller.set_control)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Run headless</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">simple_runner(model,</span> <span class="pre">data,</span> <span class="pre">duration=N)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Run interactive</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">viewer.launch(model=model,</span> <span class="pre">data=data)</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="Where-to-go-next">
+<h3>Where to go next<a class="headerlink" href="#Where-to-go-next" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="robot_systems/modular_robots">Modular Robots</a> — in-depth reference for module types and the physical robot system.</p></li>
+<li><p><a class="reference external" href="genotype_docs/nde_docs">NDE Genotype</a> — how to evolve robot bodies using the Neural Developmental Encoding.</p></li>
+<li><p><a class="reference external" href="EA_intro/robot_evolution">Robot Evolution</a> — a complete example that wires the body + controller into an evolutionary algorithm.</p></li>
+<li><p><a class="reference external" href="Mujoco_docs/mujoco_docs">MuJoCo Data Variables</a> — all MuJoCo state variables accessible during simulation.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="robot_systems/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">ARIEL Robot Systems</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="tutorial_nde_cpg.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Basic API Usage: NDE Body + CPG Controller</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Computational Intelligence Group, Vrije Universiteit Amsterdam &amp; Contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on May 13, 2026</div>
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/ci-group/ariel" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" viewBox="0 0 16 16" height="1em" width="1em">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                  0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                  -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                  .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                  -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+                  .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+                  .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+                  0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Quick Start: Modular Robots</a><ul>
+<li><a class="reference internal" href="#Overview">Overview</a></li>
+<li><a class="reference internal" href="#1.-Imports">1. Imports</a></li>
+<li><a class="reference internal" href="#2.-The-Robot-Body">2. The Robot Body</a><ul>
+<li><a class="reference internal" href="#2a.-Using-a-prebuilt-robot">2a. Using a prebuilt robot</a></li>
+<li><a class="reference internal" href="#2b.-Assembling-a-robot-manually">2b. Assembling a robot manually</a></li>
+<li><a class="reference internal" href="#2c.-Generating-a-random-robot-from-a-genotype">2c. Generating a random robot from a genotype</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#3.-Simulation-Environment">3. Simulation Environment</a><ul>
+<li><a class="reference internal" href="#Spawning-the-robot">Spawning the robot</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#4.-Controller">4. Controller</a><ul>
+<li><a class="reference internal" href="#4a.-The-NA-CPG">4a. The NA-CPG</a></li>
+<li><a class="reference internal" href="#4b.-Wrapping-the-CPG-with-Controller">4b. Wrapping the CPG with <code class="docutils literal notranslate"><span class="pre">Controller</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#5.-Running-the-Simulation">5. Running the Simulation</a><ul>
+<li><a class="reference internal" href="#5a.-Headless-run-(recommended-for-evaluation-loops)">5a. Headless run (recommended for evaluation loops)</a></li>
+<li><a class="reference internal" href="#5b.-Manual-step-loop">5b. Manual step loop</a></li>
+<li><a class="reference internal" href="#5c.-Interactive-viewer">5c. Interactive viewer</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#6.-Visualising-the-Trajectory">6. Visualising the Trajectory</a></li>
+<li><a class="reference internal" href="#7.-Defining-a-Fitness-Function">7. Defining a Fitness Function</a></li>
+<li><a class="reference internal" href="#8.-Putting-It-All-Together">8. Putting It All Together</a></li>
+<li><a class="reference internal" href="#Summary">Summary</a><ul>
+<li><a class="reference internal" href="#Where-to-go-next">Where to go next</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=7f41d439"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>
