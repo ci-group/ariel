@@ -29,6 +29,7 @@ from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler 
     SphericalAngularDroneGenomeHandler,
 )
 from airevolve.evolution_tools.evaluators.unified_fitness import UnifiedFitness
+from airevolve.evolution_tools.selectors.tournament import tournament_selection
 from airevolve.evolution_tools.strategies import evolve_neat
 
 console = Console()
@@ -38,9 +39,9 @@ console = Console()
 # ---------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser(description="NEAT-speciated drone evolution")
-parser.add_argument("--pop", type=int, default=20, help="Population size")
-parser.add_argument("--gens", type=int, default=30, help="Number of generations")
-parser.add_argument("--workers", type=int, default=None,
+parser.add_argument("--pop", type=int, default=50, help="Population size")
+parser.add_argument("--gens", type=int, default=100, help="Number of generations")
+parser.add_argument("--workers", type=int, default=1,
                     help="Parallel workers for evaluation (default: 1)")
 parser.add_argument("--min-arms", type=int, default=4, help="Minimum rotor arms")
 parser.add_argument("--max-arms", type=int, default=6, help="Maximum rotor arms")
@@ -88,16 +89,23 @@ PARAMETER_LIMITS = np.array([
     [0, 1],
 ])
 
-template_handler = SphericalAngularDroneGenomeHandler(
-    min_max_narms=(args.min_arms, args.max_arms),
-    parameter_limits=PARAMETER_LIMITS,
-    append_arm_chance=0.1,
-    bilateral_plane_for_symmetry=None,
-    repair=False,
-    rnd=np.random.default_rng(args.seed),
-)
 
-fitness_fn = UnifiedFitness(fitness_mode=args.fitness)
+fitness_fn = UnifiedFitness(
+    brain=None,
+    fitness_mode=args.fitness,
+    hover_gradient=False,
+    per_individual_repair=False,
+    is_indirect=False,
+    handler_class=SphericalAngularDroneGenomeHandler,
+    handler_kwargs={
+        "min_max_narms": (args.min_arms, args.max_arms),
+        "parameter_limits": PARAMETER_LIMITS,
+        "append_arm_chance": 0.1,
+        "bilateral_plane_for_symmetry": None,
+        "repair": False,
+    },
+    coordinate_system="spherical",
+)
 
 # ---------------------------------------------------------------------------
 # Banner
@@ -122,11 +130,12 @@ console.log(f"arms=[{args.min_arms}, {args.max_arms}]")
 console.log("Starting NEAT evolution …")
 
 all_individuals = evolve_neat(
-    handler=template_handler,
     fitness_function=fitness_fn,
     population_size=args.pop,
     num_generations=args.gens,
     crossover_rate=args.crossover_rate,
+    parent_selection=tournament_selection,
+    genome_handler=SphericalAngularDroneGenomeHandler,
     num_workers=args.workers,
     compatibility_threshold=args.compat_threshold,
     species_elitism=args.species_elitism,
