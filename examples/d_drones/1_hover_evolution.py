@@ -27,7 +27,7 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 
-from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler import (
+from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
     SphericalAngularDroneGenomeHandler,
 )
 from ariel.body_phenotypes.drone import (
@@ -61,6 +61,10 @@ parser.add_argument(
     help="Fitness function (pure_hover: analytical hover quality [0,3])",
 )
 parser.add_argument("--seed", type=int, default=42)
+parser.add_argument("--viz", action="store_true",
+                    help="Simulate best individual after evolution and save hover video")
+parser.add_argument("--viz-duration", type=float, default=10.0,
+                    help="Hover video duration in seconds (default 10)")
 args = parser.parse_args()
 
 POP_SIZE: int = args.pop
@@ -146,6 +150,11 @@ ea = EA(
 
 console.rule("[bold green]Running EA")
 ea.run()
+
+if args.viz:
+    import sys; sys.path.insert(0, str(Path(__file__).parent))
+    from _viz_best import viz_best_from_db
+    viz_best_from_db(DATA / "database.db", DATA / "best_hover.mp4", duration=args.viz_duration)
 
 # ---------------------------------------------------------------------------
 # Post-hoc analysis via Archive

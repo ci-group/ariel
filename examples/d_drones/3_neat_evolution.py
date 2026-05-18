@@ -25,12 +25,12 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 
-from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler import (
+from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
     SphericalAngularDroneGenomeHandler,
 )
-from airevolve.evolution_tools.evaluators.unified_fitness import UnifiedFitness
-from airevolve.evolution_tools.selectors.tournament import tournament_selection
-from airevolve.evolution_tools.strategies import evolve_neat
+from ariel.ec.drone.evaluators.unified_fitness import UnifiedFitness
+from ariel.ec.drone.selectors.tournament import tournament_selection
+from ariel.ec.drone.strategies import evolve_neat
 
 console = Console()
 
@@ -69,6 +69,10 @@ parser.add_argument("--no-adjust-threshold", action="store_true",
 parser.add_argument("--interspecies-rate", type=float, default=0.001,
                     help="Probability of cross-species crossover (default 0.001)")
 parser.add_argument("--seed", type=int, default=42)
+parser.add_argument("--viz", action="store_true",
+                    help="Simulate best individual after evolution and save hover video")
+parser.add_argument("--viz-duration", type=float, default=10.0,
+                    help="Hover video duration in seconds (default 10)")
 args = parser.parse_args()
 
 DATA = Path.cwd() / "__data__" / "drone_neat_evolution"
@@ -157,6 +161,14 @@ console.log(f"Total individuals evaluated: {len(all_individuals)}")
 last_gen = int(all_individuals["generation"].max())
 last_gen_df = all_individuals[all_individuals["generation"] == last_gen]
 best_row = last_gen_df.sort_values("fitness", ascending=False).iloc[0]
+
+if args.viz:
+    import sys; sys.path.insert(0, str(Path(__file__).parent))
+    from _viz_best import viz_best_phenotype
+    _genome = best_row["genome"]
+    _arms   = _genome.arms if hasattr(_genome, "arms") else np.asarray(_genome)
+    _valid  = ~np.isnan(_arms[:, 0])
+    viz_best_phenotype(_arms[_valid], DATA / "best_hover.mp4", duration=args.viz_duration)
 
 console.log(
     f"Best (gen {last_gen}): id={best_row['id']}  "

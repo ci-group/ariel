@@ -39,13 +39,13 @@ from stable_baselines3.common.callbacks import BaseCallback
 
 import torch
 
-from airevolve.evolution_tools.evaluators.drone_gate_env import (
+from ariel.simulation.tasks.drone_gate_env import (
     DroneGateEnv,
     gate_pos as DEFAULT_GATE_POS,
     gate_yaw as DEFAULT_GATE_YAW,
 )
-from airevolve.simulator.simulation.propeller_data import create_standard_propeller_config
-import airevolve.controllers.utils as ctrl_utils
+from ariel.simulation.drone.propeller_data import create_standard_propeller_config
+import ariel.simulation.drone.controllers.utils as ctrl_utils
 
 # ---------------------------------------------------------------------------
 # Window-metrics callback (vendored for self-containedness)
@@ -142,18 +142,18 @@ print(
 # ---------------------------------------------------------------------------
 
 propeller_config = create_standard_propeller_config(
-    arm_length=args.arm_length, prop_size=args.prop_size
+    "quad", arm_length=args.arm_length, prop_size=args.prop_size
 )
 
 env = DroneGateEnv(
-    propeller_config=propeller_config,
+    propellers=propeller_config,
     num_envs=args.num_envs,
     device=args.device,
     dt=0.01,
     seed=args.seed,
 )
 
-obs, _ = env.reset()
+obs = env.reset()
 print(
     f"obs shape: {obs.shape}  num_motors: {env.num_motors}  "
     f"mass: {env.drone_sim.mass:.3f} kg  motor_tau: {env.motor_tau}",
@@ -220,7 +220,7 @@ if not args.no_video:
     dt_vid = 0.01
     n_steps = int(args.video_seconds / dt_vid)
 
-    obs, _ = env.reset()
+    obs = env.reset()
     pos_all = np.zeros((n_steps, 3))
     quat_all = np.zeros((n_steps, 4))
     t_all = np.linspace(0, args.video_seconds, n_steps)

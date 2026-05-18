@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
-    from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler import (
+    from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
         SphericalNeatGenome,
     )
 
@@ -48,7 +48,7 @@ def deserialize_genome(data: dict[str, Any]) -> "SphericalNeatGenome":
     None slots become NaN-padded arm rows. Innovation IDs are restored
     to their original integer array so NEAT crossover can align genes.
     """
-    from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler import (
+    from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
         SphericalNeatGenome,
     )
 

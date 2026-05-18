@@ -30,7 +30,7 @@ from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
 if TYPE_CHECKING:
-    from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler import (
+    from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
         SphericalAngularDroneGenomeHandler,
     )
 
@@ -54,12 +54,12 @@ def _drone_eval_worker(args: tuple[dict[str, Any], str]) -> float:
     phenotype = genome.arms[valid_mask]
 
     if fitness_mode == "pure_hover":
-        from airevolve.evolution_tools.evaluators.hover_fitness import (
+        from ariel.ec.drone.evaluators.hover_fitness import (
             continuous_hover_fitness,
         )
         return continuous_hover_fitness(phenotype)
 
-    from airevolve.evolution_tools.evaluators.unified_fitness import UnifiedFitness
+    from ariel.ec.drone.evaluators.unified_fitness import UnifiedFitness
     return UnifiedFitness(fitness_mode=fitness_mode)(phenotype, log_dir=None)
 
 
