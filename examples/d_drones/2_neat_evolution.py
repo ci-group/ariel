@@ -6,10 +6,10 @@ example 2, but without ARIEL's EA engine — evolve_neat manages its own
 population and does not produce an SQLite archive.
 
 Run:
-    python examples/d_drones/3_neat_evolution.py
-    python examples/d_drones/3_neat_evolution.py --pop 20 --gens 30
-    python examples/d_drones/3_neat_evolution.py --fitness pure_hover --workers 8
-    python examples/d_drones/3_neat_evolution.py --compat-threshold 2.5 --target-species 4
+    python examples/d_drones/2_neat_evolution.py
+    python examples/d_drones/2_neat_evolution.py --pop 20 --gens 30
+    python examples/d_drones/2_neat_evolution.py --fitness pure_hover --workers 8
+    python examples/d_drones/2_neat_evolution.py --compat-threshold 2.5 --target-species 4
 """
 
 from __future__ import annotations

@@ -10,15 +10,15 @@ be overridden with --pos-gain / --vel-gain.
 
 Run:
     # Headless test with default B-spline parameters:
-    python examples/d_drones/4_simulate_lee_ctrl.py --gates figure8 --no-viz
+    python examples/d_drones/3_simulate_lee.py --gates figure8 --no-viz
 
     # Load a tuned config and save animation:
-    python examples/d_drones/4_simulate_lee_ctrl.py \\
+    python examples/d_drones/3_simulate_lee.py \\
         --gates figure8 \\
         --bspline-config __data__/lee_tuning/stage3_best.json --save
 
     # Override position / velocity gains:
-    python examples/d_drones/4_simulate_lee_ctrl.py --gates circle \\
+    python examples/d_drones/3_simulate_lee.py --gates circle \\
         --pos-gain 12.0 --vel-gain 8.0
 """
 
@@ -36,11 +36,11 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parent))
 from _ctrl_helpers import ARM_LENGTH, PROP_SIZE, GateChecker, create_2inch_quad
 
-from airevolve.controllers.lee_control.lee_controller import LeeGeometricControl
-from airevolve.controllers.trajectory_generation.trajectory import Trajectory
-from airevolve.controllers.utils.gate_configs import GATE_CONFIGS
-import airevolve.controllers.utils as ctrl_utils
-from airevolve.controllers.utils.wind_model import Wind
+from ariel.simulation.drone.controllers.lee_control.lee_controller import LeeGeometricControl
+from ariel.simulation.drone.controllers.trajectory_generation.trajectory import Trajectory
+from ariel.simulation.drone.controllers.utils.gate_configs import GATE_CONFIGS
+import ariel.simulation.drone.controllers.utils as ctrl_utils
+from ariel.simulation.drone.controllers.utils.wind_model import Wind
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -99,7 +99,7 @@ print("=" * 70 + "\n")
 # ---------------------------------------------------------------------------
 
 quad = create_2inch_quad()
-wind = Wind("None", args.time)
+wind = Wind("None")
 
 ctrl = LeeGeometricControl(
     quad,

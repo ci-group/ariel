@@ -7,13 +7,13 @@ evolved genome vs. the evenly-distributed fabrication layout.
 
 Run:
     # Randomly generated 4-arm genome:
-    python examples/d_drones/8_generate_stl.py
+    python examples/d_drones/9_generate_stl.py
 
     # Specify arm count and output directory:
-    python examples/d_drones/8_generate_stl.py --arms 6 --out __data__/my_drone_stl
+    python examples/d_drones/9_generate_stl.py --arms 6 --out __data__/my_drone_stl
 
     # Headless (no interactive matplotlib windows):
-    python examples/d_drones/8_generate_stl.py --no-show
+    python examples/d_drones/9_generate_stl.py --no-show
 """
 
 from __future__ import annotations
@@ -25,11 +25,11 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler import (
+from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
     SphericalAngularDroneGenomeHandler,
 )
-from airevolve.evolution_tools.inspection_tools.drone_visualizer import DroneVisualizer
-from airevolve.phenotype_assembly import generate_stl_files, AssemblyConfig
+from ariel.ec.drone.inspection.drone_visualizer import DroneVisualizer
+from ariel.body_phenotypes.drone.phenotype_assembly import generate_stl_files, AssemblyConfig
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -94,7 +94,7 @@ for i, arm in enumerate(valid_arms):
 
 print(f"\nGenerating STL files → {output_dir}")
 
-assembly_config = AssemblyConfig(propeller_size=args.prop_size)
+assembly_config = AssemblyConfig()
 result = generate_stl_files(
     handler,
     output_dir=str(output_dir),

@@ -7,11 +7,11 @@ Expects an ``individual_dir`` containing:
   - ``policy.zip``                          — trained SB3 PPO policy
 
 Usage:
-    uv run examples/d_drones/5_make_video.py __data__/my_individual \\
+    uv run examples/d_drones/7_make_video.py __data__/my_individual \\
         --gate-cfg figure8
 
     # With explicit device:
-    uv run examples/d_drones/5_make_video.py __data__/my_individual \\
+    uv run examples/d_drones/7_make_video.py __data__/my_individual \\
         --gate-cfg circle --device cpu
 """
 

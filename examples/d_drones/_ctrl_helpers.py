@@ -1,15 +1,13 @@
 """Shared helpers for drone simulation and controller-tuning examples.
 
-Extracted from airevolve's tuning example so that examples 4 (simulate) and
-5 (tune) can import a common drone configuration without needing sys.path
-hacks between sibling directories.
+Shared helpers for examples 4 (simulate) and 5 (tune).
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-from airevolve.simulator.simulation import DroneInterface
+from ariel.simulation.drone.drone_interface import DroneInterface
 
 # 2-inch quadrotor constants (60 mm arm, 2-inch propellers, ~0.08 kg total)
 ARM_LENGTH: float = 0.06   # metres

@@ -9,17 +9,17 @@ Requires the ``cma`` package (``uv pip install cma``).
 
 Run:
     # All three stages automatically:
-    python examples/d_drones/5_tune_lee_controller.py --stage all --gates figure8
+    python examples/d_drones/4_tune_lee_controller.py --stage all --gates figure8
 
     # Individual stages:
-    python examples/d_drones/5_tune_lee_controller.py --stage 1 --gates figure8 --max-evals 200
-    python examples/d_drones/5_tune_lee_controller.py --stage 2 --gates figure8 \\
+    python examples/d_drones/4_tune_lee_controller.py --stage 1 --gates figure8 --max-evals 200
+    python examples/d_drones/4_tune_lee_controller.py --stage 2 --gates figure8 \\
         --load-prev __data__/lee_tuning/stage1_best.json --max-evals 300
-    python examples/d_drones/5_tune_lee_controller.py --stage 3 --gates figure8 \\
+    python examples/d_drones/4_tune_lee_controller.py --stage 3 --gates figure8 \\
         --load-prev __data__/lee_tuning/stage2_best.json --max-evals 500
 
 After tuning, visualise with:
-    python examples/d_drones/4_simulate_lee_ctrl.py \\
+    python examples/d_drones/3_simulate_lee.py \\
         --gates figure8 --bspline-config __data__/lee_tuning/stage3_best.json
 """
 
@@ -41,13 +41,13 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parent))
 from _ctrl_helpers import ARM_LENGTH, PROP_SIZE, GateChecker, create_2inch_quad
 
-from airevolve.controllers.lee_control.lee_controller import LeeGeometricControl
-from airevolve.controllers.trajectory_generation.bspline_gate_trajectory import (
+from ariel.simulation.drone.controllers.lee_control.lee_controller import LeeGeometricControl
+from ariel.simulation.drone.controllers.trajectory_generation.bspline_gate_trajectory import (
     BSplineGateTrajectory,
 )
-from airevolve.controllers.trajectory_generation.trajectory import Trajectory
-from airevolve.controllers.utils.gate_configs import GATE_CONFIGS
-from airevolve.controllers.utils.wind_model import Wind
+from ariel.simulation.drone.controllers.trajectory_generation.trajectory import Trajectory
+from ariel.simulation.drone.controllers.utils.gate_configs import GATE_CONFIGS
+from ariel.simulation.drone.controllers.utils.wind_model import Wind
 
 try:
     import cma
@@ -129,12 +129,12 @@ def simulate_bspline(
             attitude=initial_euler, angular_velocity=np.zeros(3),
         )
 
-        from airevolve.controllers.trajectory_generation.trajectory import Trajectory
+        from ariel.simulation.drone.controllers.trajectory_generation.trajectory import Trajectory
         traj = Trajectory(quad, "xyz_pos", np.array([15, 3, 1]),
                           gate_config=gate_config)
         traj.bspline_trajectory = bspline_traj
 
-        wind = Wind("None", sim_time)
+        wind = Wind("None")
         gate_checker = GateChecker(gate_config.gate_pos, gate_config.gate_yaw,
                                    gate_config.gate_size)
 
@@ -357,7 +357,7 @@ class CurriculumTuner:
         if self.stage < 3:
             print(f"  To continue: --stage {self.stage + 1} --load-prev {best_path}")
         else:
-            print(f"  To visualise: python examples/d_drones/4_simulate_lee_ctrl.py "
+            print(f"  To visualise: python examples/d_drones/3_simulate_lee.py "
                   f"--gates {args.gates} --bspline-config {best_path}")
 
 

@@ -7,9 +7,9 @@ Loads the best individual from a NEAT evolution run and displays it in:
   • Interactive 3D simulator (optional)
 
 Run:
-    python examples/d_drones/4_visualize_best_drone.py
-    python examples/d_drones/4_visualize_best_drone.py --no-show
-    python examples/d_drones/4_visualize_best_drone.py --simulate
+    python examples/d_drones/5_visualize_best_drone.py
+    python examples/d_drones/5_visualize_best_drone.py --no-show
+    python examples/d_drones/5_visualize_best_drone.py --simulate
 """
 
 from __future__ import annotations
@@ -27,10 +27,10 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 
-from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler import (
+from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
     SphericalAngularDroneGenomeHandler,
 )
-from airevolve.evolution_tools.inspection_tools.drone_visualizer import (
+from ariel.ec.drone.inspection.drone_visualizer import (
     DroneVisualizer,
     VisualizationConfig,
 )
@@ -258,7 +258,7 @@ except Exception as e:
 if args.simulate:
     console.log("\n[bold cyan]Attempting physics simulation...[/bold cyan]")
     try:
-        from airevolve.evolution_tools.evaluators.hover_fitness import (
+        from ariel.ec.drone.evaluators.hover_fitness import (
             create_drone_simulator,
         )
         import mujoco
@@ -268,7 +268,7 @@ if args.simulate:
         simulator = create_drone_simulator(phenotype)
         
         console.log("  [green]✓ Simulator created successfully[/green]")
-        console.log("  (Use 'python examples/d_drones/4_simulate_lee_ctrl.py' for interactive simulation)")
+        console.log("  (Use 'python examples/d_drones/3_simulate_lee.py' for interactive simulation)")
         
     except ImportError as e:
         console.log(f"  [yellow]Simulator not available: {e}[/yellow]")

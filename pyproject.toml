@@ -51,6 +51,9 @@ Repository = "https://github.com/ci-group/ariel"
 Documentation = "https://ariel.readthedocs.io"
 Changelog = "https://github.com/ci-group/ariel/releases"
 
+[project.optional-dependencies]
+fabrication = ["cadquery>=2.4.0"]
+
 [dependency-groups]
 dev = ["mypy>=1.18.2", "pytest>=8.4.2", "pytest-modern>=0.7.4", "ruff>=0.13.3"]
 docs = [

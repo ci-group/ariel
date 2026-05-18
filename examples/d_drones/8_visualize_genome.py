@@ -10,8 +10,8 @@ genomes using airevolve's DroneVisualizer. Demonstrates:
   • Multi-panel analysis dashboard
 
 Run:
-    python examples/d_drones/7_visualize_genome.py
-    python examples/d_drones/7_visualize_genome.py --no-show   # headless, save only
+    python examples/d_drones/8_visualize_genome.py
+    python examples/d_drones/8_visualize_genome.py --no-show   # headless, save only
 """
 
 from __future__ import annotations
@@ -24,17 +24,17 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-from airevolve.evolution_tools.genome_handlers.spherical_angular_genome_handler import (
+from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
     SphericalAngularDroneGenomeHandler,
 )
-from airevolve.evolution_tools.genome_handlers.cartesian_euler_genome_handler import (
+from ariel.ec.drone.genome_handlers.cartesian_euler_genome_handler import (
     CartesianEulerDroneGenomeHandler,
 )
-from airevolve.evolution_tools.inspection_tools.drone_visualizer import (
+from ariel.ec.drone.inspection.drone_visualizer import (
     DroneVisualizer,
     VisualizationConfig,
 )
-import airevolve.evolution_tools.inspection_tools.utils as u
+import ariel.ec.drone.inspection.utils as u
 
 # ---------------------------------------------------------------------------
 # CLI

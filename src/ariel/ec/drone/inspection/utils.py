@@ -202,9 +202,10 @@ def extract_polar_genome_data(genome_array: npt.NDArray) -> dict:
     Returns:
         Dictionary with converted data for visualization
     """
-    # Remove any invalid (NaN) entries
-    valid_mask = ~np.isnan(genome_array).any(axis=1)
-    valid_genome = genome_array[valid_mask]
+    # Cast to float so np.isnan works on integer-typed genomes (all slots filled)
+    genome_float = np.asarray(genome_array, dtype=float)
+    valid_mask = ~np.isnan(genome_float).any(axis=1)
+    valid_genome = genome_float[valid_mask]
     
     positions = []
     orientations = []
@@ -241,9 +242,10 @@ def extract_cartesian_genome_data(genome_array: npt.NDArray) -> dict:
     Returns:
         Dictionary with converted data for visualization
     """
-    # Remove any invalid (NaN) entries
-    valid_mask = ~np.isnan(genome_array).any(axis=1)
-    valid_genome = genome_array[valid_mask]
+    # Cast to float so np.isnan works on integer-typed genomes (all slots filled)
+    genome_float = np.asarray(genome_array, dtype=float)
+    valid_mask = ~np.isnan(genome_float).any(axis=1)
+    valid_genome = genome_float[valid_mask]
     
     positions = []
     orientations = []
@@ -280,6 +282,10 @@ def auto_extract_genome_data(genome_data) -> dict:
     # Check if it's a genome handler with methods
     if hasattr(genome_data, 'get_motor_positions'):
         return extract_genome_data(genome_data)
+
+    # SphericalAngularDroneGenomeHandler — use get_valid_arms() directly
+    if hasattr(genome_data, 'get_valid_arms'):
+        return extract_polar_genome_data(genome_data.get_valid_arms())
     
     # Check if it's a numpy array (polar format)
     elif isinstance(genome_data, np.ndarray):
@@ -293,8 +299,10 @@ def auto_extract_genome_data(genome_data) -> dict:
         if hasattr(genome_data, 'get_motor_positions'):
             return extract_cartesian_genome_data(genome_data)
         else:
-            # Assume polar format in genome attribute
-            return extract_polar_genome_data(genome_data.genome)
+            genome = genome_data.genome
+            # SphericalNeatGenome (or similar) stores the arm array in .arms
+            genome_array = genome.arms if hasattr(genome, 'arms') else genome
+            return extract_polar_genome_data(genome_array)
     
     else:
         raise ValueError(f"Unrecognized genome format: {type(genome_data)}")

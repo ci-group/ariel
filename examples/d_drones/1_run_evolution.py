@@ -5,10 +5,10 @@ Archive post-hoc analysis). Supports the spherical arm encoding and three
 fitness modes via mu+lambda or mu,lambda selection.
 
 Run:
-    python examples/d_drones/2_drone_evolution.py
-    python examples/d_drones/2_drone_evolution.py --fitness pure_hover --strategy plus
-    python examples/d_drones/2_drone_evolution.py --fitness edit_distance --workers 8
-    python examples/d_drones/2_drone_evolution.py --pop 20 --budget 30 --min-arms 4 --max-arms 6
+    python examples/d_drones/1_run_evolution.py
+    python examples/d_drones/1_run_evolution.py --fitness pure_hover --strategy plus
+    python examples/d_drones/1_run_evolution.py --fitness edit_distance --workers 8
+    python examples/d_drones/1_run_evolution.py --pop 20 --budget 30 --min-arms 4 --max-arms 6
 """
 
 from __future__ import annotations

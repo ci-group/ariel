@@ -11,19 +11,19 @@ Four demos:
     4. Functional API (``optimization_repair_individual``)
 
 Run:
-    python examples/d_drones/9_repair_demo.py
+    python examples/d_drones/10_repair_demo.py
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-from airevolve.evolution_tools.genome_handlers.operators.optimization_repair_operator import (
+from ariel.ec.drone.genome_handlers.operators.optimization_repair_operator import (
     OptimizationBasedRepairOperator,
     OptimizationRepairConfig,
     optimization_repair_individual,
 )
-from airevolve.evolution_tools.genome_handlers.operators.repair_base import RepairConfig
+from ariel.ec.drone.genome_handlers.operators.repair_base import RepairConfig
 
 
 # ---------------------------------------------------------------------------
