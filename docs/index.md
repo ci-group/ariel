@@ -66,7 +66,7 @@ See the [Installation Guide](source/installation_guide) for full details, includ
 ```{toctree}
 :maxdepth: 3
 
-Contributing guide <source/contributing_guide/index>
+Contributing guide <source/contributing_guide/CONTRIBUTING>
 Installation Guide <source/installation_guide>
 Basic API Usage: NDE + CPG <source/tutorial_nde_cpg>
 Quick Start: Modular Robots <source/quickstart_modular_robots>
