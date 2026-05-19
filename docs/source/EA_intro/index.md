@@ -7,4 +7,5 @@
 ea_example_ackley
 ea_example_queens
 robot_evolution
+archive_and_restart
 ```
