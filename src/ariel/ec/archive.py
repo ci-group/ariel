@@ -21,8 +21,7 @@ class Archive:
 
     Opens a SQLite database written by the EA engine and exposes targeted
     query methods for retrieving archived individuals. Particularly useful
-    for the J.E.S.U.S. (Joint Evolution Strategies with Undead Sampling)
-    pattern: injecting historically successful individuals back into a
+    for injecting historically successful individuals back into a
     stagnating population.
 
     Parameters
@@ -106,7 +105,10 @@ class Archive:
 
     def _fetch_all(self, statement) -> list[Individual]:
         with Session(self.engine) as session:
-            return list(session.exec(statement).all())
+            rows = list(session.exec(statement).all())
+        for ind in rows:
+            ind.id = None
+        return rows
 
     # -- Single-individual queries ---------------------------------------------
 
@@ -351,59 +353,6 @@ class Archive:
                 for _ in range(n)
             ]
         return Population(winners)
-
-    # Used in PPSN experiments
-    def jesi(
-        self,
-        median_age: int,
-        num_jesi: int = 10,
-        tournament_size: int = 3,
-        fitness_mode: FitnessMode = "min",
-        age_window: int = 10,
-    ) -> Population:
-        """Retrieve resurrected individuals using the J.E.S.U.S. strategy.
-
-        Selects historically well-performing dead individuals from a specific
-        age band — those that lived long enough to be considered "experienced"
-        but are no longer in the active population. Designed to inject
-        diversity back into a stagnating run.
-
-        The birth and death windows are derived from ``median_age`` and
-        ``age_window``:
-
-        - ``death_range = (median_age - age_window, median_age)``
-        - ``birth_range = (0, death_range[0] - 5)``
-
-        Parameters
-        ----------
-        median_age : int
-            Target generation of death around which to centre the search.
-        num_jesi : int, optional
-            Number of individuals to resurrect. Default is ``10``.
-        tournament_size : int, optional
-            Tournament size for selection within the candidate pool.
-            Default is ``3``.
-        fitness_mode : {"min", "max"}, optional
-            Optimisation direction for tournament selection. Default ``"min"``.
-        age_window : int, optional
-            Half-width of the death-generation window. Default is ``10``.
-
-        Returns
-        -------
-        Population
-            A population of ``num_jesi`` resurrected individuals.
-        """
-        death_lo = max(0, median_age - age_window)
-        death_hi = median_age
-        birth_hi = max(0, death_lo - 5)
-
-        return self.tournament_population(
-            n=num_jesi,
-            tournament_size=tournament_size,
-            fitness_mode=fitness_mode,
-            birth_range=(0, birth_hi),
-            death_range=(death_lo, death_hi),
-        )
 
     def by_generation(self, generation: int) -> Population:
         """Return all individuals present at a given generation.
