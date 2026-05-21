@@ -306,6 +306,7 @@ class CurriculumTuner:
         ig = np.array(cfg["initial_guess"], dtype=float)
         bounds_lo = [b[0] for b in cfg["bounds"]]
         bounds_hi = [b[1] for b in cfg["bounds"]]
+        ig = np.clip(ig, bounds_lo, bounds_hi)
 
         options = {
             "maxfevals": max_evaluations,
@@ -315,6 +316,7 @@ class CurriculumTuner:
             "tolfun": 1e-4,
         }
 
+        es = None
         t0 = time.time()
         try:
             es = cma.CMAEvolutionStrategy(ig, cfg["initial_std"], options)
@@ -331,8 +333,9 @@ class CurriculumTuner:
             print("\nInterrupted — saving current best …")
         finally:
             elapsed = time.time() - t0
+            evals = es.result.evaluations if es is not None else 0
             print(f"\nStage {self.stage} done in {elapsed / 60:.1f} min  "
-                  f"({es.result.evaluations} evals)  best={self.best_score:.3f}")
+                  f"({evals} evals)  best={self.best_score:.3f}")
             self._save_results()
 
     def _save_results(self) -> None:

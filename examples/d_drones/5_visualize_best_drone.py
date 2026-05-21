@@ -59,7 +59,7 @@ parser.add_argument(
 parser.add_argument(
     "--individual-id",
     type=str,
-    default="0600",
+    default="5001",
     help="Specific individual ID to visualize (default: 0600)",
 )
 parser.add_argument(

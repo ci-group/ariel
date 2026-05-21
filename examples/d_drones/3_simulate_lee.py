@@ -227,10 +227,14 @@ print(f"{'=' * 70}\n")
 # ---------------------------------------------------------------------------
 
 if not args.no_viz:
+    import matplotlib.pyplot as plt
+
     waypoints = np.array(gate_config.gate_pos, dtype=float)
     save_path = str(Path.cwd() / "__data__" / "lee_simulation.mp4") if args.save else None
 
-    ctrl_utils.sameAxisAnimation(
+    # Keep a reference to the FuncAnimation — matplotlib will garbage-collect
+    # it otherwise and the figure renders empty.
+    anim = ctrl_utils.sameAxisAnimation(
         t_all, waypoints, pos_all, quat_all, sDes_traj_all, Ts,
         quad.params, 15, 3, int(args.save), "NED",
         gate_pos=np.array(gate_config.gate_pos),
@@ -241,3 +245,5 @@ if not args.no_viz:
 
     if save_path:
         print(f"Animation saved to: {save_path}")
+    else:
+        plt.show()
