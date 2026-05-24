@@ -11,7 +11,10 @@ the real world) can instantiate. v1 ships:
 
 Stubs sketched for future backends:
 
+  * ``blueprint_to_urdf``       — URDF file; can be fed to Isaac Lab's
+    ``UrdfConverter`` to produce a USD asset.
   * ``blueprint_to_usd``        — USD prim hierarchy for Isaac Lab
+    (direct, no URDF intermediate).
 """
 from __future__ import annotations
 
@@ -284,6 +287,49 @@ def _rpy_to_quat(roll: float, pitch: float, yaw: float) -> list[float]:
 
 
 # ---------- future backends (signatures only) ----------
+
+def blueprint_to_urdf(
+    bp: DroneBlueprint,
+    out_path: str,
+    *,
+    motor_mass: float = 0.05,
+    arm_mass: float = 0.01,
+    core_mass_override: float | None = None,
+    arm_radius: float = 0.005,
+    motor_radius: float = 0.015,
+    motor_thickness: float = 0.008,
+    robot_name: str = "drone",
+) -> str:
+    """Compile a DroneBlueprint into a URDF file.
+
+    Intended as the intermediate step for Isaac Lab / Isaac Sim: the
+    emitted ``.urdf`` is consumed by
+    ``isaaclab.sim.converters.UrdfConverter`` to produce a USD asset
+    (see ``soft_airframe_optimization/scripts/convert_xconfig_urdf.py``
+    for the conversion call pattern).
+
+    Planned mapping (mirrors ``blueprint_to_mjspec``):
+      * One ``<link>`` per blueprint node (CorePlate, Arm, Motor) with
+        an analytically-computed ``<inertial>`` block for the primitive
+        shape.
+      * One ``<joint>`` per parent-child edge. Default is
+        ``type="fixed"`` (rigid drone). A future ``CompliantJoint``
+        annotation on ``ArmNode`` would emit ``type="revolute"`` with
+        ``<dynamics damping="0"/>``; the non-linear ``τ(θ)`` law is
+        stashed as sidecar attributes for a runtime controller to apply
+        (same two-layer pattern soft_airframe uses with ``morphy:*``
+        USD attributes).
+      * Capsule arms are approximated as cylinders — URDF has no
+        capsule primitive.
+
+    Not yet implemented.
+    """
+    raise NotImplementedError(
+        "blueprint_to_urdf is not yet implemented. "
+        "Use blueprint_to_mjspec for MuJoCo, or blueprint_to_propellers "
+        "for the Python physics stack."
+    )
+
 
 def blueprint_to_usd(bp: DroneBlueprint, out_path: str) -> str:
     """Compile a DroneBlueprint into a USD file for Isaac Lab.
