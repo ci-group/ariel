@@ -10,11 +10,14 @@ Pipeline:
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import networkx as nx
+
+from ariel.simulation.drone.propeller_data import get_propeller_specs
 
 
 # ---------- node payloads ----------
@@ -35,11 +38,93 @@ class CorePlateNode:
     thickness: float = 0.01      # disc thickness (m)
 
 
+# ---------- arm cross sections ----------
+#
+# Each cross-section class describes the *shape* of an arm's cross-section
+# (perpendicular to the arm's local +X axis). They expose a uniform
+# interface used by ArmNode (mass / inertia derivation) and by backends
+# (geometry emission, via isinstance dispatch).
+
+@dataclass
+class CylindricalCrossSection:
+    """Solid circular cross-section."""
+    type: str = "Cylindrical"    # discriminator for from_dict
+    radius: float = 0.005        # m
+
+    @property
+    def area(self) -> float:
+        return math.pi * self.radius ** 2
+
+    def principal_inertia(self, length: float, mass: float) -> tuple[float, float, float]:
+        # Solid cylinder along local +X. Ixx is the axial moment.
+        Ixx = 0.5 * mass * self.radius ** 2
+        Iyy = Izz = mass * (3 * self.radius ** 2 + length ** 2) / 12
+        return (Ixx, Iyy, Izz)
+
+
+@dataclass
+class HollowTubeCrossSection:
+    """Hollow circular cross-section (tube). Default = 8mm OD / 6mm ID,
+    matching propeller_data.BEAM_DENSITY when density = 1500 kg/m³."""
+    type: str = "HollowTube"
+    outer_radius: float = 0.004  # m
+    inner_radius: float = 0.003  # m
+
+    @property
+    def area(self) -> float:
+        return math.pi * (self.outer_radius ** 2 - self.inner_radius ** 2)
+
+    def principal_inertia(self, length: float, mass: float) -> tuple[float, float, float]:
+        # Hollow cylinder along local +X.
+        sum_sq = self.outer_radius ** 2 + self.inner_radius ** 2
+        Ixx = 0.5 * mass * sum_sq
+        Iyy = Izz = mass * (3 * sum_sq + length ** 2) / 12
+        return (Ixx, Iyy, Izz)
+
+
+@dataclass
+class RectangularCrossSection:
+    """Solid rectangular (box) cross-section."""
+    type: str = "Rectangular"
+    width: float = 0.01          # m (along arm's local +Y)
+    thickness: float = 0.005     # m (along arm's local +Z)
+
+    @property
+    def area(self) -> float:
+        return self.width * self.thickness
+
+    def principal_inertia(self, length: float, mass: float) -> tuple[float, float, float]:
+        # Box (length × width × thickness) along local +X.
+        Ixx = mass * (self.width ** 2 + self.thickness ** 2) / 12
+        Iyy = mass * (length ** 2 + self.thickness ** 2) / 12
+        Izz = mass * (length ** 2 + self.width ** 2) / 12
+        return (Ixx, Iyy, Izz)
+
+
+CrossSection = Union[
+    CylindricalCrossSection,
+    HollowTubeCrossSection,
+    RectangularCrossSection,
+]
+
+
 @dataclass
 class ArmNode:
     type: str = "Arm"
     length: float = 0.18         # m
+    density: float = 1500.0      # kg/m³ — carbon-fiber-ish
+    cross_section: CrossSection = field(default_factory=HollowTubeCrossSection)
     pose: Pose = field(default_factory=Pose)   # attachment frame on parent (CorePlate)
+
+    @property
+    def mass(self) -> float:
+        """Derived: density × cross-section area × length."""
+        return self.density * self.cross_section.area * self.length
+
+    @property
+    def inertia_diag(self) -> tuple[float, float, float]:
+        """Principal moments (Ixx, Iyy, Izz) about COM, arm along local +X."""
+        return self.cross_section.principal_inertia(self.length, self.mass)
 
 
 @dataclass
@@ -47,7 +132,30 @@ class MotorNode:
     type: str = "Motor"
     pose: Pose = field(default_factory=Pose)   # pose on parent Arm tip
     spin: str = "ccw"            # "cw" | "ccw"
-    propsize: int = 5            # inches; looked up in propeller_data for kf/km
+    propsize: int = 5            # inches; PROPELLER_LIBRARY key
+
+    @property
+    def mass(self) -> float:
+        """Lumped motor + propeller mass from PROPELLER_LIBRARY."""
+        return get_propeller_specs(self.propsize)["mass"]
+
+    @property
+    def radius(self) -> float:
+        """Visual / collision cylinder radius from PROPELLER_LIBRARY."""
+        return get_propeller_specs(self.propsize)["motor_radius"]
+
+    @property
+    def thickness(self) -> float:
+        """Visual / collision cylinder half-length from PROPELLER_LIBRARY."""
+        return get_propeller_specs(self.propsize)["motor_thickness"]
+
+    @property
+    def inertia_diag(self) -> tuple[float, float, float]:
+        """Solid-cylinder principal moments. Spin axis = local +Z."""
+        m, r, h = self.mass, self.radius, 2 * self.thickness
+        Ixx = Iyy = m * (3 * r ** 2 + h ** 2) / 12
+        Izz = 0.5 * m * r ** 2
+        return (Ixx, Iyy, Izz)
 
 
 @dataclass
@@ -133,12 +241,22 @@ class DroneBlueprint:
             "Rotor": RotorNode,
             "Sensor": SensorNode,
         }
+        cross_section_map = {
+            "Cylindrical": CylindricalCrossSection,
+            "HollowTube": HollowTubeCrossSection,
+            "Rectangular": RectangularCrossSection,
+        }
         for entry in d["nodes"]:
             data = dict(entry["data"])
             cls_ = type_map[data["type"]]
             # rebuild Pose sub-dataclass where present
             if "pose" in data and isinstance(data["pose"], dict):
                 data["pose"] = Pose(**data["pose"])
+            # rebuild cross_section sub-dataclass where present
+            if "cross_section" in data and isinstance(data["cross_section"], dict):
+                cs_data = dict(data["cross_section"])
+                cs_cls = cross_section_map[cs_data["type"]]
+                data["cross_section"] = cs_cls(**cs_data)
             payload = cls_(**data)
             bp.g.add_node(entry["id"], data=payload)
             bp._next_id = max(bp._next_id, entry["id"] + 1)

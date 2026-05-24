@@ -23,7 +23,16 @@ from typing import Any, TYPE_CHECKING
 
 import numpy as np
 
-from .blueprint import DroneBlueprint, ArmNode, MotorNode, RotorNode, CorePlateNode
+from .blueprint import (
+    DroneBlueprint,
+    ArmNode,
+    MotorNode,
+    RotorNode,
+    CorePlateNode,
+    CylindricalCrossSection,
+    HollowTubeCrossSection,
+    RectangularCrossSection,
+)
 
 if TYPE_CHECKING:
     import mujoco
@@ -115,12 +124,7 @@ def blueprint_to_propellers(
 def blueprint_to_mjspec(
     bp: DroneBlueprint,
     *,
-    motor_mass: float = 0.05,
-    arm_mass: float = 0.01,
     core_mass_override: float | None = None,
-    arm_radius: float = 0.005,
-    motor_radius: float = 0.015,
-    motor_thickness: float = 0.008,
     max_thrust: float = 5.0,
     body_name: str = "drone",
 ) -> "mujoco.MjSpec":
@@ -139,12 +143,15 @@ def blueprint_to_mjspec(
       * One actuator per Motor; ``ctrl`` ∈ [0, 1] maps linearly to thrust
         in [0, ``max_thrust``] Newtons along the rotor's spin axis.
 
+    Physical parameters are read from the blueprint nodes themselves:
+    arm mass / inertia from ``arm.mass`` / ``arm.cross_section``; motor
+    mass and visual dimensions from ``motor.mass`` / ``motor.radius`` /
+    ``motor.thickness`` (sourced from ``propeller_data.PROPELLER_LIBRARY``
+    via ``motor.propsize``).
+
     Args:
         bp: the blueprint to compile.
-        motor_mass: kg per motor+rotor assembly (lumped).
-        arm_radius: capsule radius for arm visuals (m).
-        motor_radius: cylinder radius for motor visuals (m).
-        motor_thickness: cylinder half-length for motor visuals (m).
+        core_mass_override: if given, overrides ``core.mass`` for testing.
         max_thrust: maximum thrust per motor in Newtons.
         body_name: root body name.
 
@@ -197,13 +204,32 @@ def blueprint_to_mjspec(
             name=f"{body_name}_arm_{arm_id}",
             pos=[0.0, 0.0, 0.0],
         )
-        arm_body.add_geom(
-            type=mujoco.mjtGeom.mjGEOM_CAPSULE,
-            fromto=[0.0, 0.0, 0.0, *tip_local.tolist()],
-            size=[arm_radius, 0.0, 0.0],
-            mass=arm_mass,
-            rgba=(0.3, 0.3, 0.3, 1.0),
-        )
+        # Geometry dispatch on cross-section type. Mass and inertia
+        # come from arm.mass / arm.cross_section.principal_inertia.
+        cs = arm.cross_section
+        if isinstance(cs, RectangularCrossSection):
+            # Box geom centered along the arm, oriented to match tip_local.
+            arm_body.add_geom(
+                pos=(tip_local / 2.0).tolist(),
+                quat=_rpy_to_quat(0.0, arm_pitch, arm_yaw),
+                type=mujoco.mjtGeom.mjGEOM_BOX,
+                size=[arm.length / 2.0, cs.width / 2.0, cs.thickness / 2.0],
+                mass=arm.mass,
+                rgba=(0.3, 0.3, 0.3, 1.0),
+            )
+        else:
+            # CylindricalCrossSection (solid) or HollowTubeCrossSection
+            # — visualised as a capsule. Outer radius drives the visual.
+            visual_radius = (
+                cs.outer_radius if isinstance(cs, HollowTubeCrossSection) else cs.radius
+            )
+            arm_body.add_geom(
+                type=mujoco.mjtGeom.mjGEOM_CAPSULE,
+                fromto=[0.0, 0.0, 0.0, *tip_local.tolist()],
+                size=[visual_radius, 0.0, 0.0],
+                mass=arm.mass,
+                rgba=(0.3, 0.3, 0.3, 1.0),
+            )
 
         for motor_id in bp.children(arm_id):
             motor = bp.payload(motor_id)
@@ -232,8 +258,8 @@ def blueprint_to_mjspec(
             )
             motor_body.add_geom(
                 type=mujoco.mjtGeom.mjGEOM_CYLINDER,
-                size=[motor_radius, motor_thickness, 0.0],
-                mass=motor_mass,
+                size=[motor.radius, motor.thickness, 0.0],
+                mass=motor.mass,
                 rgba=(1.0, 0.2, 0.2, 1.0)
                      if motor.spin == "cw"
                      else (0.2, 0.8, 0.2, 1.0),
@@ -247,7 +273,7 @@ def blueprint_to_mjspec(
                     rotor_radius = rotor.radius
             motor_body.add_geom(
                 type=mujoco.mjtGeom.mjGEOM_CYLINDER,
-                pos=[0.0, 0.0, motor_thickness + 0.002],
+                pos=[0.0, 0.0, motor.thickness + 0.002],
                 size=[rotor_radius, 0.001, 0.0],
                 mass=0.0,
                 rgba=(0.8, 0.8, 0.8, 0.5),
@@ -256,7 +282,7 @@ def blueprint_to_mjspec(
             # Thrust site (force applied along local +Z)
             thrust_site = motor_body.add_site(
                 name=f"{body_name}_thrust_{motor_index}",
-                pos=[0.0, 0.0, motor_thickness],
+                pos=[0.0, 0.0, motor.thickness],
                 size=[0.005, 0.005, 0.005],
             )
 
@@ -292,12 +318,7 @@ def blueprint_to_urdf(
     bp: DroneBlueprint,
     out_path: str,
     *,
-    motor_mass: float = 0.05,
-    arm_mass: float = 0.01,
     core_mass_override: float | None = None,
-    arm_radius: float = 0.005,
-    motor_radius: float = 0.015,
-    motor_thickness: float = 0.008,
     robot_name: str = "drone",
 ) -> str:
     """Compile a DroneBlueprint into a URDF file.
@@ -308,10 +329,18 @@ def blueprint_to_urdf(
     (see ``soft_airframe_optimization/scripts/convert_xconfig_urdf.py``
     for the conversion call pattern).
 
+    Physical parameters are read from the blueprint nodes themselves
+    (``arm.mass``, ``arm.inertia_diag``, ``motor.mass``, ``motor.radius``,
+    ``motor.thickness``), so this signature only needs URDF-mechanical
+    options.
+
     Planned mapping (mirrors ``blueprint_to_mjspec``):
       * One ``<link>`` per blueprint node (CorePlate, Arm, Motor) with
-        an analytically-computed ``<inertial>`` block for the primitive
-        shape.
+        an ``<inertial>`` block populated from the node's derived
+        ``mass`` and ``inertia_diag``.
+      * Arm ``<geometry>`` dispatches on ``arm.cross_section``:
+        ``<cylinder>`` for solid / hollow-tube cross sections,
+        ``<box>`` for rectangular.
       * One ``<joint>`` per parent-child edge. Default is
         ``type="fixed"`` (rigid drone). A future ``CompliantJoint``
         annotation on ``ArmNode`` would emit ``type="revolute"`` with
@@ -319,8 +348,6 @@ def blueprint_to_urdf(
         stashed as sidecar attributes for a runtime controller to apply
         (same two-layer pattern soft_airframe uses with ``morphy:*``
         USD attributes).
-      * Capsule arms are approximated as cylinders — URDF has no
-        capsule primitive.
 
     Not yet implemented.
     """

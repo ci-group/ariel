@@ -24,6 +24,9 @@ PROPELLER_LIBRARY = {
         "constants": [8.12e-08, 6.40e-10],  # [k_f, k_m] force and moment constants
         "wmax": 5000,                       # Maximum angular velocity (rad/s)
         "mass": 0.0046,                     # Propeller + motor mass (kg)
+        # Motor visuals — sub-1306 brushless motor (outer can radius + half-height).
+        "motor_radius": 0.007,
+        "motor_thickness": 0.005,
         # Borrowed from params_3inch (closest sysid set; prop2 has no real sysid).
         "w_min": 305.40,
         "k": 0.84,
@@ -42,6 +45,9 @@ PROPELLER_LIBRARY = {
         "constants": [1.80e-07, 2.89e-09],  # [k_f, k_m] (k_f = k_w·m_canonical, rough)
         "wmax": 4887,
         "mass": 0.012,
+        # Motor visuals — 1306-class (13mm stator + bell).
+        "motor_radius": 0.009,
+        "motor_thickness": 0.006,
         "w_min": 305.40,
         "k": 0.84,
         "k_r_react": 1.14e-03,
@@ -53,6 +59,9 @@ PROPELLER_LIBRARY = {
         "constants": [7.24e-07, 8.20e-09],  # [k_f, k_m] force and moment constants
         "wmax": 3927,                       # Maximum angular velocity (rad/s)
         "mass": 0.018,                      # Propeller + motor mass (kg)
+        # Motor visuals — APC 4x45E pairs with 1806-class (18mm stator).
+        "motor_radius": 0.012,
+        "motor_thickness": 0.007,
         # Borrowed from params_3inch (closest sysid set).
         "w_min": 305.40,
         "k": 0.84,
@@ -65,6 +74,9 @@ PROPELLER_LIBRARY = {
         "constants": [1.08e-06, 1.22e-08],
         "wmax": 3142,
         "mass": 0.0196,
+        # Motor visuals — APC 5x5E pairs with 2204-2206 (22mm stator + bell).
+        "motor_radius": 0.014,
+        "motor_thickness": 0.008,
         # Sysid: params_5inch from optimal_quad_control_RL/randomization.py:5-10.
         "w_min": 238.49,
         "k": 0.95,
@@ -77,6 +89,9 @@ PROPELLER_LIBRARY = {
         "constants": [2.21e-06, 2.74e-08],
         "wmax": 2618,
         "mass": 0.0252,
+        # Motor visuals — APC 6x55E pairs with 2204-2208 (same 22mm stator, taller).
+        "motor_radius": 0.014,
+        "motor_thickness": 0.009,
         # Borrowed from params_5inch (closest sysid set).
         "w_min": 238.49,
         "k": 0.95,
@@ -89,6 +104,9 @@ PROPELLER_LIBRARY = {
         "constants": [4.65e-06, 6.62e-08],
         "wmax": 2244,
         "mass": 0.046,
+        # Motor visuals — APC 7x6E pairs with 2208 (22mm stator, 8mm stack).
+        "motor_radius": 0.014,
+        "motor_thickness": 0.010,
         # Borrowed from params_5inch (closest sysid set).
         "w_min": 238.49,
         "k": 0.95,
@@ -101,6 +119,9 @@ PROPELLER_LIBRARY = {
         "constants": [7.60e-06, 1.14e-07],
         "wmax": 1963,
         "mass": 0.056,
+        # Motor visuals — APC 8x6E pairs with 2212-or-larger (22mm stator, 12mm stack).
+        "motor_radius": 0.014,
+        "motor_thickness": 0.013,
         # Borrowed from params_5inch (closest sysid set).
         "w_min": 238.49,
         "k": 0.95,
@@ -113,6 +134,9 @@ PROPELLER_LIBRARY = {
         "constants": [1.076e-05, 1.61e-07],  # Matched to original framework (kTh = 1.076e-5)
         "wmax": 1963,
         "mass": 0.300,  # Increased to match original 1.2kg total mass exactly
+        # Motor visuals — large hobby motor (22mm-class outer can).
+        "motor_radius": 0.014,
+        "motor_thickness": 0.012,
         # Borrowed from params_5inch (closest sysid set).
         "w_min": 238.49,
         "k": 0.95,
