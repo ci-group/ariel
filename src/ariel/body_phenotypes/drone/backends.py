@@ -1,25 +1,30 @@
 """DroneBlueprint → phenotype backends.
 
 Each backend consumes a DroneBlueprint and emits something a simulator (or
-the real world) can instantiate. v1 ships:
+the real world) can instantiate:
 
   * ``blueprint_to_propellers`` — list[dict] consumable by
     ``ariel.simulation.drone.DroneSimulator`` / ``DroneConfiguration``.
   * ``blueprint_to_mjspec``     — MuJoCo ``mjSpec`` (compiles to MJCF /
     ``MjModel``); the same blueprint can drive both the Python physics
     stack and a full MuJoCo simulation.
+  * ``blueprint_to_urdf``       — URDF file (rigid drone, fixed joints).
+    Intermediate for Isaac Lab via ``isaaclab.sim.converters.UrdfConverter``.
 
 Stubs sketched for future backends:
 
-  * ``blueprint_to_urdf``       — URDF file; can be fed to Isaac Lab's
-    ``UrdfConverter`` to produce a USD asset.
   * ``blueprint_to_usd``        — USD prim hierarchy for Isaac Lab
     (direct, no URDF intermediate).
 """
 from __future__ import annotations
 
+import copy
 import math
+import xml.etree.ElementTree as ET
+from collections.abc import Sequence
+from pathlib import Path
 from typing import Any, TYPE_CHECKING
+from xml.dom import minidom
 
 import numpy as np
 
@@ -312,7 +317,188 @@ def _rpy_to_quat(roll: float, pitch: float, yaw: float) -> list[float]:
     ]
 
 
-# ---------- future backends (signatures only) ----------
+# ---------- URDF backend (blueprint → .urdf) ----------
+
+def _urdf_fmt(x: float) -> str:
+    return f"{float(x):.6g}"
+
+
+def _urdf_fmt_vec(v: Sequence[float]) -> str:
+    return " ".join(_urdf_fmt(c) for c in v)
+
+
+def _urdf_add_origin(parent: ET.Element, xyz: Sequence[float], rpy: Sequence[float]) -> None:
+    ET.SubElement(parent, "origin", attrib={
+        "xyz": _urdf_fmt_vec(xyz),
+        "rpy": _urdf_fmt_vec(rpy),
+    })
+
+
+def _urdf_add_inertial(
+    link: ET.Element,
+    *,
+    com_xyz: Sequence[float],
+    mass: float,
+    inertia_diag: Sequence[float],
+) -> None:
+    """Append an ``<inertial>`` block with diagonal inertia tensor.
+    ``inertia_diag`` is ``(Ixx, Iyy, Izz)`` about the COM."""
+    inertial = ET.SubElement(link, "inertial")
+    _urdf_add_origin(inertial, com_xyz, (0.0, 0.0, 0.0))
+    ET.SubElement(inertial, "mass", attrib={"value": _urdf_fmt(mass)})
+    Ixx, Iyy, Izz = inertia_diag
+    ET.SubElement(inertial, "inertia", attrib={
+        "ixx": _urdf_fmt(Ixx), "ixy": "0", "ixz": "0",
+        "iyy": _urdf_fmt(Iyy), "iyz": "0",
+        "izz": _urdf_fmt(Izz),
+    })
+
+
+def _urdf_add_visual_collision(
+    link: ET.Element,
+    *,
+    xyz: Sequence[float],
+    rpy: Sequence[float],
+    geometry: ET.Element,
+    rgba: Sequence[float] | None = None,
+    include_collision: bool = True,
+) -> None:
+    """Append matching ``<visual>`` (+ optional ``<collision>``) blocks
+    with the given geometry. ``geometry`` is a freshly-built ``<geometry>``
+    element; we deep-copy it so visual and collision are independent."""
+    visual = ET.SubElement(link, "visual")
+    _urdf_add_origin(visual, xyz, rpy)
+    visual.append(copy.deepcopy(geometry))
+    if rgba is not None:
+        mat = ET.SubElement(visual, "material", attrib={"name": ""})
+        ET.SubElement(mat, "color", attrib={"rgba": _urdf_fmt_vec(rgba)})
+    if include_collision:
+        collision = ET.SubElement(link, "collision")
+        _urdf_add_origin(collision, xyz, rpy)
+        collision.append(copy.deepcopy(geometry))
+
+
+def _urdf_cylinder_geom(radius: float, length: float) -> ET.Element:
+    geom = ET.Element("geometry")
+    ET.SubElement(geom, "cylinder", attrib={
+        "radius": _urdf_fmt(radius),
+        "length": _urdf_fmt(length),
+    })
+    return geom
+
+
+def _urdf_box_geom(size: Sequence[float]) -> ET.Element:
+    geom = ET.Element("geometry")
+    ET.SubElement(geom, "box", attrib={"size": _urdf_fmt_vec(size)})
+    return geom
+
+
+def _urdf_add_fixed_joint(
+    robot: ET.Element,
+    *,
+    name: str,
+    parent: str,
+    child: str,
+    xyz: Sequence[float],
+    rpy: Sequence[float],
+) -> None:
+    joint = ET.SubElement(robot, "joint", attrib={"name": name, "type": "fixed"})
+    _urdf_add_origin(joint, xyz, rpy)
+    ET.SubElement(joint, "parent", attrib={"link": parent})
+    ET.SubElement(joint, "child", attrib={"link": child})
+
+
+def _urdf_core_inertia_diag(core: CorePlateNode, mass: float) -> tuple[float, float, float]:
+    """Solid-cylinder inertia about COM, disc axis = link's local +Z."""
+    r, h = core.radius, core.thickness
+    Ixx = Iyy = mass * (3.0 * r * r + h * h) / 12.0
+    Izz = 0.5 * mass * r * r
+    return (Ixx, Iyy, Izz)
+
+
+def _urdf_add_core_link(robot: ET.Element, name: str, core: CorePlateNode, mass: float) -> None:
+    link = ET.SubElement(robot, "link", attrib={"name": name})
+    _urdf_add_inertial(
+        link,
+        com_xyz=(0.0, 0.0, 0.0),
+        mass=mass,
+        inertia_diag=_urdf_core_inertia_diag(core, mass),
+    )
+    _urdf_add_visual_collision(
+        link,
+        xyz=(0.0, 0.0, 0.0),
+        rpy=(0.0, 0.0, 0.0),
+        geometry=_urdf_cylinder_geom(core.radius, core.thickness),
+        rgba=(0.2, 0.4, 0.8, 1.0),
+    )
+
+
+def _urdf_add_arm_link(robot: ET.Element, name: str, arm: ArmNode) -> None:
+    """Arm link frame is at the joint-to-parent; arm extends along local +X.
+    Visual / collision geometry is centered at midpoint along the arm."""
+    link = ET.SubElement(robot, "link", attrib={"name": name})
+    com_xyz = (arm.length / 2.0, 0.0, 0.0)
+    _urdf_add_inertial(link, com_xyz=com_xyz, mass=arm.mass, inertia_diag=arm.inertia_diag)
+
+    cs = arm.cross_section
+    if isinstance(cs, RectangularCrossSection):
+        _urdf_add_visual_collision(
+            link,
+            xyz=com_xyz,
+            rpy=(0.0, 0.0, 0.0),
+            geometry=_urdf_box_geom((arm.length, cs.width, cs.thickness)),
+            rgba=(0.3, 0.3, 0.3, 1.0),
+        )
+    else:
+        # Cylindrical (solid) or HollowTube — URDF has no hollow cylinder,
+        # render solid using outer radius. URDF cylinders point along the
+        # link's local +Z; rotate by π/2 about +Y so the cylinder axis
+        # aligns with the arm's local +X.
+        visual_radius = (
+            cs.outer_radius if isinstance(cs, HollowTubeCrossSection) else cs.radius
+        )
+        _urdf_add_visual_collision(
+            link,
+            xyz=com_xyz,
+            rpy=(0.0, math.pi / 2.0, 0.0),
+            geometry=_urdf_cylinder_geom(visual_radius, arm.length),
+            rgba=(0.3, 0.3, 0.3, 1.0),
+        )
+
+
+def _urdf_add_motor_link(
+    robot: ET.Element,
+    name: str,
+    motor: MotorNode,
+    rotor: RotorNode | None,
+) -> None:
+    """Motor link: cylinder along local +Z (the thrust axis), centered at
+    the link origin. An optional rotor visual disc sits above it."""
+    link = ET.SubElement(robot, "link", attrib={"name": name})
+    full_height = 2.0 * motor.thickness
+    rgba = (1.0, 0.2, 0.2, 1.0) if motor.spin == "cw" else (0.2, 0.8, 0.2, 1.0)
+    _urdf_add_inertial(
+        link,
+        com_xyz=(0.0, 0.0, 0.0),
+        mass=motor.mass,
+        inertia_diag=motor.inertia_diag,
+    )
+    _urdf_add_visual_collision(
+        link,
+        xyz=(0.0, 0.0, 0.0),
+        rpy=(0.0, 0.0, 0.0),
+        geometry=_urdf_cylinder_geom(motor.radius, full_height),
+        rgba=rgba,
+    )
+    if rotor is not None:
+        # Visual-only thin disc above the motor; no collision, no mass
+        # (motor.mass already lumps motor + propeller).
+        visual = ET.SubElement(link, "visual")
+        _urdf_add_origin(visual, (0.0, 0.0, motor.thickness + 0.002), (0.0, 0.0, 0.0))
+        visual.append(_urdf_cylinder_geom(rotor.radius, 0.002))
+        mat = ET.SubElement(visual, "material", attrib={"name": ""})
+        ET.SubElement(mat, "color", attrib={"rgba": "0.8 0.8 0.8 0.5"})
+
 
 def blueprint_to_urdf(
     bp: DroneBlueprint,
@@ -321,7 +507,7 @@ def blueprint_to_urdf(
     core_mass_override: float | None = None,
     robot_name: str = "drone",
 ) -> str:
-    """Compile a DroneBlueprint into a URDF file.
+    """Compile a DroneBlueprint into a URDF file (rigid drone, fixed joints).
 
     Intended as the intermediate step for Isaac Lab / Isaac Sim: the
     emitted ``.urdf`` is consumed by
@@ -329,34 +515,92 @@ def blueprint_to_urdf(
     (see ``soft_airframe_optimization/scripts/convert_xconfig_urdf.py``
     for the conversion call pattern).
 
-    Physical parameters are read from the blueprint nodes themselves
-    (``arm.mass``, ``arm.inertia_diag``, ``motor.mass``, ``motor.radius``,
-    ``motor.thickness``), so this signature only needs URDF-mechanical
-    options.
-
-    Planned mapping (mirrors ``blueprint_to_mjspec``):
-      * One ``<link>`` per blueprint node (CorePlate, Arm, Motor) with
-        an ``<inertial>`` block populated from the node's derived
-        ``mass`` and ``inertia_diag``.
+    Mapping (mirrors ``blueprint_to_mjspec``):
+      * One ``<link>`` per CorePlate / Arm / Motor node, with an
+        ``<inertial>`` block populated from the node's derived ``mass``
+        and ``inertia_diag``. Visual + collision geometry per link.
+        Rotor visuals are folded into the parent motor link (no separate
+        rotor link; rotor mass is already lumped into ``motor.mass``).
+      * One ``<joint type="fixed">`` per parent-child edge. Drone is
+        rigid in v1; compliant-joint support is planned (zero-stiffness
+        revolute + sidecar ``ariel:*`` torque attributes, mirroring
+        soft_airframe's two-layer pattern).
       * Arm ``<geometry>`` dispatches on ``arm.cross_section``:
         ``<cylinder>`` for solid / hollow-tube cross sections,
         ``<box>`` for rectangular.
-      * One ``<joint>`` per parent-child edge. Default is
-        ``type="fixed"`` (rigid drone). A future ``CompliantJoint``
-        annotation on ``ArmNode`` would emit ``type="revolute"`` with
-        ``<dynamics damping="0"/>``; the non-linear ``τ(θ)`` law is
-        stashed as sidecar attributes for a runtime controller to apply
-        (same two-layer pattern soft_airframe uses with ``morphy:*``
-        USD attributes).
+      * No actuators: Isaac Lab applies thrust at runtime by force on
+        the motor link's local +Z axis.
 
-    Not yet implemented.
+    Conventions:
+      * Z-up, metres, radians. URDF cylinders are along link-local +Z;
+        arm cylinders are rotated 90° about +Y so the cylinder axis
+        matches the arm's local +X.
+      * Each link's frame is at the joint to its parent; joint
+        ``<origin>`` carries the child frame's pose in the parent.
+
+    Args:
+        bp: blueprint to compile.
+        out_path: destination ``.urdf`` path.
+        core_mass_override: if given, replaces ``core.mass`` (matches
+            ``blueprint_to_mjspec`` semantics).
+        robot_name: ``<robot name="...">`` attribute.
+
+    Returns:
+        Absolute path to the written URDF, as a string.
     """
-    raise NotImplementedError(
-        "blueprint_to_urdf is not yet implemented. "
-        "Use blueprint_to_mjspec for MuJoCo, or blueprint_to_propellers "
-        "for the Python physics stack."
-    )
+    core = bp.payload(bp.root_id)
+    if not isinstance(core, CorePlateNode):
+        raise ValueError("Blueprint root must be a CorePlateNode.")
+    core_mass = core_mass_override if core_mass_override is not None else core.mass
 
+    robot = ET.Element("robot", attrib={"name": robot_name})
+
+    core_link = "base_link"
+    _urdf_add_core_link(robot, core_link, core, core_mass)
+
+    for arm_id in bp.children(bp.root_id):  # type: ignore[arg-type]
+        arm = bp.payload(arm_id)
+        if not isinstance(arm, ArmNode):
+            continue
+        arm_link = f"arm_{arm_id}"
+        _urdf_add_arm_link(robot, arm_link, arm)
+        _urdf_add_fixed_joint(
+            robot,
+            name=f"core_to_arm_{arm_id}",
+            parent=core_link,
+            child=arm_link,
+            xyz=arm.pose.xyz,
+            rpy=arm.pose.rpy,
+        )
+        for motor_id in bp.children(arm_id):
+            motor = bp.payload(motor_id)
+            if not isinstance(motor, MotorNode):
+                continue
+            rotor: RotorNode | None = None
+            for rotor_id in bp.children(motor_id):
+                cand = bp.payload(rotor_id)
+                if isinstance(cand, RotorNode):
+                    rotor = cand
+                    break
+            motor_link = f"motor_{motor_id}"
+            _urdf_add_motor_link(robot, motor_link, motor, rotor)
+            _urdf_add_fixed_joint(
+                robot,
+                name=f"arm_{arm_id}_to_motor_{motor_id}",
+                parent=arm_link,
+                child=motor_link,
+                xyz=motor.pose.xyz,
+                rpy=motor.pose.rpy,
+            )
+
+    raw = ET.tostring(robot, encoding="unicode")
+    pretty = minidom.parseString(raw).toprettyxml(indent="  ")
+    out = Path(out_path).resolve()
+    out.write_text(pretty)
+    return str(out)
+
+
+# ---------- future backends (signatures only) ----------
 
 def blueprint_to_usd(bp: DroneBlueprint, out_path: str) -> str:
     """Compile a DroneBlueprint into a USD file for Isaac Lab.
