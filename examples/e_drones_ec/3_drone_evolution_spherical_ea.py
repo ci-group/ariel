@@ -278,10 +278,15 @@ if args.visualize:
     console.log(f"  MP4 → {videos_dir}")
 
     # Passive viewer (skip on macOS / no passive support)
-    if sys.platform != "darwin" and hasattr(mujoco.viewer, "launch_passive"):
+    try:
+        import mujoco.viewer as mj_viewer
+    except Exception:  # noqa: BLE001 - headless / no GUI backend
+        mj_viewer = None
+
+    if sys.platform != "darwin" and mj_viewer is not None and hasattr(mj_viewer, "launch_passive"):
         bridge.reset_pose()
         console.log("Launching passive viewer (close window to exit) …")
-        with mujoco.viewer.launch_passive(spawned.model, spawned.data) as v:
+        with mj_viewer.launch_passive(spawned.model, spawned.data) as v:
             t_start = time.time()
             while v.is_running() and (time.time() - t_start) < args.viewer_duration:
                 step_start = time.time()

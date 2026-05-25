@@ -80,8 +80,8 @@ parser.add_argument("--pop", type=int, default=12,
 parser.add_argument("--gens", type=int, default=8,
                     help="Number of NEAT generations (default 8)")
 parser.add_argument("--workers", type=int, default=1)
-parser.add_argument("--min-arms", type=int, default=4)
-parser.add_argument("--max-arms", type=int, default=6)
+parser.add_argument("--min-arms", type=int, default=7)
+parser.add_argument("--max-arms", type=int, default=8)
 parser.add_argument("--num-segments", type=int, default=8,
                     help="CPPN sampling resolution (max_narms = arm slots)")
 parser.add_argument("--seed", type=int, default=42)

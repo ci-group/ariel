@@ -9,6 +9,8 @@ from __future__ import annotations
 import math
 import numpy as np
 
+from ariel.body_phenotypes.drone.backends import blueprint_to_propellers
+
 from .blueprint import (
     DroneBlueprint,
     CorePlateNode,
@@ -112,3 +114,30 @@ def cartesian_euler_to_blueprint(
         bp.add(RotorNode(), parent=motor_id)
 
     return bp
+
+
+# ---------------------------------------------------------------------------
+# Example usage: decode two different genomes to the same blueprint format, then
+# extract the same propeller data from both, and show they match.
+# ---------------------------------------------------------------------------
+def blueprint_to_cartesian_array(bp: DroneBlueprint) -> np.ndarray:
+    """Flatten a DroneBlueprint to the cartesian ``(n, 7)`` array
+    ``[x, y, z, roll, pitch, yaw, direction]`` accepted by ``DroneVisualizer``.
+
+    Motor world positions and thrust normals come from
+    :func:`blueprint_to_propellers`; the thrust normal ``n`` is turned back
+    into a ``(roll, pitch, yaw)`` motor orientation (yaw fixed at 0, the free
+    DOF about the thrust axis). ``direction`` follows the decoder convention
+    ``0 = CCW, 1 = CW``.
+    """
+    rows: list[list[float]] = []
+    for prop in blueprint_to_propellers(bp, convention="z_up"):
+        x, y, z = prop["loc"]
+        nx, ny, nz, spin = prop["dir"]
+        # n = Ry(pitch) · Rx(roll) · [0, 0, 1]  ⇒  invert for roll, pitch.
+        roll = float(np.arcsin(np.clip(-ny, -1.0, 1.0)))
+        pitch = float(np.arctan2(nx, nz))
+        direction = 1.0 if spin == "cw" else 0.0
+        rows.append([float(x), float(y), float(z), roll, pitch, 0.0, direction])
+    return np.asarray(rows, dtype=float)
+
