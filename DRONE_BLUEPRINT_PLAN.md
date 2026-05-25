@@ -165,13 +165,61 @@ now go through `DroneBlueprint` rather than the phenotype generator directly.
   upstream fix before closed-loop MuJoCo Lee control is possible without
   the bridge.
 
-**Phase 3 — Isaac Lab spike. In progress (branch `blueprint-to-urdf`).**
+**Phase 3 — Isaac Lab spike. Largely landed for rigid drones (branch `blueprint-to-urdf`).**
 Approach: Blueprint → URDF → USD via Isaac Lab's `UrdfConverter`, not a
-direct `blueprint_to_usd`. Schema refactor landed on the branch so
-backends read physical parameters from the Blueprint nodes themselves
-(see §6). `blueprint_to_urdf` body is the next step. Direct
-`blueprint_to_usd` remains stubbed and now sits *behind* URDF in the
-roadmap.
+direct `blueprint_to_usd`. Direct `blueprint_to_usd` remains stubbed and
+now sits *behind* URDF in the roadmap.
+
+What's landed (in order of commit):
+
+1. `Add blueprint_to_urdf stub.` (also on `drones`) — sketches the
+   planned URDF backend alongside the existing `blueprint_to_usd` stub.
+2. `Derive arm and motor physical params from blueprint nodes.` —
+   schema refactor: cross-section sub-objects (`CylindricalCrossSection`
+   / `HollowTubeCrossSection` / `RectangularCrossSection`) and derived
+   `mass` / `inertia_diag` properties on `ArmNode` and `MotorNode`,
+   sourced from a `propsize`-keyed lookup in `PROPELLER_LIBRARY`
+   (extended with `motor_radius` / `motor_thickness` per entry, values
+   from the APC propeller-motor pairing table). Default arm cross-
+   section is `HollowTube(outer=4mm, inner=3mm)` which with
+   `density=1500 kg/m³` reproduces existing `BEAM_DENSITY = 0.034 kg/m`.
+3. `Implement blueprint_to_urdf for rigid-drone Isaac Lab path.` —
+   walks the Blueprint tree, emits one `<link>` per CorePlate/Arm/Motor
+   (diagonal `<inertial>` from node-derived properties), one
+   `<joint type="fixed">` per parent-child edge, dispatches arm
+   geometry on cross-section type (`<cylinder>` for solid/hollow-tube,
+   `<box>` for rectangular). No actuators emitted (Isaac Lab applies
+   thrust at runtime via force on the motor link's local +Z).
+4. `Add Blueprint → URDF → USD pipeline scripts.` — split across two
+   envs because ariel needs Python 3.12 (PEP 695 `type` statements,
+   25+ files) and the local isaaclab conda env runs Python 3.11. URDF
+   file is the boundary:
+   * `scripts/blueprint_to_urdf.py` — ariel env, builds blueprint,
+     writes URDF.
+   * `scripts/urdf_to_usd.py` — isaaclab env, takes URDF, writes USD
+     via `isaaclab.sim.converters.UrdfConverter` (with `target_type=
+     "none"` + zero PD gains for the all-fixed-joints case).
+   End-to-end smoke test: quad URDF → USD via the standard Isaac Lab
+   layered layout (`quad.usd` + `configuration/{quad_base,
+   quad_physics, quad_robot, quad_sensor}.usd`).
+5. `Add example 16: blueprint_to_urdf demo with cross-section
+   dispatch.` — `examples/d_drones/16_blueprint_to_urdf.py`. Default
+   produces a HollowTube X-quad URDF; `--rect-arms` flips arms to
+   solid boxes and verifies the URDF box-geometry path (both variants
+   round-trip cleanly to USD via the converter).
+
+**Still pending on this branch — to pick up next session:**
+
+* **Compliant joints (URDF revolute + sidecar stiffness + USD
+  `ariel:*` attrs).** The two-layer pattern is documented in §6 entry
+  10 — zero-stiffness `revolute` joint in URDF, non-linear `τ(θ)` law
+  stashed as sidecar attrs for a runtime controller. Schema, emission
+  in both backends, USD post-processing, and a compliant-arm example
+  are all not yet written.
+* Optional `scripts/blueprint_to_usd.py` wrapper that subprocess-
+  chains the two halves so users don't have to invoke them manually.
+* Pytest integration test (currently skips end-to-end because the
+  isaaclab env isn't directly invokable from ariel's pytest).
 
 ## 6. Design decisions (Phase 3 — URDF / USD backends)
 
@@ -272,6 +320,35 @@ Each entry: **decision** — *why*; alternatives considered.
     thrust at runtime via Python by force-on-link; the URDF only needs
     to expose named motor link prims. This is simpler than MJCF's
     actuator-per-motor wiring, not harder.
+
+12. **Pipeline split into two scripts across two Python envs; URDF file
+    is the boundary.** ariel uses PEP 695 `type X = …` syntax (25+
+    files) which requires Python 3.12, while the local isaaclab conda
+    env runs Python 3.11. We can't make ariel importable from the
+    isaaclab env without a non-trivial rewrite. So
+    `scripts/blueprint_to_urdf.py` runs in the ariel env (produces
+    URDF) and `scripts/urdf_to_usd.py` runs in the isaaclab env (URDF →
+    USD via `UrdfConverter`). Alternatives considered: (a) rewrite
+    ariel to 3.11-compatible syntax (large mechanical change, kicks
+    the can on type-statement adoption); (b) one wrapper that
+    subprocess-chains both envs (still possible as a follow-up;
+    deferred because the manual two-step is fine for now and easier
+    to debug).
+
+13. **`scripts/urdf_to_usd.py` logs progress to stderr, not stdout.**
+    Isaac Sim's launcher captures stdout (probably for its Carb
+    logger), so `print(...)` from inside the script can be lost. We
+    use a small `_log(msg)` that writes to `sys.stderr` and flushes,
+    so the only "where did my prints go?" question is answered up
+    front. Discovered by burning a debug cycle on it.
+
+14. **`UrdfConverterCfg.joint_drive` is required even for all-fixed
+    drones.** The configclass validator treats
+    `joint_drive.gains.stiffness` as a required field. For our v1
+    rigid drone we don't have any actuated joints, so we set
+    `target_type="none"` with zero PD gains — the values are unused
+    but the field has to be present to pass validation. (Same dance
+    soft_airframe does in `convert_xconfig_urdf.py`.)
 
 ## 7. Asks for the meeting
 
