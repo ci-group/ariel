@@ -218,20 +218,43 @@ What's landed (in order of commit):
    env, the full Blueprint → URDF → USD pipeline runs in one
    process. See §6 entry 15 for details.
 
+**Follow-on branch `pluggable-simulator` (off `python-311-compat`):**
+
+7. `Add pluggable simulator backend Protocol + tutorial.` — defines
+   the `BlueprintGateEnv` Protocol so ariel's EA+PPO loop is
+   simulator-backend-agnostic. Ships `NumpyBlueprintGateEnv` (thin
+   shim over the existing `DroneGateEnv` declared as a Protocol
+   implementation) and an `IsaacLabBlueprintGateEnv` stub showing
+   the next plug-in target. Tutorial at
+   `tutorials/pluggable_simulator/` walks a collaborator through the
+   architecture and the "add your own simulator" recipe. Includes a
+   fix to a pre-existing `DroneGateEnv` bug where `self.seed`
+   shadowed the inherited `VecEnv.seed()` method (broke
+   stable-baselines3's `set_random_seed`). See §6 entry 17.
+
 **Still pending — to pick up next session:**
 
+* **Phase 2 of pluggable simulator** — implement
+  `IsaacLabBlueprintGateEnv` for real (URDF→USD in-process, parallel
+  envs, per-motor thrust model lifted from soft_airframe). The
+  Protocol contract is now stable, so this is purely simulator-side
+  work.
 * **Compliant joints (URDF revolute + sidecar stiffness + USD
-  `ariel:*` attrs).** The two-layer pattern is documented in §6 entry
-  10 — zero-stiffness `revolute` joint in URDF, non-linear `τ(θ)` law
-  stashed as sidecar attrs for a runtime controller. Schema, emission
-  in both backends, USD post-processing, and a compliant-arm example
-  are all not yet written.
+  `ariel:*` attrs).** Schema landed on `compliant-joint-schema`;
+  the emission half is what's still pending. The two-layer pattern
+  is documented in §6 entry 10 — zero-stiffness `revolute` joint in
+  URDF, non-linear `τ(θ)` law stashed as sidecar attrs for a
+  runtime controller.
 * Pytest integration test for the Blueprint → URDF → USD pipeline
   (now feasible in-process under the unified env; just needs a
   `pytest.mark.isaaclab` skip-if-not-available guard).
-* (Stretch) Targeted dep pins in pyproject.toml to keep numpy < 2
-  and gymnasium == 1.2.1 so isaaclab's pins aren't violated. Defer
-  until a downstream isaaclab feature actually breaks.
+* Targeted dep pins in pyproject.toml to keep numpy < 2 and
+  gymnasium == 1.2.1 so isaaclab's pins aren't violated. **Promoted
+  from stretch:** the smoke test for `pluggable-simulator` segfaulted
+  in the unified isaaclab env on PPO startup (likely a numpy 2 ABI
+  conflict with stable-baselines3's compiled deps). Same smoke test
+  passed cleanly in the ariel 3.12 venv where numpy 1.x is intact,
+  confirming the seam itself is correct.
 
 ## 6. Design decisions (Phase 3 — URDF / USD backends)
 
@@ -402,6 +425,49 @@ Each entry: **decision** — *why*; alternatives considered.
     conflicts bite elsewhere (RL training, dex_retargeting, etc.)
     they'll need targeted pins in ariel's pyproject.toml; deferred
     until something actually breaks.
+
+17. **Simulator backends are a plug point, not a hard-coded choice;
+    the contract is the `BlueprintGateEnv` Protocol.**
+
+    **Motivation:** the ARIEL consortium has collaborators using
+    divergent simulators (MuJoCo, Aerial Gym, Isaac Lab, IsaacGym,
+    in-house stacks). ARIEL's contribution to those groups is the
+    *evolutionary + learning loop* — decoders, EA operators, repair,
+    inspection, PPO training. If the simulator is hard-coded, every
+    collaborator either swaps to ariel's simulator (won't happen) or
+    re-implements the loop themselves (defeats the point). The
+    seam has to be deliberate.
+
+    **Contract:** a `BlueprintGateEnv` is a `gymnasium.VecEnv` (stable-
+    baselines3 style) constructed from a `DroneBlueprint`, exposing
+    `.blueprint` and `.num_envs` attributes. Implemented as
+    `typing.Protocol` with `@runtime_checkable` (per the
+    pluggable-backend question we deliberated): no inheritance
+    forced on collaborators, but `isinstance(env, BlueprintGateEnv)`
+    works for runtime sanity-checks. Concrete VecEnv methods come
+    via the standard `stable_baselines3.common.vec_env.VecEnv` base
+    class.
+
+    **What ships in v1:**
+    - `NumpyBlueprintGateEnv` — declares the existing `DroneGateEnv`
+      (NumPy + SymPy physics) as a Protocol implementation by
+      subclassing it and adding a Blueprint → propellers-list
+      adapter at the constructor. Smoke-tested with PPO 2k steps in
+      4.7 s.
+    - `IsaacLabBlueprintGateEnv` — stub with the planned constructor
+      signature and a `NotImplementedError` body. Phase 2 work.
+    - `tutorials/pluggable_simulator/{README.md, train.py}` —
+      walks a collaborator through the architecture, the
+      `--simulator {numpy,isaaclab}` dispatch, and the five-step
+      "add your own backend" recipe.
+
+    **Pre-existing bug fixed in passing:** `DroneGateEnv.__init__`
+    stored `self.seed = seed` (an int), shadowing the inherited
+    `VecEnv.seed()` method that stable-baselines3's `PPO` calls in
+    `set_random_seed`. Renamed to `self._seed` and updated the one
+    other internal reader (`reset_seed`). Any PPO user of
+    `DroneGateEnv` would have hit this; nothing in the existing
+    examples exercised it because they didn't pass `seed=` to PPO.
 
 ## 7. Asks for the meeting
 

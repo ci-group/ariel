@@ -74,11 +74,14 @@ class DroneGateEnv(VecEnv):
         self.y_bounds = y_bounds
         self.z_bounds = z_bounds
 
-        # set seed
-        self.seed = seed
-        if self.seed is not None:
-            np.random.seed(self.seed)
-            torch.manual_seed(self.seed)
+        # set seed.
+        # NOTE: stored as `self._seed`, not `self.seed`, to avoid shadowing
+        # the inherited `VecEnv.seed()` method that stable-baselines3's
+        # `set_random_seed` calls.
+        self._seed = seed
+        if self._seed is not None:
+            np.random.seed(self._seed)
+            torch.manual_seed(self._seed)
         
         # Initialize drone simulator
         if propellers is not None:
@@ -256,9 +259,9 @@ class DroneGateEnv(VecEnv):
         return propellers, mounting_points
     
     def reset_seed(self):
-        if self.seed is not None:
-            np.random.seed(self.seed)
-            torch.manual_seed(self.seed)
+        if self._seed is not None:
+            np.random.seed(self._seed)
+            torch.manual_seed(self._seed)
 
     def update_states_gate(self):
         # Transform pos and vel in gate frame
