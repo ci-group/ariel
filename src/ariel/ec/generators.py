@@ -1,7 +1,7 @@
 """Generators and mutations for the EC module."""
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, TypeAlias, cast
 
 import numpy as np
 from numpy.random import Generator
@@ -14,8 +14,8 @@ if TYPE_CHECKING:
 SEED: int = 42
 _rng: Generator = np.random.default_rng(SEED)
 
-type Integers = Sequence[int]
-type Floats = Sequence[float]
+Integers: TypeAlias = Sequence[int]
+Floats: TypeAlias = Sequence[float]
 
 
 # -- Settings ------------------------------------------------------------------

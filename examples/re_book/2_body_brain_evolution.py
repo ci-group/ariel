@@ -11,7 +11,7 @@ Genotype:
 import argparse
 import random
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TypeAlias
 
 import mujoco
 
@@ -92,7 +92,7 @@ NUM_CPPN_INPUTS = 6
 NUM_CPPN_OUTPUTS = 1 + T + R
 
 # Type Aliases
-type ViewerTypes = Literal["launcher", "video", "simple"]
+ViewerTypes: TypeAlias = Literal["launcher", "video", "simple"]
 
 # Determinism
 SEED = 42

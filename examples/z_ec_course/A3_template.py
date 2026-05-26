@@ -2,7 +2,7 @@
 
 # Standard library
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias
 
 # Third-party libraries
 import mujoco as mj
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from networkx import DiGraph
 
 # Type Aliases
-type ViewerTypes = Literal["launcher", "video", "simple", "no_control", "frame"]
+ViewerTypes: TypeAlias = Literal["launcher", "video", "simple", "no_control", "frame"]
 
 # --- RANDOM GENERATOR SETUP --- #
 SEED = 42
