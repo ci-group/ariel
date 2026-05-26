@@ -360,27 +360,48 @@ Each entry: **decision** — *why*; alternatives considered.
     soft_airframe does in `convert_xconfig_urdf.py`.)
 
 15. **ariel is now Python 3.11-compatible (branch `python-311-compat`).**
-    Motivation: ARIEL needs to be simulator-agnostic, and the only
-    practical way to host Isaac Lab inside the same conda env as ariel
-    was to drop ariel's Python 3.12-only constructs (Isaac Sim 5.1
-    ships its own Python 3.11 in `_isaac_sim/kit/python/`; NVIDIA
-    pins it). Audit found ~31 PEP 695 `type X = ...` statements
-    across 14 files plus one PEP 695 generic class
-    (`class EAOperation[**P]:`); no 3.12-only stdlib calls. Each
-    `type X = ...` became `X: TypeAlias = ...` (PEP 613); the generic
-    class became `class EAOperation(Generic[P]):` using the existing
-    module-level `P = ParamSpec("P")`. One subtlety:
+
+    **Motivation:** ARIEL must be simulator-agnostic, and the use case
+    that forced this was *EA objective functions that simulate each
+    morphology* (e.g., fitness = gates passed in N seconds). With
+    thousands of individuals per evolution, the previous two-env
+    subprocess split paid the Isaac Sim launch cost (~60–90 s) once
+    per evaluation — catastrophic. The only practical way to host
+    Isaac Lab inside the same conda env as ariel was to drop ariel's
+    Python 3.12-only constructs, because Isaac Sim 5.1 ships its own
+    Python 3.11 in `_isaac_sim/kit/python/` and NVIDIA pins it (we
+    can't bring Isaac to 3.12, so ariel comes down to 3.11). With
+    both in one process, EA workers can convert + simulate
+    in-memory; per-individual launch overhead disappears.
+
+    **Audit:** 31 PEP 695 `type X = ...` statements across 14 files
+    plus one PEP 695 generic class (`class EAOperation[**P]:`); no
+    3.12-only stdlib calls. Alternatives considered: (a) rewrite
+    Isaac to support 3.12 — not actually controllable by us; (b)
+    long-running Isaac Lab worker process talking to ariel over IPC
+    — viable but ~hundreds of lines of plumbing and harder to debug;
+    (c) keep MuJoCo as the only EA-loop simulator and use Isaac Lab
+    only for top-K validation — a fine v1 default but doesn't give
+    us GPU-parallel envs.
+
+    **Rewrite:** each `type X = ...` → `X: TypeAlias = ...` (PEP 613);
+    the generic class → `class EAOperation(Generic[P]):` using the
+    existing module-level `P = ParamSpec("P")`. One subtlety:
     `src/ariel/ec/individual.py` had self-referential aliases
-    (`JSONType` referring to itself); PEP 695's lazy evaluation made
+    (`JSONType` refers to itself); PEP 695's lazy evaluation made
     this transparent, but PEP 613 is eager, so we dropped the
     recursion (nested values now `Any`, matching `pydantic.JsonValue`
-    practice). pyproject.toml dropped from `>=3.12` to `>=3.11`. End-
-    to-end validation: blueprint_to_urdf + urdf_to_usd both run in
-    one `isaaclab` conda env after `pip install -e ariel`. The pip
+    practice for runtime use). pyproject.toml dropped from `>=3.12`
+    to `>=3.11`.
+
+    **Validation:** blueprint_to_urdf + urdf_to_usd both run in one
+    `isaaclab` conda env after `pip install -e ariel`. The pip
     resolver reports conflicts (numpy 2 vs `isaaclab`'s `<2`,
-    gymnasium 1.3 vs 1.2.1, torch CUDA build swap) but the URDF→USD
-    pipeline still works; if those conflicts bite elsewhere (RL
-    training, dex_retargeting, etc.) they'll need targeted pins.
+    gymnasium 1.3 vs 1.2.1, torch CUDA build swap from `+cu128` to
+    `+cu130`) but the URDF→USD pipeline still works. If those
+    conflicts bite elsewhere (RL training, dex_retargeting, etc.)
+    they'll need targeted pins in ariel's pyproject.toml; deferred
+    until something actually breaks.
 
 ## 7. Asks for the meeting
 
