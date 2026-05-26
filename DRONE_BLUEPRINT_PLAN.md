@@ -208,7 +208,17 @@ What's landed (in order of commit):
    solid boxes and verifies the URDF box-geometry path (both variants
    round-trip cleanly to USD via the converter).
 
-**Still pending on this branch — to pick up next session:**
+**Follow-on branch `python-311-compat` (off `blueprint-to-urdf`):**
+
+6. `Make ariel importable on Python 3.11.` — dropped all PEP 695
+   syntax (31 type-alias statements + one generic class) and
+   downgraded `requires-python` to `>=3.11`. Motivation: unify ariel
+   and Isaac Lab into one conda env (Isaac Sim 5.1 pins Python 3.11).
+   After `pip install -e ariel` into the existing `isaaclab` conda
+   env, the full Blueprint → URDF → USD pipeline runs in one
+   process. See §6 entry 15 for details.
+
+**Still pending — to pick up next session:**
 
 * **Compliant joints (URDF revolute + sidecar stiffness + USD
   `ariel:*` attrs).** The two-layer pattern is documented in §6 entry
@@ -216,10 +226,12 @@ What's landed (in order of commit):
   stashed as sidecar attrs for a runtime controller. Schema, emission
   in both backends, USD post-processing, and a compliant-arm example
   are all not yet written.
-* Optional `scripts/blueprint_to_usd.py` wrapper that subprocess-
-  chains the two halves so users don't have to invoke them manually.
-* Pytest integration test (currently skips end-to-end because the
-  isaaclab env isn't directly invokable from ariel's pytest).
+* Pytest integration test for the Blueprint → URDF → USD pipeline
+  (now feasible in-process under the unified env; just needs a
+  `pytest.mark.isaaclab` skip-if-not-available guard).
+* (Stretch) Targeted dep pins in pyproject.toml to keep numpy < 2
+  and gymnasium == 1.2.1 so isaaclab's pins aren't violated. Defer
+  until a downstream isaaclab feature actually breaks.
 
 ## 6. Design decisions (Phase 3 — URDF / USD backends)
 
@@ -321,19 +333,16 @@ Each entry: **decision** — *why*; alternatives considered.
     to expose named motor link prims. This is simpler than MJCF's
     actuator-per-motor wiring, not harder.
 
-12. **Pipeline split into two scripts across two Python envs; URDF file
-    is the boundary.** ariel uses PEP 695 `type X = …` syntax (25+
-    files) which requires Python 3.12, while the local isaaclab conda
-    env runs Python 3.11. We can't make ariel importable from the
-    isaaclab env without a non-trivial rewrite. So
-    `scripts/blueprint_to_urdf.py` runs in the ariel env (produces
-    URDF) and `scripts/urdf_to_usd.py` runs in the isaaclab env (URDF →
-    USD via `UrdfConverter`). Alternatives considered: (a) rewrite
-    ariel to 3.11-compatible syntax (large mechanical change, kicks
-    the can on type-statement adoption); (b) one wrapper that
-    subprocess-chains both envs (still possible as a follow-up;
-    deferred because the manual two-step is fine for now and easier
-    to debug).
+12. **~~Pipeline split into two scripts across two Python envs~~ — superseded by entry 15.**
+    Originally documented: ariel used PEP 695 `type X = …` syntax (25+
+    files) requiring Python 3.12, while the local isaaclab conda env
+    runs Python 3.11, so `scripts/blueprint_to_urdf.py` ran in the
+    ariel env and `scripts/urdf_to_usd.py` in the isaaclab env with
+    the URDF file as the boundary. **As of branch `python-311-compat`
+    (commit `7f678f3`), this constraint is gone** — ariel is now 3.11-
+    compatible and pip-installable into the isaaclab env. The two
+    scripts still exist and are useful as separable building blocks,
+    but they can both run in the single unified env.
 
 13. **`scripts/urdf_to_usd.py` logs progress to stderr, not stdout.**
     Isaac Sim's launcher captures stdout (probably for its Carb
@@ -349,6 +358,29 @@ Each entry: **decision** — *why*; alternatives considered.
     `target_type="none"` with zero PD gains — the values are unused
     but the field has to be present to pass validation. (Same dance
     soft_airframe does in `convert_xconfig_urdf.py`.)
+
+15. **ariel is now Python 3.11-compatible (branch `python-311-compat`).**
+    Motivation: ARIEL needs to be simulator-agnostic, and the only
+    practical way to host Isaac Lab inside the same conda env as ariel
+    was to drop ariel's Python 3.12-only constructs (Isaac Sim 5.1
+    ships its own Python 3.11 in `_isaac_sim/kit/python/`; NVIDIA
+    pins it). Audit found ~31 PEP 695 `type X = ...` statements
+    across 14 files plus one PEP 695 generic class
+    (`class EAOperation[**P]:`); no 3.12-only stdlib calls. Each
+    `type X = ...` became `X: TypeAlias = ...` (PEP 613); the generic
+    class became `class EAOperation(Generic[P]):` using the existing
+    module-level `P = ParamSpec("P")`. One subtlety:
+    `src/ariel/ec/individual.py` had self-referential aliases
+    (`JSONType` referring to itself); PEP 695's lazy evaluation made
+    this transparent, but PEP 613 is eager, so we dropped the
+    recursion (nested values now `Any`, matching `pydantic.JsonValue`
+    practice). pyproject.toml dropped from `>=3.12` to `>=3.11`. End-
+    to-end validation: blueprint_to_urdf + urdf_to_usd both run in
+    one `isaaclab` conda env after `pip install -e ariel`. The pip
+    resolver reports conflicts (numpy 2 vs `isaaclab`'s `<2`,
+    gymnasium 1.3 vs 1.2.1, torch CUDA build swap) but the URDF→USD
+    pipeline still works; if those conflicts bite elsewhere (RL
+    training, dex_retargeting, etc.) they'll need targeted pins.
 
 ## 7. Asks for the meeting
 
