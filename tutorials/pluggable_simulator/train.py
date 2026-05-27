@@ -118,7 +118,7 @@ def main_numpy(parser: argparse.ArgumentParser) -> None:
     print(f"  steps/sec : {args.total_timesteps / dt:.0f}")
 
 
-# ---------- isaaclab backend: rsl_rl PPO + DirectRLEnv --------------------------
+# ---------- isaaclab backend: rl_games PPO + DirectRLEnv ------------------------
 
 def _isaaclab_step_smoke(env, args) -> None:
     """Random-action stepping loop for fast env-construction validation.
@@ -171,11 +171,14 @@ def _isaaclab_rl_games_train(env, args) -> None:
     from rl_games.torch_runner import Runner  # noqa: PLC0415
 
     _log("building rl_games agent config...")
-    agent_cfg = make_rl_games_agent_cfg(
+    agent_cfg_kwargs = dict(
         max_epochs=args.max_iterations,
         minibatch_size=24 * args.num_envs,
         device=args.device,
     )
+    if args.experiment_prefix:
+        agent_cfg_kwargs["experiment_name"] = args.experiment_prefix
+    agent_cfg = make_rl_games_agent_cfg(**agent_cfg_kwargs)
     clip_obs = agent_cfg["params"]["env"].get("clip_observations", float("inf"))
     clip_actions = agent_cfg["params"]["env"].get("clip_actions", float("inf"))
     obs_groups = agent_cfg["params"]["env"].get("obs_groups")
@@ -227,6 +230,16 @@ def main_isaaclab(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--device-override", type=str, default=None,
                         help="Override the auto-selected device "
                              "(e.g., 'cpu' or 'cuda:0').")
+    parser.add_argument("--blueprint-json", type=str, default=None,
+                        help="Path to a DroneBlueprint JSON file. When set, "
+                             "the blueprint is loaded from disk and --preset "
+                             "is ignored. Lets an outer EA loop hand in a "
+                             "per-individual morphology.")
+    parser.add_argument("--experiment-prefix", type=str, default=None,
+                        help="rl_games experiment_name (also the runs/<X>_* "
+                             "directory prefix). Set per individual when "
+                             "driven by an outer EA loop so checkpoints are "
+                             "discoverable.")
 
     # AppLauncher must be imported early so its args can be added to the
     # parser. Importing it triggers Isaac Sim's launcher setup; this is
@@ -250,7 +263,9 @@ def main_isaaclab(parser: argparse.ArgumentParser) -> None:
     simulation_app = app_launcher.app
     _log("Isaac Sim launched")
 
+    import os  # noqa: PLC0415
     import traceback  # noqa: PLC0415
+    exit_code = 0
     try:
         _log("importing IsaacLabBlueprintHoverEnv...")
         from ariel.simulation.tasks.isaaclab_hover_env import (  # noqa: PLC0415
@@ -258,10 +273,17 @@ def main_isaaclab(parser: argparse.ArgumentParser) -> None:
             IsaacLabBlueprintHoverEnvCfg,
         )
 
-        _log("building blueprint...")
-        blueprint = spherical_angular_to_blueprint(
-            PRESETS[args.preset], propsize=args.propsize,
-        )
+        if args.blueprint_json:
+            _log(f"loading blueprint from {args.blueprint_json}...")
+            from ariel.body_phenotypes.drone.blueprint import (  # noqa: PLC0415
+                DroneBlueprint,
+            )
+            blueprint = DroneBlueprint.load_json(args.blueprint_json)
+        else:
+            _log(f"building blueprint from preset {args.preset!r}...")
+            blueprint = spherical_angular_to_blueprint(
+                PRESETS[args.preset], propsize=args.propsize,
+            )
 
         _log("building cfg from blueprint (generates URDF + USD)...")
         env_cfg = IsaacLabBlueprintHoverEnvCfg.from_blueprint(
@@ -282,10 +304,15 @@ def main_isaaclab(parser: argparse.ArgumentParser) -> None:
     except Exception as exc:
         _log(f"ERROR: {type(exc).__name__}: {exc}")
         traceback.print_exc(file=sys.stderr)
-        raise
-    finally:
-        _log("closing simulation app")
-        simulation_app.close()
+        exit_code = 1
+
+    # Skip simulation_app.close(): in current Isaac Sim builds it can
+    # leave Isaac Sim's app threads spinning at ~120% CPU after a
+    # successful run. Checkpoints are already on disk by this point,
+    # so we exit hard via os._exit() to release control back to any
+    # outer EA driver. See README §3c.
+    _log(f"exiting (code {exit_code})")
+    os._exit(exit_code)
 
 
 # ---------- entry point ---------------------------------------------------------

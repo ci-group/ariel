@@ -9,8 +9,8 @@ Two backends ship today:
 
 | `--simulator` | Simulator (physics) | RL library / loop | Task |
 |---------------|---------------------|---------------|----------------|
-| `numpy`       | `DroneSimulator` (pure NumPy + SymPy) | **stable-baselines3 PPO** (trains end-to-end) | gate-passing |
-| `isaaclab`    | Isaac Lab / Isaac Sim PhysX           | random-action env stepping (rl_games PPO wiring is Phase 2.5) | hover-to-goal |
+| `numpy` (TUDelft)       | `DroneSimulator` (pure NumPy + SymPy) | **stable-baselines3 PPO** (trains end-to-end) | gate-passing |
+| `isaaclab`    | Isaac Lab / Isaac Sim PhysX           | **rl_games PPO** (trains end-to-end; `--mode step` also available for env-construction smokes) | hover-to-goal |
 
 Each backend brings its own simulator **and** its own RL library, because
 that matches how real heterogeneous simulator ecosystems work — Isaac
@@ -18,17 +18,14 @@ Lab ships rsl_rl/rl_games/skrl as native trainers, the NumPy stack pairs
 naturally with sb3, etc. The EA loop above never sees the simulator
 choice; it just gets a fitness scalar back per individual.
 
-**Phase 2 status:** the architectural seam is demonstrated for both
-backends. The NumPy backend trains a policy with sb3 PPO end-to-end.
-The Isaac Lab backend constructs the env, spawns N parallel drones,
-and steps them with random actions to validate observations / rewards /
-dones. Actual PPO training via `rl_games` is wired in
-[`make_rl_games_agent_cfg()`](../../src/ariel/simulation/tasks/isaaclab_hover_env.py)
-but currently blocked on an env-stack issue (Isaac Sim's bundled torch
-tensorboard transitively imports an older TF/jax/numpy stack that
-conflicts with the conda env's numpy 2). See
-[DRONE_BLUEPRINT_PLAN.md §6 entry 17](../../DRONE_BLUEPRINT_PLAN.md) for
-the full story and the Phase 2.5 path forward.
+**Status:** both backends train end-to-end. The NumPy backend trains
+sb3 PPO on the gate-passing task; the Isaac Lab backend trains
+`rl_games` PPO on hover-to-goal in a single conda env where ariel's
+deps are simulator-agnostic and Isaac Lab owns the binary stack
+(torch/gymnasium/numpy) — see §3b for the install recipe. A
+reference EA + PPO loop on top of the Isaac Lab backend ships at
+[`evolve.py`](./evolve.py); see §6 for how to wire your own RL
+pipeline into ariel's EA layer.
 
 ---
 
@@ -42,12 +39,12 @@ ariel offers: EA loop  +  RL trainers  +  DroneBlueprint IR
                               ▼
               ─── Plug point: simulator+trainer pair ───
                               │
-   ┌──────────────────────────┼──────────────────────────┐
+   ┌─────────────────-────┼──────────────────────────┐
    ▼                          ▼                          ▼
 NumpyBlueprintGateEnv   IsaacLabBlueprintHoverEnv   <YourBackendEnv>
  (gymnasium VecEnv)        (DirectRLEnv)             (whatever shape
        +                        +                      your simulator
-sb3 PPO                  rsl_rl PPO                  needs)
+sb3 PPO                  rl_games PPO                needs)
        │                        │                          │
        ▼                        ▼                          ▼
 blueprint_to_propellers   blueprint_to_urdf →       whatever conversion
@@ -126,8 +123,7 @@ simulator ecosystems through a single shape (e.g., wrapping Isaac
 Lab to gymnasium VecEnv via `isaaclab_rl.sb3`) drags in
 stable-baselines3, which collides with the numpy-2 ABI in the
 unified isaaclab conda env. Honest heterogeneity is cheaper than
-forced uniformity. See [DRONE_BLUEPRINT_PLAN.md §6 entry 17](../../DRONE_BLUEPRINT_PLAN.md)
-for the full rationale.
+forced uniformity.
 
 ---
 
@@ -152,8 +148,7 @@ root README](../../README.md) for the broader ariel install matrix.
 
 Isaac Lab owns its own torch / gymnasium / numpy ABI stack, so we
 install ariel **into** Isaac Lab's env rather than the other way
-around. The reproducible recipe (this is the doc-side of Phase 2.5's
-"Option A" plan in [DRONE_BLUEPRINT_PLAN.md §5](../../DRONE_BLUEPRINT_PLAN.md)):
+around. The reproducible recipe:
 
 ```bash
 # 0) Paths (adjust if your checkout differs)
@@ -244,9 +239,7 @@ print('ariel Blueprint chain: OK')
 Why this shape: ariel's base `pyproject.toml` pins `numpy>=1.26,<2`
 specifically to be safe to install into an Isaac Lab env. Going the
 other way — installing Isaac Lab into an ariel-managed env — drags in
-sb3's compiled deps against numpy 2 and segfaults. See
-[DRONE_BLUEPRINT_PLAN.md §6 entries 15 and 17](../../DRONE_BLUEPRINT_PLAN.md)
-for the full env-stack story.
+sb3's compiled deps against numpy 2 and segfaults.
 
 ### 3c. Operational gotcha: stale Isaac Sim processes after a failed run
 
@@ -273,8 +266,8 @@ pkill -KILL -f "tutorials/pluggable_simulator/train.py"
 
 This is a known Isaac Sim behavior, not an ariel bug. It also applies
 to the official Isaac Lab `train.py` scripts. Worth running the check
-after any failed smoke during Phase 2.5 iteration so you don't end up
-with ~5 cores of CPU silently burning while you debug.
+after any failed smoke so you don't end up with ~5 cores of CPU
+silently burning while you debug.
 
 ---
 
@@ -424,9 +417,65 @@ python tutorials/pluggable_simulator/train.py --simulator <your_backend> \
 evaluator) at the new backend. The EA loop never sees the simulator
 choice — it just gets fitness numbers back per individual.
 
+Once your env is in place, see [§6](#6-driving-morphology-evolution-with-your-own-rl-pipeline)
+for wiring an EA loop on top — i.e., turning a working trainer into
+*morphology evolution + RL*.
+
 ---
 
-## 6. Why this matters
+## 6. Driving morphology evolution with your own RL pipeline
+
+§5 covered the *inner* loop: "I have a simulator and want to train a
+policy on a fixed morphology." This section covers the *outer* loop:
+"I already have an Isaac Lab + RL training pipeline and want to drive
+**morphology evolution** with ariel on top."
+
+Three roles to implement (most partners only write the third):
+
+1. **Genome → DroneBlueprint decoder.** Reuse a shipped decoder
+   (`spherical_angular_to_blueprint`, `cartesian_euler_to_blueprint`
+   in [`src/ariel/body_phenotypes/drone/decoders.py`](../../src/ariel/body_phenotypes/drone/decoders.py))
+   if your genome shape fits — most do.
+2. **An RL env that takes a `DroneBlueprint` at construction.**
+   Either of the shipped envs is a copy-paste starting point: see
+   `IsaacLabBlueprintHoverEnvCfg.from_blueprint` in
+   [`src/ariel/simulation/tasks/isaaclab_hover_env.py`](../../src/ariel/simulation/tasks/isaaclab_hover_env.py).
+3. **An `evaluate(genome) → fitness` function + outer EA loop.**
+   The shipped reference is [`tutorials/pluggable_simulator/evolve.py`](./evolve.py).
+   Copy it and replace the inner training call with your trainer.
+
+Five-step recipe (compact, executable):
+
+1. **Pick or write a genome class.** Existing options live in
+   [`src/ariel/ec/drone/genome_handlers/`](../../src/ariel/ec/drone/genome_handlers/)
+   (`spherical_angular`, `cartesian_euler`, `cppn_neat`,
+   `hybrid_cppn`). For the tutorial-sized evolve.py we use an even
+   simpler `ArmLengthGenome` defined inline.
+2. **Write `genome_to_blueprint(g) → DroneBlueprint`** (or reuse a
+   shipped decoder).
+3. **Build the env from the blueprint.** Adapt
+   `IsaacLabBlueprintHoverEnvCfg.from_blueprint` (or your own env's
+   constructor) to take a `DroneBlueprint` and produce a USD on the
+   fly via [`blueprint_to_urdf`](../../src/ariel/body_phenotypes/drone/backends.py)
+   + Isaac Lab's `UrdfConverter`.
+4. **Copy `evolve.py`; replace `_evaluate_in_subprocess` with your
+   trainer.** Or — if you prefer in-process — call your trainer
+   directly. Note: in-process reuse of `DirectRLEnv` across genomes
+   was unreliable in our tests, which is why the shipped reference
+   spawns a subprocess per individual.
+5. **Plug fitness back.** Three common shapes:
+   - parse the rl_games checkpoint filename (simplest, used in
+     `evolve.py`);
+   - subclass `IsaacAlgoObserver` to capture mean-reward stats inline;
+   - run a deterministic post-training eval pass and average reward.
+
+**For deeper material** — file-by-role reference table, in-process
+vs subprocess pattern tradeoffs, fitness-extraction options, common
+pitfalls — see [`connect_your_pipeline.md`](./connect_your_pipeline.md).
+
+---
+
+## 7. Why this matters
 
 The ARIEL consortium's collaborators bring their own simulators:
 MuJoCo, Aerial Gym, Isaac Lab, IsaacGym, custom in-house stacks.
@@ -436,6 +485,3 @@ sharing ariel's evolutionary and morphology infrastructure —
 decoders, EA operators, repair, descriptors, the morphology IR.
 One IR (`DroneBlueprint`), one EA loop, many backends, many
 trainers.
-
-See [DRONE_BLUEPRINT_PLAN.md](../../DRONE_BLUEPRINT_PLAN.md) §1
-("Value proposition") and §6 entry 17 for the broader rationale.
