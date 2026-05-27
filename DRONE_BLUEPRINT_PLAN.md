@@ -297,9 +297,14 @@ What's landed (in order of commit):
   export ISAACLAB_ROOT="$HOME/Documents/sandbox/IsaacLab"
   export ENV_NAME="ariel-isaaclab-train"
 
-  # 1) Create a clean env from Isaac Lab's pinned stack
+  # 1) Create a clean env from a *vendored* copy of Isaac Lab's pinned stack.
+  #    Vendoring the env spec inside ariel (rather than reading
+  #    $ISAACLAB_ROOT/environment.yml directly) makes this recipe
+  #    reproducible across upstream Isaac Lab evolution — see the SHA
+  #    documented in the file header.
   conda env remove -n "$ENV_NAME" -y || true
-  conda env create -n "$ENV_NAME" -f "$ISAACLAB_ROOT/environment.yml"
+  conda env create -n "$ENV_NAME" \
+      -f "$ARIEL_ROOT/tutorials/pluggable_simulator/isaaclab-env.yml"
   conda activate "$ENV_NAME"
 
   # 2) Install Isaac Lab into that env (owns torch/gymnasium/numpy ABI layer)
@@ -309,14 +314,38 @@ What's landed (in order of commit):
   # 3) Sanity-check Isaac Lab python path first
   ./isaaclab.sh -p -c "import isaaclab; print('isaaclab import OK')"
 
-  # 4) Install ariel WITHOUT dependency resolution side effects
+  # 4) Snapshot simulator-owned binary versions BEFORE ariel install.
+  #    The next step (pip install -e . --no-deps) MUST leave these
+  #    untouched; the post-install diff confirms it.
+  pip list --format=freeze \
+      | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
+      | sort > /tmp/ariel_phase25_binaries_before.txt
+  cat /tmp/ariel_phase25_binaries_before.txt
+
+  # 5) Install ariel WITHOUT dependency resolution side effects.
+  #    --no-deps is the load-bearing flag: pip MUST NOT replace the
+  #    simulator-owned torch/gymnasium/numpy stack here.
   cd "$ARIEL_ROOT"
   pip install -e . --no-deps
 
-  # 5) Quick import smoke for ariel + sb3/numpy backend path
+  # 6) Guardrail check: verify ariel install did not bump binaries.
+  #    Expected output: "BINARIES UNCHANGED" with empty diff.
+  pip list --format=freeze \
+      | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
+      | sort > /tmp/ariel_phase25_binaries_after.txt
+  if diff -u /tmp/ariel_phase25_binaries_before.txt \
+              /tmp/ariel_phase25_binaries_after.txt; then
+      echo "BINARIES UNCHANGED ✓"
+  else
+      echo "ERROR: simulator-owned binaries were bumped by ariel install" >&2
+      echo "       inspect pyproject.toml [project.dependencies] for leaks" >&2
+      exit 1
+  fi
+
+  # 7) Quick import smoke for ariel + sb3/numpy backend path
   python -c "from ariel.simulation.tasks.drone_gate_env import DroneGateEnv; print('DroneGateEnv import OK')"
 
-  # 6) Isaac Lab backend smoke (env stepping; PPO training still Phase 2.5 gate)
+  # 8) Isaac Lab backend smoke (env stepping; PPO training still Phase 2.5 gate)
   python tutorials/pluggable_simulator/train.py \
       --simulator isaaclab \
       --headless \
@@ -325,9 +354,16 @@ What's landed (in order of commit):
   ```
 
   **Option A acceptance checklist (mark done when all true):**
-  - [ ] New clean env is created from Isaac Lab's `environment.yml` with no manual pin surgery.
+  - [ ] New clean env is created from the vendored
+        `tutorials/pluggable_simulator/isaaclab-env.yml` (NOT directly
+        from upstream `$ISAACLAB_ROOT/environment.yml`) with no manual
+        pin surgery.
   - [ ] Isaac Lab import sanity check passes before ariel is installed.
-  - [ ] `pip install -e . --no-deps` completes and does not replace simulator-owned torch/gymnasium/numpy.
+  - [ ] Pre-install binary snapshot captured to
+        `/tmp/ariel_phase25_binaries_before.txt`.
+  - [ ] `pip install -e . --no-deps` completes and does not replace
+        simulator-owned torch/gymnasium/numpy (guardrail diff is
+        empty — `BINARIES UNCHANGED ✓`).
   - [ ] `DroneGateEnv` import smoke passes in the Option A env.
   - [ ] `train.py --simulator isaaclab --headless --max-iterations 3` completes successfully.
   - [ ] One short `rl_games` PPO smoke run completes in this env (single command recorded in the notes).
