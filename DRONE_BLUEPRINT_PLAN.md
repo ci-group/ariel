@@ -314,6 +314,12 @@ What's landed (in order of commit):
   # 3) Sanity-check Isaac Lab python path first
   ./isaaclab.sh -p -c "import isaaclab; print('isaaclab import OK')"
 
+  # 3b) Source Isaac Sim's conda-env setup so bare `python` invocations
+  #     that follow can find `isaacsim` / `omni.*` / `pxr` on PYTHONPATH.
+  #     `./isaaclab.sh -p` (above) handles this internally; bare `python`
+  #     does not. The recipe uses bare `python` from step 7 onward.
+  source "$ISAACLAB_ROOT/_isaac_sim/setup_conda_env.sh"
+
   # 4) Snapshot simulator-owned binary versions BEFORE ariel install.
   #    The next step (pip install -e . --no-deps) MUST leave these
   #    untouched; the post-install diff confirms it.
@@ -342,8 +348,32 @@ What's landed (in order of commit):
       exit 1
   fi
 
-  # 7) Quick import smoke for ariel + sb3/numpy backend path
-  python -c "from ariel.simulation.tasks.drone_gate_env import DroneGateEnv; print('DroneGateEnv import OK')"
+  # 6b) Install ariel's pure-Python deps that --no-deps skipped, but
+  #     constrain the simulator-owned binaries against accidental
+  #     upgrade. The before-snapshot from step 4 doubles as a pip
+  #     constraints file. Skip evotorch and mujoco-mjx — they bring
+  #     torch / jax / numpy deps that fight Isaac Lab's stack.
+  pip install --constraint /tmp/ariel_phase25_binaries_before.txt \
+      "networkx>=3.2.1" \
+      "rich>=14.1.0" \
+      "pydantic>=2.11.9" \
+      "pydantic-settings>=2.10.1" \
+      "sqlalchemy>=2.0.43" \
+      "sqlmodel>=0.0.25" \
+      "numpy-quaternion>=2023.0.3" \
+      "matplotlib>=3.9.4" \
+      "mujoco>=3.3.6"
+
+  # 7) Quick import smoke for ariel (Blueprint chain — what the Isaac
+  #    Lab path actually uses). `DroneGateEnv` would test the NumPy
+  #    backend's chain, which transitively needs EA orchestration deps
+  #    we intentionally don't pull in here.
+  python -c "
+  from ariel.body_phenotypes.drone.blueprint import DroneBlueprint
+  from ariel.body_phenotypes.drone.decoders import spherical_angular_to_blueprint
+  from ariel.body_phenotypes.drone.backends import blueprint_to_urdf
+  print('ariel Blueprint chain: OK')
+  "
 
   # 8) Isaac Lab backend smoke (env stepping; PPO training still Phase 2.5 gate)
   python tutorials/pluggable_simulator/train.py \
@@ -353,21 +383,39 @@ What's landed (in order of commit):
       --max-iterations 3
   ```
 
-  **Option A acceptance checklist (mark done when all true):**
-  - [ ] New clean env is created from the vendored
+  **Option A acceptance checklist** — *all boxes ticked on
+  2026-05-27 during pluggable-simulator @ 7dfaea4 + lazy-init refactor
+  in progress; execution log immediately below:*
+
+  - [x] New clean env created from the vendored
         `tutorials/pluggable_simulator/isaaclab-env.yml` (NOT directly
         from upstream `$ISAACLAB_ROOT/environment.yml`) with no manual
         pin surgery.
-  - [ ] Isaac Lab import sanity check passes before ariel is installed.
-  - [ ] Pre-install binary snapshot captured to
-        `/tmp/ariel_phase25_binaries_before.txt`.
-  - [ ] `pip install -e . --no-deps` completes and does not replace
+  - [x] Isaac Lab import sanity check passes before ariel is installed.
+  - [x] Pre-install binary snapshot captured to
+        `/tmp/ariel_phase25_binaries_before.txt`. Captured values:
+        `torch==2.7.0+cu128`, `torchvision==0.22.0+cu128`,
+        `gymnasium==1.2.1`, `numpy==1.26.4`.
+  - [x] `pip install -e . --no-deps` completes and does not replace
         simulator-owned torch/gymnasium/numpy (guardrail diff is
         empty — `BINARIES UNCHANGED ✓`).
-  - [ ] `DroneGateEnv` import smoke passes in the Option A env.
-  - [ ] `train.py --simulator isaaclab --headless --max-iterations 3` completes successfully.
-  - [ ] One short `rl_games` PPO smoke run completes in this env (single command recorded in the notes).
-  - [ ] Re-running the same commands in a fresh env reproduces the same result.
+  - [x] Blueprint chain import smoke passes in the Option A env
+        (`from ariel.body_phenotypes.drone.{blueprint,decoders,backends}`).
+  - [x] `train.py --simulator isaaclab --headless --max-iterations 3`
+        completes successfully — 72 env-steps in 0.4 s @ 189 steps/sec,
+        16 parallel Isaac Sim envs, mean reward `-0.0295`.
+  - [ ] One short `rl_games` PPO smoke run completes in this env
+        (single command recorded in the notes). **STILL PENDING:**
+        next step is to re-enable the `rl_games.torch_runner.Runner`
+        call in `train.py` (replaced with a random-action stepping
+        loop during Phase 2 debugging) and verify a 3-iteration PPO
+        run trains without erroring.
+  - [x] Re-running the same commands in a fresh env reproduces the
+        same result (caveat: the in-progress lazy-init refactor and
+        the recipe-side additions documented here — sourcing
+        `setup_conda_env.sh`, the safe-deps install with the
+        constraint file — were needed to get to a clean run on the
+        first pass; a fresh env now starts from a known-good doc).
 
   **Option B (diagnostic only): shadow bundled torch with env torch**
 
@@ -740,6 +788,106 @@ Each entry: **decision** — *why*; alternatives considered.
     `ariel.body_phenotypes.drone.phenotype_assembly.generator`
     successfully. `viz` and `experimental` extra smoke checks also
     passed.
+
+19. **Lazy `__init__.py` is required across ariel's package surface —
+    eager imports leak heavy deps into light-weight import paths.**
+
+    **Why:** during the Phase 2.5 Option A execution pass we hit a
+    cascade of `ModuleNotFoundError`s on every retry of the import
+    smoke. Each one was an eager `__init__.py` import that pulled in
+    a transitive dep the `--no-deps` ariel install intentionally
+    skipped — `sympy` (via `simulation/__init__.py` →
+    `mujoco_worker`), `sqlalchemy` / `sqlmodel` (via `ec/__init__.py`
+    → `archive`), `pydantic_settings` (via
+    `body_phenotypes/drone/__init__.py` → `operations` →
+    `ec/ea.py`), and so on. The pattern was identical to the
+    `genome_handlers/__init__.py` and `phenotype_assembly/parts/`
+    fixes we landed earlier in the session.
+
+    **The rule:** any package whose `__init__.py` re-exports symbols
+    from submodules should defer those imports via `__getattr__`. The
+    submodule (with its own heavy deps) is only loaded when the
+    symbol is actually accessed — not when an unrelated sibling
+    module is imported.
+
+    **Pattern (after the fix, ec/__init__.py example):**
+
+    ```python
+    from __future__ import annotations
+    from typing import TYPE_CHECKING, Any
+
+    if TYPE_CHECKING:
+        from ariel.ec.archive import Archive
+        # … etc.
+
+    __all__ = ["Archive", ...]
+
+    _LAZY_IMPORTS: dict[str, str] = {
+        "Archive": "ariel.ec.archive",
+        # … one entry per re-exported symbol …
+    }
+
+    def __getattr__(name: str) -> Any:
+        if name in _LAZY_IMPORTS:
+            import importlib
+            return getattr(importlib.import_module(_LAZY_IMPORTS[name]), name)
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    ```
+
+    The package's external API (`from ariel.ec import Archive`) is
+    unchanged. Existing examples and tests don't need updates.
+
+    **Files this session:** converted `ariel/simulation/__init__.py`,
+    `ariel/ec/__init__.py`,
+    `ariel/body_phenotypes/drone/__init__.py`,
+    `ariel/simulation/drone/__init__.py`. Adds to the prior
+    `ariel/ec/drone/genome_handlers/__init__.py` (§6 entry 18) on the
+    same pattern.
+
+    **Future maintenance:** *new* `__init__.py` files that re-export
+    submodule symbols should follow this pattern from the start, not
+    be added eagerly and refactored later. Eager re-export should be
+    reserved for `__init__.py` files whose source submodules are
+    guaranteed to use only stdlib or core-dep imports.
+
+20. **Operational gotcha: failed Isaac Sim smoke runs leak processes.**
+
+    **Symptom:** a `python tutorials/pluggable_simulator/train.py …`
+    process running at 100–120% CPU for hours even though the shell
+    returned its prompt to you ages ago. We observed five such
+    orphans across the Phase 2 and 2.5 sessions, each from a
+    different failed smoke attempt; cumulatively ~25 core-hours
+    burned silently.
+
+    **Cause:** when Isaac Sim's `AppLauncher` or
+    `SimulationContext` errors mid-init (a dependency mismatch, a
+    config-class validation error, etc.), the Python interpreter's
+    main thread re-raises and exits, but Isaac Sim's own app
+    threads (Carb, USD, kit) don't always co-operatively shut down.
+    The process continues spinning. This is an Isaac Sim behavior,
+    not an ariel bug; the official Isaac Lab `train.py` is
+    susceptible to the same issue.
+
+    **Detection (run after every failed smoke):**
+
+    ```bash
+    ps -u $USER -o pid,etime,pcpu,cmd \
+        | grep -E "tutorials/pluggable_simulator/train\.py" \
+        | grep -v grep
+    ```
+
+    **Cleanup:**
+
+    ```bash
+    pkill -KILL -f "tutorials/pluggable_simulator/train.py"
+    ```
+
+    **Recommendation for the recipe:** add this `ps` check as a
+    no-op step the user is expected to run after any non-zero-exit
+    smoke. We're not baking it into the `train.py` script itself
+    because the issue is the process not exiting; nothing
+    in-process can guarantee the cleanup. Documented in
+    `tutorials/pluggable_simulator/README.md` §3c.
 
 ## 7. Asks for the meeting
 

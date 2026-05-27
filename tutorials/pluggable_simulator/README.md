@@ -177,6 +177,12 @@ cd "$ISAACLAB_ROOT"
 # 3) Sanity-check Isaac Lab's python path first.
 ./isaaclab.sh -p -c "import isaaclab; print('isaaclab import OK')"
 
+# 3b) Source Isaac Sim's conda-env setup so bare `python` invocations
+#     that follow can find `isaacsim` / `omni.*` / `pxr` on PYTHONPATH.
+#     `./isaaclab.sh -p` (above) handles this internally; bare `python`
+#     does not. The recipe uses bare `python` from step 7 onward.
+source "$ISAACLAB_ROOT/_isaac_sim/setup_conda_env.sh"
+
 # 4) Snapshot simulator-owned binary versions BEFORE ariel install.
 #    The next step (pip install -e . --no-deps) MUST leave these
 #    untouched; the post-install diff confirms it.
@@ -205,8 +211,34 @@ else
     exit 1
 fi
 
-# 7) Quick import smoke for ariel.
-python -c "from ariel.simulation.tasks.drone_gate_env import DroneGateEnv; print('DroneGateEnv import OK')"
+# 6b) Install ariel's pure-Python deps that --no-deps skipped, but
+#     pin the simulator-owned binaries against accidental upgrade.
+#     The before-snapshot from step 4 doubles as a pip constraints
+#     file: any line `torch==2.7.0+cu128` in there acts as a hard
+#     ceiling on what pip can do here. Skip evotorch and mujoco-mjx
+#     — they bring torch / jax / numpy deps that fight Isaac Lab's
+#     stack.
+pip install --constraint /tmp/ariel_phase25_binaries_before.txt \
+    "networkx>=3.2.1" \
+    "rich>=14.1.0" \
+    "pydantic>=2.11.9" \
+    "pydantic-settings>=2.10.1" \
+    "sqlalchemy>=2.0.43" \
+    "sqlmodel>=0.0.25" \
+    "numpy-quaternion>=2023.0.3" \
+    "matplotlib>=3.9.4" \
+    "mujoco>=3.3.6"
+
+# 7) Quick import smoke for ariel (Blueprint chain — what the Isaac
+#    Lab path actually uses). Importing `DroneGateEnv` here would test
+#    the NumPy backend's chain, which transitively needs EA orchestration
+#    deps the Isaac Lab env intentionally doesn't pull in.
+python -c "
+from ariel.body_phenotypes.drone.blueprint import DroneBlueprint
+from ariel.body_phenotypes.drone.decoders import spherical_angular_to_blueprint
+from ariel.body_phenotypes.drone.backends import blueprint_to_urdf
+print('ariel Blueprint chain: OK')
+"
 ```
 
 Why this shape: ariel's base `pyproject.toml` pins `numpy>=1.26,<2`
@@ -215,6 +247,34 @@ other way — installing Isaac Lab into an ariel-managed env — drags in
 sb3's compiled deps against numpy 2 and segfaults. See
 [DRONE_BLUEPRINT_PLAN.md §6 entries 15 and 17](../../DRONE_BLUEPRINT_PLAN.md)
 for the full env-stack story.
+
+### 3c. Operational gotcha: stale Isaac Sim processes after a failed run
+
+When Isaac Sim errors during launcher init (a config validation problem,
+a dependency mismatch, anything before the env-stepping loop starts),
+the Python interpreter often doesn't cleanly exit — Isaac Sim's app
+threads keep spinning even after the shell prints its prompt. Symptom:
+a `python train.py …` process running at ~120% CPU for hours after a
+3-iteration smoke test "ended."
+
+After every failed Isaac Sim smoke run, check for orphans:
+
+```bash
+ps -u $USER -o pid,etime,pcpu,cmd \
+    | grep -E "tutorials/pluggable_simulator/train\.py" \
+    | grep -v grep
+```
+
+If anything is listed, kill it:
+
+```bash
+pkill -KILL -f "tutorials/pluggable_simulator/train.py"
+```
+
+This is a known Isaac Sim behavior, not an ariel bug. It also applies
+to the official Isaac Lab `train.py` scripts. Worth running the check
+after any failed smoke during Phase 2.5 iteration so you don't end up
+with ~5 cores of CPU silently burning while you debug.
 
 ---
 
