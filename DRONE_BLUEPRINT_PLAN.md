@@ -232,13 +232,39 @@ What's landed (in order of commit):
    shadowed the inherited `VecEnv.seed()` method (broke
    stable-baselines3's `set_random_seed`). See §6 entry 17.
 
+8. `Implement IsaacLabBlueprintHoverEnv (Phase 2).` —
+   `src/ariel/simulation/tasks/isaaclab_hover_env.py` adapted from
+   Isaac Lab's reference `QuadcopterEnv`; spawns N parallel drones
+   from a Blueprint-derived USD, applies a thrust+moment wrench at
+   the root body each step, computes `-distance × step_dt` rewards.
+   `train.py --simulator isaaclab` exercises the full path
+   end-to-end via a random-action stepping loop (72 steps in 1.6 s
+   on 16 envs). Real PPO training via `rl_games.torch_runner.Runner`
+   is wired through `make_rl_games_agent_cfg` but currently calls a
+   random-action loop instead, gated on Phase 2.5. Architectural
+   choice change from Phase 1: the Isaac Lab backend follows the
+   `DirectRLEnv` shape rather than the `BlueprintGateEnv` Protocol —
+   "two-Protocols-one-trainer" as picked during planning. See §6
+   entry 17.
+
 **Still pending — to pick up next session:**
 
-* **Phase 2 of pluggable simulator** — implement
-  `IsaacLabBlueprintGateEnv` for real (URDF→USD in-process, parallel
-  envs, per-motor thrust model lifted from soft_airframe). The
-  Protocol contract is now stable, so this is purely simulator-side
-  work.
+* **Phase 2.5 of pluggable simulator: actually train.** The
+  `rl_games` Runner trips on a transitive import chain (Isaac Sim's
+  bundled `torch.utils.tensorboard.writer` → lazy `tensorflow` →
+  `jax` → `numpy.dtypes.StringDType`) because Isaac Sim's
+  `pip_prebundle/` ships an older numpy than the conda env's
+  numpy 2.4.6. Options: (a) install a clean conda env with pinned
+  versions matched to Isaac Sim's bundle, (b) shadow the bundled
+  torch with the conda env's torch on `PYTHONPATH`, (c) downgrade
+  jax + tensorboard to versions tolerant of numpy 2. Independent of
+  this, `rsl_rl` integration via `isaaclab_rl.rsl_rl` was a
+  separate dead end during Phase 2 — the adapter sends kwargs
+  (`optimizer`, `share_cnn_encoders`) that don't match the
+  installed `rsl-rl-lib` 3.0.1 PPO signature (and 5.x has its own
+  config shape mismatch). `rl_games` is the path we picked
+  forward; `make_rl_games_agent_cfg` in
+  `isaaclab_hover_env.py` is the matching config helper.
 * **Compliant joints (URDF revolute + sidecar stiffness + USD
   `ariel:*` attrs).** Schema landed on `compliant-joint-schema`;
   the emission half is what's still pending. The two-layer pattern
@@ -427,39 +453,81 @@ Each entry: **decision** — *why*; alternatives considered.
     until something actually breaks.
 
 17. **Simulator backends are a plug point, not a hard-coded choice;
-    the contract is the `BlueprintGateEnv` Protocol.**
+    the contract is two complementary shapes — one per ecosystem.**
 
     **Motivation:** the ARIEL consortium has collaborators using
     divergent simulators (MuJoCo, Aerial Gym, Isaac Lab, IsaacGym,
-    in-house stacks). ARIEL's contribution to those groups is the
-    *evolutionary + learning loop* — decoders, EA operators, repair,
-    inspection, PPO training. If the simulator is hard-coded, every
+    in-house stacks). ARIEL's contribution is the *evolutionary +
+    learning loop* — decoders, EA operators, repair, inspection,
+    training boilerplate. If the simulator is hard-coded, every
     collaborator either swaps to ariel's simulator (won't happen) or
-    re-implements the loop themselves (defeats the point). The
-    seam has to be deliberate.
+    re-implements the loop themselves (defeats the point). The seam
+    has to be deliberate.
 
-    **Contract:** a `BlueprintGateEnv` is a `gymnasium.VecEnv` (stable-
-    baselines3 style) constructed from a `DroneBlueprint`, exposing
-    `.blueprint` and `.num_envs` attributes. Implemented as
-    `typing.Protocol` with `@runtime_checkable` (per the
-    pluggable-backend question we deliberated): no inheritance
-    forced on collaborators, but `isinstance(env, BlueprintGateEnv)`
-    works for runtime sanity-checks. Concrete VecEnv methods come
-    via the standard `stable_baselines3.common.vec_env.VecEnv` base
-    class.
+    **Architecture (revised in Phase 2): two Protocols, one trainer
+    per backend.** Initially we tried a single `BlueprintGateEnv`
+    Protocol (gymnasium VecEnv). The Phase 2 attempt to wrap Isaac
+    Lab's `DirectRLEnv` to that shape via `isaaclab_rl.sb3` collided
+    with the numpy-2 ABI issues that sb3's compiled deps have in the
+    unified env. The honest fix is to accept heterogeneity: numpy
+    backend exposes a gymnasium VecEnv and pairs with sb3 PPO;
+    Isaac Lab backend exposes a `DirectRLEnv` and pairs with one of
+    Isaac Lab's native RL libraries (`rl_games` is the v1 target).
+    Each backend brings its own simulator AND its own trainer — same
+    as how heterogeneous simulator ecosystems work in the wild.
+
+    **Contract 1 (gymnasium-VecEnv path):** `BlueprintGateEnv` is a
+    `typing.Protocol` declaring `.blueprint`, `.num_envs`, plus the
+    standard VecEnv methods (inherited from
+    `stable_baselines3.common.vec_env.VecEnv`). `@runtime_checkable`,
+    so `isinstance(env, BlueprintGateEnv)` works for sanity checks.
+    `NumpyBlueprintGateEnv` is the v1 reference implementation.
+
+    **Contract 2 (Isaac Lab DirectRLEnv path):** subclass
+    `isaaclab.envs.DirectRLEnv` with a config built from a
+    `DroneBlueprint` (Blueprint → URDF → USD generated at construction
+    time via the helpers in `isaaclab_hover_env.py`). The standard
+    `_setup_scene` / `_pre_physics_step` / `_apply_action` /
+    `_get_observations` / `_get_rewards` / `_get_dones` / `_reset_idx`
+    methods implement the task.
 
     **What ships in v1:**
-    - `NumpyBlueprintGateEnv` — declares the existing `DroneGateEnv`
-      (NumPy + SymPy physics) as a Protocol implementation by
-      subclassing it and adding a Blueprint → propellers-list
-      adapter at the constructor. Smoke-tested with PPO 2k steps in
-      4.7 s.
-    - `IsaacLabBlueprintGateEnv` — stub with the planned constructor
-      signature and a `NotImplementedError` body. Phase 2 work.
-    - `tutorials/pluggable_simulator/{README.md, train.py}` —
-      walks a collaborator through the architecture, the
-      `--simulator {numpy,isaaclab}` dispatch, and the five-step
-      "add your own backend" recipe.
+    - **NumPy backend (Phase 1):** `NumpyBlueprintGateEnv` —
+      Protocol-conforming subclass of existing `DroneGateEnv` with a
+      Blueprint→propellers adapter. Trains a gate-passing policy
+      with sb3 PPO end-to-end. Smoke-tested with PPO 2k steps in
+      4.7 s (3.12 venv); also works in the unified 3.11 env.
+    - **Isaac Lab backend (Phase 2):** `IsaacLabBlueprintHoverEnv` —
+      adapted from Isaac Lab's reference `QuadcopterEnv`; the
+      articulation USD is generated at runtime from a Blueprint via
+      `blueprint_to_urdf` + `UrdfConverter`. Spawns N parallel drones,
+      computes `-distance × step_dt` rewards. v1 smoke-tests via a
+      random-action stepping loop (PPO training deferred to
+      Phase 2.5; see below). 72 steps in 1.6 s on 16 envs through
+      Isaac Sim PhysX.
+    - `tutorials/pluggable_simulator/{README.md, train.py}` — the
+      tutorial doc + a unified entry point with `--simulator
+      {numpy,isaaclab}` dispatch and the five-step "add your own
+      backend" recipe.
+
+    **Phase 2.5 deferred — three layered env-stack issues
+    encountered:**
+    1. `sb3 + numpy 2`: sb3's compiled deps segfault in the unified
+       isaaclab env (numpy ABI mismatch with bundled torch). Avoided
+       by NOT routing Isaac Lab through sb3.
+    2. `isaaclab_rl.rsl_rl` adapter ↔ `rsl-rl-lib`: the adapter
+       sends config keys (`optimizer`, `share_cnn_encoders`) that
+       don't match the installed PPO signature on either 3.0.1 or
+       5.3.0. Tried both; both fail differently. The
+       `handle_deprecated_rsl_rl_cfg` shim doesn't catch the
+       relevant fields on these versions.
+    3. `rl_games` (the v1 target): the runner's tensorboard import
+       transitively pulls in Isaac Sim's bundled `pip_prebundle/torch`,
+       which imports an older `tensorflow` → `jax` →
+       `numpy.dtypes.StringDType`. Bundle ships older numpy than the
+       conda env's 2.4.6, so the attribute lookup fails. Architectural
+       fix likely requires either a clean conda env with pinned-to-
+       bundle versions, or shadowing the bundle's torch.
 
     **Pre-existing bug fixed in passing:** `DroneGateEnv.__init__`
     stored `self.seed = seed` (an int), shadowing the inherited
