@@ -26,6 +26,7 @@ Add --no-video to skip the video step entirely.
 from __future__ import annotations
 
 import argparse
+import math
 import sqlite3
 import time as _time
 from pathlib import Path
@@ -57,6 +58,12 @@ parser.add_argument("--no-video", action="store_true",
                     help="Skip the MuJoCo video step.")
 parser.add_argument("--view", action="store_true",
                     help="Open MuJoCo passive viewer instead of writing MP4.")
+parser.add_argument("--gate-pos", default=None,
+                    help="Path to gate_pos_*.npy (NED coords, shape N×3). "
+                         "Auto-detected from --run-dir if omitted.")
+parser.add_argument("--gate-yaw", default=None,
+                    help="Path to gate_yaw_*.npy (shape N,). "
+                         "Auto-detected from --run-dir if omitted.")
 args = parser.parse_args()
 
 if args.no_show:
@@ -85,6 +92,20 @@ if db_path is None or not db_path.exists():
 if bp_path is None or not bp_path.exists():
     raise SystemExit(f"Blueprint not found. Pass --blueprint or --run-dir. (resolved: {bp_path})")
 
+# Gate files — optional; enable gate rendering in MuJoCo when present
+_gpos_path = Path(args.gate_pos) if args.gate_pos else (
+    _latest(run_dir, "gate_pos_*.npy") if run_dir else None
+)
+_gyaw_path = Path(args.gate_yaw) if args.gate_yaw else (
+    _latest(run_dir, "gate_yaw_*.npy") if run_dir else None
+)
+gate_pos_ned: np.ndarray | None = None
+gate_yaw_arr: np.ndarray | None = None
+if (_gpos_path is not None and _gpos_path.exists()
+        and _gyaw_path is not None and _gyaw_path.exists()):
+    gate_pos_ned = np.load(_gpos_path)
+    gate_yaw_arr = np.load(_gyaw_path)
+
 out_dir = Path(args.out_dir) if args.out_dir else db_path.parent
 out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -92,6 +113,8 @@ run_tag = db_path.stem.replace("database_", "")
 print(f"DB         : {db_path}")
 print(f"Blueprint  : {bp_path}")
 print(f"Policy     : {policy_path or '(not found — video step will be skipped)'}")
+print(f"Gates      : {gate_pos_ned.shape[0]} gates from {_gpos_path.name}"  # type: ignore[union-attr]
+      if gate_pos_ned is not None else "Gates      : none (MuJoCo scene will have no gate markers)")
 print(f"Output dir : {out_dir}")
 
 # ---------------------------------------------------------------------------
@@ -198,13 +221,24 @@ else:
     print(f"\nLoading policy from {policy_path} …")
     propellers = blueprint_to_propellers(bp, convention="ned")
 
-    env = DroneGateEnv(
+    # Build env kwargs — wire in the quintic gates when available so the
+    # rollout uses the same track that was trained on.
+    _env_kwargs: dict = dict(
         propellers=propellers,
         num_envs=1,
         device=args.device,
         dt=args.dt,
         seed=0,
+        initialize_at_random_gates=False,
     )
+    if gate_pos_ned is not None and gate_yaw_arr is not None:
+        _start_pos = (gate_pos_ned[0] + np.array([0.0, -1.0, 0.0])).astype(np.float32)
+        _env_kwargs.update(
+            gates_pos=gate_pos_ned,
+            gate_yaw=gate_yaw_arr,
+            start_pos=_start_pos,
+        )
+    env = DroneGateEnv(**_env_kwargs)
     model = PPO.load(str(policy_path), env=env, device=args.device)
     print("Policy loaded.")
 
@@ -219,11 +253,9 @@ else:
         euler_log[i] = env.world_states[0, 6:9]
         action, _ = model.predict(obs, deterministic=True)
         obs, _, dones, _ = env.step(action)
-        if dones[0]:
-            N = i + 1
-            pos_ned = pos_ned[:N]
-            euler_log = euler_log[:N]
-            break
+        # env auto-resets on done — keep recording the full rollout_time
+        # so the video always shows `--rollout-time` seconds even if the
+        # drone crashes and restarts mid-rollout.
 
     print(
         f"Rollout done: {N} steps ({N * args.dt:.1f}s)  "
@@ -262,6 +294,49 @@ else:
         position=(float(pos_enu[0, 0]), float(pos_enu[0, 1]), float(pos_enu[0, 2])),
         correct_collision_with_floor=False,
     )
+
+    # Add gate markers when quintic gate data is present.
+    # Gate positions are in the "NED-like" convention used by DroneGateEnv:
+    # x/y are unchanged from ENU, only z is down (z_ned = -z_enu).
+    if gate_pos_ned is not None and gate_yaw_arr is not None:
+        n_vis_gates = gate_pos_ned.shape[0]
+        for _gi in range(n_vis_gates):
+            _gx = float(gate_pos_ned[_gi, 0])
+            _gy = float(gate_pos_ned[_gi, 1])
+            _gz = float(-gate_pos_ned[_gi, 2])  # NED z → ENU z
+            _yaw = float(gate_yaw_arr[_gi])
+            # Quaternion for yaw rotation around the Z axis: (w, x, y, z)
+            _qw = math.cos(_yaw / 2.0)
+            _qz = math.sin(_yaw / 2.0)
+            _gate_body = world_mj.spec.worldbody.add_body(
+                name=f"gate_{_gi}",
+                pos=[_gx, _gy, _gz],
+                quat=[_qw, 0.0, 0.0, _qz],
+            )
+            # Thin slab representing the gate plane (1.5 m × 1.5 m opening,
+            # 2 cm deep); contype/conaffinity=0 → no collision response.
+            # Thin dimension must be LOCAL X (= travel direction after yaw
+            # rotation) so the gate face is perpendicular to travel and the
+            # drone flies *through* it.  size=[depth, half, half].
+            _gate_body.add_geom(
+                name=f"gate_plane_{_gi}",
+                type=mujoco.mjtGeom.mjGEOM_BOX,
+                size=[0.01, 0.75, 0.75],
+                rgba=(1.0, 0.55, 0.0, 0.25),  # orange, semi-transparent
+                contype=0,
+                conaffinity=0,
+            )
+            # Small red sphere at the gate centre for easy reference.
+            _gate_body.add_geom(
+                name=f"gate_marker_{_gi}",
+                type=mujoco.mjtGeom.mjGEOM_SPHERE,
+                size=[0.06, 0.0, 0.0],
+                rgba=(1.0, 0.1, 0.1, 1.0),
+                contype=0,
+                conaffinity=0,
+            )
+        print(f"Added {n_vis_gates} gate markers to MuJoCo scene.")
+
     model_mj = world_mj.spec.compile()
     data_mj = mujoco.MjData(model_mj)
     model_mj.opt.timestep = args.dt
