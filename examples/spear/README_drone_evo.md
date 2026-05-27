@@ -10,14 +10,14 @@ quintic gate-racing circuit.
 
 ```bash
 # Default settings — small run to verify everything works (~5 min on GPU)
-uv run examples/e_drones_ec/9_drone_evo_configurable.py --device cuda:0
+uv run examples/spear/9_drone_evo_configurable.py --device cuda:0
 
 # Longer research run
-uv run examples/e_drones_ec/9_drone_evo_configurable.py --device cuda:0 --seed 7
+uv run examples/spear/9_drone_evo_configurable.py --device cuda:0 --seed 7
 
 # Then visualise
 uv run examples/e_drones_ec/6_visualize_evo_results.py --run-dir __data__/drone_evo_configurable/<RUN_ID>
-uv run examples/e_drones_ec/8_visualize_gate_track.py  --run-dir __data__/drone_evo_configurable/<RUN_ID>
+uv run examples/spear/8_visualize_gate_track.py  --run-dir __data__/drone_evo_configurable/<RUN_ID>
 ```
 
 ---
@@ -158,11 +158,11 @@ GATE_MODE       = "naive"  # "naive" = fixed track | "online" = infinite stream
 
 ```bash
 # Generate and view a fresh track with these settings
-uv run examples/e_drones_ec/8_visualize_gate_track.py \
+uv run examples/spear/8_visualize_gate_track.py \
     --path-steps 15 --path-scale 5.0 --seed 42
 
 # Or load the saved track from a previous run
-uv run examples/e_drones_ec/8_visualize_gate_track.py \
+uv run examples/spear/8_visualize_gate_track.py \
     --run-dir __data__/drone_evo_configurable/<RUN_ID>
 ```
 
@@ -217,11 +217,14 @@ PPO_ENT_COEF   = 0.01    # entropy bonus (higher = more exploration)
 
 ```
 ariel/
-├── examples/e_drones_ec/
+├── examples/spear/
 │   ├── 9_drone_evo_configurable.py   ← YOU ARE HERE
-│   ├── 7_drone_evo_rl_quintic.py     ← original script
-│   ├── 6_visualize_evo_results.py    ← visualise a finished run
+│   ├── 7_drone_evo_rl_quintic.py     ← original script (CLI-only)
 │   ├── 8_visualize_gate_track.py     ← visualise the gate circuit
+│   └── (colab_drone_evo.ipynb lives in examples/e_drones_ec/)
+│
+├── examples/e_drones_ec/
+│   ├── 6_visualize_evo_results.py    ← visualise a finished run
 │   └── colab_drone_evo.ipynb         ← run on Google Colab
 │
 ├── src/ariel/

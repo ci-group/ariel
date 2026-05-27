@@ -11,11 +11,11 @@ Two modes (--mode):
           (Uses the NumPy-backed DroneGateEnv for now.)
 
 Smoke test (CPU, ~2 min):
-    uv run examples/e_drones_ec/7_drone_evo_rl_quintic.py \\
+    uv run examples/spear/7_drone_evo_rl_quintic.py \\
         --pop 4 --gens 2 --ppo-steps 20000 --num-envs 20 --device cpu
 
 Moderate run (GPU, online mode):
-    uv run examples/e_drones_ec/7_drone_evo_rl_quintic.py \\
+    uv run examples/spear/7_drone_evo_rl_quintic.py \\
         --pop 8 --gens 5 --ppo-steps 200000 --num-envs 100 \\
         --device cuda:0 --mode online
 """

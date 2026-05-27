@@ -7,20 +7,20 @@ Two modes
 ---------
 1. Load saved gate files from a previous run (--gate-pos / --gate-yaw):
 
-    uv run examples/e_drones_ec/8_visualize_gate_track.py \\
+    uv run examples/spear/8_visualize_gate_track.py \\
         --gate-pos __data__/drone_evo_rl_quintic/RUN_ID/gate_pos_RUN_ID.npy \\
         --gate-yaw __data__/drone_evo_rl_quintic/RUN_ID/gate_yaw_RUN_ID.npy
 
    Or point at the run directory and let it auto-detect:
 
-    uv run examples/e_drones_ec/8_visualize_gate_track.py \\
+    uv run examples/spear/8_visualize_gate_track.py \\
         --run-dir __data__/drone_evo_rl_quintic/RUN_ID
 
 2. Generate a fresh track from the quintic coefficients (default):
 
-    uv run examples/e_drones_ec/8_visualize_gate_track.py
-    uv run examples/e_drones_ec/8_visualize_gate_track.py --seed 42
-    uv run examples/e_drones_ec/8_visualize_gate_track.py \\
+    uv run examples/spear/8_visualize_gate_track.py
+    uv run examples/spear/8_visualize_gate_track.py --seed 42
+    uv run examples/spear/8_visualize_gate_track.py \\
         --path-steps 8 --path-scale 3.0 --dense-steps 500 --seed 7
 
 Gate orientation

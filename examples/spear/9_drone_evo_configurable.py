@@ -7,12 +7,12 @@ to the one you want to change and edit the Python values directly.
 
 Quick start
 -----------
-    uv run examples/e_drones_ec/9_drone_evo_configurable.py
+    uv run examples/spear/9_drone_evo_configurable.py
 
 Pass a few CLI flags to override output location, device, and seed
 without touching the config sections:
 
-    uv run examples/e_drones_ec/9_drone_evo_configurable.py \\
+    uv run examples/spear/9_drone_evo_configurable.py \\
         --device cuda:0 --seed 7 --out-dir __data__/my_run
 
 See README_drone_evo.md in this directory for a full explanation of every
@@ -85,7 +85,7 @@ console = Console()
 #  What controls how bodies are generated, varied, and selected.
 #
 #  Example scripts to read first:
-#    examples/e_drones_ec/7_drone_evo_rl_quintic.py  ← full pipeline this is based on
+#    examples/spear/7_drone_evo_rl_quintic.py  ← full pipeline this is based on
 #    examples/z_ec_course/                            ← step-by-step EA tutorials
 #
 #  Key source files:
@@ -186,7 +186,7 @@ CUSTOM_GENERATION_OPS = None   # None = use default pipeline
 #    goal_generator_ltu/polynomial_goal_generator/       ← quintic path planner
 #
 #  Visualise the track (no drone) with:
-#    uv run examples/e_drones_ec/8_visualize_gate_track.py
+#    uv run examples/spear/8_visualize_gate_track.py
 # ═════════════════════════════════════════════════════════════════════════════
 
 # Number of gates sampled from the quintic path.
@@ -623,5 +623,5 @@ console.log(
 console.log(
     f"\nTo visualise:\n"
     f"  uv run examples/e_drones_ec/6_visualize_evo_results.py --run-dir {DATA}\n"
-    f"  uv run examples/e_drones_ec/8_visualize_gate_track.py  --run-dir {DATA}"
+    f"  uv run examples/spear/8_visualize_gate_track.py  --run-dir {DATA}"
 )
