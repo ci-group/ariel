@@ -131,7 +131,94 @@ for the full rationale.
 
 ---
 
-## 3. Running the shipped backends
+## 3. Environment setup
+
+The two backends have different runtime requirements, so each gets its
+own env. Pick the one matching the backend(s) you want to use.
+
+### 3a. NumPy backend (gate task, stable-baselines3)
+
+Works in any ariel venv with the `rl-sb3` and `torch` extras installed.
+From the ariel repo root:
+
+```bash
+uv sync --extra rl-sb3 --extra torch
+```
+
+That's it — the NumPy backend has no further setup. See the [project
+root README](../../README.md) for the broader ariel install matrix.
+
+### 3b. Isaac Lab backend (hover task, rl_games)
+
+Isaac Lab owns its own torch / gymnasium / numpy ABI stack, so we
+install ariel **into** Isaac Lab's env rather than the other way
+around. The reproducible recipe (this is the doc-side of Phase 2.5's
+"Option A" plan in [DRONE_BLUEPRINT_PLAN.md §5](../../DRONE_BLUEPRINT_PLAN.md)):
+
+```bash
+# 0) Paths (adjust if your checkout differs)
+export ARIEL_ROOT="$HOME/Documents/sandbox/ariel"
+export ISAACLAB_ROOT="$HOME/Documents/sandbox/IsaacLab"
+export ENV_NAME="ariel-isaaclab-train"
+
+# 1) Create a clean env from this repo's *vendored* copy of Isaac Lab's
+#    env spec. We vendor (rather than read $ISAACLAB_ROOT/environment.yml
+#    directly) so the recipe is stable across upstream Isaac Lab churn —
+#    refresh deliberately, not silently. See the SHA in the file header.
+conda env remove -n "$ENV_NAME" -y || true
+conda env create -n "$ENV_NAME" \
+    -f "$ARIEL_ROOT/tutorials/pluggable_simulator/isaaclab-env.yml"
+conda activate "$ENV_NAME"
+
+# 2) Install Isaac Lab into the env (it owns torch / gymnasium / numpy).
+cd "$ISAACLAB_ROOT"
+./isaaclab.sh -i
+
+# 3) Sanity-check Isaac Lab's python path first.
+./isaaclab.sh -p -c "import isaaclab; print('isaaclab import OK')"
+
+# 4) Snapshot simulator-owned binary versions BEFORE ariel install.
+#    The next step (pip install -e . --no-deps) MUST leave these
+#    untouched; the post-install diff confirms it.
+pip list --format=freeze \
+    | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
+    | sort > /tmp/ariel_phase25_binaries_before.txt
+cat /tmp/ariel_phase25_binaries_before.txt
+
+# 5) Install ariel WITHOUT dependency resolution side effects.
+#    --no-deps is the load-bearing flag: pip MUST NOT replace the
+#    simulator-owned torch / gymnasium / numpy here.
+cd "$ARIEL_ROOT"
+pip install -e . --no-deps
+
+# 6) Guardrail check: verify ariel install did not bump binaries.
+#    Expected output: "BINARIES UNCHANGED ✓" with an empty diff.
+pip list --format=freeze \
+    | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
+    | sort > /tmp/ariel_phase25_binaries_after.txt
+if diff -u /tmp/ariel_phase25_binaries_before.txt \
+            /tmp/ariel_phase25_binaries_after.txt; then
+    echo "BINARIES UNCHANGED ✓"
+else
+    echo "ERROR: simulator-owned binaries were bumped by ariel install" >&2
+    echo "       inspect pyproject.toml [project.dependencies] for leaks" >&2
+    exit 1
+fi
+
+# 7) Quick import smoke for ariel.
+python -c "from ariel.simulation.tasks.drone_gate_env import DroneGateEnv; print('DroneGateEnv import OK')"
+```
+
+Why this shape: ariel's base `pyproject.toml` pins `numpy>=1.26,<2`
+specifically to be safe to install into an Isaac Lab env. Going the
+other way — installing Isaac Lab into an ariel-managed env — drags in
+sb3's compiled deps against numpy 2 and segfaults. See
+[DRONE_BLUEPRINT_PLAN.md §6 entries 15 and 17](../../DRONE_BLUEPRINT_PLAN.md)
+for the full env-stack story.
+
+---
+
+## 4. Running the shipped backends
 
 ### NumPy backend (gate task, sb3 PPO)
 
@@ -150,6 +237,8 @@ steps/sec on 8 parallel envs.
 
 ### Isaac Lab backend (hover task, env-stepping smoke for v1)
 
+Run from the env you built in §3b:
+
 ```bash
 python tutorials/pluggable_simulator/train.py \
     --simulator isaaclab \
@@ -158,8 +247,6 @@ python tutorials/pluggable_simulator/train.py \
     --max-iterations 3
 ```
 
-Requires the unified ariel+IsaacLab conda env (see
-[DRONE_BLUEPRINT_PLAN.md §6 entry 15](../../DRONE_BLUEPRINT_PLAN.md)).
 What v1 does:
 
 1. Launches Isaac Sim via `AppLauncher`.
@@ -174,12 +261,11 @@ Phase 2.5 will replace step 5 with a real PPO training run via
 `rl_games.torch_runner.Runner` — the config helper
 [`make_rl_games_agent_cfg`](../../src/ariel/simulation/tasks/isaaclab_hover_env.py)
 already returns a working agent config; wiring it through is gated on
-resolving the bundled-package-vs-conda-env stack issue described
-above.
+the env-stack stabilising via the recipe above.
 
 ---
 
-## 4. Adding your own simulator
+## 5. Adding your own simulator
 
 Five steps. The exact contract you implement depends on your RL
 library of choice:
@@ -270,7 +356,7 @@ choice — it just gets fitness numbers back per individual.
 
 ---
 
-## 5. Why this matters
+## 6. Why this matters
 
 The ARIEL consortium's collaborators bring their own simulators:
 MuJoCo, Aerial Gym, Isaac Lab, IsaacGym, custom in-house stacks.
