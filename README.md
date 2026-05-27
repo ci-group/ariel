@@ -37,7 +37,26 @@ cd ariel
 ```bash
 uv sync
 ```
-4. Run an example, in this case, brain evolution (aka learning) using:
+4. Install optional extras for your workflow (examples)
+```bash
+# sb3 gate-training path
+uv sync --extra rl-sb3 --extra torch
+
+# dashboard and rendering tools
+uv sync --extra viz
+
+# CAD / STL assembly tools
+uv sync --extra fabrication
+
+# additional experimental stacks used by selected examples
+uv sync --extra experimental
+```
+For Isaac Lab workflows, use the Isaac Lab-owned environment and install
+ariel without replacing simulator-owned binary packages:
+```bash
+pip install -e . --no-deps
+```
+5. Run an example, in this case, brain evolution (aka learning) using:
 ```bash
 uv run examples/re_book/1_brain_evolution.py
 ```

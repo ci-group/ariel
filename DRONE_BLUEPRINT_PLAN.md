@@ -249,21 +249,147 @@ What's landed (in order of commit):
 
 **Still pending — to pick up next session:**
 
-* **Phase 2.5 of pluggable simulator: actually train.** The
-  `rl_games` Runner trips on a transitive import chain (Isaac Sim's
-  bundled `torch.utils.tensorboard.writer` → lazy `tensorflow` →
-  `jax` → `numpy.dtypes.StringDType`) because Isaac Sim's
-  `pip_prebundle/` ships an older numpy than the conda env's
-  numpy 2.4.6. Options: (a) install a clean conda env with pinned
-  versions matched to Isaac Sim's bundle, (b) shadow the bundled
-  torch with the conda env's torch on `PYTHONPATH`, (c) downgrade
-  jax + tensorboard to versions tolerant of numpy 2. Independent of
-  this, `rsl_rl` integration via `isaaclab_rl.rsl_rl` was a
-  separate dead end during Phase 2 — the adapter sends kwargs
-  (`optimizer`, `share_cnn_encoders`) that don't match the
-  installed `rsl-rl-lib` 3.0.1 PPO signature (and 5.x has its own
-  config shape mismatch). `rl_games` is the path we picked
-  forward; `make_rl_games_agent_cfg` in
+* **Phase 2.5 of pluggable simulator: stabilize the Isaac Lab
+  training stack, then run PPO.** The `rl_games` Runner trips on a
+  transitive import chain (Isaac Sim's bundled
+  `torch.utils.tensorboard.writer` → lazy `tensorflow` → `jax` →
+  `numpy.dtypes.StringDType`) because Isaac Sim's `pip_prebundle/`
+  ships an older numpy than the conda env's numpy 2.4.6. We should
+  stop treating the three remediations as peers; the recommended
+  path is a dedicated Isaac-Lab-specific training env pinned to the
+  Isaac Sim / Isaac Lab stack, with ariel installed into it without
+  upgrading the simulator-owned binaries.
+
+  **Concrete packaging / env plan:**
+  1. Create a clean `ariel-isaaclab-train` conda env from Isaac
+    Lab's published env / bundled versions first, not from
+    ariel's top-level `pyproject.toml`.
+  2. Install Isaac Lab / Isaac Sim into that env, verify the stock
+    `rl_games` examples run, then install ariel editable with
+    `pip install -e . --no-deps` so pip does not replace the
+    simulator-owned torch / gymnasium / numpy stack.
+  3. Trim ariel's top-level dependencies down to simulator-agnostic
+    requirements. In particular, move `torch`, `torchvision`, and
+    `gymnasium` out of `[project.dependencies]`; do not let the
+    base package force versions of libraries Isaac Lab already owns.
+  4. Pin shared binary deps conservatively in the base package:
+    `numpy>=1.26,<2` is the target unless a code path is proven to
+    require a numpy-2-only API. The current `numpy>=2.0.2` default
+    is the wrong bias for this integration.
+  5. If we keep an optional `isaaclab` extra, it should be a
+    glue-only extra, not a second owner of the low-level runtime.
+    That means: no `torch`, no `torchvision`, no `gymnasium`, and
+    no attempt to pip-install Isaac Lab itself from ariel. At most,
+    it carries tiny compatibility pins that are not already owned by
+    Isaac Lab's env.
+  6. Treat shadowing torch on `PYTHONPATH` as a diagnostic hack, not
+    a supported solution. Treat `jax` / `tensorboard` downgrades as
+    a probe to confirm the import chain, not the primary fix.
+  7. Phase-2.5 exit criterion: one reproducible env-creation recipe,
+    one documented install command, and one short `rl_games` PPO
+    smoke run from `tutorials/pluggable_simulator/train.py`.
+
+  **Option A execution recipe (copy/paste):**
+
+  ```bash
+  # 0) Paths (adjust if your checkout differs)
+  export ARIEL_ROOT="$HOME/Documents/sandbox/ariel"
+  export ISAACLAB_ROOT="$HOME/Documents/sandbox/IsaacLab"
+  export ENV_NAME="ariel-isaaclab-train"
+
+  # 1) Create a clean env from Isaac Lab's pinned stack
+  conda env remove -n "$ENV_NAME" -y || true
+  conda env create -n "$ENV_NAME" -f "$ISAACLAB_ROOT/environment.yml"
+  conda activate "$ENV_NAME"
+
+  # 2) Install Isaac Lab into that env (owns torch/gymnasium/numpy ABI layer)
+  cd "$ISAACLAB_ROOT"
+  ./isaaclab.sh -i
+
+  # 3) Sanity-check Isaac Lab python path first
+  ./isaaclab.sh -p -c "import isaaclab; print('isaaclab import OK')"
+
+  # 4) Install ariel WITHOUT dependency resolution side effects
+  cd "$ARIEL_ROOT"
+  pip install -e . --no-deps
+
+  # 5) Quick import smoke for ariel + sb3/numpy backend path
+  python -c "from ariel.simulation.tasks.drone_gate_env import DroneGateEnv; print('DroneGateEnv import OK')"
+
+  # 6) Isaac Lab backend smoke (env stepping; PPO training still Phase 2.5 gate)
+  python tutorials/pluggable_simulator/train.py \
+      --simulator isaaclab \
+      --headless \
+      --num-envs 16 \
+      --max-iterations 3
+  ```
+
+  **Option A acceptance checklist (mark done when all true):**
+  - [ ] New clean env is created from Isaac Lab's `environment.yml` with no manual pin surgery.
+  - [ ] Isaac Lab import sanity check passes before ariel is installed.
+  - [ ] `pip install -e . --no-deps` completes and does not replace simulator-owned torch/gymnasium/numpy.
+  - [ ] `DroneGateEnv` import smoke passes in the Option A env.
+  - [ ] `train.py --simulator isaaclab --headless --max-iterations 3` completes successfully.
+  - [ ] One short `rl_games` PPO smoke run completes in this env (single command recorded in the notes).
+  - [ ] Re-running the same commands in a fresh env reproduces the same result.
+
+  **Option B (diagnostic only): shadow bundled torch with env torch**
+
+  **Purpose:** quickly test whether the `rl_games` failure is mainly an
+  import-precedence issue (`pip_prebundle/torch` winning over the env's
+  torch).
+
+  **Why this is NOT a primary fix:** this changes import order rather than
+  making the environment reproducible. It is sensitive to launch scripts,
+  shell state, and path ordering.
+
+  **Minimal runbook (for diagnosis):**
+  1. Start from a known-good Option A env.
+  2. Export `PYTHONPATH` so the env's site-packages come before Isaac Sim's
+     bundled paths.
+  3. Run the shortest failing `rl_games` smoke command.
+  4. Capture `sys.path`, `torch.__file__`, and `numpy.__version__` in logs.
+
+  **Stop criteria:**
+  - If this makes PPO smoke pass once but the result is not reproducible in
+    a fresh shell, treat as a confirmed diagnostic only.
+  - If this still fails on the same tensorboard/jax path, abandon Option B
+    and return to Option A.
+
+  **Rollback:** unset `PYTHONPATH`, reopen shell, and re-run baseline Option A
+  smoke to verify environment behavior is unchanged.
+
+  **Option C (diagnostic fallback): targeted jax/tensorboard downgrade**
+
+  **Purpose:** test whether the `numpy.dtypes.StringDType` failure is caused by
+  a specific transitive version edge in `jax` / `tensorboard`.
+
+  **Why this is NOT a primary fix:** package surgery in this subtree can hide
+  deeper ABI mismatches and often drifts over time.
+
+  **Minimal runbook (for diagnosis):**
+  1. Clone Option A env to an isolated test env.
+  2. Apply only the smallest jax/tensorboard version change needed for the
+     failing import path.
+  3. Re-run the same short `rl_games` smoke command.
+  4. Record before/after versions for `jax`, `tensorboard`, `tensorflow`,
+     `numpy`, and `torch`.
+
+  **Stop criteria:**
+  - If PPO smoke passes, treat this as evidence about the failure mechanism,
+    not production config, until reproduced from a locked env spec.
+  - If additional downgrades cascade beyond this subtree, stop and revert;
+    this is no longer a targeted probe.
+
+  **Rollback:** discard the test env and recreate from Option A recipe rather
+  than attempting in-place undo.
+
+  Independent of this, `rsl_rl` integration via
+  `isaaclab_rl.rsl_rl` was a separate dead end during Phase 2 — the
+  adapter sends kwargs (`optimizer`, `share_cnn_encoders`) that do
+  not match the installed `rsl-rl-lib` 3.0.1 PPO signature (and 5.x
+  has its own config shape mismatch). `rl_games` is the path we
+  picked forward; `make_rl_games_agent_cfg` in
   `isaaclab_hover_env.py` is the matching config helper.
 * **Compliant joints (URDF revolute + sidecar stiffness + USD
   `ariel:*` attrs).** Schema landed on `compliant-joint-schema`;
@@ -274,13 +400,16 @@ What's landed (in order of commit):
 * Pytest integration test for the Blueprint → URDF → USD pipeline
   (now feasible in-process under the unified env; just needs a
   `pytest.mark.isaaclab` skip-if-not-available guard).
-* Targeted dep pins in pyproject.toml to keep numpy < 2 and
-  gymnasium == 1.2.1 so isaaclab's pins aren't violated. **Promoted
-  from stretch:** the smoke test for `pluggable-simulator` segfaulted
-  in the unified isaaclab env on PPO startup (likely a numpy 2 ABI
-  conflict with stable-baselines3's compiled deps). Same smoke test
-  passed cleanly in the ariel 3.12 venv where numpy 1.x is intact,
-  confirming the seam itself is correct.
+* **~~Targeted dep pins in pyproject.toml~~ — implemented this
+  session as a dependency-ownership split.**
+  `pyproject.toml` now keeps simulator-agnostic requirements in
+  `[project.dependencies]` and moves simulator-/workflow-specific
+  stacks to extras (`rl-sb3`, `torch`, `viz`, `fabrication`,
+  `experimental`). Base `numpy` is pinned conservatively
+  (`>=1.26,<2`) and `rl-sb3` pins `gymnasium==1.2.1` to match
+  Isaac Lab expectations. `README.md` now documents the
+  extra-specific install commands and the Isaac-Lab-safe
+  `pip install -e . --no-deps` path.
 
 ## 6. Design decisions (Phase 3 — URDF / USD backends)
 
@@ -447,10 +576,19 @@ Each entry: **decision** — *why*; alternatives considered.
     `isaaclab` conda env after `pip install -e ariel`. The pip
     resolver reports conflicts (numpy 2 vs `isaaclab`'s `<2`,
     gymnasium 1.3 vs 1.2.1, torch CUDA build swap from `+cu128` to
-    `+cu130`) but the URDF→USD pipeline still works. If those
-    conflicts bite elsewhere (RL training, dex_retargeting, etc.)
-    they'll need targeted pins in ariel's pyproject.toml; deferred
-    until something actually breaks.
+    `+cu130`) but the URDF→USD pipeline still works. Phase 2.5 makes
+    this no longer a vague future cleanup item: ariel's base package
+    should stop owning Isaac-Lab-sensitive binary deps. The concrete
+    split is:
+
+    * keep simulator-agnostic deps in `[project.dependencies]`;
+    * pin base `numpy` conservatively (`>=1.26,<2` unless proven
+      otherwise);
+    * move `torch`, `torchvision`, and `gymnasium` out of top-level
+      deps;
+    * keep any future `isaaclab` extra glue-only, so the env created
+      by Isaac Lab remains the sole owner of torch / gymnasium /
+      low-level CUDA-coupled packages.
 
 17. **Simulator backends are a plug point, not a hard-coded choice;
     the contract is two complementary shapes — one per ecosystem.**
@@ -536,6 +674,36 @@ Each entry: **decision** — *why*; alternatives considered.
     other internal reader (`reset_seed`). Any PPO user of
     `DroneGateEnv` would have hit this; nothing in the existing
     examples exercised it because they didn't pass `seed=` to PPO.
+
+18. **Session update (dependency split + smoke validation):
+    two import-chain blockers were fixed to make the new extras
+    usable in clean envs.**
+
+    **Why:** after moving dependencies behind extras, clean-env smoke
+    tests surfaced two failures that made the split incomplete:
+    (a) importing `DroneGateEnv` through the `rl-sb3` path
+    transitively imported `fcl` from an unrelated operator module;
+    (b) `fabrication` imports failed because
+    `phenotype_assembly/parts/` did not exist even though the
+    assembly code imported it.
+
+    **What was changed this session:**
+    - `src/ariel/ec/drone/genome_handlers/__init__.py` was converted
+      from eager imports to lazy `__getattr__`-based imports. This
+      prevents optional heavy deps from being imported just by touching
+      helper modules under `genome_handlers`.
+    - Added missing
+      `src/ariel/body_phenotypes/drone/phenotype_assembly/parts/`
+      package with API-compatible factories:
+      `create_core_plate`, `create_arm_mount`, `create_motor_arm`,
+      `create_motor_mount`.
+
+    **Validation:** reran smoke tests in fresh temporary uv envs.
+    `rl-sb3 + torch` now imports `DroneGateEnv` successfully; and
+    `fabrication` now imports
+    `ariel.body_phenotypes.drone.phenotype_assembly.generator`
+    successfully. `viz` and `experimental` extra smoke checks also
+    passed.
 
 ## 7. Asks for the meeting
 

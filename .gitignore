@@ -31,6 +31,10 @@ eggs/
 lib/
 lib64/
 parts/
+# Don't let the buildout-style `parts/` rule above silently swallow
+# source-tree `parts/` packages (e.g.
+# src/ariel/body_phenotypes/drone/phenotype_assembly/parts/).
+!src/**/parts/
 sdist/
 var/
 wheels/
