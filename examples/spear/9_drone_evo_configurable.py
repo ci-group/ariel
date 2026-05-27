@@ -622,6 +622,6 @@ console.log(
 )
 console.log(
     f"\nTo visualise:\n"
-    f"  uv run examples/e_drones_ec/6_visualize_evo_results.py --run-dir {DATA}\n"
+    f"  uv run examples/e_drones_ec/6_visualize_evo_results.py {DATA}\n"
     f"  uv run examples/spear/8_visualize_gate_track.py  --run-dir {DATA}"
 )

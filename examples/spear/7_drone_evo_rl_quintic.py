@@ -635,9 +635,7 @@ if policy_b64:
     console.log(f"  policy    → {policy_path}")
     console.log(
         f"\n  visualize:\n"
-        f"    uv run examples/e_drones_ec/6_visualize_evo_results.py \\\n"
-        f"        --blueprint {bp_path} --policy {policy_path} \\\n"
-        f"        --gate-pos {gate_pos_path} --gate-yaw {gate_yaw_path} --no-show"
+        f"    uv run examples/e_drones_ec/6_visualize_evo_results.py --run-dir {DATA}"
     )
 else:
     console.log("[yellow]  policy_b64 tag missing — policy not saved[/yellow]")

@@ -1,23 +1,20 @@
-"""Visualise results from 5_drone_evo_rl_figure8.py.
+"""Visualise results from a drone evolution run directory.
 
 Three outputs:
   1. Fitness-over-generations plot (best & mean per generation).
   2. DroneVisualizer 4-panel rendering of the best blueprint.
-  3. MuJoCo video of the best individual flying the figure-8 with its PPO policy.
+  3. MuJoCo video of the best individual flying the gate track.
 
 Usage
 -----
-Point at the directory produced by script 5 (auto-detects all files):
+Pass the run directory produced by script 7, 8, or 9:
 
     uv run examples/e_drones_ec/6_visualize_evo_results.py \\
-        --run-dir __data__/drone_evo_rl_figure8
+        __data__/drone_evo_configurable/20260527_143200
 
-Or supply explicit paths:
-
-    uv run examples/e_drones_ec/6_visualize_evo_results.py \\
-        --db        __data__/drone_evo_rl_figure8/database_20260525_145131.db \\
-        --blueprint __data__/drone_evo_rl_figure8/best_blueprint_20260525_145131.json \\
-        --policy    __data__/drone_evo_rl_figure8/best_policy_20260525_145131.zip
+Files are auto-detected by glob pattern (latest match wins):
+  database_*.db, best_blueprint_*.json, best_policy_*.zip,
+  gate_pos_*.npy, gate_yaw_*.npy
 
 Add --no-show to save matplotlib figures without opening GUI windows.
 Add --view to open a MuJoCo passive viewer instead of writing an MP4.
@@ -39,15 +36,15 @@ import numpy as np
 # CLI
 # ---------------------------------------------------------------------------
 
-parser = argparse.ArgumentParser(description="Visualise drone evo + PPO results")
-parser.add_argument("--run-dir", default=None,
-                    help="Directory written by script 5 (auto-detects DB and blueprint).")
-parser.add_argument("--db", default=None, help="Explicit path to SQLite DB.")
-parser.add_argument("--blueprint", default=None, help="Explicit path to blueprint JSON.")
-parser.add_argument("--policy", default=None,
-                    help="Explicit path to best_policy_*.zip (SB3 format).")
-parser.add_argument("--out-dir", default=None,
-                    help="Where to save figures and video (default: same dir as DB).")
+parser = argparse.ArgumentParser(
+    description="Visualise drone evo + PPO results from a run directory.",
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+)
+parser.add_argument(
+    "--run-dir",
+    type=Path,
+    help="Directory produced by script 7, 8, or 9 (auto-detects all files).",
+)
 parser.add_argument("--rollout-time", type=float, default=15.0,
                     help="PPO rollout duration for video in seconds (default 15).")
 parser.add_argument("--dt", type=float, default=0.01)
@@ -58,12 +55,6 @@ parser.add_argument("--no-video", action="store_true",
                     help="Skip the MuJoCo video step.")
 parser.add_argument("--view", action="store_true",
                     help="Open MuJoCo passive viewer instead of writing MP4.")
-parser.add_argument("--gate-pos", default=None,
-                    help="Path to gate_pos_*.npy (NED coords, shape N×3). "
-                         "Auto-detected from --run-dir if omitted.")
-parser.add_argument("--gate-yaw", default=None,
-                    help="Path to gate_yaw_*.npy (shape N,). "
-                         "Auto-detected from --run-dir if omitted.")
 args = parser.parse_args()
 
 if args.no_show:
@@ -71,51 +62,41 @@ if args.no_show:
 
 # Resolve paths ---------------------------------------------------------------
 
-def _latest(directory: Path, pattern: str) -> Path | None:
-    matches = sorted(directory.glob(pattern))
+run_dir: Path = args.run_dir
+if not run_dir.is_dir():
+    raise SystemExit(f"run_dir does not exist: {run_dir}")
+
+def _latest(pattern: str) -> Path | None:
+    matches = sorted(run_dir.glob(pattern))
     return matches[-1] if matches else None
 
-run_dir = Path(args.run_dir) if args.run_dir else None
+db_path     = _latest("database_*.db")
+bp_path     = _latest("best_blueprint_*.json")
+policy_path = _latest("best_policy_*.zip")
+_gpos_path  = _latest("gate_pos_*.npy")
+_gyaw_path  = _latest("gate_yaw_*.npy")
 
-db_path = Path(args.db) if args.db else (
-    _latest(run_dir, "database_*.db") if run_dir else None
-)
-bp_path = Path(args.blueprint) if args.blueprint else (
-    _latest(run_dir, "best_blueprint_*.json") if run_dir else None
-)
-policy_path = Path(args.policy) if args.policy else (
-    _latest(run_dir, "best_policy_*.zip") if run_dir else None
-)
+if db_path is None:
+    raise SystemExit(f"No database_*.db found in {run_dir}")
+if bp_path is None:
+    raise SystemExit(f"No best_blueprint_*.json found in {run_dir}")
 
-if db_path is None or not db_path.exists():
-    raise SystemExit(f"DB not found. Pass --db or --run-dir. (resolved: {db_path})")
-if bp_path is None or not bp_path.exists():
-    raise SystemExit(f"Blueprint not found. Pass --blueprint or --run-dir. (resolved: {bp_path})")
-
-# Gate files — optional; enable gate rendering in MuJoCo when present
-_gpos_path = Path(args.gate_pos) if args.gate_pos else (
-    _latest(run_dir, "gate_pos_*.npy") if run_dir else None
-)
-_gyaw_path = Path(args.gate_yaw) if args.gate_yaw else (
-    _latest(run_dir, "gate_yaw_*.npy") if run_dir else None
-)
 gate_pos_ned: np.ndarray | None = None
 gate_yaw_arr: np.ndarray | None = None
-if (_gpos_path is not None and _gpos_path.exists()
-        and _gyaw_path is not None and _gyaw_path.exists()):
+if _gpos_path is not None and _gyaw_path is not None:
     gate_pos_ned = np.load(_gpos_path)
     gate_yaw_arr = np.load(_gyaw_path)
 
-out_dir = Path(args.out_dir) if args.out_dir else db_path.parent
+out_dir = run_dir
 out_dir.mkdir(parents=True, exist_ok=True)
 
 run_tag = db_path.stem.replace("database_", "")
-print(f"DB         : {db_path}")
-print(f"Blueprint  : {bp_path}")
-print(f"Policy     : {policy_path or '(not found — video step will be skipped)'}")
-print(f"Gates      : {gate_pos_ned.shape[0]} gates from {_gpos_path.name}"  # type: ignore[union-attr]
-      if gate_pos_ned is not None else "Gates      : none (MuJoCo scene will have no gate markers)")
-print(f"Output dir : {out_dir}")
+print(f"Run dir    : {run_dir}")
+print(f"DB         : {db_path.name}")
+print(f"Blueprint  : {bp_path.name}")
+print(f"Policy     : {policy_path.name if policy_path else '(not found — video step will be skipped)'}")
+print(f"Gates      : {gate_pos_ned.shape[0]} gates" if gate_pos_ned is not None
+      else "Gates      : none (MuJoCo scene will have no gate markers)")
 
 # ---------------------------------------------------------------------------
 # 1. Fitness-over-generations plot
