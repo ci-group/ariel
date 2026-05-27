@@ -213,6 +213,203 @@ PPO_ENT_COEF   = 0.01    # entropy bonus (higher = more exploration)
 
 ---
 
+## Switching the simulator
+
+Two gate-environment implementations are available.  Both satisfy the
+`stable_baselines3.common.vec_env.VecEnv` interface and accept identical
+constructor arguments, so swapping one for the other is a one-line change.
+
+| | `TorchDroneGateEnv` | `DroneGateEnv` |
+|---|---|---|
+| **Backend** | PyTorch (all state on device) | NumPy (CPU only) |
+| **Device** | `cpu` or `cuda:X` | CPU only |
+| **Speed** | ~10–50× faster on GPU | Baseline |
+| **History obs** | ✗ not yet supported | ✓ `num_state_history`, `num_action_history` |
+| **Source** | `src/ariel/simulation/tasks/torch_drone_gate_env.py` | `src/ariel/simulation/tasks/drone_gate_env.py` |
+
+### Switching between the two built-in environments
+
+In `9_drone_evo_configurable.py`, find the `# Environment factory` block and
+change the import at the top of the file:
+
+```python
+# GPU (default):
+from ariel.simulation.tasks.torch_drone_gate_env import TorchDroneGateEnv as GateEnv
+
+# CPU reference:
+from ariel.simulation.tasks.drone_gate_env import DroneGateEnv as GateEnv
+```
+
+Then update the `_make_env` factory to use `GateEnv` instead of a hardcoded class name.
+
+### Plugging in your own simulator
+
+Any class that implements `stable_baselines3.common.vec_env.VecEnv` works as a
+drop-in.  The minimum interface required by the training loop is:
+
+```python
+class MyEnv(VecEnv):
+    def __init__(self, num_envs, propellers, gates_pos, gate_yaw, start_pos, device, ...):
+        # propellers: list[Propeller] — built from the drone blueprint by
+        #   blueprint_to_propellers(bp, convention="ned")
+        # gates_pos:  np.ndarray (N, 3) — gate centres in NED metres
+        # gate_yaw:   np.ndarray (N,)   — gate headings in radians
+        # start_pos:  np.ndarray (3,)   — drone start position
+        ...
+
+    def reset(self) -> np.ndarray: ...         # → obs (num_envs, obs_dim)
+    def step_async(self, actions): ...
+    def step_wait(self): ...                   # → obs, rewards, dones, infos
+    # stubs required by SB3:
+    def close(self): pass
+    def env_method(self, *a, **kw): pass
+    def env_is_wrapped(self, *a, **kw): return [False] * self.num_envs
+    def get_attr(self, *a, **kw): raise AttributeError()
+    def set_attr(self, *a, **kw): pass
+    def seed(self, seed=None): pass
+```
+
+Then replace the `_make_env` factory in `9_drone_evo_configurable.py`:
+
+```python
+def _make_env(propellers):
+    return MyEnv(
+        num_envs   = PPO_NUM_ENVS,
+        propellers = propellers,
+        gates_pos  = _gate_pos,
+        gate_yaw   = _gate_yaw,
+        start_pos  = _start_pos,
+        device     = args.device,
+    )
+```
+
+The `propellers` argument is a list of `ariel.simulation.drone.propeller.Propeller`
+objects built from the candidate blueprint — your env receives a fresh one for
+every individual the EA evaluates.
+
+---
+
+## Switching the genotype encoding
+
+Three genome handlers are available in
+`src/ariel/ec/drone/genome_handlers/`.  All three produce a `(max_arms, 6)`
+phenotype array consumed by `spherical_angular_to_blueprint`, so the EA and
+PPO evaluation loop are unaffected by the choice.
+
+### `SphericalAngularDroneGenomeHandler` ← current default
+
+Each arm is described in **spherical coordinates + motor orientation**:
+
+| col | parameter | range |
+|-----|-----------|-------|
+| 0 | arm length (m) | 0.055 – 0.17 |
+| 1 | arm azimuth (rad) | −π … +π |
+| 2 | arm elevation (rad) | −π/2 … +π/2 |
+| 3 | motor disc azimuth (rad) | −π … +π |
+| 4 | motor disc pitch (rad) | −π … +π |
+| 5 | propeller spin direction | 0 (CCW) or 1 (CW) |
+
+Angular parameters wrap at ±π; no parameter clipping needed.
+Crossover uses NEAT-style innovation-number alignment so arm genes are
+matched by identity, not by position in the array.
+
+```python
+from ariel.ec.drone.genome_handlers.spherical_angular_genome_handler import (
+    SphericalAngularDroneGenomeHandler,
+)
+genome_handler = SphericalAngularDroneGenomeHandler(
+    min_max_narms=(4, 8),
+    parameter_limits=PARAMETER_LIMITS,   # shape (6, 2)
+    append_arm_chance=0.1,               # probability of adding/removing an arm per mutation
+    bilateral_plane_for_symmetry="xz",   # None | "xz" | "xy" | "yz"
+    repair=False,
+    rnd=np.random.default_rng(seed),
+)
+```
+
+### `CartesianEulerDroneGenomeHandler`
+
+Each arm is described in **Cartesian position + Euler orientation** — easier to
+reason about geometrically, but angular parameters clip (no wrap) and arm
+identity across crossover is position-based:
+
+| col | parameter | range |
+|-----|-----------|-------|
+| 0–2 | motor x, y, z (m) | −0.4 … +0.4 each |
+| 3–5 | roll, pitch, yaw (rad) | −π … +π each |
+| 6 | propeller spin direction | 0 or 1 |
+
+Collision repair (`enable_collision_repair=True`) is strongly recommended
+because Cartesian mutations can easily produce overlapping propellers.
+
+```python
+from ariel.ec.drone.genome_handlers.cartesian_euler_genome_handler import (
+    CartesianEulerDroneGenomeHandler,
+)
+genome_handler = CartesianEulerDroneGenomeHandler(
+    min_max_narms=(4, 8),
+    append_arm_chance=0.0,        # 0 = fixed arm count
+    repair=True,
+    enable_collision_repair=True,
+    rnd=np.random.default_rng(seed),
+)
+```
+
+### `CPPNNeatDroneGenomeHandler` — indirect encoding
+
+The genome is a **CPPN** (Compositional Pattern-Producing Network).  It takes
+a normalised segment index + bias as input and produces 7 outputs
+(`arm_present`, `magnitude`, `arm_yaw`, `arm_pitch`, `motor_yaw`,
+`motor_pitch`, `direction`).  Topology and weights are evolved with NEAT.
+This is the highest-expressive option — able to discover regular, symmetric
+patterns that direct encodings rarely find — but also the slowest to converge.
+
+```python
+from ariel.ec.drone.genome_handlers.cppn_neat_genome_handler import (
+    CPPNNeatDroneGenomeHandler,
+)
+genome_handler = CPPNNeatDroneGenomeHandler(
+    num_segments=8,           # number of angular positions the CPPN queries
+    min_max_narms=(3, 8),
+    init_topology="empty",    # "empty" = classic NEAT  |  "seeded" = pre-wired start
+    prob_add_node=0.03,
+    prob_add_connection=0.05,
+    prob_mutate_weights=0.80,
+    rng=np.random.default_rng(seed),
+)
+```
+
+### Swapping the handler in `9_drone_evo_configurable.py`
+
+1. Replace the `genome_handler = SphericalAngularDroneGenomeHandler(...)` line
+   in the `# Genome handler` block with your chosen handler.
+2. Update `PARAMETER_LIMITS` / constructor args to match the new handler's
+   parameter count (6 for Spherical/CPPN, 7 for Cartesian).
+3. The `initialize_drones`, `crossover_drones`, and `mutate_drones` operation
+   factories all accept a `template_handler` argument — pass the new handler
+   and they will delegate mutation/crossover to it automatically.
+
+### Bring your own genotype
+
+Subclass `ariel.ec.drone.genome_handlers.base.GenomeHandler` and implement:
+
+```python
+class MyGenomeHandler(GenomeHandler):
+    def crossover(self, other: "MyGenomeHandler") -> "MyGenomeHandler": ...
+    def mutate(self) -> None: ...
+    def copy(self) -> "MyGenomeHandler": ...
+    def get_phenotype(self) -> np.ndarray: ...  # must return shape (max_arms, 6)
+    def is_valid(self) -> bool: ...
+    def generate_random_population(self, n: int) -> list["MyGenomeHandler"]: ...
+```
+
+`get_phenotype()` must return a `(max_arms, 6)` float array where inactive arms
+are NaN-padded — columns match the `SphericalAngularDroneGenomeHandler` format
+(`[length, arm_az, arm_el, motor_az, motor_pitch, spin]`) because
+`spherical_angular_to_blueprint` is called on this array downstream.
+
+---
+
 ## Repository map — where to find things
 
 ```
