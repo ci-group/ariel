@@ -295,9 +295,16 @@ Uses `DroneSimulator` (pure NumPy + SymPy) via `NumpyBlueprintGateEnv`
 the established `DroneGateEnv`. >100× real-time on CPU. ~6600 env-
 steps/sec on 8 parallel envs.
 
-### Isaac Lab backend (hover task, env-stepping smoke for v1)
+### Isaac Lab backend (hover task)
 
-Run from the env you built in §3b:
+Run from the env you built in §3b. Two modes:
+
+**`--mode train` (default): real `rl_games` PPO training.** This is
+the headline workflow — full Blueprint → URDF → USD → Isaac Sim
+parallel envs → `rl_games.torch_runner.Runner` PPO. Uses the agent
+config from
+[`make_rl_games_agent_cfg`](../../src/ariel/simulation/tasks/isaaclab_hover_env.py)
+which mirrors Isaac Lab's reference quadcopter PPO config.
 
 ```bash
 python tutorials/pluggable_simulator/train.py \
@@ -307,21 +314,24 @@ python tutorials/pluggable_simulator/train.py \
     --max-iterations 3
 ```
 
-What v1 does:
+**`--mode step`: random-action env-stepping smoke.** Skips PPO,
+useful for verifying env construction or debugging the Isaac-Lab-
+side env-stack without paying for a PPO run. Steps the env with
+`uniform(-1, 1)` actions for `max_iterations × 24` steps, computing
+observations + rewards (`-distance_to_goal × step_dt`) + done flags
+per step.
 
-1. Launches Isaac Sim via `AppLauncher`.
-2. Runs `blueprint_to_urdf` to produce a URDF.
-3. Calls `UrdfConverter` to produce a USD.
-4. Spawns N parallel articulation instances in Isaac Sim.
-5. Steps the env with random actions for `max_iterations × 24` steps,
-   computing observations + rewards (`-distance_to_goal × step_dt`)
-   + done flags per step. Verifies the whole physics + reward pipeline.
+```bash
+python tutorials/pluggable_simulator/train.py \
+    --simulator isaaclab \
+    --mode step \
+    --headless \
+    --num-envs 16 \
+    --max-iterations 3
+```
 
-Phase 2.5 will replace step 5 with a real PPO training run via
-`rl_games.torch_runner.Runner` — the config helper
-[`make_rl_games_agent_cfg`](../../src/ariel/simulation/tasks/isaaclab_hover_env.py)
-already returns a working agent config; wiring it through is gated on
-the env-stack stabilising via the recipe above.
+Both modes share the same `IsaacLabBlueprintHoverEnv`; only the
+post-construction code path differs.
 
 ---
 

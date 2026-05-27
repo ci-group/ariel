@@ -9,9 +9,8 @@ that matches how real heterogeneous simulator ecosystems work:
                            + stable-baselines3 PPO   (gate-passing task)
 
   --simulator isaaclab   → IsaacLabBlueprintHoverEnv (DirectRLEnv)
-                           + random-action env stepping  (hover-to-goal task;
-                                                         rl_games PPO wiring
-                                                         pending Phase 2.5)
+                           + rl_games PPO (default) or random-action env
+                             stepping (with `--mode step`)  (hover-to-goal task)
 
 The morphology is built from a small set of presets via
 ``spherical_angular_to_blueprint``; the EA above this script never
@@ -23,9 +22,17 @@ Examples:
     python tutorials/pluggable_simulator/train.py --simulator numpy \\
         --total-timesteps 5000 --num-envs 4
 
-    # Isaac Lab backend, hover task, rsl_rl PPO (headless, short run).
+    # Isaac Lab backend, hover task, rl_games PPO (headless, short run).
+    # `--mode train` is the default; PPO trains for --max-iterations
+    # epochs.
     python tutorials/pluggable_simulator/train.py --simulator isaaclab \\
         --headless --max-iterations 20 --num-envs 64
+
+    # Same backend, but `--mode step` skips PPO and runs a random-action
+    # env-stepping loop. Faster sanity check for env construction and
+    # the Isaac-Lab-side env-stack.
+    python tutorials/pluggable_simulator/train.py --simulator isaaclab \\
+        --mode step --headless --max-iterations 3 --num-envs 16
 """
 from __future__ import annotations
 
@@ -113,10 +120,110 @@ def main_numpy(parser: argparse.ArgumentParser) -> None:
 
 # ---------- isaaclab backend: rsl_rl PPO + DirectRLEnv --------------------------
 
+def _isaaclab_step_smoke(env, args) -> None:
+    """Random-action stepping loop for fast env-construction validation.
+
+    Useful when iterating on env code or env-stack health; avoids PPO's
+    setup cost. The recipe's Option A acceptance prefers
+    `--mode train` (real rl_games PPO), but `--mode step` remains the
+    fastest sanity check.
+    """
+    import torch  # noqa: PLC0415
+
+    n_steps = max(1, args.max_iterations) * 24  # iterations × horizon
+    _log(f"stepping env with random actions for {n_steps} steps "
+         f"(env-construction smoke)...")
+
+    env.reset()
+    action_dim = env.cfg.action_space
+    rewards_seen: list[float] = []
+    t0 = time.time()
+    for step in range(n_steps):
+        actions = (torch.rand(args.num_envs, action_dim, device=args.device) * 2.0 - 1.0)
+        _obs_dict, reward, _terminated, _truncated, _info = env.step(actions)
+        rewards_seen.append(float(reward.mean().item()))
+        if (step + 1) % 24 == 0:
+            _log(f"  step {step+1:4d} | mean reward (last 24): "
+                 f"{sum(rewards_seen[-24:])/24:.4f}")
+    dt = time.time() - t0
+
+    _log(f"=== env-stepping smoke complete ===")
+    _log(f"  wall time      : {dt:.1f} s")
+    _log(f"  steps          : {n_steps}")
+    _log(f"  steps/sec      : {n_steps / dt:.0f}")
+    _log(f"  mean reward    : {sum(rewards_seen) / len(rewards_seen):.4f}")
+
+
+def _isaaclab_rl_games_train(env, args) -> None:
+    """Real PPO training via rl_games + Isaac Lab's adapter.
+
+    Reaches the last Option A acceptance box: ``one short `rl_games` PPO
+    smoke run completes in this env``. Mirrors Isaac Lab's official
+    rl_games training pattern from
+    ``IsaacLab/scripts/reinforcement_learning/rl_games/train.py``.
+    """
+    from ariel.simulation.tasks.isaaclab_hover_env import (  # noqa: PLC0415
+        make_rl_games_agent_cfg,
+    )
+    from isaaclab_rl.rl_games import RlGamesGpuEnv, RlGamesVecEnvWrapper  # noqa: PLC0415
+    from rl_games.common import env_configurations, vecenv  # noqa: PLC0415
+    from rl_games.common.algo_observer import IsaacAlgoObserver  # noqa: PLC0415
+    from rl_games.torch_runner import Runner  # noqa: PLC0415
+
+    _log("building rl_games agent config...")
+    agent_cfg = make_rl_games_agent_cfg(
+        max_epochs=args.max_iterations,
+        minibatch_size=24 * args.num_envs,
+        device=args.device,
+    )
+    clip_obs = agent_cfg["params"]["env"].get("clip_observations", float("inf"))
+    clip_actions = agent_cfg["params"]["env"].get("clip_actions", float("inf"))
+    obs_groups = agent_cfg["params"]["env"].get("obs_groups")
+    concate_obs_groups = agent_cfg["params"]["env"].get("concate_obs_groups", True)
+
+    _log("wrapping env for rl_games...")
+    env = RlGamesVecEnvWrapper(
+        env, args.device, clip_obs, clip_actions, obs_groups, concate_obs_groups,
+    )
+
+    _log("registering env in rl_games global registry...")
+    vecenv.register(
+        "IsaacRlgWrapper",
+        lambda config_name, num_actors, **kwargs: RlGamesGpuEnv(
+            config_name, num_actors, **kwargs,
+        ),
+    )
+    env_configurations.register(
+        "rlgpu",
+        {"vecenv_type": "IsaacRlgWrapper", "env_creator": lambda **kwargs: env},
+    )
+    agent_cfg["params"]["config"]["num_actors"] = env.unwrapped.num_envs
+
+    _log("building rl_games Runner...")
+    runner = Runner(IsaacAlgoObserver())
+    runner.load(agent_cfg)
+    runner.reset()
+
+    _log(f"starting PPO training for max_epochs={args.max_iterations}...")
+    t0 = time.time()
+    runner.run({"train": True, "play": False, "sigma": None})
+    dt = time.time() - t0
+
+    _log(f"=== PPO training complete ===")
+    _log(f"  wall time   : {dt:.1f} s")
+    _log(f"  max_epochs  : {args.max_iterations}")
+
+
 def main_isaaclab(parser: argparse.ArgumentParser) -> None:
     # Add Isaac-Lab-specific args + AppLauncher args, then parse.
+    parser.add_argument("--mode", choices=["train", "step"], default="train",
+                        help="`train` (default): run real rl_games PPO. "
+                             "`step`: random-action env-stepping smoke "
+                             "(faster, useful for env-construction sanity).")
     parser.add_argument("--max-iterations", type=int, default=20,
-                        help="rl_games PPO max_epochs.")
+                        help="rl_games PPO max_epochs (--mode train) OR "
+                             "number of 24-step horizons of random actions "
+                             "(--mode step).")
     parser.add_argument("--device-override", type=str, default=None,
                         help="Override the auto-selected device "
                              "(e.g., 'cpu' or 'cuda:0').")
@@ -131,8 +238,7 @@ def main_isaaclab(parser: argparse.ArgumentParser) -> None:
     if args.device_override is not None:
         args.device = args.device_override
 
-    _log(f"=== pluggable-simulator demo: isaaclab + env-stepping smoke "
-         f"(rl_games PPO wiring deferred to Phase 2.5; see DRONE_BLUEPRINT_PLAN.md §6 entry 17) ===")
+    _log(f"=== pluggable-simulator demo: isaaclab + {args.mode} mode ===")
     _log(f"  preset / propsize : {args.preset} / {args.propsize}")
     _log(f"  num_envs          : {args.num_envs}")
     _log(f"  max_iterations    : {args.max_iterations}")
@@ -151,7 +257,6 @@ def main_isaaclab(parser: argparse.ArgumentParser) -> None:
             IsaacLabBlueprintHoverEnv,
             IsaacLabBlueprintHoverEnvCfg,
         )
-        import torch  # noqa: PLC0415
 
         _log("building blueprint...")
         blueprint = spherical_angular_to_blueprint(
@@ -168,36 +273,12 @@ def main_isaaclab(parser: argparse.ArgumentParser) -> None:
         _log(f"constructing env (num_envs={args.num_envs}, device={args.device})...")
         env = IsaacLabBlueprintHoverEnv(cfg=env_cfg)
 
-        # Phase 2 demonstrates env construction + scene spawn + per-step
-        # physics via a random-action stepping loop. Real PPO training
-        # via `rl_games.torch_runner.Runner` is structurally wired (see
-        # IsaacLabBlueprintHoverEnv's `make_rl_games_agent_cfg`) but
-        # blocked on a Phase 2.5 follow-up: Isaac Sim's bundled torch
-        # tensorboard transitively imports an older TF/jax/numpy stack
-        # that conflicts with the conda env's numpy 2. See
-        # DRONE_BLUEPRINT_PLAN.md §6 entry 17 for the full story.
-        n_steps = max(1, args.max_iterations) * 24  # iterations × horizon
-        _log(f"stepping env with random actions for {n_steps} steps "
-             f"(env-construction smoke; PPO is Phase 2.5)...")
-
-        env.reset()
-        action_dim = env.cfg.action_space
-        rewards_seen: list[float] = []
-        t0 = time.time()
-        for step in range(n_steps):
-            actions = (torch.rand(args.num_envs, action_dim, device=args.device) * 2.0 - 1.0)
-            _obs_dict, reward, _terminated, _truncated, _info = env.step(actions)
-            rewards_seen.append(float(reward.mean().item()))
-            if (step + 1) % 24 == 0:
-                _log(f"  step {step+1:4d} | mean reward (last 24): "
-                     f"{sum(rewards_seen[-24:])/24:.4f}")
-        dt = time.time() - t0
-
-        _log(f"=== env-stepping smoke complete ===")
-        _log(f"  wall time      : {dt:.1f} s")
-        _log(f"  steps          : {n_steps}")
-        _log(f"  steps/sec      : {n_steps / dt:.0f}")
-        _log(f"  mean reward    : {sum(rewards_seen) / len(rewards_seen):.4f}")
+        if args.mode == "step":
+            _isaaclab_step_smoke(env, args)
+        elif args.mode == "train":
+            _isaaclab_rl_games_train(env, args)
+        else:
+            raise SystemExit(f"unknown --mode {args.mode!r}")
     except Exception as exc:
         _log(f"ERROR: {type(exc).__name__}: {exc}")
         traceback.print_exc(file=sys.stderr)

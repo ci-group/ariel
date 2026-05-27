@@ -165,7 +165,12 @@ now go through `DroneBlueprint` rather than the phenotype generator directly.
   upstream fix before closed-loop MuJoCo Lee control is possible without
   the bridge.
 
-**Phase 3 — Isaac Lab spike. Largely landed for rigid drones (branch `blueprint-to-urdf`).**
+**Phase 3 — Isaac Lab spike. ✅ Landed end-to-end for rigid drones (branch `blueprint-to-urdf`, with the pluggable architecture on `pluggable-simulator`).**
+
+The full Blueprint → URDF → USD → DirectRLEnv → `rl_games` PPO path
+runs cleanly in the unified `ariel-isaaclab-train` conda env as of
+2026-05-27. All seven Option A acceptance boxes (see Phase 2.5
+section in "Still pending" below) tick empirically.
 Approach: Blueprint → URDF → USD via Isaac Lab's `UrdfConverter`, not a
 direct `blueprint_to_usd`. Direct `blueprint_to_usd` remains stubbed and
 now sits *behind* URDF in the roadmap.
@@ -404,12 +409,17 @@ What's landed (in order of commit):
   - [x] `train.py --simulator isaaclab --headless --max-iterations 3`
         completes successfully — 72 env-steps in 0.4 s @ 189 steps/sec,
         16 parallel Isaac Sim envs, mean reward `-0.0295`.
-  - [ ] One short `rl_games` PPO smoke run completes in this env
-        (single command recorded in the notes). **STILL PENDING:**
-        next step is to re-enable the `rl_games.torch_runner.Runner`
-        call in `train.py` (replaced with a random-action stepping
-        loop during Phase 2 debugging) and verify a 3-iteration PPO
-        run trains without erroring.
+  - [x] One short `rl_games` PPO smoke run completes in this env.
+        Executed on 2026-05-27 with
+        `python tutorials/pluggable_simulator/train.py
+        --simulator isaaclab --headless --num-envs 16
+        --max-iterations 3` (the new default `--mode train` exercises
+        the `rl_games.torch_runner.Runner` path). Result: 3 PPO
+        epochs in 0.9 s, fps_total climbing 719 → 2787 → 3318 across
+        epochs, ep3 reward `-1.2708529` (consistent with
+        `-distance × step_dt` summed over a 24-step horizon × 16 envs
+        with a freshly-initialized policy). Checkpoint saved to
+        `runs/ariel_blueprint_hover_27-15-14-30/nn/`.
   - [x] Re-running the same commands in a fresh env reproduces the
         same result (caveat: the in-progress lazy-init refactor and
         the recipe-side additions documented here — sourcing
