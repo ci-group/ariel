@@ -1,8 +1,9 @@
 """Overnight drone morphology evolution — asymmetric, high-budget configuration.
 
 Pre-tuned for a ~12-hour GPU run (RTX 5070 Ti or better):
-  • pop=20, gens=100  → 2 000 total evaluations
-  • PPO_STEPS=2_000_000, PPO_NUM_ENVS=3000  → ~18 s per individual, ~10h total
+  • pop=20, gens=300  → ~3 020 total evaluations
+    (crossover pairs 20 parents → 10 offspring/gen; survivors don't re-evaluate)
+  • PPO_STEPS=2_000_000, PPO_NUM_ENVS=3000  → ~14 s/individual → ~12h total
   • No bilateral symmetry — evolution is free to find asymmetric designs
 
 Quick start
@@ -97,7 +98,7 @@ console = Console()
 
 # ── Population & generations ──────────────────────────────────────────────────
 EA_POP_SIZE  = 20    # individuals alive at any time  (larger → more diversity)
-EA_GENS      = 100   # number of EA generations to run (~12h on RTX 5070 Ti)
+EA_GENS      = 300   # ~12h on RTX 5070 Ti (crossover yields 10 offspring/gen → 3020 evals @ ~14s each)
 
 # ── Drone body: number of arms ────────────────────────────────────────────────
 # All arms share the same propeller size (set in CONFIG 3).
