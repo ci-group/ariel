@@ -2,7 +2,7 @@
 
 This tutorial demonstrates how ariel decouples the **EA + RL learning loop**
 from the **physics simulator** so that collaborators can plug in their
-own simulators while reusing ariel's evolutionary and morphology-IR
+own simulators while reusing ariel's evolutionary and morphology-IR (i.e. Blueprint)
 infrastructure.
 
 Two backends ship today:
@@ -12,11 +12,7 @@ Two backends ship today:
 | `numpy` (TUDelft)       | `DroneSimulator` (pure NumPy + SymPy) | **stable-baselines3 PPO** (trains end-to-end) | gate-passing |
 | `isaaclab`    | Isaac Lab / Isaac Sim PhysX           | **rl_games PPO** (trains end-to-end; `--mode step` also available for env-construction smokes) | hover-to-goal |
 
-Each backend brings its own simulator **and** its own RL library, because
-that matches how real heterogeneous simulator ecosystems work — Isaac
-Lab ships rsl_rl/rl_games/skrl as native trainers, the NumPy stack pairs
-naturally with sb3, etc. The EA loop above never sees the simulator
-choice; it just gets a fitness scalar back per individual.
+Each backend brings its own simulator **and** its own RL library. The EA loop above never sees the simulator choice; it just gets a fitness scalar back per individual.
 
 **Status:** both backends train end-to-end. The NumPy backend trains
 sb3 PPO on the gate-passing task; the Isaac Lab backend trains
@@ -67,9 +63,8 @@ DroneSimulator
   or anything else).
 - A task definition (reward, termination, observation/action spaces).
 
-The seam is **deliberate**: the EA evolves the same morphology
-variables either way; only the fitness function and the trained
-policy are backend-specific.
+The EA evolves the same morphology variables either way; 
+only the fitness function and the trained policy are backend-specific.
 
 ---
 
