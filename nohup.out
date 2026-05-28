@@ -1,0 +1,111 @@
+────────────────── Drone Body Evolution + PPO (configurable) ───────────────────
+[19:20:49] pop=20  gens=300  arms=6–6              10_drone_evo_overnight.py:562
+           ppo_steps=2,000,000  num_envs=3000                                   
+           gate_steps=15  scale=5.0  mode=naive                                 
+           device=cuda:0                                                        
+           DB →                                    10_drone_evo_overnight.py:568
+           __data__/drone_evo_overnight/20260527_1                              
+           92049/database_20260527_192049.db                                    
+           Initializing + evaluating initial       10_drone_evo_overnight.py:573
+           population …                                                         
+/home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/stable_baselines3/common/vec_env/base_vec_env.py:78: UserWarning: The `render_mode` attribute is not defined in your environment. It will be set to None.
+  warnings.warn("The `render_mode` attribute is not defined in your environment. It will be set to None.")
+/home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+[19:21:26]   id=#1  motors=6  mean_reward=-119.805 10_drone_evo_overnight.py:528
+           start=cold  (36.7s)                                                  
+/home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/stable_baselines3/common/vec_env/base_vec_env.py:78: UserWarning: The `render_mode` attribute is not defined in your environment. It will be set to None.
+  warnings.warn("The `render_mode` attribute is not defined in your environment. It will be set to None.")
+/home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+PPO evaluation… ━━                                         5% -:--:--
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /home/user/Desktop/EvoDevo/ariel/examples/spear/10_drone_evo_overnight.py:57 │
+│ 5 in <module>                                                                │
+│                                                                              │
+│   572                                                                        │
+│   573 console.log("Initializing + evaluating initial population …")          │
+│   574 initial_pop = init_op(initial_pop)                                     │
+│ ❱ 575 initial_pop = eval_op(initial_pop)                                     │
+│   576                                                                        │
+│   577 finite0 = [ind.fitness_ for ind in initial_pop if ind.fitness_ is not  │
+│   578 if finite0:                                                            │
+│                                                                              │
+│ /home/user/Desktop/EvoDevo/ariel/src/ariel/ec/ea.py:233 in __call__          │
+│                                                                              │
+│   230 │   │   │   │   raise TypeError(                                       │
+│   231 │   │   │   │   │   msg,                                               │
+│   232 │   │   │   │   )                                                      │
+│ ❱ 233 │   │   │   result = self.func(population, *self.args, **self.kwargs)  │
+│   234 │   │   │   if not isinstance(result, Population):                     │
+│   235 │   │   │   │   msg = (                                                │
+│   236 │   │   │   │   │   f"'{self.func.__name__}' expected a Population as  │
+│                                                                              │
+│ /home/user/Desktop/EvoDevo/ariel/examples/spear/10_drone_evo_overnight.py:51 │
+│ 5 in evaluate_with_ppo                                                       │
+│                                                                              │
+│   512 │                                                                      │
+│   513 │   for _i, ind in enumerate(track(to_eval, description="PPO evaluatio │
+│   514 │   │   t0  = time.time()                                              │
+│ ❱ 515 │   │   fit, model, n_motors = _train_and_eval(ind.genotype, cfg)      │
+│   516 │   │   ind.fitness = fit                                              │
+│   517 │   │   warm_tag = ""                                                  │
+│   518 │   │   if model is not None:                                          │
+│                                                                              │
+│ /home/user/Desktop/EvoDevo/ariel/examples/spear/10_drone_evo_overnight.py:48 │
+│ 4 in _train_and_eval                                                         │
+│                                                                              │
+│   481 │   │   finally:                                                       │
+│   482 │   │   │   _tmp.unlink(missing_ok=True)                               │
+│   483 │                                                                      │
+│ ❱ 484 │   model.learn(total_timesteps=cfg["ppo_steps"])                      │
+│   485 │                                                                      │
+│   486 │   # Deterministic evaluation rollout.                                │
+│   487 │   obs      = env.reset()                                             │
+│                                                                              │
+│ /home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/stable_b │
+│ aselines3/ppo/ppo.py:311 in learn                                            │
+│                                                                              │
+│   308 │   │   reset_num_timesteps: bool = True,                              │
+│   309 │   │   progress_bar: bool = False,                                    │
+│   310 │   ) -> SelfPPO:                                                      │
+│ ❱ 311 │   │   return super().learn(                                          │
+│   312 │   │   │   total_timesteps=total_timesteps,                           │
+│   313 │   │   │   callback=callback,                                         │
+│   314 │   │   │   log_interval=log_interval,                                 │
+│                                                                              │
+│ /home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/stable_b │
+│ aselines3/common/on_policy_algorithm.py:337 in learn                         │
+│                                                                              │
+│   334 │   │   │   │   assert self.ep_info_buffer is not None                 │
+│   335 │   │   │   │   self.dump_logs(iteration)                              │
+│   336 │   │   │                                                              │
+│ ❱ 337 │   │   │   self.train()                                               │
+│   338 │   │                                                                  │
+│   339 │   │   callback.on_training_end()                                     │
+│   340                                                                        │
+│                                                                              │
+│ /home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/stable_b │
+│ aselines3/ppo/ppo.py:254 in train                                            │
+│                                                                              │
+│   251 │   │   │   │   else:                                                  │
+│   252 │   │   │   │   │   entropy_loss = -th.mean(entropy)                   │
+│   253 │   │   │   │                                                          │
+│ ❱ 254 │   │   │   │   entropy_losses.append(entropy_loss.item())             │
+│   255 │   │   │   │                                                          │
+│   256 │   │   │   │   loss = policy_loss + self.ent_coef * entropy_loss + se │
+│   257                                                                        │
+╰──────────────────────────────────────────────────────────────────────────────╯
+KeyboardInterrupt
+Exception ignored in atexit callback: <function shutdown_compile_workers at 0x798c0ff65b20>
+Traceback (most recent call last):
+  File "/home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/torch/_inductor/async_compile.py", line 142, in shutdown_compile_workers
+    pool.shutdown()
+  File "/home/user/Desktop/EvoDevo/ariel/.venv/lib/python3.12/site-packages/torch/_inductor/compile_worker/subproc_pool.py", line 243, in shutdown
+    self.process.wait(300)
+  File "/home/user/snap/code/238/.local/share/uv/python/cpython-3.12.9-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 1266, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/snap/code/238/.local/share/uv/python/cpython-3.12.9-linux-x86_64-gnu/lib/python3.12/subprocess.py", line 2055, in _wait
+    time.sleep(delay)
+KeyboardInterrupt: 

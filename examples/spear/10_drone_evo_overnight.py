@@ -97,8 +97,8 @@ console = Console()
 # ═════════════════════════════════════════════════════════════════════════════
 
 # ── Population & generations ──────────────────────────────────────────────────
-EA_POP_SIZE  = 20    # individuals alive at any time  (larger → more diversity)
-EA_GENS      = 300   # ~12h on RTX 5070 Ti (crossover yields 10 offspring/gen → 3020 evals @ ~14s each)
+EA_POP_SIZE  = 10    # individuals alive at any time  (larger → more diversity)
+EA_GENS      = 10   #300 ~12h on RTX 5070 Ti (crossover yields 10 offspring/gen → 3020 evals @ ~14s each)
 
 # ── Drone body: number of arms ────────────────────────────────────────────────
 # All arms share the same propeller size (set in CONFIG 3).
@@ -148,7 +148,7 @@ REPAIR = False
 #   Shape must be (6,) matching the columns of PARAMETER_LIMITS.
 #   Example — tighter arm-length mutations, larger angle mutations:
 #     MUTATION_SCALES = np.array([0.03, 0.10, 0.10, 0.10, 0.10, 0.50])
-MUTATION_SCALES = None   # None → use library defaults
+MUTATION_SCALES = np.array([0.02, 0.08, 0.05, 0.05, 0.05, 0.10])  # None → use library defaults
 
 # ── Generation pipeline ────────────────────────────────────────────────────────
 # The pipeline runs once per generation in the listed order.
@@ -198,10 +198,18 @@ GATE_PATH_STEPS = 15    # default: 15
 # path_scale=5 → gates spread over ≈ ±5 m in x/y.
 # Larger = faster flight required; smaller = tighter turns.
 GATE_PATH_SCALE = 5.0   # metres
+# Play-field half-size: must exceed GATE_PATH_SCALE + ~2 m so drones don't hit
+# the OOB wall while approaching boundary gates.
+FIELD_XY = GATE_PATH_SCALE + 2.0   # metres (defaults to 7.0 with scale=5)
 
 # Gate altitude in NED z-convention (negative = above ground).
 # -1.5 means gates are 1.5 m above the ground plane.
 GATE_Z_HEIGHT = -1.5    # NED z (metres)
+
+# Reward bonus awarded each time the drone passes through a gate.
+# Without this, the only bonus (+10) fires only on lap completion, which a
+# random morphology never achieves — leading evolution to converge on hovering.
+GATE_REWARD = 1.0       # per-gate bonus (in addition to proximity shaping)
 
 # Gate evaluation mode:
 #   "naive"  — one fixed quintic circuit per run (all individuals fly the same track)
@@ -226,12 +234,12 @@ GATE_MODE = "naive"
 
 # Total PPO environment steps used to train each candidate body.
 # Rule of thumb: ≥ 500 000 for meaningful learning; 2 M+ for fine policies.
-PPO_STEPS = 2_000_000   # 2× longer training → better fitness estimates per body
+PPO_STEPS = 3_000_000   # 2× longer training → better fitness estimates per body
 
 # Parallel environments inside TorchDroneGateEnv.
 # More envs = faster wall-clock training (up to GPU memory limit).
 # RTX 5070 Ti: up to ~4 000.  A100: up to ~16 000.
-PPO_NUM_ENVS = 3000   # more parallel envs → faster wall-clock on 5070 Ti / A100
+PPO_NUM_ENVS = 2048   # more parallel envs → faster wall-clock on 5070 Ti / A100
 
 # Steps used for the final deterministic evaluation rollout (not training).
 # Should be large enough for the drone to complete several laps.
@@ -248,8 +256,8 @@ PROP_SIZE = 2
 PPO_NET_ARCH = dict(pi=[256, 256], vf=[256, 256])
 
 # Activation function applied between hidden layers.
-# torch.nn.Tanh is the SB3 default; SiLU often trains faster for flight tasks.
-PPO_ACTIVATION = torch.nn.SiLU
+# torch.nn.Tanh is the SB3 default; (torch.nn.SiLU) SiLU often trains faster for flight tasks.
+PPO_ACTIVATION = torch.nn.Tanh
 
 # ── PPO hyperparameters ───────────────────────────────────────────────────────
 # These are standard PPO knobs — see the SB3 docs for explanations.
@@ -257,7 +265,7 @@ PPO_ACTIVATION = torch.nn.SiLU
 PPO_N_EPOCHS    = 20     # gradient update passes per rollout collection
 PPO_GAMMA       = 0.999  # discount factor (close to 1 = long-horizon planning)
 PPO_LR          = 1e-3   # learning rate
-PPO_CLIP_RANGE  = 0.2    # PPO clipping parameter
+PPO_CLIP_RANGE  = 0.15   # PPO clipping parameter
 PPO_ENT_COEF    = 0.01   # entropy bonus (higher = more exploration)
 
 
@@ -346,6 +354,10 @@ if GATE_MODE == "naive":
             gates_pos=_gate_pos,
             gate_yaw=_gate_yaw,
             start_pos=_start_pos,
+            gate_reward=GATE_REWARD,
+            x_bounds=(-FIELD_XY, FIELD_XY),
+            y_bounds=(-FIELD_XY, FIELD_XY),
+            z_bounds=(-FIELD_XY, 1.0),
             device=args.device,
             dt=0.01,
             seed=args.seed,
@@ -592,15 +604,28 @@ ea.run()
 # Save best individual
 # ─────────────────────────────────────────────────────────────────────────────
 
-ea.fetch_population(only_alive=False, requires_eval=False)
-finite = [ind for ind in ea.population if ind.fitness_ is not None and np.isfinite(ind.fitness_)]
-if not finite:
-    console.log("[red]No valid individuals — aborting.[/red]")
+# Query the DB directly for the single best row — fetch_population loads every
+# individual's policy blob into RAM, which OOMs on large runs.
+import json as _json
+import sqlite3 as _sqlite3
+_con = _sqlite3.connect(DB_PATH)
+_cur = _con.cursor()
+_cur.execute(
+    "SELECT genotype_, tags_, fitness_ FROM individual "
+    "WHERE fitness_ IS NOT NULL ORDER BY fitness_ DESC LIMIT 1"
+)
+_row = _cur.fetchone()
+_con.close()
+
+if _row is None:
+    console.log("[red]No evaluated individuals in DB — aborting.[/red]")
     raise SystemExit(1)
 
-best       = sorted(finite, key=lambda ind: ind.fitness_, reverse=True)[0]
-best_genome = deserialize_genome(best.genotype)
-best_bp    = spherical_angular_to_blueprint(best_genome.arms, propsize=PROP_SIZE)
+_genotype_json, _tags_json, _best_fitness = _row
+_tags = _json.loads(_tags_json) if _tags_json else {}
+
+best_genome = deserialize_genome(_json.loads(_genotype_json))
+best_bp     = spherical_angular_to_blueprint(best_genome.arms, propsize=PROP_SIZE)
 
 bp_path = DATA / f"best_blueprint_{RUN_ID}.json"
 best_bp.save_json(bp_path)
@@ -612,14 +637,14 @@ _vis_gate_pos, _vis_gate_yaw = _quintic_to_gates(
 np.save(DATA / f"gate_pos_{RUN_ID}.npy", _vis_gate_pos)
 np.save(DATA / f"gate_yaw_{RUN_ID}.npy", _vis_gate_yaw)
 
-if "policy_b64" in best.tags:
+if "policy_b64" in _tags:
     policy_path = DATA / f"best_policy_{RUN_ID}.zip"
-    _b64_to_policy(best.tags["policy_b64"], policy_path)
+    _b64_to_policy(_tags["policy_b64"], policy_path)
     console.log(f"Best policy    → {policy_path}")
 
 console.log(
     f"[bold green]Done.[/bold green]  "
-    f"Best fitness: {best.fitness_:.4f}  DB → {DB_PATH}"
+    f"Best fitness: {_best_fitness:.4f}  DB → {DB_PATH}"
 )
 console.log(
     f"\nTo visualise:\n"

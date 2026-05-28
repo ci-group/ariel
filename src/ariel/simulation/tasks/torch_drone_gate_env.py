@@ -236,6 +236,7 @@ class TorchDroneGateEnv(VecEnv):
         dt: float = 0.01,
         max_steps: int = 1200,
         action_filter_alpha: float = 1.0,
+        gate_reward: float = 1.0,
         # Accepted for API compat with DroneGateEnv; not implemented here
         pause_if_collision: bool = False,
         num_state_history: int = 0,
@@ -315,6 +316,7 @@ class TorchDroneGateEnv(VecEnv):
         self.dt                 = float(dt)
         self.max_steps          = int(max_steps)
         self.action_filter_alpha = float(action_filter_alpha)
+        self.gate_reward = float(gate_reward)
         self.x_bounds = x_bounds
         self.y_bounds = y_bounds
         self.z_bounds = z_bounds
@@ -476,6 +478,7 @@ class TorchDroneGateEnv(VecEnv):
         in_gate  = (pos_new - gpos).abs().amax(dim=1) < (self.gate_size / 2)
         gate_passed = crossed & in_gate
 
+        rewards[gate_passed] += self.gate_reward
         final_gate = gate_passed & (self.target_gates == self.num_gates - 1)
         rewards[final_gate] += 10.0
 
