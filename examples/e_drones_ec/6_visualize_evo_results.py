@@ -213,7 +213,9 @@ else:
         initialize_at_random_gates=False,
     )
     if gate_pos_ned is not None and gate_yaw_arr is not None:
-        _start_pos = (gate_pos_ned[0] + np.array([0.0, -1.0, 0.0])).astype(np.float32)
+        _start_pos = (gate_pos_ned[0] - np.array([
+            np.cos(gate_yaw_arr[0]), np.sin(gate_yaw_arr[0]), 0.0
+        ])).astype(np.float32)
         _env_kwargs.update(
             gates_pos=gate_pos_ned,
             gate_yaw=gate_yaw_arr,

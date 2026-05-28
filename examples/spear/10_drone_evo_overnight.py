@@ -345,7 +345,9 @@ if GATE_MODE == "naive":
     _gate_pos, _gate_yaw = _quintic_to_gates(
         COEFFS, GATE_PATH_STEPS, GATE_PATH_SCALE, GATE_Z_HEIGHT, seed=args.seed,
     )
-    _start_pos = (_gate_pos[0] + np.array([0.0, -1.0, 0.0])).astype(np.float32)
+    _start_pos = (_gate_pos[0] - np.array([
+        np.cos(_gate_yaw[0]), np.sin(_gate_yaw[0]), 0.0
+    ])).astype(np.float32)
 
     def _make_env(propellers: Any) -> TorchDroneGateEnv:
         return TorchDroneGateEnv(
