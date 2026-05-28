@@ -73,8 +73,8 @@ USD.
 @configclass
 class MyEnvCfg(DirectRLEnvCfg):
     @classmethod
-    def from_blueprint(cls, bp, num_envs=64, usd_output_dir=None):
-        usd_path = make_blueprint_usd(bp, usd_output_dir or "/tmp")
+    def from_blueprint(cls, bp, *, num_envs=64, usd_output_dir=None):
+        usd_path = make_blueprint_usd(bp, output_dir=usd_output_dir or "/tmp")
         cfg = cls(num_envs=num_envs)
         cfg.robot.spawn.usd_path = str(usd_path)
         return cfg
