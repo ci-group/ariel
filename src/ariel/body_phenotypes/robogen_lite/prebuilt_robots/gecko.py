@@ -6,7 +6,10 @@ from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
 
-def gecko() -> CoreModule:
+GECKO_N_HINGES = 8
+
+
+def gecko(servo_map: list[int] | None = None) -> CoreModule:
     """Gecko robot body.
 
     Create and attach bodies/sites, then print relative orientations between
@@ -18,6 +21,19 @@ def gecko() -> CoreModule:
     spine. For better mobility the front two flippers have 2 hinges (joints),
     each rotated 90 degrees to each other. Additionally, the back two flippers
     are rotated 45 degrees compared to the body, to encourage forward movement.
+
+    MuJoCo actuator order (8 hinges, determined by attach_body call sequence):
+        0: neck,    1: spine
+        2: fl_leg,  3: fl_leg2
+        4: fr_leg,  5: fr_leg2
+        6: bl_leg,  7: br_leg
+
+    Parameters
+    ----------
+    servo_map : list[int] | None
+        Maps MuJoCo actuator index i to a Robohat servo channel number.
+        Defaults to identity [0, 1, ..., 7] (actuator i → servo channel i).
+        Override this to match your physical wiring.
 
     Returns
     -------
@@ -144,6 +160,8 @@ def gecko() -> CoreModule:
         body=br_flipper.body,
         prefix="br_flipper",
     )
+
+    core.servo_map = servo_map if servo_map is not None else list(range(GECKO_N_HINGES))
     return core
 
 if __name__ == "__main__":

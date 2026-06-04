@@ -6,13 +6,29 @@ from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
 
 
-def spider() -> CoreModule:
+SPIDER_N_HINGES = 8
+
+
+def spider(servo_map: list[int] | None = None) -> CoreModule:
     """Spider robot body.
 
     Body Description
     ---------
     The spider body consists of a core module, 4 legs. Each leg constains two hinges,
     with blocks attached at the end of them.
+
+    MuJoCo actuator order (8 hinges):
+        0: l1_1 front-yaw,  1: l1_2 front-pitch
+        2: l2_1 left-yaw,   3: l2_2 left-pitch
+        4: l3_1 right-yaw,  5: l3_2 right-pitch
+        6: l4_1 back-yaw,   7: l4_2 back-pitch
+
+    Parameters
+    ----------
+    servo_map : list[int] | None
+        Maps MuJoCo actuator index i to a Robohat servo channel number.
+        Defaults to identity [0, 1, ..., 7] (actuator i → servo channel i).
+        Override this to match your physical wiring.
 
     Returns
     -------
@@ -141,4 +157,5 @@ def spider() -> CoreModule:
         prefix="l4_3",
     )
 
+    core.servo_map = servo_map if servo_map is not None else list(range(SPIDER_N_HINGES))
     return core

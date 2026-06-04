@@ -54,6 +54,10 @@ class CoreModule(Module):
         # Set the index
         self.index = IDX_OF_CORE
 
+        # Hardware servo mapping: servo_map[mujoco_actuator_idx] = robohat_servo_channel.
+        # None means this robot is not configured for hardware deployment.
+        self.servo_map: list[int] | None = None
+
         # Create the parent spec.
         spec = mujoco.MjSpec()
 
