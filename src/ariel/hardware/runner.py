@@ -62,12 +62,15 @@ class RobogenHardwareRunner:
 
     Parameters
     ----------
-    robot : CoreModule
-        A built robogen-lite robot with `servo_map` set.
-        `servo_map[actuator_idx]` must be a valid Robohat servo channel number.
-    cpg : SimpleCPG
-        Trained CPG controller whose number of oscillators matches the robot's
-        number of MuJoCo actuators (len(servo_map)).
+    robot : HardwareRobot | CoreModule
+        A robot descriptor with ``servo_map`` and (for duck-typing) a length
+        that equals the CPG oscillator count.  On the physical robot use
+        :class:`ariel.hardware.robot.HardwareRobot`; on the workstation the
+        full robogen-lite ``CoreModule`` (e.g. ``spider()``) also works.
+    cpg : SimpleCPGInference | SimpleCPG
+        Trained CPG controller.  On the robot load a `.npz` with
+        :class:`ariel.hardware.cpg_inference.SimpleCPGInference`; on the
+        workstation the torch ``SimpleCPG`` is also accepted.
     servo_assembly_1_config : ServoAssemblyConfig
         Configuration for the primary servo assembly board (P3 plug).
     servo_board_1_datas_list : list[ServoData]
@@ -166,8 +169,13 @@ class RobogenHardwareRunner:
             while elapsed < duration:
                 t0 = time.monotonic()
 
-                # Step CPG and get joint angles in radians
-                angles_rad: np.ndarray = self.cpg.forward(elapsed).detach().numpy()
+                # Step CPG and get joint angles in radians.
+                # Supports both SimpleCPGInference (returns ndarray) and
+                # SimpleCPG (returns torch.Tensor — used when testing on workstation).
+                result = self.cpg.forward(elapsed)
+                angles_rad: np.ndarray = (
+                    result.detach().numpy() if hasattr(result, "detach") else np.asarray(result)
+                )
 
                 # Build full servo angle array (all channels start at neutral)
                 servo_angles = list(neutral)
