@@ -22,58 +22,6 @@ Repository = "https://github.com/ci-group/ariel"
 Documentation = "https://ariel.readthedocs.io"
 Changelog = "https://github.com/ci-group/ariel/releases"
 
-[dependency-groups]
-dev = [
-    "mypy>=1.18.2",
-    "pytest>=8.4.2",
-    "pytest-cov>=7.1.0",
-    "pytest-modern>=0.7.4",
-    "ruff>=0.13.3",
-]
-docs = [
-  "furo>=2025.12.19",
-  "jupyter-sphinx>=0.5.3",
-  "linkify-it-py>=2.0.3",
-  "myst-parser>=3.0.1",
-  "nbsphinx>=0.9.7",
-  "nox>=2025.5.1",
-  "numpydoc>=1.9.0",
-  "pandoc>=2.4",
-  "pypandoc>=1.15",
-  "shibuya>=2025.8.16",
-  "sphinx-autoapi>=3.6.0",
-  "sphinx-autobuild>=2024.10.3",
-  "sphinx-autodoc-typehints>=3.0.1",
-  "sphinx-autodoc2>=0.5.0",
-  "sphinx-click>=6.0.0",
-  "sphinx-copybutton>=0.5.2",
-  "sphinx-design>=0.6.1",
-]
-stubs = [
-  "lxml-stubs>=0.5.1",
-  "opencv-stubs>=0.1.0",
-  "pandas-stubs>=2.3.2.250926",
-  "scipy-stubs>=1.16.2.0",
-  "types-aiofiles>=24.1.0.20250822",
-  "types-colorama>=0.4.15.20250801",
-  "types-decorator>=5.2.0.20250324",
-  "types-defusedxml>=0.7.0.20250822",
-  "types-docutils>=0.22.2.20250924",
-  "types-greenlet>=3.2.0.20250915",
-  "types-jsonschema>=4.25.1.20250822",
-  "types-libsass>=0.23.0.20250401",
-  "types-networkx>=3.5.0.20250918",
-  "types-openpyxl>=3.1.5.20250919",
-  "types-pexpect>=4.9.0.20250916",
-  "types-protobuf>=6.32.1.20250918",
-  "types-pygments>=2.19.0.20250809",
-  "types-pyyaml>=6.0.12.20250915",
-  "types-setuptools>=80.9.0.20250822",
-  "types-tabulate>=0.9.0.20241207",
-  "types-tqdm>=4.67.0.20250809",
-  "types-ujson>=5.10.0.20250822",
-  "types-xlrd>=2.0.0.20250914",
-]
 
 [tool.setuptools.packages.find]
 where = ["src"]
