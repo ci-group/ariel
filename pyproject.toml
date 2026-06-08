@@ -11,8 +11,8 @@ classifiers = ["Development Status :: 2 - Pre-Alpha"]
 dependencies = [
   # Hardware branch: minimal runtime deps for the physical robot.
   # Full simulation / evolution / visualisation deps live on the main branch.
+  # pyserial is pulled in transitively by robohatlib (uv pip install -e robohat/).
   "numpy>=2.0.2",
-  "pyserial>=3.5",
 ]
 
 
