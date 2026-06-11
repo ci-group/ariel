@@ -2,9 +2,9 @@
 """Simple RL training script with parametrizable run length.
 
 Usage:
-    python train_rl_policy.py --steps 10000
-    python train_rl_policy.py --steps 50000 --morphology random --seed 42
-    python train_rl_policy.py --steps 5000 --batch-size 32 --n-epochs 2
+    uv run python train_rl_policy.py --steps 10000
+    uv run python train_rl_policy.py --steps 50000 --morphology random --seed 42
+    uv run python train_rl_policy.py --steps 5000 --batch-size 32 --n-epochs 2
 """
 from __future__ import annotations
 

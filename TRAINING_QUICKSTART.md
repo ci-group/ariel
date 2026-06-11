@@ -6,34 +6,34 @@ Simple parametrizable script for training the generalist drone controller.
 
 ```bash
 cd /home/user/Desktop/EvoDevo/ariel
-PYTHONPATH=. uv run python train_rl_policy.py [OPTIONS]
+uv run python train_rl_policy.py [OPTIONS]
 ```
 
 ## Examples
 
 ### Quick test (512 steps, ~1 minute)
 ```bash
-PYTHONPATH=. uv run python train_rl_policy.py --steps 512
+uv run python train_rl_policy.py --steps 512
 ```
 
 ### Standard training (10k steps, ~10 minutes)
 ```bash
-PYTHONPATH=. uv run python train_rl_policy.py --steps 10000
+uv run python train_rl_policy.py --steps 10000
 ```
 
 ### Longer training (50k steps, ~1 hour)
 ```bash
-PYTHONPATH=. uv run python train_rl_policy.py --steps 50000
+uv run python train_rl_policy.py --steps 50000
 ```
 
 ### Random morphology
 ```bash
-PYTHONPATH=. uv run python train_rl_policy.py --steps 10000 --morphology random
+uv run python train_rl_policy.py --steps 10000 --morphology random
 ```
 
 ### Custom hyperparameters
 ```bash
-PYTHONPATH=. uv run python train_rl_policy.py \
+uv run python train_rl_policy.py \
   --steps 20000 \
   --morphology nominal \
   --lr 5e-5 \
@@ -117,13 +117,13 @@ TRAINING COMPLETE ✓
 After training completes, the script prints the exact command to visualize:
 
 ```bash
-PYTHONPATH=. uv run python generalist/examples/run_and_visualize_mujoco.py \
+uv run python generalist/examples/run_and_visualize_mujoco.py \
   --rl-checkpoint checkpoints/rl_nom_20260611_112054/final_policy.pt \
   --duration 10.0 \
   --morphology nominal
 ```
 
-Remove `--no-render` to see the MuJoCo viewer (if you have a display).
+To see the MuJoCo viewer, remove `--no-render` (if you have a display). The script includes `--no-render` by default for headless environments.
 
 ## Expected Results
 
