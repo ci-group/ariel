@@ -185,7 +185,7 @@ def main():
 
     # Visualize command
     print(f"\n🎬 To visualize the trained policy:")
-    print(f"   PYTHONPATH=. uv run python generalist/examples/run_and_visualize_mujoco.py \\")
+    print(f"   uv run python generalist/examples/run_and_visualize_mujoco.py \\")
     print(f"     --rl-checkpoint {checkpoint_path} \\")
     print(f"     --duration 10.0 \\")
     print(f"     --morphology {args.morphology}")
