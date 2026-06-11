@@ -75,6 +75,10 @@ def run_and_visualize(
     import mujoco
     import mujoco.viewer
     import torch
+    import warnings
+
+    # Suppress GLFW warnings (common in headless/SSH)
+    warnings.filterwarnings("ignore", message=".*GLFWError.*")
 
     # ---- Setup morphology ----
     if morphology == "nominal":
@@ -186,7 +190,8 @@ def run_and_visualize(
 
     # ---- Render with viewer ----
     if render:
-        print("Launching MuJoCo viewer for trajectory playback...")
+        print("Attempting to launch MuJoCo viewer for trajectory playback...")
+        viewer_success = False
         try:
             with mujoco.viewer.launch_passive(model, data) as viewer:
                 # Configure camera
@@ -209,12 +214,14 @@ def run_and_visualize(
                     # Let viewer render
                     viewer.sync()
 
-            print("Visualization complete")
+            print("✓ Visualization complete")
+            viewer_success = True
         except Exception as e:
-            print(f"Could not launch viewer: {e}")
-            print("(This is expected in headless/SSH environments)")
+            print(f"⚠ Viewer launch failed: {type(e).__name__}")
+            print(f"  ({str(e)[:100]}...)")
+            print(f"  (Expected in headless/SSH environments)")
     else:
-        print("Skipping visualization (render=False)")
+        print("Skipping visualization (render=False, use --render to enable)")
 
     # Summary
     errors = [s["error"] for s in trajectory]
