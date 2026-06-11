@@ -211,8 +211,9 @@ class RLLoop:
         save_dir = Path(save_dir) if save_dir else Path("checkpoints/rl_custom")
         save_dir.mkdir(parents=True, exist_ok=True)
 
+        num_iterations = max(2, total_timesteps // self.n_steps)
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            self.optimizer, T_max=total_timesteps // self.n_steps
+            self.optimizer, T_max=num_iterations
         )
 
         while self.global_step < total_timesteps:
