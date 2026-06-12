@@ -4,9 +4,6 @@ from collections.abc import Hashable, Sequence
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
-type JSONPrimitive = str | int | float | bool
-type JSONType = JSONPrimitive | Sequence[JSONType] | dict[Hashable, JSONType]
-type JSONIterable = Sequence[JSONType] | dict[Hashable, JSONType]
 
 
 class Individual(SQLModel, table=True):
@@ -66,10 +63,10 @@ class Individual(SQLModel, table=True):
 
     # -- Genotype --------------------------------------------------------------
     requires_init: bool = Field(default=True, index=True)
-    genotype_: JSONIterable | None = Field(default=None, sa_column=Column(JSON))
+    genotype_: dict = Field(default=None, sa_column=Column(JSON))
 
     # -- Tags ------------------------------------------------------------------
-    tags_: dict[JSONType, JSONType] = Field(default={}, sa_column=Column(JSON))
+    tags_: dict = Field(default={}, sa_column=Column(JSON))
 
     # -- Fitness property ------------------------------------------------------
 
@@ -110,7 +107,7 @@ class Individual(SQLModel, table=True):
     # -- Genotype property -----------------------------------------------------
 
     @property
-    def genotype(self) -> JSONIterable:
+    def genotype(self):
         """Genotype of the individual.
 
         Returns
@@ -129,7 +126,7 @@ class Individual(SQLModel, table=True):
         return self.genotype_
 
     @genotype.setter
-    def genotype(self, value: JSONIterable) -> None:
+    def genotype(self, value) -> None:
         """Assign the genotype and update the initialisation flag.
 
         Sets ``requires_init`` to ``False`` when ``value`` is non-empty,
@@ -147,7 +144,7 @@ class Individual(SQLModel, table=True):
     # -- Tags property ---------------------------------------------------------
 
     @property
-    def tags(self) -> dict[JSONType, JSONType]:
+    def tags(self) -> dict:
         """Metadata tags attached to this individual.
 
         Returns
@@ -158,7 +155,7 @@ class Individual(SQLModel, table=True):
         return self.tags_
 
     @tags.setter
-    def tags(self, update: dict[JSONType, JSONType]) -> None:
+    def tags(self, update: dict) -> None:
         """Merge new tags into the existing tag dictionary.
 
         Existing keys are overwritten by keys present in ``update``;

@@ -14,8 +14,8 @@ if TYPE_CHECKING:
 SEED: int = 42
 _rng: Generator = np.random.default_rng(SEED)
 
-type Integers = Sequence[int]
-type Floats = Sequence[float]
+Integers = Sequence[int]
+Floats = Sequence[float]
 
 
 # -- Settings ------------------------------------------------------------------

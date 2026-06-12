@@ -7,8 +7,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .generators import _rng
-from .individual import JSONIterable
-
 
 def _validate_same_shape(
     arr_i: NDArray[Any],
@@ -37,8 +35,8 @@ def _validate_same_shape(
 
 
 def _load(
-    parent_i: JSONIterable,
-    parent_j: JSONIterable,
+    parent_i,
+    parent_j,
 ) -> tuple[tuple[int, ...], NDArray[Any], NDArray[Any]]:
     """
     Convert two parent genotypes into flat NumPy arrays ready for crossover.
@@ -69,7 +67,7 @@ def _load(
     return arr_i.shape, arr_i.flatten().copy(), arr_j.flatten().copy()
 
 
-def _pack(flat: NDArray[Any], shape: tuple[int, ...]) -> JSONIterable:
+def _pack(flat: NDArray[Any], shape: tuple[int, ...]):
     """Reshape to original shape.
 
     Reshape a flat array back to the original genotype shape and convert to a
@@ -97,9 +95,9 @@ class Crossover:
 
     @staticmethod
     def one_point(
-        parent_i: JSONIterable,
-        parent_j: JSONIterable,
-    ) -> tuple[JSONIterable, JSONIterable]:
+        parent_i,
+        parent_j,
+    ) -> tuple:
         """
         Produce two offspring via single-point crossover.
 
@@ -134,10 +132,10 @@ class Crossover:
 
     @staticmethod
     def n_point(
-        parent_i: JSONIterable,
-        parent_j: JSONIterable,
+        parent_i,
+        parent_j,
         n: int,
-    ) -> tuple[JSONIterable, JSONIterable]:
+    ) -> tuple:
         """
         Produce two offspring via n-point crossover.
 
@@ -196,10 +194,10 @@ class Crossover:
 
     @staticmethod
     def uniform(
-        parent_i: JSONIterable,
-        parent_j: JSONIterable,
+        parent_i,
+        parent_j,
         swap_probability: float = 0.5,
-    ) -> tuple[JSONIterable, JSONIterable]:
+    ) -> tuple:
         """
         Produce two offspring via uniform crossover.
 

@@ -11,9 +11,9 @@ from sqlmodel import Session, col, select
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
-type FitnessMode = Literal["min", "max"]
-type AgeRange = tuple[int, int] | None
-type FitnessRange = tuple[float, float] | None
+FitnessMode = Literal["min", "max"]
+AgeRange = tuple[int, int] | None
+FitnessRange = tuple[float, float] | None
 
 
 class Archive:

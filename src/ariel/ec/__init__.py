@@ -14,9 +14,6 @@ from ariel.ec.generators import (
 )
 from ariel.ec.individual import (
     Individual,
-    JSONIterable,
-    JSONPrimitive,
-    JSONType,
 )
 from ariel.ec.population import Population
 
@@ -49,9 +46,6 @@ __all__: list[str] = [
 
     # Integer generators / mutators
     "IntegersGenerator",
-    "JSONIterable",
-    "JSONPrimitive",
-    "JSONType",
 
     # Population
     "Population",
