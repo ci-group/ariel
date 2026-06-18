@@ -42,6 +42,45 @@ uv sync
 uv run examples/re_book/1_brain_evolution.py
 ```
 
+### EvoGym experiments
+
+EvoGym requires Python 3.10 and cannot be installed into the main `uv` environment
+(which targets Python 3.12). A separate venv is needed for the EvoGym scripts.
+
+```bash
+# Create a Python 3.10 venv (requires python3.10 on PATH, e.g. via pyenv or brew)
+python3.10 -m venv evogym-venv
+source evogym-venv/bin/activate
+
+# Install EvoGym and the remaining dependencies
+pip install evogym gymnasium numpy nevergrad rich imageio
+
+deactivate
+```
+
+Then run EvoGym scripts through that venv from the repo root.  `PYTHONPATH=src` is
+required because `ariel` declares `requires-python >=3.12` and cannot be pip-installed
+into the 3.10 venv — sourcing `src/` directly works around this.
+
+```bash
+# Single learning run
+PYTHONPATH=src evogym-venv/bin/python examples/d_social_learning/evogym_learn.py
+
+# Render video of learned gait (after learning)
+PYTHONPATH=src evogym-venv/bin/python examples/d_social_learning/make_evogym_video.py
+
+# Architecture comparison experiment
+PYTHONPATH=src evogym-venv/bin/python examples/d_social_learning/experiment_evogym.py
+
+# Render comparison videos (after experiment)
+PYTHONPATH=src evogym-venv/bin/python examples/d_social_learning/make_evogym_video_compare.py
+
+# Plot learning curves (gecko + evogym)
+PYTHONPATH=src evogym-venv/bin/python examples/d_social_learning/plot_results.py
+```
+
+All outputs are written under `__data__/` (gitignored).
+
 <!-- ## TODO: Installation
 
 ## Notes

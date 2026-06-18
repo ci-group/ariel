@@ -3,6 +3,7 @@
 *.mp4
 # Dirs
 __data__
+evogym-venv/
 # Mujoco
 MUJOCO_LOG.TXT
 # DrawIo

@@ -14,6 +14,7 @@ dependencies = [
   "dm-control>=1.0.38",
   "evotorch>=0.6.1",
   "gymnasium>=1.2.3",
+  "imageio[ffmpeg]>=2.37.3",
   "ipykernel>=6.30.1",
   "jupyter>=1.1.1",
   "kaleido>=1.2.0",
@@ -54,6 +55,7 @@ Changelog = "https://github.com/ci-group/ariel/releases"
 [dependency-groups]
 dev = [
     "mypy>=1.18.2",
+    "pdfminer-six>=20260107",
     "pytest>=8.4.2",
     "pytest-cov>=7.1.0",
     "pytest-modern>=0.7.4",
