@@ -32,6 +32,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target-y", type=float, default=float(DEFAULT_TARGET[1]))
     parser.add_argument("--target-z", type=float, default=float(DEFAULT_TARGET[2]))
     parser.add_argument("--eval-only", action="store_true")
+    parser.add_argument("--record", type=str, default=None,
+                        help="If set, write an MP4 of the rollout to this path "
+                             "(offscreen render, no viewer).")
+    parser.add_argument("--record-fps", type=int, default=60)
+    parser.add_argument("--record-width", type=int, default=1280)
+    parser.add_argument("--record-height", type=int, default=720)
     return parser.parse_args()
 
 
@@ -121,6 +127,81 @@ def run_rollout(
     return initial_distance, min_distance, final_distance, first_touch_time
 
 
+def record_rollout(
+    model: mujoco.MjModel,
+    data: mujoco.MjData,
+    net: FastNumpyNetwork,
+    policy: PolicySpec,
+    tcp_sid: int,
+    tgt_sid: int,
+    joint_ids: list[int],
+    target: np.ndarray,
+    sim_steps: int,
+    ctrl_freq: int,
+    touch_threshold: float,
+    out_path: Path,
+    fps: int,
+    width: int,
+    height: int,
+) -> None:
+    import imageio.v2 as imageio
+
+    set_target_position(model, data, tgt_sid, target)
+
+    dt = float(model.opt.timestep)
+    sim_steps_per_frame = max(1, int(round(1.0 / (fps * dt))))
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    if width > model.vis.global_.offwidth:
+        model.vis.global_.offwidth = width
+    if height > model.vis.global_.offheight:
+        model.vis.global_.offheight = height
+    renderer = mujoco.Renderer(model, height=height, width=width)
+    scene_opt = mujoco.MjvOption()
+    if hasattr(mujoco.mjtVisFlag, "mjVIS_SITE"):
+        scene_opt.flags[mujoco.mjtVisFlag.mjVIS_SITE] = True
+    else:
+        scene_opt.sitegroup[:] = 1
+
+    controls_locked = False
+    locked_ctrl = np.zeros(model.nu, dtype=np.float64)
+
+    writer = imageio.get_writer(str(out_path), fps=fps, codec="libx264", quality=8)
+    try:
+        for step in range(sim_steps):
+            if step % ctrl_freq == 0 and not controls_locked:
+                obs = build_observation(model, data, joint_ids, tcp_sid, tgt_sid)
+                action = net.forward(obs)
+                apply_position_delta_control(
+                    model=model,
+                    data=data,
+                    joint_ids=joint_ids,
+                    action=action,
+                    action_scale=policy.action_scale,
+                    max_delta=policy.max_delta,
+                )
+                locked_ctrl[:] = data.ctrl[:]
+
+            if controls_locked:
+                data.ctrl[:] = locked_ctrl
+
+            mujoco.mj_step(model, data)
+
+            d = float(np.linalg.norm(data.site_xpos[tcp_sid] - data.site_xpos[tgt_sid]))
+            if not controls_locked and d <= touch_threshold:
+                controls_locked = True
+                locked_ctrl[:] = data.ctrl[:]
+
+            if step % sim_steps_per_frame == 0:
+                renderer.update_scene(data, scene_option=scene_opt)
+                writer.append_data(renderer.render())
+    finally:
+        writer.close()
+        renderer.close()
+
+    print(f"Saved {out_path}")
+
+
 def main() -> None:
     args = parse_args()
 
@@ -140,6 +221,26 @@ def main() -> None:
         output_size=policy.output_size,
         weights=brain,
     )
+
+    if args.record:
+        record_rollout(
+            model=model,
+            data=data,
+            net=net,
+            policy=policy,
+            tcp_sid=tcp_sid,
+            tgt_sid=tgt_sid,
+            joint_ids=joint_ids,
+            target=target,
+            sim_steps=int(args.sim_steps),
+            ctrl_freq=int(args.ctrl_freq),
+            touch_threshold=touch_threshold,
+            out_path=Path(args.record),
+            fps=int(args.record_fps),
+            width=int(args.record_width),
+            height=int(args.record_height),
+        )
+        return
 
     if args.eval_only:
         init_d, min_d, final_d, touch_t = run_rollout(
