@@ -24,6 +24,13 @@ from ariel.simulation.environments._simple_flat import (
 from ariel.simulation.environments._simple_tilted import (
     SimpleTiltedWorld,
 )
+from ariel.simulation.environments.obstacles import (
+    Obstacle,
+    ObstacleConfig,
+    ObstacleType,
+    attach_obstacles,
+    generate_obstacles,
+)
 from ariel.simulation.environments.olympic_arena import (
     OlympicArena,
 )
@@ -33,9 +40,14 @@ __all__ = [
     "BaseWorld",
     "CompoundWorld",
     "CraterTerrainWorld",
+    "Obstacle",
+    "ObstacleConfig",
+    "ObstacleType",
     "OlympicArena",
     "RuggedTerrainWorld",
     "RuggedTiltedWorld",
     "SimpleFlatWorld",
     "SimpleTiltedWorld",
+    "attach_obstacles",
+    "generate_obstacles",
 ]

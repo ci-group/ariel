@@ -242,6 +242,19 @@ class TorchDroneGateEnv(VecEnv):
         num_state_history: int = 0,
         num_action_history: int = 0,
         history_step_size: int = 1,
+        upright_bonus: float = 0.0,
+        tilt_terminate_cos: float = 0.0,
+        extra_yaw_rate_pen: float = 0.0,
+        obstacle_cyl_pos: np.ndarray | None = None,
+        obstacle_cyl_r: np.ndarray | None = None,
+        num_rays: int = 0,
+        ray_max_range: float = 5.0,
+        body_radius: float = 0.2,
+        collision_penalty: float = 10.0,
+        clearance_pen_coef: float = 0.0,
+        velocity_reward_coef: float = 0.0,
+        altitude_floor_z: float = -0.5,
+        altitude_floor_coef: float = 0.0,
     ) -> None:
         if num_state_history or num_action_history:
             raise NotImplementedError(
@@ -320,12 +333,61 @@ class TorchDroneGateEnv(VecEnv):
         self.x_bounds = x_bounds
         self.y_bounds = y_bounds
         self.z_bounds = z_bounds
+        # upright_bonus>0 adds +α·cos(phi)·cos(theta) per step (clamped ≥0).
+        # tilt_terminate_cos>0 ends the episode when cos(phi)·cos(theta) drops
+        # below the threshold (e.g. 0.25 ≈ 75° off vertical).
+        # extra_yaw_rate_pen scales an additional |ω_z| penalty on top of the
+        # legacy 0.001·||ω|| term.
+        self.upright_bonus = float(upright_bonus)
+        self.tilt_terminate_cos = float(tilt_terminate_cos)
+        self.extra_yaw_rate_pen = float(extra_yaw_rate_pen)
+        # velocity_reward_coef>0 adds +α·max(0, v·dir_to_next_gate) per step,
+        # incentivising forward velocity toward the active gate (not just
+        # closing distance). Defaults to 0 → legacy reward shape preserved.
+        # altitude_floor_coef>0 adds a soft penalty when z exceeds
+        # altitude_floor_z in NED frame (i.e. drone too close to floor).
+        self.velocity_reward_coef = float(velocity_reward_coef)
+        self.altitude_floor_z = float(altitude_floor_z)
+        self.altitude_floor_coef = float(altitude_floor_coef)
+
+        # ---- obstacle / ray-cast perception ----------------------------
+        # When num_rays > 0, the env appends `num_rays` xy-plane distance
+        # measurements (body-frame, evenly spaced over 2π) to each obs.
+        # Cylinders are upright (z-axis), defined by xy position and radius.
+        # Collisions terminate the episode with -collision_penalty.
+        self.num_rays = int(num_rays)
+        self.ray_max_range = float(ray_max_range)
+        self.body_radius = float(body_radius)
+        self.collision_penalty = float(collision_penalty)
+        self.clearance_pen_coef = float(clearance_pen_coef)
+
+        if obstacle_cyl_pos is not None and len(obstacle_cyl_pos) > 0:
+            cyl_pos_np = np.asarray(obstacle_cyl_pos, dtype=np.float32).reshape(-1, 2)
+            cyl_r_np = np.asarray(obstacle_cyl_r, dtype=np.float32).reshape(-1)
+            if cyl_pos_np.shape[0] != cyl_r_np.shape[0]:
+                raise ValueError(
+                    f"obstacle_cyl_pos has {cyl_pos_np.shape[0]} rows but "
+                    f"obstacle_cyl_r has {cyl_r_np.shape[0]} values"
+                )
+            self.obstacle_cyl_pos_t = torch.tensor(cyl_pos_np, device=self.dev, dtype=self.dtype)  # (C, 2)
+            self.obstacle_cyl_r_t = torch.tensor(cyl_r_np, device=self.dev, dtype=self.dtype)      # (C,)
+        else:
+            self.obstacle_cyl_pos_t = torch.zeros((0, 2), device=self.dev, dtype=self.dtype)
+            self.obstacle_cyl_r_t = torch.zeros((0,), device=self.dev, dtype=self.dtype)
+
+        if self.num_rays > 0:
+            angles = torch.linspace(
+                0.0, 2.0 * math.pi, self.num_rays + 1, device=self.dev, dtype=self.dtype,
+            )[:-1]   # (K,)
+            self.ray_body_angles_t = angles
+        else:
+            self.ray_body_angles_t = torch.zeros((0,), device=self.dev, dtype=self.dtype)
 
         # ---- spaces ----------------------------------------------------
         n = self.num_motors
         u_lim = 2.0 * motor_limit - 1.0
         action_space      = spaces.Box(low=-1.0, high=u_lim, shape=(n,), dtype=np.float64)
-        self.state_len    = 12 + n + 4 * gates_ahead
+        self.state_len    = 12 + n + 4 * gates_ahead + self.num_rays
         observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(self.state_len,), dtype=np.float64
         )
@@ -381,6 +443,43 @@ class TorchDroneGateEnv(VecEnv):
             idx = (self.target_gates + i + 1) % self.num_gates
             obs[:, base+4*i : base+4*i+3] = self.gate_pos_rel_t[idx]
             obs[:, base+4*i+3]            = self.gate_yaw_rel_t[idx]
+
+        # Ray-cast distances to cylindrical obstacles (body frame, xy plane).
+        if self.num_rays > 0:
+            ray_base = base + 4 * self.gates_ahead
+            obs[:, ray_base:ray_base + self.num_rays] = self._compute_ray_distances()
+
+    def _compute_ray_distances(self) -> torch.Tensor:
+        """Return (E, K) tensor of distances along K body-frame rays to the
+        nearest cylinder hit, clipped at `ray_max_range`. If there are no
+        obstacles, returns a tensor of `ray_max_range`.
+        """
+        E, K = self.num_envs, self.num_rays
+        max_r = self.ray_max_range
+        if self.obstacle_cyl_pos_t.shape[0] == 0:
+            return torch.full((E, K), max_r, device=self.dev, dtype=self.dtype)
+
+        pos_xy = self.world_states[:, 0:2]                                # (E, 2)
+        yaw = self.world_states[:, 8]                                     # (E,)
+        # World-frame ray directions: shape (E, K, 2)
+        ang = yaw.unsqueeze(1) + self.ray_body_angles_t.unsqueeze(0)      # (E, K)
+        dirs = torch.stack([ang.cos(), ang.sin()], dim=-1)                # (E, K, 2)
+
+        # Offsets from each origin to each cylinder centre: (E, C, 2)
+        oc = pos_xy.unsqueeze(1) - self.obstacle_cyl_pos_t.unsqueeze(0)
+        oc_norm_sq = (oc * oc).sum(dim=-1)                                # (E, C)
+        r_sq = (self.obstacle_cyl_r_t * self.obstacle_cyl_r_t)            # (C,)
+
+        # Project oc onto each ray direction:
+        # b[e, k, c] = sum_d dirs[e, k, d] * oc[e, c, d]
+        b = (dirs.unsqueeze(2) * oc.unsqueeze(1)).sum(dim=-1)             # (E, K, C)
+
+        disc = b * b - (oc_norm_sq.unsqueeze(1) - r_sq.view(1, 1, -1))    # (E, K, C)
+        sqrt_disc = disc.clamp(min=0.0).sqrt()
+        t = -b - sqrt_disc                                                # nearest root, (E, K, C)
+        valid = (disc >= 0.0) & (t > 0.0)
+        t_masked = torch.where(valid, t, torch.full_like(t, max_r))
+        return t_masked.min(dim=-1).values.clamp(max=max_r)
 
     def _reset_envs(self, mask: torch.Tensor) -> None:
         """Overwrite world state for envs where mask is True.
@@ -468,7 +567,30 @@ class TorchDroneGateEnv(VecEnv):
         d_old = (pos_old - gpos).norm(dim=1)
         d_new = (pos_new - gpos).norm(dim=1)
         rate_pen = 0.001 * new_states[:, 9:12].norm(dim=1)
+        if self.extra_yaw_rate_pen > 0.0:
+            rate_pen = rate_pen + self.extra_yaw_rate_pen * new_states[:, 11].abs()
         rewards  = d_old - d_new - rate_pen
+
+        # body-z · world-z (=1 upright, 0 sideways, -1 inverted)
+        upright_cos = new_states[:, 6].cos() * new_states[:, 7].cos()
+        if self.upright_bonus > 0.0:
+            rewards = rewards + self.upright_bonus * upright_cos.clamp(min=0.0)
+
+        # Reward velocity component toward the active gate. d_old−d_new is
+        # telescoping so it doesn't favour speed; this term does.
+        if self.velocity_reward_coef > 0.0:
+            diff = gpos - pos_new                                       # (E, 3)
+            dist_safe = d_new.clamp(min=0.1).unsqueeze(1)
+            direction = diff / dist_safe                                # unit-ish vector
+            vel = new_states[:, 3:6]
+            vel_toward = (direction * vel).sum(dim=1)                   # (E,)
+            rewards = rewards + self.velocity_reward_coef * vel_toward.clamp(min=0.0)
+
+        # Soft floor: penalise dropping below `altitude_floor_z` (NED, so a
+        # higher value means closer to the ground). Linear ramp.
+        if self.altitude_floor_coef > 0.0:
+            floor_excess = (new_states[:, 2] - self.altitude_floor_z).clamp(min=0.0)
+            rewards = rewards - self.altitude_floor_coef * floor_excess
 
         # ---- gate passing ----------------------------------------------
         nx = gyaw.cos();  ny = gyaw.sin()
@@ -490,9 +612,33 @@ class TorchDroneGateEnv(VecEnv):
         )
         rewards[oob | diverged] = -10.0
 
+        # ---- tilt termination ------------------------------------------
+        if self.tilt_terminate_cos > 0.0:
+            tilted = upright_cos < self.tilt_terminate_cos
+            rewards[tilted] = -10.0
+        else:
+            tilted = torch.zeros_like(oob)
+
+        # ---- obstacle collision ----------------------------------------
+        # Cylinder collision: drone xy within (cyl_radius + body_radius) of
+        # any cylinder axis. Optional soft clearance penalty before contact.
+        if self.obstacle_cyl_pos_t.shape[0] > 0:
+            pos_xy_new = new_states[:, 0:2]
+            d_xy = (pos_xy_new.unsqueeze(1) - self.obstacle_cyl_pos_t.unsqueeze(0)).norm(dim=-1)  # (E, C)
+            clearance = d_xy - self.obstacle_cyl_r_t.unsqueeze(0)                                  # (E, C)
+            min_clearance = clearance.min(dim=-1).values                                           # (E,)
+            collided = min_clearance < self.body_radius
+            if self.clearance_pen_coef > 0.0:
+                safety = self.body_radius + 0.3
+                soft = torch.relu(safety - min_clearance) / max(safety, 1e-6)
+                rewards = rewards - self.clearance_pen_coef * soft
+            rewards[collided] = -self.collision_penalty
+        else:
+            collided = torch.zeros_like(oob)
+
         # ---- episode termination ---------------------------------------
         max_steps_reached = self.step_counts >= self.max_steps
-        dones = max_steps_reached | oob | diverged
+        dones = max_steps_reached | oob | diverged | tilted | collided
 
         # ---- update state and gate targets -----------------------------
         self.target_gates[gate_passed] = (self.target_gates[gate_passed] + 1) % self.num_gates
@@ -514,9 +660,15 @@ class TorchDroneGateEnv(VecEnv):
         oob_np          = oob.cpu().numpy()
         gate_passed_np  = gate_passed.cpu().numpy()
         max_steps_np    = max_steps_reached.cpu().numpy()
+        tilted_np       = tilted.cpu().numpy()
+        collided_np     = collided.cpu().numpy()
+        diverged_np     = diverged.cpu().numpy()
 
         infos = [{"out_of_bounds": bool(oob_np[i]),
                   "gate_passed":   bool(gate_passed_np[i]),
+                  "tilted":        bool(tilted_np[i]),
+                  "collided":      bool(collided_np[i]),
+                  "diverged":      bool(diverged_np[i]),
                   "num_gates_passed": gp_np}
                  for i in range(self.num_envs)]
         for i in range(self.num_envs):

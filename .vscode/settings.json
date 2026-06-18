@@ -23,7 +23,6 @@
         ".typings": false,
         ".venv": false
     },
-    "python-envs.pythonProjects": [],
     "python.testing.pytestArgs": [
         "tests"
     ],
