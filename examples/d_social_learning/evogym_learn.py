@@ -70,12 +70,11 @@ def evaluate(env, brain: DistributedMLP, theta: np.ndarray, body: np.ndarray, ad
     env.reset()
     total_reward = 0.0
     for step in range(n_steps):
-        node_inputs, t = get_node_inputs(env.sim, body, adjacency, step)
-        raw = brain.forward_all(node_inputs, t)
-        _, reward, done, _, _ = env.step(scale_actions(raw))
+        if step % 5 == 0:
+            node_inputs, t = get_node_inputs(env.sim, body, adjacency, step)
+            raw = brain.forward_all(node_inputs, t)
+        _, reward, _, _, _ = env.step(scale_actions(raw))
         total_reward += reward
-        if done:
-            break
     return total_reward
 
 

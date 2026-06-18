@@ -74,6 +74,7 @@ def main() -> None:
     body = SAMPLE_BODY
     adjacency = body_to_adjacency(body)
     env = make_env(body)
+    env.default_viewer.track_objects('robot')
     env.reset()
 
     brain = DistributedMLP(n_neighbors=8)
@@ -83,8 +84,9 @@ def main() -> None:
     console.log(f"Rendering {args.steps} steps at {FPS}fps...")
 
     for step in range(args.steps):
-        node_inputs, t = get_node_inputs(env.sim, body, adjacency, step)
-        raw = brain.forward_all(node_inputs, t)
+        if step % 5 == 0:
+            node_inputs, t = get_node_inputs(env.sim, body, adjacency, step)
+            raw = brain.forward_all(node_inputs, t)
         env.step(scale_actions(raw))
         frame = env.render()
         if frame is not None:

@@ -122,15 +122,15 @@ def get_node_inputs(
         corners = [(positions[0][i], positions[1][i]) for i in sensor_indices]
         vxs = [velocities[0][i] for i in sensor_indices]
         vys = [velocities[1][i] for i in sensor_indices]
-        vx = float(sum(vxs) / len(vxs))
-        vy = float(sum(vys) / len(vys))
+        vx = np.clip(float(sum(vxs) / len(vxs)), -20.0, 20.0) / 20.0
+        vy = np.clip(float(sum(vys) / len(vys)), -20.0, 20.0) / 20.0
         area = _rect_area(corners) if len(corners) == 4 else 0.0
         state = float(np.clip(area, 0.0, 3.0) / 1.5 - 1.0)
         oh = _voxel_onehot(vtype)
         return NodeObservation(vx, vy, state, oh)
 
     # EvoGym default timestep is 0.01s; 100 steps = 1.0s cycle
-    time_signal = (timestep % 100) / 99.0
+    time_signal = np.sin(2 * np.pi * timestep / 100)
 
     node_inputs: list[tuple[NodeObservation, list[NodeObservation]]] = []
     for flat in actuators:

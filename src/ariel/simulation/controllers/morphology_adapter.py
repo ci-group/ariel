@@ -201,7 +201,7 @@ class MorphologyAdapter:
             pairs, one per actuator.  ``time_signal`` is a float in ``[0, 1]``.
         """
         joint_pos, joint_vel = self._read_joint_states(model, data)
-        time_signal = (timestep % 25) / 24.0
+        time_signal = np.sin(2 * np.pi * timestep / 25)
 
         node_inputs: list[tuple[NodeObservation, list[NodeObservation]]] = []
         for mod_idx in self.actuator_to_module:
