@@ -160,7 +160,10 @@ def _load_tracks(npz_path: Path) -> dict:
 
 def _run_eval_in_process(eval_paths: dict, quintic_tracks: dict | None,
                          task: str, rollout_time: float, device: str,
-                         no_view: bool, viz_dir: Path | None) -> int:
+                         no_view: bool, viz_dir: Path | None,
+                         combined_mp4: Path | None = None,
+                         mp4_width: int = 720, mp4_height: int = 540,
+                         mp4_fps: int = 30) -> int:
     """Import 27_eval_rl_hex_mtrl_v4 in-process, monkey-patch its
     ``_task_config`` to return our quintic tracks (when available), then
     invoke its ``main()`` with the right sys.argv.
@@ -199,6 +202,13 @@ def _run_eval_in_process(eval_paths: dict, quintic_tracks: dict | None,
         argv += ["--no-view"]
         if viz_dir is not None:
             argv += ["--out-dir", str(viz_dir)]
+    if combined_mp4 is not None:
+        argv += [
+            "--combined-mp4", str(combined_mp4),
+            "--mp4-width",  str(mp4_width),
+            "--mp4-height", str(mp4_height),
+            "--mp4-fps",    str(mp4_fps),
+        ]
 
     old_argv = sys.argv
     sys.argv = argv
@@ -225,6 +235,13 @@ def main():
     parser.add_argument("--no-view", action="store_true",
                         help="Render MP4s into <out-dir>/viz/ instead of opening the viewer.")
     parser.add_argument("--out-dir", default=None)
+    parser.add_argument("--combined-mp4", default=None,
+                        help="Write a single MP4 with all selected tasks "
+                             "concatenated. If a relative path is given, it is "
+                             "resolved under <out-dir>.")
+    parser.add_argument("--mp4-width",  type=int, default=720)
+    parser.add_argument("--mp4-height", type=int, default=540)
+    parser.add_argument("--mp4-fps",    type=int, default=30)
     args = parser.parse_args()
 
     db_path = Path(args.db)
@@ -258,6 +275,12 @@ def main():
         )
 
     viz_dir = (out_dir / "viz") if args.no_view else None
+
+    combined_mp4 = None
+    if args.combined_mp4:
+        cm = Path(args.combined_mp4)
+        combined_mp4 = cm if cm.is_absolute() else (out_dir / cm)
+
     rc = _run_eval_in_process(
         eval_paths=paths,
         quintic_tracks=quintic_tracks,
@@ -266,6 +289,10 @@ def main():
         device=args.device,
         no_view=args.no_view,
         viz_dir=viz_dir,
+        combined_mp4=combined_mp4,
+        mp4_width=args.mp4_width,
+        mp4_height=args.mp4_height,
+        mp4_fps=args.mp4_fps,
     )
     if rc != 0:
         console.log(f"[red]Eval main() returned non-zero: {rc}[/red]")

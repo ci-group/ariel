@@ -48,6 +48,7 @@ import torch
 from rich.console import Console
 from rich.progress import track
 from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.vec_env import VecNormalize
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -112,8 +113,8 @@ console = Console()
 #  CONFIG 1 — EA
 # ═════════════════════════════════════════════════════════════════════════════
 
-EA_POP_SIZE  = 10
-EA_GENS      = 10
+EA_POP_SIZE  = 1
+EA_GENS      = 1
 
 # v4 policy is locked to 6 motors. Keep min == max == 6.
 N_ARMS_MIN = 6
@@ -142,12 +143,17 @@ CUSTOM_GENERATION_OPS = None
 GATE_DENSITY = 3
 PROP_SIZE    = 2
 
+# Disable v4's tilt-based episode termination. Evolved morphologies can
+# spin out under the warm-started hexacopter policy; resetting on tilt
+# kills fine-tune episodes before the policy can adapt.
+_v4.TILT_TERMINATE_COS = -1.0
+
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  CONFIG 3 — PPO / RL  (smaller budget than base — this is a fine-tune)
 # ═════════════════════════════════════════════════════════════════════════════
 
-PPO_STEPS         = 3_000_000
+PPO_STEPS         = 10_000_000
 PPO_NUM_ENVS      = 128
 PPO_N_STEPS       = 4096
 PPO_N_EPOCHS      = 10
@@ -160,6 +166,10 @@ PPO_ENT_END       = 1e-4
 PPO_MAX_GRAD_NORM = 0.5
 
 EVAL_STEPS = 1500
+
+# Periodic in-training gate-pass probe. Set MID_EVAL_EVERY=0 to disable.
+MID_EVAL_EVERY = 524_288   # env-steps between probes (≈ one PPO rollout)
+MID_EVAL_STEPS = 1500
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -360,6 +370,46 @@ cfg: dict[str, Any] = {
 _quintic_seed_counter = {"n": 0}
 
 
+class MidTrainingGateEval(BaseCallback):
+    """Run _eval_per_task every ``eval_every`` env steps and print gates/s
+    so we can watch adaptation progress during PPO fine-tune."""
+
+    def __init__(self, eval_every: int, eval_steps: int, console: Console):
+        super().__init__()
+        self.eval_every = int(eval_every)
+        self.eval_steps = int(eval_steps)
+        self.console    = console
+        self._next_at   = self.eval_every
+
+    def _on_step(self) -> bool:
+        if self.eval_every <= 0 or self.num_timesteps < self._next_at:
+            return True
+        self._next_at = self.num_timesteps + self.eval_every
+        env = self.model.get_env()
+        was_training = env.training
+        env.training = False
+        try:
+            _ep_r, _ep_g, total_g, live_steps = _eval_per_task(
+                env, self.model, n_steps=self.eval_steps,
+            )
+        finally:
+            env.training = was_training
+
+        elapsed_s = float(live_steps.sum()) * 0.01
+        gps_total = float(total_g.sum()) / elapsed_s if elapsed_s > 0 else 0.0
+        per_task_parts = []
+        for ti, name in enumerate(TASK_NAMES):
+            tsec = float(live_steps[ti]) * 0.01
+            gps = (float(total_g[ti]) / tsec) if tsec > 0 else 0.0
+            per_task_parts.append(f"{name}={int(total_g[ti])}g/{gps:.3f}gps")
+        self.console.log(
+            f"[cyan]gate-probe @ {self.num_timesteps:>10,} steps[/cyan]  "
+            f"total={int(total_g.sum())}g / {gps_total:.4f} gps  "
+            + "  ".join(per_task_parts)
+        )
+        return True
+
+
 def _train_and_eval(genotype: dict, cfg: dict) -> tuple[float, Any, str | None, str | None, int]:
     try:
         genome = deserialize_genome(genotype)
@@ -423,9 +473,13 @@ def _train_and_eval(genotype: dict, cfg: dict) -> tuple[float, Any, str | None, 
     )
     model.lr_schedule = lambda _progress_remaining: PPO_LR
 
+    _callbacks: list = [EntCoefAnneal(PPO_ENT_START, PPO_ENT_END, cfg["ppo_steps"])]
+    if MID_EVAL_EVERY > 0:
+        _callbacks.append(MidTrainingGateEval(MID_EVAL_EVERY, MID_EVAL_STEPS, console))
+
     model.learn(
         total_timesteps=cfg["ppo_steps"],
-        callback=[EntCoefAnneal(PPO_ENT_START, PPO_ENT_END, cfg["ppo_steps"])],
+        callback=_callbacks,
         progress_bar=False,
     )
 

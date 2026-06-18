@@ -99,7 +99,7 @@ class _TaskOneHotWrapper(VecEnv):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _rollout(task_name, task_id, propellers, model, vn_path, device, dt, n_steps,
-             seed, gate_density):
+             seed, gate_density, permissive=False):
     gpos, gyaw, spos = _task_config(task_name, density=gate_density)
     is_hover = (task_name == "hover")
     # Tight bounds — divergence ends the episode instead of drifting to ±200m.
@@ -107,6 +107,17 @@ def _rollout(task_name, task_id, propellers, model, vn_path, device, dt, n_steps
     xb = (-20.0, 20.0)
     if task_name == "slalom":
         xb = (-5.0, float(gpos[:, 0].max()) + 5.0)
+    yb = (-20.0, 20.0)
+    zb = (-10.0, 0.5)
+    tilt_cos = TILT_TERMINATE_COS
+    if permissive:
+        # Video-friendly rollout: stop killing the episode for tilt or for
+        # drifting outside the gate footprint. Evolved morphologies often
+        # spin/tumble — we still want to see the full trajectory.
+        tilt_cos = -1.0          # tilt_terminate_cos<=0 disables tilt termination
+        xb = (-200.0, 200.0)
+        yb = (-200.0, 200.0)
+        zb = (-100.0, 5.0)
     # v4: figure8 fixed-start to match training; slalom/shuttle-run random.
     random_init = (not is_hover) and (task_name != "figure8")
     raw_env = TorchDroneGateEnv(
@@ -116,8 +127,8 @@ def _rollout(task_name, task_id, propellers, model, vn_path, device, dt, n_steps
         gate_yaw=gyaw,
         start_pos=spos,
         x_bounds=xb,
-        y_bounds=(-20.0, 20.0),
-        z_bounds=(-10.0, 0.5),
+        y_bounds=yb,
+        z_bounds=zb,
         gates_ahead=2,
         device=device,
         dt=dt,
@@ -125,7 +136,7 @@ def _rollout(task_name, task_id, propellers, model, vn_path, device, dt, n_steps
         max_steps=n_steps,
         initialize_at_random_gates=random_init,
         upright_bonus=0.0 if is_hover else UPRIGHT_BONUS,
-        tilt_terminate_cos=TILT_TERMINATE_COS,
+        tilt_terminate_cos=tilt_cos,
         extra_yaw_rate_pen=EXTRA_YAW_RATE_PEN,
         velocity_reward_coef=0.0 if is_hover else VELOCITY_REWARD_COEF,
         altitude_floor_z=ALTITUDE_FLOOR_Z,
@@ -265,6 +276,18 @@ def main():
                              "via best_bp.save_json). Defaults to the standard hex.")
     parser.add_argument("--no-view", action="store_true")
     parser.add_argument("--out-dir", default=None)
+    parser.add_argument("--combined-mp4", default=None,
+                        help="If set, write a single MP4 to this path with all "
+                             "selected tasks concatenated one after another. "
+                             "Implies --no-view.")
+    parser.add_argument("--mp4-width",  type=int, default=720)
+    parser.add_argument("--mp4-height", type=int, default=540)
+    parser.add_argument("--mp4-fps",    type=int, default=30)
+    parser.add_argument("--permissive-rollout", action="store_true",
+                        help="Disable tilt termination and widen position "
+                             "bounds. Auto-enabled when --combined-mp4 is set, "
+                             "so spinning evolved morphologies still produce a "
+                             "full-length video.")
     args = parser.parse_args()
 
     np.random.seed(args.seed)
@@ -298,15 +321,30 @@ def main():
     n_steps = int(args.rollout_time / args.dt) + 1
 
     out_dir = Path(args.out_dir) if args.out_dir else Path(args.policy).parent / "viz"
-    if args.no_view:
+    if args.no_view or args.combined_mp4:
         out_dir.mkdir(parents=True, exist_ok=True)
+
+    combined_recorder = None
+    if args.combined_mp4:
+        combined_path = Path(args.combined_mp4)
+        combined_path.parent.mkdir(parents=True, exist_ok=True)
+        # VideoRecorder appends a timestamp to file_name. We honour the
+        # caller-supplied path stem and accept that extra suffix.
+        combined_recorder = VideoRecorder(
+            file_name=combined_path.stem,
+            output_folder=combined_path.parent,
+            width=args.mp4_width, height=args.mp4_height, fps=args.mp4_fps,
+        )
+        print(f"combined MP4 → {combined_path.parent}/{combined_path.stem}_<ts>.mp4")
 
     for task_name in tasks_to_run:
         task_id = TASK_NAMES.index(task_name)
         print(f"\n=== TASK: {task_name} (id={task_id}) ===")
+        permissive = bool(args.permissive_rollout or args.combined_mp4)
         pos_ned, euler, gates_passed, raw_env, term_cause, term_counts = _rollout(
             task_name, task_id, propellers, model, vn_path,
             args.device, args.dt, n_steps, args.seed, args.gate_density,
+            permissive=permissive,
         )
         n_logged = len(pos_ned)
         counts_str = " ".join(f"{k}={v}" for k, v in term_counts.items() if v > 0) or "none"
@@ -330,7 +368,24 @@ def main():
             data_mj.qvel[:] = 0.0
             mujoco.mj_forward(model_mj, data_mj)
 
-        if not args.no_view:
+        if combined_recorder is not None:
+            steps_per_frame = max(1, int(round(1.0 / (combined_recorder.fps * args.dt))))
+            t_render = _time.time()
+            with mujoco.Renderer(
+                model_mj,
+                width=combined_recorder.width,
+                height=combined_recorder.height,
+            ) as renderer:
+                for idx in range(0, len(pos_enu), steps_per_frame):
+                    _set_pose(idx)
+                    renderer.update_scene(data_mj)
+                    combined_recorder.write(frame=renderer.render())
+            print(
+                f"  appended {task_name} ({len(pos_enu)} steps, "
+                f"{combined_recorder.frame_count} frames so far) "
+                f"in {_time.time() - t_render:.2f}s"
+            )
+        elif not args.no_view:
             print(f"  launching viewer for {task_name} — close window to advance.")
             _set_pose(0)
             with mujoco.viewer.launch_passive(model_mj, data_mj) as viewer:
@@ -358,6 +413,10 @@ def main():
                     recorder.write(frame=renderer.render())
             recorder.release()
             print(f"  rendered in {_time.time() - t_render:.2f}s → {out}")
+
+    if combined_recorder is not None:
+        combined_recorder.release()
+        print(f"combined MP4 saved — total frames: {combined_recorder.frame_count}")
 
     print("\ndone.")
     return 0
