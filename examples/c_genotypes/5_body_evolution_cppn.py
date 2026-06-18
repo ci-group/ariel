@@ -3,8 +3,6 @@ Morphology-only evolution for CPPN genomes using the same morphological fitness
 as the tree-based example. Decodes CPPNs into module graphs using the
 best-first decoder and evaluates with MorphologicalMeasures.
 """
-from __future__ import annotations
-
 import argparse
 import copy
 import random
@@ -26,7 +24,6 @@ from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
-from ariel.body_phenotypes.robogen_lite.decoders.score_cube import MorphologyDecoderCubePruning
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
@@ -178,13 +175,15 @@ class CPPNEvolution:
         parents = [ind for ind in population if ind.tags.get("ps", False)]
         if not parents:
             parents = population
-        new_offspring: List[Individual] = []
+        new_offspring: list[Individual] = []
         target_pool = self.config.target_population_size * 2
         while len(population) + len(new_offspring) < target_pool:
             if len(parents) >= 2 and RNG.random() < 0.5:
                 p1, p2 = random.sample(parents, 2)
                 g1 = Genome.from_dict(p1.genotype["cppn"]) if isinstance(p1.genotype["cppn"], dict) else p1.genotype["cppn"]
+                g1.fitness = p1.fitness if p1.fitness is not None else 0.0
                 g2 = Genome.from_dict(p2.genotype["cppn"]) if isinstance(p2.genotype["cppn"], dict) else p2.genotype["cppn"]
+                g2.fitness = p2.fitness if p2.fitness is not None else 0.0
                 child = self.crossover(g1, g2)
             else:
                 parent = random.choice(parents)

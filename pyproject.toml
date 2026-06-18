@@ -3,45 +3,24 @@ name = "ariel"
 version = "0.0.0"
 description = "ARIEL"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 license = { text = "GPL-3.0" }
 authors = [{ name = "jmdm", email = "jmdm.880@gmail.com" }]
 classifiers = ["Development Status :: 2 - Pre-Alpha"]
 
 dependencies = [
-  "attrs>=25.4.0",
-  "deap>=1.4.3",
-  "dm-control>=1.0.38",
   "evotorch>=0.6.1",
-  "gymnasium>=1.2.3",
-  "ipykernel>=6.30.1",
-  "jupyter>=1.1.1",
-  "kaleido>=1.2.0",
-  "keyboard>=0.13.5",
-  "manifold3d>=3.4.0",
   "matplotlib>=3.9.4",
   "mujoco>=3.3.6",
   "mujoco-mjx[warp]>=3.6.0",
   "networkx>=3.2.1",
-  "nevergrad>=1.0.12",
-  "nicegui>=2.24.1",
-  "numpy>=2.0.2",
+  "numpy>=1.26,<2",
   "numpy-quaternion>=2023.0.3",
-  "omegaconf>=2.3.0",
-  "opencv-python>=4.11.0.86",
-  "panel>=1.8.9",
-  "pillow>=11.3.0",
-  "plotly>=6.6.0",
-  "polars>=1.35.2",
   "pydantic>=2.11.9",
   "pydantic-settings>=2.10.1",
-  "pyserial>=3.5",
-  "pyvista>=0.47.1",
   "rich>=14.1.0",
   "sqlalchemy>=2.0.43",
   "sqlmodel>=0.0.25",
-  "torch>=2.8.0",
-  "torchvision>=0.23.0",
 ]
 
 
@@ -50,6 +29,39 @@ Homepage = "https://github.com/ci-group/ariel"
 Repository = "https://github.com/ci-group/ariel"
 Documentation = "https://ariel.readthedocs.io"
 Changelog = "https://github.com/ci-group/ariel/releases"
+
+[project.optional-dependencies]
+rl-sb3 = [
+  "gymnasium==1.2.1",
+  "stable-baselines3>=2.7.0",
+]
+torch = [
+  "torch>=2.8.0",
+  "torchvision>=0.23.0",
+]
+viz = [
+  "opencv-python>=4.11.0.86",
+  "pillow>=11.3.0",
+  "panel>=1.8.9",
+  "plotly>=6.6.0",
+  "kaleido>=1.2.0",
+]
+fabrication = ["cadquery>=2.4.0"]
+experimental = [
+  "attrs>=25.4.0",
+  "deap>=1.4.3",
+  "dm-control>=1.0.38",
+  "ipykernel>=6.30.1",
+  "jupyter>=1.1.1",
+  "keyboard>=0.13.5",
+  "manifold3d>=3.4.0",
+  "nevergrad>=1.0.12",
+  "nicegui>=2.24.1",
+  "omegaconf>=2.3.0",
+  "polars>=1.35.2",
+  "pyserial>=3.5",
+  "pyvista>=0.47.1",
+]
 
 [dependency-groups]
 dev = [

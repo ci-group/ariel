@@ -11,7 +11,7 @@ import random
 import shutil
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 # Third-party libraries
 import mujoco as mj
@@ -50,10 +50,10 @@ from ariel.utils.runners import simple_runner
 from ariel.utils.video_recorder import VideoRecorder
 
 # Type Checking
-type ViewerTypes = Literal["launcher", "video", "simple", "no_control", "frame"]
+ViewerTypes: TypeAlias = Literal["launcher", "video", "simple", "no_control", "frame"]
 
 # Type Aliases
-type PopulationFunc = Callable[[Population], Population]
+PopulationFunc: TypeAlias = Callable[[Population], Population]
 
 # --- DATA SETUP --- #
 SCRIPT_NAME = __file__.split("/")[-1][:-3]

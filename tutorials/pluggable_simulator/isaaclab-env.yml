@@ -1,0 +1,22 @@
+# Pinned Isaac Lab conda environment for ariel's Phase 2.5 Option A
+# recipe. Vendored snapshot of upstream IsaacLab's `environment.yml`
+# at commit:
+#
+#     f4aa17f87e2  Updates Newton docs on main for 3.0 beta changes (#4934)
+#                  (https://github.com/isaac-sim/IsaacLab)
+#
+# Vendored here so the Option A recipe in DRONE_BLUEPRINT_PLAN.md is
+# reproducible across upstream Isaac Lab evolution. If Isaac Lab
+# changes its env shape, refresh this file deliberately and update
+# the SHA above; do NOT silently follow upstream.
+#
+# Original upstream license: BSD-3-Clause
+# Copyright (c) 2022-2026, The Isaac Lab Project Developers
+# (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md)
+
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - importlib_metadata

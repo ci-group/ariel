@@ -1,0 +1,482 @@
+# Pluggable simulator backends for drone evolution + RL
+
+This tutorial demonstrates how ariel decouples the **EA + RL learning loop**
+from the **physics simulator** so that collaborators can plug in their
+own simulators while reusing ariel's evolutionary and morphology-IR (i.e. Blueprint)
+infrastructure.
+
+Two backends ship today:
+
+| `--simulator` | Simulator (physics) | RL library / loop | Task |
+|---------------|---------------------|---------------|----------------|
+| `numpy` (TUDelft)       | `DroneSimulator` (pure NumPy + SymPy) | **stable-baselines3 PPO** (trains end-to-end) | gate-passing |
+| `isaaclab`    | Isaac Lab / Isaac Sim PhysX           | **rl_games PPO** (trains end-to-end; `--mode step` also available for env-construction smokes) | hover-to-goal |
+
+Each backend brings its own simulator **and** its own RL library. The EA loop above never sees the simulator choice; it just gets a fitness scalar back per individual.
+
+**Status:** both backends train end-to-end. The NumPy backend trains
+sb3 PPO on the gate-passing task; the Isaac Lab backend trains
+`rl_games` PPO on hover-to-goal in a single conda env where ariel's
+deps are simulator-agnostic and Isaac Lab owns the binary stack
+(torch/gymnasium/numpy) — see §3b for the install recipe. A
+reference EA + PPO loop on top of the Isaac Lab backend ships at
+[`evolve.py`](./evolve.py); see §6 for how to wire your own RL
+pipeline into ariel's EA layer.
+
+---
+
+## 1. The architecture
+
+```
+ariel offers: EA loop  +  RL trainers  +  DroneBlueprint IR
+─────────────────────────────────────────────────────────────
+   genome handlers │ EA operators │ scripts/train.py dispatch
+                              │
+                              ▼
+              ─── Plug point: simulator+trainer pair ───
+                              │
+   ┌─────────────────-────┼──────────────────────────┐
+   ▼                          ▼                          ▼
+NumpyBlueprintGateEnv   IsaacLabBlueprintHoverEnv   <YourBackendEnv>
+ (gymnasium VecEnv)        (DirectRLEnv)             (whatever shape
+       +                        +                      your simulator
+sb3 PPO                  rl_games PPO                needs)
+       │                        │                          │
+       ▼                        ▼                          ▼
+blueprint_to_propellers   blueprint_to_urdf →       whatever conversion
+       │                  UrdfConverter →                  your backend
+       ▼                  Isaac Sim spawn                  needs
+DroneSimulator
+(pure NumPy)
+```
+
+**What ariel provides** (above the plug point):
+- `DroneBlueprint` — the morphology IR every backend consumes.
+- EA operators, genome handlers, repair, inspection, descriptors —
+  all simulator-agnostic.
+- A unified `train.py` dispatch that routes to backend-specific RL
+  glue without exposing the choice to the EA.
+
+**What a simulator backend provides** (below the plug point):
+- A learning-ready env constructed from a `DroneBlueprint`.
+- Hooks into its preferred RL library (sb3, rsl_rl, rl_games, skrl,
+  or anything else).
+- A task definition (reward, termination, observation/action spaces).
+
+The EA evolves the same morphology variables either way; 
+only the fitness function and the trained policy are backend-specific.
+
+---
+
+## 2. The two contracts
+
+ariel ships two complementary contracts, each matched to its
+backend's native shape:
+
+### 2a. `BlueprintGateEnv` Protocol (gymnasium VecEnv)
+
+Lives in
+[`src/ariel/simulation/tasks/blueprint_gate_env.py`](../../src/ariel/simulation/tasks/blueprint_gate_env.py).
+Used by backends that train with **stable-baselines3** or any other
+gymnasium-VecEnv-compatible RL library.
+
+```python
+@runtime_checkable
+class BlueprintGateEnv(Protocol):
+    blueprint: DroneBlueprint
+    num_envs: int
+    # ...plus the standard VecEnv methods inherited from
+    # stable_baselines3.common.vec_env.VecEnv.
+```
+
+Conformance: subclass `stable_baselines3.common.vec_env.VecEnv` and
+take a `DroneBlueprint` at construction. `NumpyBlueprintGateEnv` is
+the shipped reference implementation.
+
+### 2b. Isaac Lab's `DirectRLEnv` shape (lives in `isaaclab.envs`)
+
+Used by backends that train with **Isaac Lab's native RL libraries**
+(rsl_rl, rl_games, skrl). Isaac Lab provides this class hierarchy;
+our `IsaacLabBlueprintHoverEnv` extends it and slots in a
+Blueprint-derived USD at scene-setup time.
+
+```python
+class IsaacLabBlueprintHoverEnv(DirectRLEnv):
+    cfg: IsaacLabBlueprintHoverEnvCfg
+    def __init__(self, cfg, render_mode=None, **kwargs): ...
+    def _setup_scene(self): ...
+    def _pre_physics_step(self, actions): ...
+    def _apply_action(self): ...
+    def _get_observations(self): ...
+    def _get_rewards(self): ...
+    def _get_dones(self): ...
+    def _reset_idx(self, env_ids): ...
+```
+
+Why two contracts and not one universal? Trying to force both
+simulator ecosystems through a single shape (e.g., wrapping Isaac
+Lab to gymnasium VecEnv via `isaaclab_rl.sb3`) drags in
+stable-baselines3, which collides with the numpy-2 ABI in the
+unified isaaclab conda env. Honest heterogeneity is cheaper than
+forced uniformity.
+
+---
+
+## 3. Environment setup
+
+The two backends have different runtime requirements, so each gets its
+own env. Pick the one matching the backend(s) you want to use.
+
+### 3a. NumPy backend (gate task, stable-baselines3)
+
+Works in any ariel venv with the `rl-sb3` and `torch` extras installed.
+From the ariel repo root:
+
+```bash
+uv sync --extra rl-sb3 --extra torch
+```
+
+That's it — the NumPy backend has no further setup. See the [project
+root README](../../README.md) for the broader ariel install matrix.
+
+### 3b. Isaac Lab backend (hover task, rl_games)
+
+Isaac Lab owns its own torch / gymnasium / numpy ABI stack, so we
+install ariel **into** Isaac Lab's env rather than the other way
+around. The reproducible recipe:
+
+```bash
+# 0) Paths (adjust if your checkout differs)
+export ARIEL_ROOT="$HOME/Documents/sandbox/ariel"
+export ISAACLAB_ROOT="$HOME/Documents/sandbox/IsaacLab"
+export ENV_NAME="ariel-isaaclab-train"
+
+# 1) Create a clean env from this repo's *vendored* copy of Isaac Lab's
+#    env spec. We vendor (rather than read $ISAACLAB_ROOT/environment.yml
+#    directly) so the recipe is stable across upstream Isaac Lab churn —
+#    refresh deliberately, not silently. See the SHA in the file header.
+conda env remove -n "$ENV_NAME" -y || true
+conda env create -n "$ENV_NAME" \
+    -f "$ARIEL_ROOT/tutorials/pluggable_simulator/isaaclab-env.yml"
+conda activate "$ENV_NAME"
+
+# 2) Install Isaac Lab into the env (it owns torch / gymnasium / numpy).
+cd "$ISAACLAB_ROOT"
+./isaaclab.sh -i
+
+# 3) Sanity-check Isaac Lab's python path first.
+./isaaclab.sh -p -c "import isaaclab; print('isaaclab import OK')"
+
+# 3b) Source Isaac Sim's conda-env setup so bare `python` invocations
+#     that follow can find `isaacsim` / `omni.*` / `pxr` on PYTHONPATH.
+#     `./isaaclab.sh -p` (above) handles this internally; bare `python`
+#     does not. The recipe uses bare `python` from step 7 onward.
+source "$ISAACLAB_ROOT/_isaac_sim/setup_conda_env.sh"
+
+# 4) Snapshot simulator-owned binary versions BEFORE ariel install.
+#    The next step (pip install -e . --no-deps) MUST leave these
+#    untouched; the post-install diff confirms it.
+pip list --format=freeze \
+    | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
+    | sort > /tmp/ariel_phase25_binaries_before.txt
+cat /tmp/ariel_phase25_binaries_before.txt
+
+# 5) Install ariel WITHOUT dependency resolution side effects.
+#    --no-deps is the load-bearing flag: pip MUST NOT replace the
+#    simulator-owned torch / gymnasium / numpy here.
+cd "$ARIEL_ROOT"
+pip install -e . --no-deps
+
+# 6) Guardrail check: verify ariel install did not bump binaries.
+#    Expected output: "BINARIES UNCHANGED ✓" with an empty diff.
+pip list --format=freeze \
+    | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
+    | sort > /tmp/ariel_phase25_binaries_after.txt
+if diff -u /tmp/ariel_phase25_binaries_before.txt \
+            /tmp/ariel_phase25_binaries_after.txt; then
+    echo "BINARIES UNCHANGED ✓"
+else
+    echo "ERROR: simulator-owned binaries were bumped by ariel install" >&2
+    echo "       inspect pyproject.toml [project.dependencies] for leaks" >&2
+    exit 1
+fi
+
+# 6b) Install ariel's pure-Python deps that --no-deps skipped, but
+#     pin the simulator-owned binaries against accidental upgrade.
+#     The before-snapshot from step 4 doubles as a pip constraints
+#     file: any line `torch==2.7.0+cu128` in there acts as a hard
+#     ceiling on what pip can do here. Skip evotorch and mujoco-mjx
+#     — they bring torch / jax / numpy deps that fight Isaac Lab's
+#     stack.
+pip install --constraint /tmp/ariel_phase25_binaries_before.txt \
+    "networkx>=3.2.1" \
+    "rich>=14.1.0" \
+    "pydantic>=2.11.9" \
+    "pydantic-settings>=2.10.1" \
+    "sqlalchemy>=2.0.43" \
+    "sqlmodel>=0.0.25" \
+    "numpy-quaternion>=2023.0.3" \
+    "matplotlib>=3.9.4" \
+    "mujoco>=3.3.6"
+
+# 7) Quick import smoke for ariel (Blueprint chain — what the Isaac
+#    Lab path actually uses). Importing `DroneGateEnv` here would test
+#    the NumPy backend's chain, which transitively needs EA orchestration
+#    deps the Isaac Lab env intentionally doesn't pull in.
+python -c "
+from ariel.body_phenotypes.drone.blueprint import DroneBlueprint
+from ariel.body_phenotypes.drone.decoders import spherical_angular_to_blueprint
+from ariel.body_phenotypes.drone.backends import blueprint_to_urdf
+print('ariel Blueprint chain: OK')
+"
+```
+
+Why this shape: ariel's base `pyproject.toml` pins `numpy>=1.26,<2`
+specifically to be safe to install into an Isaac Lab env. Going the
+other way — installing Isaac Lab into an ariel-managed env — drags in
+sb3's compiled deps against numpy 2 and segfaults.
+
+### 3c. Operational gotcha: stale Isaac Sim processes after a failed run
+
+When Isaac Sim errors during launcher init (a config validation problem,
+a dependency mismatch, anything before the env-stepping loop starts),
+the Python interpreter often doesn't cleanly exit — Isaac Sim's app
+threads keep spinning even after the shell prints its prompt. Symptom:
+a `python train.py …` process running at ~120% CPU for hours after a
+3-iteration smoke test "ended."
+
+After every failed Isaac Sim smoke run, check for orphans:
+
+```bash
+ps -u $USER -o pid,etime,pcpu,cmd \
+    | grep -E "tutorials/pluggable_simulator/train\.py" \
+    | grep -v grep
+```
+
+If anything is listed, kill it:
+
+```bash
+pkill -KILL -f "tutorials/pluggable_simulator/train.py"
+```
+
+This is a known Isaac Sim behavior, not an ariel bug. It also applies
+to the official Isaac Lab `train.py` scripts. Worth running the check
+after any failed smoke so you don't end up with ~5 cores of CPU
+silently burning while you debug.
+
+---
+
+## 4. Running the shipped backends
+
+### NumPy backend (gate task, sb3 PPO)
+
+```bash
+python tutorials/pluggable_simulator/train.py \
+    --simulator numpy \
+    --preset quad \
+    --num-envs 8 \
+    --total-timesteps 5000
+```
+
+Uses `DroneSimulator` (pure NumPy + SymPy) via `NumpyBlueprintGateEnv`
+— a thin shim that calls `blueprint_to_propellers` and forwards to
+the established `DroneGateEnv`. >100× real-time on CPU. ~6600 env-
+steps/sec on 8 parallel envs.
+
+### Isaac Lab backend (hover task)
+
+Run from the env you built in §3b. Two modes:
+
+**`--mode train` (default): real `rl_games` PPO training.** This is
+the headline workflow — full Blueprint → URDF → USD → Isaac Sim
+parallel envs → `rl_games.torch_runner.Runner` PPO. Uses the agent
+config from
+[`make_rl_games_agent_cfg`](../../src/ariel/simulation/tasks/isaaclab_hover_env.py)
+which mirrors Isaac Lab's reference quadcopter PPO config.
+
+```bash
+python tutorials/pluggable_simulator/train.py \
+    --simulator isaaclab \
+    --headless \
+    --num-envs 16 \
+    --max-iterations 3
+```
+
+**`--mode step`: random-action env-stepping smoke.** Skips PPO,
+useful for verifying env construction or debugging the Isaac-Lab-
+side env-stack without paying for a PPO run. Steps the env with
+`uniform(-1, 1)` actions for `max_iterations × 24` steps, computing
+observations + rewards (`-distance_to_goal × step_dt`) + done flags
+per step.
+
+```bash
+python tutorials/pluggable_simulator/train.py \
+    --simulator isaaclab \
+    --mode step \
+    --headless \
+    --num-envs 16 \
+    --max-iterations 3
+```
+
+Both modes share the same `IsaacLabBlueprintHoverEnv`; only the
+post-construction code path differs.
+
+---
+
+## 5. Adding your own simulator
+
+Five steps. The exact contract you implement depends on your RL
+library of choice:
+
+### If you're using stable-baselines3 (gymnasium VecEnv)
+
+**1. Create `src/ariel/simulation/tasks/<your_backend>_gate_env.py`.**
+
+```python
+from stable_baselines3.common.vec_env import VecEnv
+from ariel.body_phenotypes.drone.blueprint import DroneBlueprint
+
+class YourBackendBlueprintGateEnv(VecEnv):
+    def __init__(self, *, blueprint: DroneBlueprint, num_envs: int, **kwargs):
+        # Convert the Blueprint into whatever your simulator needs.
+        # Helpers available in ariel.body_phenotypes.drone.backends:
+        #   - blueprint_to_propellers(bp)   → list[dict] motor positions/dirs
+        #   - blueprint_to_mjspec(bp)       → mujoco.MjSpec
+        #   - blueprint_to_urdf(bp, path)   → URDF file
+        ...
+        self.blueprint = blueprint
+        self.num_envs = num_envs
+        super().__init__(num_envs=num_envs,
+                         observation_space=...,
+                         action_space=...)
+
+    # Implement the VecEnv abstract methods:
+    def reset(self):       ...
+    def step_async(self, actions): ...
+    def step_wait(self):   ...
+    def close(self):       ...
+    def get_attr(self, attr_name, indices=None): ...
+    def set_attr(self, attr_name, value, indices=None): ...
+    def env_method(self, method_name, *args, indices=None, **kwargs): ...
+    def env_is_wrapped(self, wrapper_class, indices=None): ...
+```
+
+### If you're using Isaac Lab's native RL (rsl_rl, rl_games, skrl)
+
+**1. Create `src/ariel/simulation/tasks/<your_backend>_<task>_env.py`.**
+
+```python
+from isaaclab.envs import DirectRLEnv, DirectRLEnvCfg
+from isaaclab.utils import configclass
+from ariel.body_phenotypes.drone.blueprint import DroneBlueprint
+
+@configclass
+class YourBackendEnvCfg(DirectRLEnvCfg):
+    # episode_length_s, decimation, action_space, observation_space, scene, robot ...
+    @classmethod
+    def from_blueprint(cls, blueprint: DroneBlueprint, **kwargs):
+        # Generate a USD asset from the Blueprint, slot path into self.robot.spawn.
+        ...
+
+class YourBackendEnv(DirectRLEnv):
+    cfg: YourBackendEnvCfg
+    def __init__(self, cfg, render_mode=None, **kwargs):
+        super().__init__(cfg, render_mode, **kwargs)
+        ...
+    def _setup_scene(self): ...
+    def _pre_physics_step(self, actions): ...
+    def _apply_action(self): ...
+    def _get_observations(self): ...
+    def _get_rewards(self): ...
+    def _get_dones(self): ...
+    def _reset_idx(self, env_ids): ...
+```
+
+### Both paths: register your backend in `train.py`
+
+**2. Add a dispatch branch in `train.py`** (a `main_<your_backend>`
+function that imports your env + your RL library and runs training).
+
+**3. Add `--simulator <your_backend>` to the choices list** so the
+peek-parser routes correctly.
+
+**4. Verify it runs:**
+
+```bash
+python tutorials/pluggable_simulator/train.py --simulator <your_backend> \
+    --num-envs 2 --total-timesteps 1000   # or --max-iterations 2
+```
+
+**5. Plug into the EA evaluator.** Once training works, point
+`ariel.ec.drone.evaluators.gate_evaluator.GateEvaluator` (or your own
+evaluator) at the new backend. The EA loop never sees the simulator
+choice — it just gets fitness numbers back per individual.
+
+Once your env is in place, see [§6](#6-driving-morphology-evolution-with-your-own-rl-pipeline)
+for wiring an EA loop on top — i.e., turning a working trainer into
+*morphology evolution + RL*.
+
+---
+
+## 6. Driving morphology evolution with your own RL pipeline
+
+§5 covered the *inner* loop: "I have a simulator and want to train a
+policy on a fixed morphology." This section covers the *outer* loop:
+"I already have an Isaac Lab + RL training pipeline and want to drive
+**morphology evolution** with ariel on top."
+
+Three roles to implement (most partners only write the third):
+
+1. **Genome → DroneBlueprint decoder.** Reuse a shipped decoder
+   (`spherical_angular_to_blueprint`, `cartesian_euler_to_blueprint`
+   in [`src/ariel/body_phenotypes/drone/decoders.py`](../../src/ariel/body_phenotypes/drone/decoders.py))
+   if your genome shape fits — most do.
+2. **An RL env that takes a `DroneBlueprint` at construction.**
+   Either of the shipped envs is a copy-paste starting point: see
+   `IsaacLabBlueprintHoverEnvCfg.from_blueprint` in
+   [`src/ariel/simulation/tasks/isaaclab_hover_env.py`](../../src/ariel/simulation/tasks/isaaclab_hover_env.py).
+3. **An `evaluate(genome) → fitness` function + outer EA loop.**
+   The shipped reference is [`tutorials/pluggable_simulator/evolve.py`](./evolve.py).
+   Copy it and replace the inner training call with your trainer.
+
+Five-step recipe (compact, executable):
+
+1. **Pick or write a genome class.** Existing options live in
+   [`src/ariel/ec/drone/genome_handlers/`](../../src/ariel/ec/drone/genome_handlers/)
+   (`spherical_angular`, `cartesian_euler`, `cppn_neat`,
+   `hybrid_cppn`). For the tutorial-sized evolve.py we use an even
+   simpler `ArmLengthGenome` defined inline.
+2. **Write `genome_to_blueprint(g) → DroneBlueprint`** (or reuse a
+   shipped decoder).
+3. **Build the env from the blueprint.** Adapt
+   `IsaacLabBlueprintHoverEnvCfg.from_blueprint` (or your own env's
+   constructor) to take a `DroneBlueprint` and produce a USD on the
+   fly via [`blueprint_to_urdf`](../../src/ariel/body_phenotypes/drone/backends.py)
+   + Isaac Lab's `UrdfConverter`.
+4. **Copy `evolve.py`; replace `_evaluate_in_subprocess` with your
+   trainer.** Or — if you prefer in-process — call your trainer
+   directly. Note: in-process reuse of `DirectRLEnv` across genomes
+   was unreliable in our tests, which is why the shipped reference
+   spawns a subprocess per individual.
+5. **Plug fitness back.** Three common shapes:
+   - parse the rl_games checkpoint filename (simplest, used in
+     `evolve.py`);
+   - subclass `IsaacAlgoObserver` to capture mean-reward stats inline;
+   - run a deterministic post-training eval pass and average reward.
+
+**For deeper material** — file-by-role reference table, in-process
+vs subprocess pattern tradeoffs, fitness-extraction options, common
+pitfalls — see [`connect_your_pipeline.md`](./connect_your_pipeline.md).
+
+---
+
+## 7. Why this matters
+
+The ARIEL consortium's collaborators bring their own simulators:
+MuJoCo, Aerial Gym, Isaac Lab, IsaacGym, custom in-house stacks.
+Each group has a preferred RL library too. The two-contract seam
+means each can keep their preferred simulator and trainer while
+sharing ariel's evolutionary and morphology infrastructure —
+decoders, EA operators, repair, descriptors, the morphology IR.
+One IR (`DroneBlueprint`), one EA loop, many backends, many
+trainers.
