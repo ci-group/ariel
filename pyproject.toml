@@ -44,6 +44,7 @@ dependencies = [
   "torch>=2.8.0",
   "torchvision>=0.23.0",
   "sb3-contrib>=2.8.0",
+  "fcl>=0.0.15",
 ]
 
 
