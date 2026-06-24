@@ -36,6 +36,8 @@ optimizer = ng.optimizers.<Name>(
 
 All optimizers are accessible via `ng.optimizers.registry`.
 
+For CMA-ES variants (CMAstd, CMAsmall, CMApara, DiagonalCMA, EDCMA, CMAbounded, FCMA, ...) and the full `ParametrizedCMA` factory signature with `inopts` passthrough to [[CMAEvolutionStrategy]], see [[ParametrizedCMA]].
+
 > **Default assumption:** All optimizers assume centered and reduced prior — zero mean, unit standard deviation — at initialization. They can still discover distant optima.
 
 ## Ask / Tell Interface

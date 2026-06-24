@@ -2,7 +2,7 @@
 type: source_summary
 tags: [nevergrad, optimization, cma-es, ask-tell, parametrization]
 source: https://facebookresearch.github.io/nevergrad/optimization.html
-date_ingested: 2026-04-09
+date_ingested: 2026-06-24
 ---
 
 # Nevergrad Optimization API

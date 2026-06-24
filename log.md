@@ -17,3 +17,25 @@
 - Files created: mjx_overview.md, mjx_core_functions.md, mjx_warp.md, mjx_performance.md, Source - MuJoCo MJX Documentation.md
 - Files updated: (none)
 - Model: Claude (subscription)
+
+## [2026-06-24] Ingest | Nevergrad Optimization API (re-fetch)
+- Files created: (none — already covered)
+- Files updated: Source - Nevergrad Optimization API.md (date refreshed)
+- Notes: Re-verified https://facebookresearch.github.io/nevergrad/optimization.html against existing pages; content unchanged.
+- Model: Claude (subscription)
+
+## [2026-06-24] Ingest | Nevergrad Parametrization
+- Files created: Source - Nevergrad Parametrization.md
+- Files updated: (none — Nevergrad_Parametrization.md already covers the page)
+- Notes: Re-fetched https://facebookresearch.github.io/nevergrad/parametrization.html; no new API surface beyond existing wiki coverage. Recorded gaps (set_bounds method options, per-element sigma, custom mutation classes) for future source-code ingest.
+- Model: Claude (subscription)
+
+## [2026-06-24] Ingest | pycma CMAEvolutionStrategy API
+- Files created: CMAEvolutionStrategy.md, Source - pycma CMAEvolutionStrategy API.md
+- Files updated: (none)
+- Model: Claude (subscription)
+
+## [2026-06-24] Ingest | Nevergrad optimizerlib.py (ParametrizedCMA)
+- Files created: ParametrizedCMA.md, Source - Nevergrad optimizerlib.md
+- Files updated: Nevergrad_Optimizers.md
+- Model: Claude (subscription)
