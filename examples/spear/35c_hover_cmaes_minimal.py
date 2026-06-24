@@ -25,6 +25,7 @@ Run:
 
 import argparse
 import math
+import sys
 import time
 from pathlib import Path
 
@@ -38,6 +39,13 @@ from ariel.body_phenotypes.drone.blueprint import DroneBlueprint
 from ariel.simulation.drone.drone_configuration import DroneConfiguration
 from ariel.simulation.drone.dynamics_params import derive_reference_params
 from ariel.simulation.tasks.torch_drone_gate_env import _build_torch_dynamics
+
+# Canonical hover prior: mixers, u_hover, controller formula.
+# Single source of truth shared by 35c (this file), 35d (replay), and the
+# Stage-2 residual env. Sign-convention regression is guarded by
+# examples/spear/library/test_prior_controller.py.
+sys.path.insert(0, str(Path(__file__).parent / "library"))
+from prior_controller import HoverPrior, N_GAINS  # noqa: E402
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -84,48 +92,9 @@ def _build_params(propellers):
     return params, cfg.num_motors
 
 
-def _compute_u_hover(params, num_motors):
-    k_w, k, w_min, w_max = params["k_w"], params["k"], params["w_min"], params["w_max"]
-    W_hover = math.sqrt(GRAVITY / (k_w * num_motors))
-    z = float(np.clip((W_hover - w_min) / (w_max - w_min), 0.0, 1.0))
-    disc = (1.0 - k) ** 2 + 4.0 * k * z * z
-    U_hover = (-(1.0 - k) + math.sqrt(max(disc, 0.0))) / (2.0 * k)
-    return float(np.clip(2.0 * U_hover - 1.0, -1.0, 1.0))
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Per-motor tilt mixer
-#
-# For a multirotor, roll/pitch correction works by *biasing thrust around
-# the body* based on each motor's azimuthal position. Motor at azimuth φ
-# contributes pitch torque ∝ cos(φ) and roll torque ∝ sin(φ). We compute
-# this once from the propeller list — it's pure morphology, not learned.
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _tilt_mixer(propellers):
-    """Return (N, 2) tensor: column 0 = pitch contribution, column 1 = roll.
-    Each row is a per-motor gain for [pitch_err, roll_err] feedback.
-
-    Sign convention (verified against src/ariel/simulation/drone/
-    dynamics_params.py:118-120 and the torch_drone_gate_env body dynamics):
-      * Roll:   k_p_signed[i] = -y_i · k_f / Ixx.  Right-side motor (+y) with
-                phi>0 (right wing down in NED) → needs MORE thrust → mixer
-                contribution is +sin(phi)·phi.  ✓ correct as written.
-      * Pitch:  k_q_signed[i] = +x_i · k_f / Iyy.  Front motor (+x) with
-                theta>0 (nose up in NED) → needs LESS thrust to push the nose
-                back down → mixer contribution must be NEGATIVE.  Hence
-                -cos(phi) here.  The asymmetric minus on y vs plus on x in
-                dynamics_params is exactly why pitch and roll need opposite
-                mixer signs even though both come from the same kinematic
-                azimuth.
-    """
-    mix = np.zeros((len(propellers), 2), dtype=np.float32)
-    for i, p in enumerate(propellers):
-        pos = np.asarray(p["loc"], dtype=np.float32)  # body-frame position
-        phi = math.atan2(float(pos[1]), float(pos[0]))
-        mix[i, 0] = -math.cos(phi)   # pitch  (note negative — see docstring)
-        mix[i, 1] =  math.sin(phi)   # roll
-    return mix
+# Mixers, u_hover, and controller formula now live in
+# examples/spear/library/prior_controller.py (imported above as HoverPrior).
+# Sign-convention tests live in test_prior_controller.py.
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -141,9 +110,15 @@ class BatchedHover:
         self.dt = dt
         self.max_steps = max_steps
         self._dyn = _build_torch_dynamics(params, n_mot, GRAVITY, self.dev, self.dtype)
-        self.target = torch.tensor(HOVER_TARGET_NED, device=self.dev, dtype=self.dtype)
-        self.u_hover = _compute_u_hover(params, n_mot)
-        self.mix = torch.tensor(_tilt_mixer(propellers), device=self.dev, dtype=self.dtype)
+        # Single source of truth for the analytical controller.
+        self.prior = HoverPrior(
+            propellers=propellers, params=params,
+            target_ned=HOVER_TARGET_NED.tolist(),
+            gravity=GRAVITY, action_scale=0.4,
+            device=self.dev, dtype=self.dtype,
+        )
+        # Aliases used elsewhere in this file (reset, reward computation).
+        self.target = self.prior.target
         self.num_envs = num_envs
         self.state_dim = 12 + n_mot
 
@@ -159,42 +134,21 @@ class BatchedHover:
 
     @torch.no_grad()
     def rollout(self, params_batch):
-        """Run one episode per param vector. Returns survival_steps (int)."""
-        # Param layout per candidate:
-        #   [trim(N), k_alt_p, k_alt_d, k_tilt, k_rate]
-        N = self.n_mot
-        trim    = params_batch[:, 0:N]                              # (λ, N)
-        k_alt_p = params_batch[:, N + 0].unsqueeze(1)               # (λ, 1)
-        k_alt_d = params_batch[:, N + 1].unsqueeze(1)               # (λ, 1)
-        k_tilt  = params_batch[:, N + 2].unsqueeze(1)               # (λ, 1)
-        k_rate  = params_batch[:, N + 3].unsqueeze(1)               # (λ, 1)
+        """Run one episode per param vector. Returns survival_steps (int).
 
+        Controller logic lives in `prior.prior_action`. Param layout
+        documented in `prior_controller.HoverPrior`:
+        ``[trim×N, k_alt_p, k_alt_d, k_tilt, k_rate, k_yaw_rate]``.
+        """
         s = self.reset()
         alive = torch.ones(self.num_envs, dtype=torch.bool, device=self.dev)
         survival = torch.zeros(self.num_envs, dtype=self.dtype, device=self.dev)
 
         for _ in range(self.max_steps):
-            z_err      = s[:, 2:3] - self.target[2]   # NED: z down, err > 0 → too low
-            vz         = s[:, 5:6]                    # NED: vz > 0 → falling
-            roll       = s[:, 6:7]                    # phi
-            pitch      = s[:, 7:8]                    # theta
-            roll_rate  = s[:, 9:10]                   # body p
-            pitch_rate = s[:, 10:11]                  # body q
-
-            # Feedback law (PD on altitude + PD on attitude via mixer):
-            #   altitude:  +k_alt_p * z_err  - k_alt_d * vz
-            #   attitude P: per-motor mixer * k_tilt * [pitch, roll]
-            #   attitude D: per-motor mixer * k_rate * [pitch_rate, roll_rate]
-            alt_cmd  = k_alt_p * z_err - k_alt_d * vz                                    # (λ, 1)
-            att_cmd  = k_tilt * (self.mix[:, 0].unsqueeze(0) * pitch +                    # (λ, N)
-                                 self.mix[:, 1].unsqueeze(0) * roll)
-            rate_cmd = k_rate * (self.mix[:, 0].unsqueeze(0) * pitch_rate +               # (λ, N)
-                                 self.mix[:, 1].unsqueeze(0) * roll_rate)
-            action = trim + alt_cmd + att_cmd + rate_cmd                                  # (λ, N)
-            action = (self.u_hover + action.clamp(-1.0, 1.0) * 0.4).clamp(-1.0, 1.0)
-
+            action = self.prior.prior_action(s, params_batch)
             sd = self._dyn(s.T, action.T).T
             s = s + self.dt * sd
+            yaw_rate = s[:, 11:12]   # used below for reward shaping
 
             pos = s[:, 0:3]
             tilt = torch.norm(s[:, 6:8], dim=1)
@@ -203,18 +157,22 @@ class BatchedHover:
             divg = ~torch.isfinite(s).all(dim=1)
             dead = oob | flipped | divg
 
-            # Dense fitness: smooth Gaussian on distance AND on attitude.
+            # Dense fitness: smooth Gaussian on distance AND on attitude
+            # AND on body yaw rate.
             #
-            # Position-only reward let CMA collapse k_tilt and k_rate to zero
-            # — the drone held altitude with no attitude correction and slowly
-            # toppled out of the reward sphere. Adding an exp(-(tilt/σ_θ)²)
-            # factor gives the attitude gains a real fitness gradient.
-            #
-            # Per Hansen 2023 §B.4: dense reward avoids the plateau that
-            # caused the indicator version to stall.
+            # Yaw-rate term added because spin imbalance (or just initial
+            # perturbation) causes drones to spin up indefinitely without
+            # feedback — pitch/roll stay nice but yaw runs away.  Without
+            # this penalty, CMA leaves k_yaw_rate at 0 since the position
+            # and tilt terms don't see yaw spin.  σ_r = 1.0 rad/s (~57°/s):
+            # tight enough to punish noticeable spin, loose enough that
+            # small recovery transients don't crush reward.
             dist = torch.norm(pos - self.target.unsqueeze(0), dim=1)
             tilt = torch.norm(s[:, 6:8], dim=1)
-            reward = torch.exp(-(dist / 0.4) ** 2) * torch.exp(-(tilt / 0.25) ** 2)
+            r_abs = yaw_rate.abs().squeeze(-1)
+            reward = (torch.exp(-(dist / 0.4) ** 2)
+                      * torch.exp(-(tilt / 0.25) ** 2)
+                      * torch.exp(-(r_abs / 1.0) ** 2))
             survival = torch.where(alive & ~dead,
                                    survival + reward, survival)
             alive = alive & ~dead
@@ -233,23 +191,18 @@ propellers = blueprint_to_propellers(bp, convention="ned")
 N = len(propellers)
 console.log(f"Motors: {N}")
 
-NUM_PARAMS = N + 4   # trim_i (N) + k_alt_p + k_alt_d + k_tilt + k_rate
-console.log(f"Search space: {NUM_PARAMS} dims  (trim×{N} + alt_p + alt_d + tilt_p + rate_d)")
-
 env = BatchedHover(
     propellers=propellers, num_envs=args.population,
     device=args.device, dt=DT, max_steps=args.episode_steps,
 )
+NUM_PARAMS = env.prior.param_dim   # N + 5
+console.log(f"Search space: {NUM_PARAMS} dims  (trim×{N} + alt_p + alt_d + tilt_p + rate_d + yaw_d)")
 
-# CMA-ES.  Init: trims at 0 (u_hover is already analytically subtracted),
-# feedback gains warm-started with the correct *signs* so we don't waste
-# generations exploring the "no feedback" basin. These aren't tuned —
-# CMA-ES will refine them — but they put us on the right side of zero.
-init = np.zeros(NUM_PARAMS, dtype=np.float32)
-init[N + 0] = 0.5    # k_alt_p — push up when below target
-init[N + 1] = -0.5   # k_alt_d — damp downward velocity (NED: vz > 0 = falling)
-init[N + 2] = 0.3    # k_tilt  — P term: corrective torque proportional to tilt angle
-init[N + 3] = -0.15  # k_rate  — D term: damps angular velocity (opposite sign of k_tilt)
+# CMA-ES.  Trims start at 0 (u_hover is already analytically subtracted),
+# feedback gains warm-started with the correct *signs* via
+# prior.default_init_params(). Single source of truth for the warm-start
+# lives in prior_controller.py.
+init = env.prior.default_init_params()
 
 # σ₀ rule (Hansen 2023, Table 1): σ₀ = 0.3 · (b − a). Search range ≈ ±2 → 0.3·4 = 1.2
 # is too aggressive given the warm-started signs. We use 0.4 — big enough that
@@ -350,6 +303,7 @@ console.log(
     f"(≈ {best_survival*DT:.2f}s near target)\n"
     f"  trim   = [{trim_str}]\n"
     f"  k_alt_p={best_vec[N]:+.3f}  k_alt_d={best_vec[N+1]:+.3f}  "
-    f"k_tilt={best_vec[N+2]:+.3f}  k_rate={best_vec[N+3]:+.3f}"
+    f"k_tilt={best_vec[N+2]:+.3f}  k_rate={best_vec[N+3]:+.3f}  "
+    f"k_yaw_rate={best_vec[N+4]:+.3f}"
 )
 console.log(f"Saved → {DATA}")

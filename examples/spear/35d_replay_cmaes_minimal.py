@@ -8,7 +8,7 @@ Run:
 """
 
 import argparse
-import math
+import sys
 import time as _time
 from pathlib import Path
 
@@ -24,6 +24,10 @@ from ariel.simulation.environments import SimpleFlatWorld
 from ariel.simulation.tasks.torch_drone_gate_env import _build_torch_dynamics
 from ariel.utils.video_recorder import VideoRecorder
 
+# Canonical hover prior (same instance type 35c uses for training).
+sys.path.insert(0, str(Path(__file__).parent / "library"))
+from prior_controller import HoverPrior, N_GAINS  # noqa: E402
+
 HOVER_TARGET_NED = np.array([0.0, 0.0, -1.5], dtype=np.float32)
 GRAVITY = 9.81
 
@@ -38,6 +42,17 @@ parser.add_argument("--deterministic-init", action="store_true",
                     help="Start exactly at target (no init perturbation)")
 parser.add_argument("--out", default=None)
 parser.add_argument("--view", action="store_true")
+# Video quality knobs.  Defaults give HD@60fps with H.264 — visually a big
+# step up from the previous 720×540 / 30fps / mp4v output.  Use --width
+# 1920 --height 1080 for full-HD; drop to 1280×720 if disk space matters.
+parser.add_argument("--width", type=int, default=1280, help="Video width (px)")
+parser.add_argument("--height", type=int, default=720, help="Video height (px)")
+parser.add_argument("--fps", type=int, default=60, help="Video framerate")
+parser.add_argument("--video-quality", type=int, default=9,
+                    help="imageio quality 0–10 (only used if imageio-ffmpeg available)")
+parser.add_argument("--camera", choices=["follow", "orbit", "fixed"],
+                    default="follow",
+                    help="follow=track drone, orbit=slowly circle, fixed=static")
 args = parser.parse_args()
 
 run_dir = Path(args.run_dir)
@@ -88,7 +103,7 @@ else:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Same dynamics + mixer as 35c. Kept inline for the same reason as 35b.
+# Build params; the mixer and u_hover live in `prior_controller.HoverPrior`.
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _build_params(propellers):
@@ -102,30 +117,6 @@ def _build_params(propellers):
     return params, cfg.num_motors
 
 
-def _compute_u_hover(params, num_motors):
-    k_w, k, w_min, w_max = params["k_w"], params["k"], params["w_min"], params["w_max"]
-    W_hover = math.sqrt(GRAVITY / (k_w * num_motors))
-    z = float(np.clip((W_hover - w_min) / (w_max - w_min), 0.0, 1.0))
-    disc = (1.0 - k) ** 2 + 4.0 * k * z * z
-    U_hover = (-(1.0 - k) + math.sqrt(max(disc, 0.0))) / (2.0 * k)
-    return float(np.clip(2.0 * U_hover - 1.0, -1.0, 1.0))
-
-
-def _tilt_mixer(propellers):
-    # Sign convention must match 35c_hover_cmaes_minimal.py::_tilt_mixer.
-    # Pitch column is NEGATIVE cos(phi): k_q_signed = +x·k_f/Iyy in the
-    # dynamics, so a front motor (+x) with theta>0 (nose up in NED) needs
-    # LESS thrust to recover. Roll column is +sin(phi) since k_p_signed
-    # already absorbs the -y_i sign for roll. See docstring in 35c.
-    mix = np.zeros((len(propellers), 2), dtype=np.float32)
-    for i, p in enumerate(propellers):
-        pos = np.asarray(p["loc"], dtype=np.float32)
-        phi = math.atan2(float(pos[1]), float(pos[0]))
-        mix[i, 0] = -math.cos(phi)   # pitch
-        mix[i, 1] =  math.sin(phi)   # roll
-    return mix
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Load + roll out
 # ─────────────────────────────────────────────────────────────────────────────
@@ -135,24 +126,35 @@ print(bp.summary())
 propellers = blueprint_to_propellers(bp, convention="ned")
 N = len(propellers)
 
-theta = np.load(pr_path).astype(np.float32)
-assert theta.shape[0] == N + 4, f"Param shape {theta.shape} doesn't match N={N}+4"
-trim    = torch.tensor(theta[:N],     dtype=torch.float32)
-k_alt_p = float(theta[N + 0])
-k_alt_d = float(theta[N + 1])
-k_tilt  = float(theta[N + 2])
-k_rate  = float(theta[N + 3])
-print(f"trim={theta[:N].round(3).tolist()}  k_alt_p={k_alt_p:.3f}  "
-      f"k_alt_d={k_alt_d:.3f}  k_tilt={k_tilt:.3f}  k_rate={k_rate:.3f}")
-
 params, _ = _build_params(propellers)
 dev = torch.device(args.device)
 dtype = torch.float32
 dyn = _build_torch_dynamics(params, N, GRAVITY, dev, dtype)
-u_hover = _compute_u_hover(params, N)
-mix = torch.tensor(_tilt_mixer(propellers), device=dev, dtype=dtype)
-target = torch.tensor(HOVER_TARGET_NED, device=dev, dtype=dtype)
-trim = trim.to(dev)
+prior = HoverPrior(
+    propellers=propellers, params=params,
+    target_ned=HOVER_TARGET_NED.tolist(),
+    gravity=GRAVITY, action_scale=0.4,
+    device=dev, dtype=dtype,
+)
+target = prior.target
+
+theta = np.load(pr_path).astype(np.float32)
+# Backwards compat: legacy runs saved N+4 params (no k_yaw_rate). Newer
+# runs save N+5. Pad with k_yaw_rate=0 if loading a legacy file so the
+# replay still works (drone will yaw-drift as before).
+if theta.shape[0] == N + 4:
+    print("Legacy params (N+4) — padding k_yaw_rate=0 for backward-compat.")
+    theta = np.concatenate([theta, np.zeros(1, dtype=np.float32)])
+assert theta.shape[0] == prior.param_dim, (
+    f"Param shape {theta.shape} doesn't match expected ({prior.param_dim},) "
+    f"for N={N}"
+)
+print(f"trim={theta[:N].round(3).tolist()}  "
+      f"k_alt_p={theta[N+0]:+.3f}  k_alt_d={theta[N+1]:+.3f}  "
+      f"k_tilt={theta[N+2]:+.3f}  k_rate={theta[N+3]:+.3f}  "
+      f"k_yaw_rate={theta[N+4]:+.3f}")
+
+params_t = torch.tensor(theta, device=dev, dtype=dtype)
 
 # Initial state (1 env)
 state_dim = 12 + N
@@ -171,19 +173,7 @@ for i in range(steps):
     pos_ned[i]   = s[0, 0:3].cpu().numpy()
     euler_log[i] = s[0, 6:9].cpu().numpy()
 
-    z_err      = s[:, 2:3] - target[2]
-    vz         = s[:, 5:6]
-    roll       = s[:, 6:7]
-    pitch      = s[:, 7:8]
-    roll_rate  = s[:, 9:10]
-    pitch_rate = s[:, 10:11]
-    alt_cmd  = k_alt_p * z_err - k_alt_d * vz
-    att_cmd  = k_tilt * (mix[:, 0].unsqueeze(0) * pitch +
-                         mix[:, 1].unsqueeze(0) * roll)
-    rate_cmd = k_rate * (mix[:, 0].unsqueeze(0) * pitch_rate +
-                         mix[:, 1].unsqueeze(0) * roll_rate)
-    action = trim.unsqueeze(0) + alt_cmd + att_cmd + rate_cmd
-    action = (u_hover + action.clamp(-1.0, 1.0) * 0.4).clamp(-1.0, 1.0)
+    action = prior.prior_action(s, params_t.unsqueeze(0))
     act_log[i] = action[0].cpu().numpy()
 
     sd = dyn(s.T, action.T).T
@@ -263,15 +253,85 @@ if args.view:
 else:
     out = Path(args.out) if args.out else (run_dir / "replay.mp4")
     out.parent.mkdir(parents=True, exist_ok=True)
-    rec = VideoRecorder(file_name=out.stem, output_folder=out.parent,
-                        width=720, height=540, fps=30)
-    steps_per_frame = max(1, int(round(1.0 / (rec.fps * args.dt))))
-    with mujoco.Renderer(m, width=rec.width, height=rec.height) as renderer:
-        for idx in range(0, len(pos_enu), steps_per_frame):
-            _set_pose(idx)
-            renderer.update_scene(d)
-            rec.write(frame=renderer.render())
-    rec.release()
-    print(f"Video → {out}")
+    W, H, FPS = args.width, args.height, args.fps
+
+    # ── Camera ──────────────────────────────────────────────────────────
+    # MjvCamera in FREE mode tracking the drone gives much better framing
+    # than the default model camera (which is usually static at the world
+    # origin and squashes everything to a corner).
+    cam = mujoco.MjvCamera()
+    cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+    cam.distance = 3.0          # metres from look-at point
+    cam.elevation = -20.0       # negative tilts down toward subject
+    cam.azimuth = 45.0          # initial heading (deg); orbit mode rotates this
+    cam.lookat[:] = [0.0, 0.0, -float(HOVER_TARGET_NED[2])]
+
+    # ── Float-accurate frame timing ─────────────────────────────────────
+    # Old code did int(1 / (fps·dt)) frames-per-step which silently drops
+    # frames and produces visible stutter when fps·dt isn't an integer
+    # divisor (e.g. 30·0.01 = 0.3 → rounds to 3 sim-steps per frame → real
+    # playback is 33fps not 30fps).  Resample by sim-time instead.
+    total_time = (len(pos_enu) - 1) * args.dt
+    n_frames = max(1, int(round(total_time * FPS)) + 1)
+    frame_times = np.linspace(0.0, total_time, n_frames)
+
+    print(f"Rendering {n_frames} frames @ {W}×{H} {FPS}fps "
+          f"(camera={args.camera}) …")
+
+    frames: list[np.ndarray] = []
+    with mujoco.Renderer(m, width=W, height=H) as renderer:
+        for f_idx, t in enumerate(frame_times):
+            # Nearest sim sample for this video frame (no interp — at 60fps
+            # with dt=0.01 the gap is at most one sim step, ~10 ms, which
+            # is visually imperceptible for hover).
+            sim_idx = min(int(round(t / args.dt)), len(pos_enu) - 1)
+            _set_pose(sim_idx)
+
+            if args.camera == "follow":
+                cam.lookat[:] = [float(pos_enu[sim_idx, 0]),
+                                 float(pos_enu[sim_idx, 1]),
+                                 float(pos_enu[sim_idx, 2])]
+            elif args.camera == "orbit":
+                cam.lookat[:] = [float(pos_enu[sim_idx, 0]),
+                                 float(pos_enu[sim_idx, 1]),
+                                 float(pos_enu[sim_idx, 2])]
+                cam.azimuth = 45.0 + 20.0 * t   # slow 20°/s orbit
+            # "fixed" leaves cam alone
+
+            renderer.update_scene(d, camera=cam)
+            frames.append(renderer.render())
+
+    # ── Encode ──────────────────────────────────────────────────────────
+    # Prefer imageio-ffmpeg + libx264: dramatically better visual quality
+    # than OpenCV's mp4v at the same file size.  Fall back to the project's
+    # VideoRecorder (mp4v / mp4) if imageio-ffmpeg isn't installed.
+    encoded = False
+    try:
+        import imageio.v3 as iio   # type: ignore[import-not-found]
+        iio.imwrite(
+            str(out),
+            np.stack(frames, axis=0),
+            fps=FPS,
+            codec="libx264",
+            quality=args.video_quality,         # 0–10, higher = better
+            pixelformat="yuv420p",              # broadly compatible (QuickTime, browsers)
+            macro_block_size=1,                 # don't pad dimensions
+            ffmpeg_log_level="error",
+        )
+        encoded = True
+        print(f"Video (libx264 q={args.video_quality}) → {out}")
+    except ImportError:
+        print("imageio-ffmpeg not installed; falling back to OpenCV/mp4v "
+              "(install with: uv pip install imageio[ffmpeg] for better quality)")
+    except Exception as e:
+        print(f"imageio encode failed ({e!s}); falling back to OpenCV/mp4v")
+
+    if not encoded:
+        rec = VideoRecorder(file_name=out.stem, output_folder=out.parent,
+                            width=W, height=H, fps=FPS)
+        for f in frames:
+            rec.write(frame=f)
+        rec.release()
+        print(f"Video (mp4v) → {out}")
 
 print("Done.")
