@@ -181,6 +181,7 @@ class HoverPrior:
         *,
         gravity: float = GRAVITY_DEFAULT,
         action_scale: float = 0.4,
+        twr: float | None = None,
         device: torch.device | str = "cpu",
         dtype: torch.dtype = torch.float32,
     ):
@@ -204,9 +205,17 @@ class HoverPrior:
             Multiplier applied to the inner-clamped effort before adding
             ``u_hover``. 35c uses 0.4; the residual env uses the same so
             that prior+residual share the same control-authority budget.
+        twr
+            If provided, scales `action_scale` by
+            ``(TWR_REF / twr)**2`` (clamped ≤ 1). High-TWR morphs
+            (prop-6/7 hexes) over-correct with the reference 0.4 and
+            crash; this auto-reduces authority where needed.
         """
         self.n_motors = len(propellers)
         self.gravity = float(gravity)
+        TWR_REF = 32.0
+        if twr is not None and twr > TWR_REF:
+            action_scale = float(action_scale) * (TWR_REF / float(twr)) ** 2
         self.action_scale = float(action_scale)
         self.device = torch.device(device)
         self.dtype = dtype
@@ -218,6 +227,16 @@ class HoverPrior:
         # Target and u_hover
         self.target = torch.tensor(list(target_ned), device=self.device, dtype=self.dtype)
         self.u_hover = compute_u_hover(params, self.n_motors, self.gravity)
+
+        # Stash dynamics constants + motor positions for analytical trim.
+        self._k_w = float(params["k_w"])
+        self._k_sq = float(params["k"])
+        self._w_min = float(params["w_min"])
+        self._w_max = float(params["w_max"])
+        self._motor_xy = np.asarray(
+            [[float(p["loc"][0]), float(p["loc"][1])] for p in propellers],
+            dtype=np.float32,
+        )
 
     # ── shape constants ────────────────────────────────────────────────
 
@@ -234,21 +253,104 @@ class HoverPrior:
 
     # ── parameter helpers ──────────────────────────────────────────────
 
-    def default_init_params(self) -> np.ndarray:
+    # Reference morph used to calibrate the hand-tuned gains in 35c.
+    # Values approximate the canonical test hex (mass ≈ 0.20 kg,
+    # Iyy ≈ 1.5e-3 kg·m², Izz ≈ 3.0e-3 kg·m²). Used for the inertia-
+    # scaled warm-start in `default_init_params(mass=..., inertia=...)`.
+    REF_MASS = 0.20            # kg
+    REF_IYY = 1.5e-3           # kg·m²
+    REF_IZZ = 3.0e-3           # kg·m²
+
+    def default_init_params(
+        self,
+        *,
+        mass: float | None = None,
+        inertia: np.ndarray | None = None,
+    ) -> np.ndarray:
         """Warm-started parameter vector matching 35c.
 
         Trims zeroed; gains hand-picked with the correct *signs* so CMA
-        starts on the right side of zero. Returns numpy for direct
-        feeding into ``ng.p.Array(init=...)``.
+        starts on the right side of zero.
+
+        If `mass` and `inertia` are supplied, the gains are **scaled by
+        the morph's mass / inertia** to keep the closed-loop bandwidth
+        roughly constant across morphs (PD theory: for fixed natural
+        frequency ω_n, ``k_p ∝ I`` and similar for translational
+        ``k ∝ m``). Without this, library builds across diverse hex
+        sizes get stuck — small-inertia morphs over-correct and crash
+        instantly with the reference-sized gains, large-inertia morphs
+        under-correct.
+
+        Returns numpy so it can be fed directly into ``ng.p.Array(init=...)``.
         """
         init = np.zeros(self.param_dim, dtype=np.float32)
         N = self.n_motors
-        init[N + 0] =  0.5    # k_alt_p
-        init[N + 1] = -0.5    # k_alt_d
-        init[N + 2] =  0.3    # k_tilt
-        init[N + 3] = -0.15   # k_rate
-        init[N + 4] =  0.2    # k_yaw_rate
+
+        # Scaling factors. Default to 1.0 if the caller didn't supply
+        # morph properties (back-compat with the original 35c warm-start).
+        s_mass = 1.0
+        s_iyy = 1.0
+        s_izz = 1.0
+        if mass is not None:
+            s_mass = float(mass) / self.REF_MASS
+        if inertia is not None:
+            inertia_arr = np.asarray(inertia)
+            s_iyy = float(inertia_arr[1, 1]) / self.REF_IYY
+            s_izz = float(inertia_arr[2, 2]) / self.REF_IZZ
+
+        init[N + 0] =  0.5  * s_mass    # k_alt_p     (translational, ∝ mass)
+        init[N + 1] = -0.5  * s_mass    # k_alt_d     (translational, ∝ mass)
+        init[N + 2] =  0.3  * s_iyy     # k_tilt      (pitch/roll P, ∝ Iyy)
+        init[N + 3] = -0.15 * s_iyy     # k_rate      (pitch/roll D, ∝ Iyy)
+        init[N + 4] =  0.2  * s_izz     # k_yaw_rate  (yaw D, ∝ Izz)
+
+        # Analytical trim: cancel static roll/pitch moment caused by
+        # asymmetric arm magnitudes (the sampler's ±30% per-motor jitter).
+        # Without this, low-inertia high-thrust morphs (prop=6/7 hexes)
+        # flip in <0.1s before CMA can refine the gains.
+        init[0:N] = self._analytical_trim().astype(np.float32)
         return init
+
+    def _analytical_trim(self) -> np.ndarray:
+        """Per-motor trim that nulls static roll & pitch moment at hover.
+
+        Min-norm solution to
+            sum(delta_r_i) = 0          (preserves Fz)
+            sum(y_i delta_r_i) = -Σy_i  (zero roll moment)
+            sum(x_i delta_r_i) = -Σx_i  (zero pitch moment)
+        where ``r_i = F_i / F_hover``. Maps r_i → target W_i via
+        ``F = k_w W²`` and inverts the throttle curve to get u_i, then
+        ``trim_i = (u_i - u_hover) / action_scale``.
+        """
+        N = self.n_motors
+        xy = self._motor_xy
+        x = xy[:, 0].astype(np.float64)
+        y = xy[:, 1].astype(np.float64)
+        ones = np.ones(N, dtype=np.float64)
+        A = np.stack([ones, y, x], axis=0)            # (3, N)
+        b = np.array([0.0, -float(y.sum()), -float(x.sum())], dtype=np.float64)
+        # Min-norm delta_r = A.T (A A.T)^-1 b
+        try:
+            G = A @ A.T
+            delta_r = A.T @ np.linalg.solve(G, b)
+        except np.linalg.LinAlgError:
+            return np.zeros(N, dtype=np.float32)
+        r = 1.0 + delta_r                              # target thrust ratios
+        r = np.clip(r, 0.05, 5.0)                      # numerical safety
+
+        # Map r_i → u_i. F_hover = m g / N is implicit; we work in W.
+        w_hover = math.sqrt(self.gravity / (self._k_w * N))
+        W = w_hover * np.sqrt(r)
+        z = np.clip((W - self._w_min) / (self._w_max - self._w_min), 1e-6, 1.0)
+        k = self._k_sq
+        # u_raw solves k*u_raw^2 + (1-k)*u_raw - z^2 = 0
+        disc = (1.0 - k) ** 2 + 4.0 * k * z * z
+        u_raw = (-(1.0 - k) + np.sqrt(np.maximum(disc, 0.0))) / (2.0 * k)
+        u = np.clip(2.0 * u_raw - 1.0, -1.0, 1.0)
+        # trim_i is in effort space (action_scale-relative)
+        scale = max(self.action_scale, 1e-3)
+        trim = (u - self.u_hover) / scale
+        return np.clip(trim, -1.0, 1.0)
 
     # ── effort / action ────────────────────────────────────────────────
 
