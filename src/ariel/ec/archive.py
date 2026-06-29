@@ -21,8 +21,12 @@ class Archive:
 
     Opens a SQLite database written by the EA engine and exposes targeted
     query methods for retrieving archived individuals. Particularly useful
+<<<<<<< HEAD
     for the J.E.S.U.S. (Joint Evolution Strategies with Undead Sampling)
     pattern: injecting historically successful individuals back into a
+=======
+    for injecting historically successful individuals back into a
+>>>>>>> main
     stagnating population.
 
     Parameters
@@ -106,7 +110,14 @@ class Archive:
 
     def _fetch_all(self, statement) -> list[Individual]:
         with Session(self.engine) as session:
+<<<<<<< HEAD
             return list(session.exec(statement).all())
+=======
+            rows = list(session.exec(statement).all())
+        for ind in rows:
+            ind.id = None
+        return rows
+>>>>>>> main
 
     # -- Single-individual queries ---------------------------------------------
 
@@ -352,6 +363,7 @@ class Archive:
             ]
         return Population(winners)
 
+<<<<<<< HEAD
     # Used in PPSN experiments
     def jesi(
         self,
@@ -405,6 +417,8 @@ class Archive:
             death_range=(death_lo, death_hi),
         )
 
+=======
+>>>>>>> main
     def by_generation(self, generation: int) -> Population:
         """Return all individuals present at a given generation.
 

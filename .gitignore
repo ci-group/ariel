@@ -144,12 +144,14 @@ dmypy.json
 .pytype/
 # Cython debug symbols
 cython_debug/
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
 ### VSCODE ######################################################################
 .vscode
 .vscode/*
@@ -157,6 +159,7 @@ cython_debug/
 .history/
 # Built Visual Studio Code Extensions
 *.vsix
+
 ### LINUX ######################################################################
 *~
 # temporary files which can be created if a process still has a handle open of a deleted file
@@ -167,6 +170,7 @@ cython_debug/
 .Trash-*
 # .nfs files are created when an open file is removed but is still being accessed
 .nfs*
+
 ### MACOS ######################################################################
 # General
 .DS_Store
@@ -190,6 +194,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
 ### IMAGES #####################################################################
 # JPEG
 *.jpg
@@ -241,12 +246,14 @@ Temporary Items
 # 3D Images
 *.3dm
 *.max
+
 ### VSCODE ####################################################################
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+
 ### WINDOWS ####################################################################
 # Windows thumbnail cache files
 Thumbs.db

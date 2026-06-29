@@ -7,4 +7,8 @@
 ea_example_ackley
 ea_example_queens
 robot_evolution
+<<<<<<< HEAD
+=======
+archive_and_restart
+>>>>>>> main
 ```

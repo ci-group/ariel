@@ -188,13 +188,15 @@ class HighProbabilityDecoder(Blueprint):
         all_possible_rotations = set(ModuleRotationsIdx)
         for module_idx, module_type in self.type_dict.items():
             # Constrain connections based on module type
+            if module_type == ModuleType.NONE:
+                self.conn_p_space[module_idx, :, :] = 0.0
+                self.conn_p_space[:, module_idx, :] = 0.0
+
             allowed_faces = set(ALLOWED_FACES[module_type])
             disallowed_faces = all_possible_faces - allowed_faces
             for face in disallowed_faces:
                 # Disable as parent
                 self.conn_p_space[module_idx, :, face.value] = 0.0
-                # Disable as child
-                self.conn_p_space[:, module_idx, face.value] = 0.0
 
             # Constrain rotations based on module type
             allowed_rotations = set(ALLOWED_ROTATIONS[module_type])
