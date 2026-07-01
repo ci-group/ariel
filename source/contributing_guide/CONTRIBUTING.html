@@ -1,0 +1,926 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Installation Guide" href="../installation_guide.html"><link rel="prev" title="ARIEL — A Robot Evolution Framework" href="../../index.html">
+
+    <link rel="shortcut icon" href="../../_static/ariel_favicon.ico"><!-- Generated with Sphinx 8.1.3 and Furo 2025.12.19 -->
+        <title>Contributing to ARIEL - ARIEL</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #4A90D9;
+  --color-brand-content: #4A90D9;
+  --color-admonition-background: rgba(74, 144, 217, 0.05);
+  --font-stack: Inter, system-ui, sans-serif;
+  --font-stack--monospace: JetBrains Mono, monospace;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #79B8FF;
+  --color-brand-content: #79B8FF;
+  --color-admonition-background: rgba(121, 184, 255, 0.05);
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-brand-primary: #79B8FF;
+  --color-brand-content: #79B8FF;
+  --color-admonition-background: rgba(121, 184, 255, 0.05);
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     <b>🚀 New release coming soon!</b> Check out what's new in v0.1 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">ARIEL</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">ARIEL</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Contributing guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation_guide.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial_nde_cpg.html">Basic API Usage: NDE + CPG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart_modular_robots.html">Quick Start: Modular Robots</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../robot_systems/index.html">Robot Systems</a><input aria-label="Toggle navigation of Robot Systems" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../robot_systems/modular_robots.html">ARIEL Modular Robot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../robot_systems/modular_robots.html#An-introduction-to-modular-robots">An introduction to modular robots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../robot_systems/lynx_arm.html">ARIEL Lynx Arm</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../genotype_docs/index.html">Genotypes</a><input aria-label="Toggle navigation of Genotypes" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../genotype_docs/nde_docs.html">Neuro Developmental Encoding (NDE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../genotype_docs/cppn_docs.html">Compositional Pattern Producing Network (CPPN)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../genotype_docs/tree_docs.html">Tree Genome Genotype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../genotype_docs/vector_docs.html">Vector representation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../EA_intro/index.html">EAs with ARIEL Introduction</a><input aria-label="Toggle navigation of EAs with ARIEL Introduction" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../EA_intro/ea_example_ackley.html">Continuous Optimisation (Ackley Function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../EA_intro/ea_example_queens.html">Discrete Optimisation (N-Queens Problem)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../EA_intro/robot_evolution.html">Robot Evolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../EA_intro/archive_and_restart.html">Archive &amp; Restarting from a Database</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../parallel_robot_eval/index.html">Parallelising Robot Simulations</a><input aria-label="Toggle navigation of Parallelising Robot Simulations" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../parallel_robot_eval/mujoco_worker.html">Parallelising Robot Evaluation with MuJoCo Worker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../parallel_robot_eval/parallel_ackley.html">Parallelising ARIEL with Ray</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GUI.html">GUI</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../Db_examples/index.html">ARIEL Database Handling</a><input aria-label="Toggle navigation of ARIEL Database Handling" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../Db_examples/db_with_pandas.html">Database manipulation with pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Db_examples/db_with_polars.html">Database manipulation with polars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Db_examples/db_with_sqlite3.html">Database manipulation with sqlite3</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Mujoco_docs/mujoco_docs.html">MuJoCo Data Variables Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/ariel/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel</span></code></a><input aria-label="Toggle navigation of ariel" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">body_phenotypes</span></code></a><input aria-label="Toggle navigation of body_phenotypes" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">robogen_lite</span></code></a><input aria-label="Toggle navigation of robogen_lite" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_neat</span></code></a><input aria-label="Toggle navigation of cppn_neat" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/activations/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">activations</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/connection/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">connection</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/genome/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genome</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/id_manager/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">id_manager</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/node/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">node</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/cppn_neat/tests/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tests</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/decoders/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">decoders</span></code></a><input aria-label="Toggle navigation of decoders" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/decoders/cppn_best_first/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_best_first</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/decoders/hi_prob_decoding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hi_prob_decoding</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/decoders/vector_decoding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vector_decoding</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/modules/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">modules</span></code></a><input aria-label="Toggle navigation of modules" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/modules/brick/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">brick</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/modules/core/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/modules/hinge/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">hinge</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/modules/module/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">module</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prebuilt_robots</span></code></a><input aria-label="Toggle navigation of prebuilt_robots" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/gecko/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gecko</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/john_set/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">john_set</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/random_20/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">random_20</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/spider/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spider</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/prebuilt_robots/spider_with_blocks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">spider_with_blocks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/config/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/body_phenotypes/robogen_lite/constructor/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">constructor</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/ariel/ec/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ec</span></code></a><input aria-label="Toggle navigation of ec" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">genotypes</span></code></a><input aria-label="Toggle navigation of genotypes" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/cppn/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn</span></code></a><input aria-label="Toggle navigation of cppn" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/cppn/cppn_decoding/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cppn_decoding</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/nde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nde</span></code></a><input aria-label="Toggle navigation of nde" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/nde/nde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nde</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5 has-children"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/tree/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tree</span></code></a><input aria-label="Toggle navigation of tree" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/tree/io/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/tree/operators/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">operators</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/tree/tree_genome/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tree_genome</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../autoapi/ariel/ec/genotypes/tree/validation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">validation</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/archive/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">archive</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/crossover/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">crossover</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/ea/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ea</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/generators/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">generators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/generators%20copy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">generators</span> <span class="pre">copy</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/individual/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">individual</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/ec/population/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">population</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/ariel/parameters/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">parameters</span></code></a><input aria-label="Toggle navigation of parameters" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/parameters/ariel_modules/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_modules</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/parameters/ariel_types/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ariel_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/parameters/mujoco_params/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_params</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/ariel/simulation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulation</span></code></a><input aria-label="Toggle navigation of simulation" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../autoapi/ariel/simulation/controllers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controllers</span></code></a><input aria-label="Toggle navigation of controllers" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/controllers/controller/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">controller</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/controllers/na_cpg/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/controllers/na_cpg_beta/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_beta</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/controllers/na_cpg_norm/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">na_cpg_norm</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/controllers/simple_cpg/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simple_cpg</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../autoapi/ariel/simulation/environments/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environments</span></code></a><input aria-label="Toggle navigation of environments" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/environments/compile_terrains/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">compile_terrains</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/environments/heightmap_functions/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">heightmap_functions</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/environments/olympic_arena/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">olympic_arena</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../autoapi/ariel/simulation/tasks/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tasks</span></code></a><input aria-label="Toggle navigation of tasks" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/tasks/gait_learning/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gait_learning</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/tasks/targeted_locomotion/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">targeted_locomotion</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/simulation/tasks/turning_in_place/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">turning_in_place</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/simulation/example_usage/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">example_usage</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/simulation/mujoco_worker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_worker</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/ariel/utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a><input aria-label="Toggle navigation of utils" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../autoapi/ariel/utils/optimizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optimizers</span></code></a><input aria-label="Toggle navigation of optimizers" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/ariel/utils/optimizers/revde/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">revde</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/file_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">file_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/morphological_descriptor/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">morphological_descriptor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/mujoco_ops/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mujoco_ops</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/noise_gen/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">noise_gen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/renderers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">renderers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/runners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">runners</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/tracker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/utils/video_recorder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">video_recorder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/ariel/visualisation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualisation</span></code></a><input aria-label="Toggle navigation of visualisation" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/ariel/visualisation/analysis/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/table/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">table</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/data_get/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">data_get</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/lynx_arm/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lynx_arm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/dash_faster/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dash_faster</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/custom_plots/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custom_plots</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/plot_registry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_registry</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/dash_fast_mod/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dash_fast_mod</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/dashboard_new/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dashboard_new</span></code></a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/unified_pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unified_pipeline</span></code></a><input aria-label="Toggle navigation of unified_pipeline" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/unified_pipeline/common/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">common</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/unified_pipeline/evolve/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">evolve</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/unified_pipeline/plot_from_logs/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plot_from_logs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/unified_pipeline/replay/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">replay</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="contributing-to-ariel">
+<h1>Contributing to ARIEL<a class="headerlink" href="#contributing-to-ariel" title="Link to this heading">¶</a></h1>
+<p>Thank you for your interest in contributing to <strong>ARIEL</strong> — an open-source evolutionary robotics framework.
+ARIEL is licensed under <a class="reference external" href="https://opensource.org/licenses/GPL-3.0">GPL-3.0</a> and welcomes contributions of all kinds: bug reports, feature requests, documentation improvements, and pull requests.</p>
+<hr class="docutils" />
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#resources"><span class="std std-ref">Resources</span></a></p></li>
+<li><p><a class="reference internal" href="#code-of-conduct"><span class="std std-ref">Code of Conduct</span></a></p></li>
+<li><p><a class="reference internal" href="#reporting-bugs"><span class="std std-ref">Reporting Bugs</span></a></p></li>
+<li><p><a class="reference internal" href="#requesting-features"><span class="std std-ref">Requesting Features</span></a></p></li>
+<li><p><a class="reference internal" href="#development-environment"><span class="std std-ref">Development Environment</span></a></p></li>
+<li><p><a class="reference internal" href="#project-structure"><span class="std std-ref">Project Structure</span></a></p></li>
+<li><p>Code Style &amp; Quality</p></li>
+<li><p><a class="reference internal" href="#type-checking"><span class="std std-ref">Type Checking</span></a></p></li>
+<li><p><a class="reference internal" href="#writing-docstrings"><span class="std std-ref">Writing Docstrings</span></a></p></li>
+<li><p><a class="reference internal" href="#testing"><span class="std std-ref">Testing</span></a></p></li>
+<li><p><a class="reference internal" href="#documentation"><span class="std std-ref">Documentation</span></a></p></li>
+<li><p>Pre-commit Hooks</p></li>
+<li><p><a class="reference internal" href="#submitting-a-pull-request"><span class="std std-ref">Submitting a Pull Request</span></a></p></li>
+<li><p><a class="reference internal" href="#commit-message-guidelines"><span class="std std-ref">Commit Message Guidelines</span></a></p></li>
+</ol>
+</section>
+<hr class="docutils" />
+<section id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Resource</p></th>
+<th class="head"><p>Link</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Source code</p></td>
+<td><p><a class="reference external" href="https://github.com/ci-group/ariel">https://github.com/ci-group/ariel</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Issue tracker</p></td>
+<td><p><a class="reference external" href="https://github.com/ci-group/ariel/issues">https://github.com/ci-group/ariel/issues</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Changelog</p></td>
+<td><p><a class="reference external" href="https://github.com/ci-group/ariel/releases">https://github.com/ci-group/ariel/releases</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="code-of-conduct">
+<h2>Code of Conduct<a class="headerlink" href="#code-of-conduct" title="Link to this heading">¶</a></h2>
+<p>This project follows the <a class="reference internal" href="../../CODE_OF_CONDUCT.html"><span class="std std-doc">Contributor Covenant Code of Conduct</span></a>.
+By participating, you agree to uphold these standards. Violations may be reported to the project maintainers.</p>
+</section>
+<hr class="docutils" />
+<section id="reporting-bugs">
+<h2>Reporting Bugs<a class="headerlink" href="#reporting-bugs" title="Link to this heading">¶</a></h2>
+<p>Report bugs via the <a class="reference external" href="https://github.com/ci-group/ariel/issues">Issue Tracker</a>.</p>
+<p>A good bug report answers all of the following:</p>
+<ul class="simple">
+<li><p><strong>OS &amp; Python version</strong> — e.g. Ubuntu 22.04, Python 3.12.3</p></li>
+<li><p><strong>What you did</strong> — minimal code snippet to reproduce the problem</p></li>
+<li><p><strong>What you expected</strong> — the behaviour you anticipated</p></li>
+<li><p><strong>What happened instead</strong> — exact error message or observed behaviour</p></li>
+</ul>
+<p>The fastest path to a fix is a minimal reproducible example or a failing test case.</p>
+</section>
+<hr class="docutils" />
+<section id="requesting-features">
+<h2>Requesting Features<a class="headerlink" href="#requesting-features" title="Link to this heading">¶</a></h2>
+<p>Open a <a class="reference external" href="https://github.com/ci-group/ariel/issues">GitHub Issue</a> and describe:</p>
+<ul class="simple">
+<li><p>The problem the feature would solve</p></li>
+<li><p>A rough API sketch or usage example</p></li>
+<li><p>Any relevant prior art or references</p></li>
+</ul>
+<p>It is recommended to discuss the idea in an issue <strong>before</strong> writing code, so the approach can be validated early.</p>
+</section>
+<hr class="docutils" />
+<section id="development-environment">
+<h2>Development Environment<a class="headerlink" href="#development-environment" title="Link to this heading">¶</a></h2>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Purpose</p></th>
+<th class="head"><p>Install</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Python ≥ 3.12.9</p></td>
+<td><p>Runtime</p></td>
+<td><p><a class="reference external" href="https://www.python.org">https://www.python.org</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.astral.sh/uv/">uv</a></p></td>
+<td><p>Package &amp; environment manager</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">uv</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://nox.thea.codes/">Nox</a></p></td>
+<td><p>Task runner / test sessions</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nox</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://pre-commit.com/">pre-commit</a></p></td>
+<td><p>Git hook manager</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pre-commit</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h3>
+<p>Clone the repository and install the package in editable mode with all development dependencies:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ci-group/ariel.git
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>ariel
+<span class="gp">$ </span>uv<span class="w"> </span>venv
+<span class="gp">$ </span>uv<span class="w"> </span>sync
+</pre></div>
+</div>
+<p>Verify the installation:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>ariel/examples/a_mujoco/0_mujoco_launcher.py
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="project-structure">
+<h2>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ariel/
+├── src/ariel/              # Main package source
+│   ├── body_phenotypes/    # Robot morphology (robot systems, CPPN-NEAT)
+│   ├── ec/                 # Evolutionary computation engines, operators etc
+│   ├── simulation/         # Physics simulation (MuJoCo)
+│   ├── parameters/         # Configuration and parameter management
+│   ├── utils/              # Shared utilities
+│   └── visualisation/      # Dashboard and visualisation tools
+├── tests/
+│   ├── unit/               # Unit tests
+│   └── functional/         # Functional / integration tests
+├── docs/                   # Sphinx documentation
+│   └── source/             # RST/Markdown source pages
+├── examples/               # Standalone runnable examples
+├── .github/workflows/      # CI/CD pipelines
+├── pyproject.toml          # Project metadata and tool config
+├── ruff.toml               # Ruff linter/formatter config
+├── mypy.ini                # MyPy type checker config
+├── pyrightconfig.json      # Pyright type checker config
+└── noxfile.py              # Nox session definitions
+</pre></div>
+</div>
+<p>A general heuristic for package dependencies: if adding a feature would introduce a dependency from one ARIEL sub-package to another, reconsider the design.
+Refer to the package diagram in the documentation for the intended dependency direction.</p>
+</section>
+<hr class="docutils" />
+<section id="code-style-quality">
+<h2>Code Style &amp; Quality<a class="headerlink" href="#code-style-quality" title="Link to this heading">¶</a></h2>
+<p>ARIEL enforces a consistent code style using <strong>Ruff</strong> for both linting and formatting.</p>
+<section id="key-formatting-rules">
+<h3>Key formatting rules<a class="headerlink" href="#key-formatting-rules" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Target Python</p></td>
+<td><p>3.12.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>Line length</p></td>
+<td><p>80 characters</p></td>
+</tr>
+<tr class="row-even"><td><p>Quote style</p></td>
+<td><p>Double quotes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Indent</p></td>
+<td><p>4 spaces</p></td>
+</tr>
+<tr class="row-even"><td><p>Line endings</p></td>
+<td><p>LF (<code class="docutils literal notranslate"><span class="pre">\n</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Docstring convention</p></td>
+<td><p>NumPy</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>All linting rules (<code class="docutils literal notranslate"><span class="pre">ALL</span></code>) are enabled except a small set of acknowledged exceptions (see <code class="docutils literal notranslate"><span class="pre">ruff.toml</span></code>).</p>
+</section>
+<section id="running-the-formatter">
+<h3>Running the formatter<a class="headerlink" href="#running-the-formatter" title="Link to this heading">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>format<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="running-the-linter">
+<h3>Running the linter<a class="headerlink" href="#running-the-linter" title="Link to this heading">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>.<span class="w"> </span>--fix
+</pre></div>
+</div>
+<p>Auto-fixes are applied automatically; review the diff before committing.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="type-checking">
+<h2>Type Checking<a class="headerlink" href="#type-checking" title="Link to this heading">¶</a></h2>
+<p>All public API code must be <strong>fully typed</strong>. ARIEL runs two type checkers in strict mode:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Config</p></th>
+<th class="head"><p>Command</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://mypy.readthedocs.io/">MyPy</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mypy.ini</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">mypy</span> <span class="pre">src/</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/microsoft/pyright">Pyright</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pyrightconfig.json</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">pyright</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Both run in <strong>strict</strong> mode. Do not use <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">type:</span> <span class="pre">ignore</span></code> comments without a clear explanation.</p>
+<p>ARIEL ships a <code class="docutils literal notranslate"><span class="pre">py.typed</span></code> marker (PEP 561), so downstream packages can consume its type information.</p>
+</section>
+<hr class="docutils" />
+<section id="writing-docstrings">
+<h2>Writing Docstrings<a class="headerlink" href="#writing-docstrings" title="Link to this heading">¶</a></h2>
+<p>All public functions, classes, and methods must have a docstring following the <strong>NumPy style</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="n">robot</span><span class="p">:</span> <span class="n">Robot</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">SimConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate the fitness of a robot in simulation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    robot : Robot</span>
+<span class="sd">        The robot morphology and controller to evaluate.</span>
+<span class="sd">    config : SimConfig</span>
+<span class="sd">        Simulation configuration (duration, timestep, etc.).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Scalar fitness value. Higher is better.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    SimulationError</span>
+<span class="sd">        If the physics engine fails to initialise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Docstrings are validated by <strong>pydoclint</strong> (NumPy style) via pre-commit.
+Code examples inside docstrings are auto-formatted by Ruff.</p>
+</section>
+<hr class="docutils" />
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<section id="running-the-test-suite">
+<h3>Running the test suite<a class="headerlink" href="#running-the-test-suite" title="Link to this heading">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>nox
+</pre></div>
+</div>
+<p>List all available Nox sessions:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>nox<span class="w"> </span>--list-sessions
+</pre></div>
+</div>
+<p>Run only unit tests:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>nox<span class="w"> </span>--session<span class="o">=</span>tests
+</pre></div>
+</div>
+<p>Run tests directly with pytest (faster iteration):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/unit/
+<span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/functional/
+</pre></div>
+</div>
+</section>
+<section id="writing-tests">
+<h3>Writing tests<a class="headerlink" href="#writing-tests" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Place <strong>unit tests</strong> in <code class="docutils literal notranslate"><span class="pre">tests/unit/</span></code> and <strong>functional tests</strong> in <code class="docutils literal notranslate"><span class="pre">tests/functional/</span></code>.</p></li>
+<li><p>Use <a class="reference external" href="https://docs.pytest.org/">pytest</a> conventions — no custom test classes unless necessary.</p></li>
+<li><p>Prefer small, focused tests with descriptive names.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">assert</span></code> statements are allowed in tests (the <code class="docutils literal notranslate"><span class="pre">S101</span></code> rule is disabled in test files).</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h2>
+<p>The documentation is built with <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a>, the <a class="reference external" href="https://pradyunsg.me/furo/">Furo</a> theme, and <a class="reference external" href="https://myst-parser.readthedocs.io/">MyST Parser</a> for Markdown support.
+API reference pages are generated automatically via <a class="reference external" href="https://sphinx-autoapi.readthedocs.io/">AutoAPI</a>.</p>
+<section id="building-docs-locally">
+<h3>Building docs locally<a class="headerlink" href="#building-docs-locally" title="Link to this heading">¶</a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>nox<span class="w"> </span>--session<span class="o">=</span>docs
+</pre></div>
+</div>
+<p>This cleans the <code class="docutils literal notranslate"><span class="pre">docs/_build/</span></code> and <code class="docutils literal notranslate"><span class="pre">docs/_autoapi/</span></code> directories, then launches a live-reload server at <code class="docutils literal notranslate"><span class="pre">http://localhost:8000</span></code>.</p>
+</section>
+<section id="documentation-guidelines">
+<h3>Documentation guidelines<a class="headerlink" href="#documentation-guidelines" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>All public symbols must have a complete NumPy-style docstring (see <a class="reference internal" href="#writing-docstrings"><span class="std std-ref">Writing Docstrings</span></a>).</p></li>
+<li><p>New features should include a tutorial page or example notebook in <code class="docutils literal notranslate"><span class="pre">docs/source/</span></code> or <code class="docutils literal notranslate"><span class="pre">examples/</span></code>.</p></li>
+<li><p>If your changes add or remove a public API, update the relevant <code class="docutils literal notranslate"><span class="pre">.md</span></code> source page.</p></li>
+<li><p>Documentation is deployed automatically to GitHub Pages on every push to <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="submitting-a-pull-request">
+<h2>Submitting a Pull Request<a class="headerlink" href="#submitting-a-pull-request" title="Link to this heading">¶</a></h2>
+<ol class="arabic">
+<li><p><strong>Open an issue first</strong> for non-trivial changes to align on the approach before writing code.</p></li>
+<li><p><strong>Fork</strong> the repository and create a branch from <code class="docutils literal notranslate"><span class="pre">main</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feat/my-feature
+</pre></div>
+</div>
+</li>
+<li><p>Make your changes, ensuring:</p>
+<ul class="simple">
+<li><p>The full test suite passes (<code class="docutils literal notranslate"><span class="pre">nox</span></code>)</p></li>
+<li><p>Code coverage is maintained</p></li>
+<li><p>New public APIs are fully typed and documented</p></li>
+</ul>
+</li>
+<li><p>Push your branch and open a Pull Request against <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+<li><p>The PR description should explain <strong>what</strong> changed and <strong>why</strong>.</p></li>
+</ol>
+<section id="pr-checklist">
+<h3>PR checklist<a class="headerlink" href="#pr-checklist" title="Link to this heading">¶</a></h3>
+<ul class="contains-task-list simple">
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Tests pass (<code class="docutils literal notranslate"><span class="pre">nox</span></code>)</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Code coverage (<code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">pytest</span> <span class="pre">--cov=ariel</span></code>)</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Type checks pass (<code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">mypy</span> <span class="pre">src/</span></code> and <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">pyright</span></code>)</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> All new public symbols have NumPy-style docstrings</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> Documentation updated if API changed</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> PR description explains the motivation</p></li>
+</ul>
+<blockquote>
+<div><p><strong>Merging policy:</strong></p>
+<ul class="simple">
+<li><p>Into <code class="docutils literal notranslate"><span class="pre">main</span></code>: use <strong>Squash and Merge</strong> to keep a clean linear history.</p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+<hr class="docutils" />
+<section id="commit-message-guidelines">
+<h2>Commit Message Guidelines<a class="headerlink" href="#commit-message-guidelines" title="Link to this heading">¶</a></h2>
+<p>ARIEL follows a conventional commit style to make the history readable:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">type</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&lt;</span><span class="n">scope</span><span class="o">&gt;</span><span class="p">):</span> <span class="o">&lt;</span><span class="n">short</span> <span class="n">summary</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">optional</span> <span class="n">body</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p><strong>Types:</strong> <code class="docutils literal notranslate"><span class="pre">feat</span></code>, <code class="docutils literal notranslate"><span class="pre">fix</span></code>, <code class="docutils literal notranslate"><span class="pre">docs</span></code>, <code class="docutils literal notranslate"><span class="pre">refactor</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">chore</span></code>, <code class="docutils literal notranslate"><span class="pre">perf</span></code></p>
+<p><strong>Examples:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">feat</span><span class="p">(</span><span class="n">ec</span><span class="p">):</span> <span class="n">add</span> <span class="n">restart</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">database</span> <span class="n">support</span> <span class="k">for</span> <span class="n">EC</span> <span class="n">engines</span>
+<span class="n">fix</span><span class="p">(</span><span class="n">simulation</span><span class="p">):</span> <span class="n">correct</span> <span class="n">MuJoCo</span> <span class="n">worker</span> <span class="n">timestep</span> <span class="n">initialisation</span>
+<span class="n">docs</span><span class="p">(</span><span class="n">contributing</span><span class="p">):</span> <span class="n">expand</span> <span class="n">PR</span> <span class="n">checklist</span> <span class="ow">and</span> <span class="nb">type</span><span class="o">-</span><span class="n">checking</span> <span class="n">section</span>
+<span class="n">test</span><span class="p">(</span><span class="n">body_phenotypes</span><span class="p">):</span> <span class="n">add</span> <span class="n">coverage</span> <span class="k">for</span> <span class="n">CPPN</span><span class="o">-</span><span class="n">NEAT</span> <span class="n">edge</span> <span class="n">cases</span>
+</pre></div>
+</div>
+<p>Keep the summary line under 72 characters.
+Use the body to explain <em>why</em> the change was made, not <em>what</em> — the diff already shows the what.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../installation_guide.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Installation Guide</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../../index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Computational Intelligence Group, Vrije Universiteit Amsterdam &amp; Contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on Jul 01, 2026</div>
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/ci-group/ariel" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" viewBox="0 0 16 16" height="1em" width="1em">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                  0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                  -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                  .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                  -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+                  .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+                  .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+                  0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Contributing to ARIEL</a><ul>
+<li><a class="reference internal" href="#table-of-contents">Table of Contents</a></li>
+<li><a class="reference internal" href="#resources">Resources</a></li>
+<li><a class="reference internal" href="#code-of-conduct">Code of Conduct</a></li>
+<li><a class="reference internal" href="#reporting-bugs">Reporting Bugs</a></li>
+<li><a class="reference internal" href="#requesting-features">Requesting Features</a></li>
+<li><a class="reference internal" href="#development-environment">Development Environment</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li><a class="reference internal" href="#code-style-quality">Code Style &amp; Quality</a><ul>
+<li><a class="reference internal" href="#key-formatting-rules">Key formatting rules</a></li>
+<li><a class="reference internal" href="#running-the-formatter">Running the formatter</a></li>
+<li><a class="reference internal" href="#running-the-linter">Running the linter</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#type-checking">Type Checking</a></li>
+<li><a class="reference internal" href="#writing-docstrings">Writing Docstrings</a></li>
+<li><a class="reference internal" href="#testing">Testing</a><ul>
+<li><a class="reference internal" href="#running-the-test-suite">Running the test suite</a></li>
+<li><a class="reference internal" href="#writing-tests">Writing tests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#documentation">Documentation</a><ul>
+<li><a class="reference internal" href="#building-docs-locally">Building docs locally</a></li>
+<li><a class="reference internal" href="#documentation-guidelines">Documentation guidelines</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#submitting-a-pull-request">Submitting a Pull Request</a><ul>
+<li><a class="reference internal" href="#pr-checklist">PR checklist</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#commit-message-guidelines">Commit Message Guidelines</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=7f41d439"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>
