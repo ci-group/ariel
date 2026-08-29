@@ -2,7 +2,7 @@
 
 # Standard library
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TypeAlias
 
 # Third-party libraries
 import numpy as np
@@ -16,7 +16,7 @@ from ariel.parameters.ariel_types import (
 )
 
 # Type Aliases
-type NormMethod = Literal["linear", "clip", "none"]
+NormMethod: TypeAlias = Literal["linear", "clip", "none"]
 
 
 @dataclass

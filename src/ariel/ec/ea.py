@@ -3,7 +3,7 @@
 import inspect
 from collections.abc import Callable
 from pathlib import Path
-from typing import Concatenate, Literal, ParamSpec
+from typing import Concatenate, Generic, Literal, ParamSpec, TypeAlias
 
 from pydantic import computed_field
 from pydantic_settings import BaseSettings
@@ -25,7 +25,7 @@ from ariel.ec.population import Population
 install()
 P = ParamSpec("P")
 
-type DBHandlingMode = Literal["delete", "halt"]
+DBHandlingMode: TypeAlias = Literal["delete", "halt"]
 
 
 # -- Settings ------------------------------------------------------------------
@@ -99,7 +99,7 @@ config: EASettings = EASettings()
 # -- Step wrapper --------------------------------------------------------------
 
 
-class EAOperation[**P]:
+class EAOperation(Generic[P]):
     """EAOperation class.
 
     Decorating a function with ``@EAOperation`` validates its signature and

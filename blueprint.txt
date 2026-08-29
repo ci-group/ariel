@@ -1,0 +1,28 @@
+
+The blueprint is an intermediate representation that is part of the pipeline that constructs the robot. Structurally, it sits between the genotype and the phenotype. It acts as a universal common interface through which entirely different encoding schemes can be easily translated into a functioning robot body. As seen in Figure~\ref{fig:blueprint}, the process is divided into two halves: evolution and robotics. It illustrates that the blueprint is not merely a storage format, but the architectural boundary that separates evolutionary representation from embodiment, thereby allowing either side to change without forcing a redesign of the other. Figure~\ref{fig:blueprint-simvsirl} shows the transition from blueprint to instantiation in either simulation or the real world.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{figures/ARIEL_Paper_Blueprint.pdf}
+\caption{ Conceptual showcase of how the blueprint works as an intermediate step between a series of choices. Design choices feed into the genotype creation, which is then decoded into the blueprint. The blueprint is then transformed into the phenotype, and after choosing to create it in simulation or the real world, it is instantiated.}
+\label{fig:blueprint}
+\end{figure}
+%\vspace{-7pt}
+
+The evolution part takes the researcher’s design decisions as input, e.g., the choice of mutation operators or parent selection. It then creates the genotype, which is transformed into a blueprint by a decoder. The blueprint is then transformed into a phenotype that matches the chosen robot platform and is equipped with a brain. The user makes their final choice, whether the output should be created in simulation or built in the real world as a physical robot. At that point, the process reaches the end of the pipeline, and the robot is instantiated and ready for evaluation.
+
+It can be noted that the decoder does the heavy-lifting to ensure that a genotype can be successfully instantiated; this shifts the burden of development from the traditional genotype-to-phenotype mapping to the decoder. This trade-off is worth it because as your library of decoders expands, more robot systems can reuse them for their own phenotype space.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{figures/ARIEL_blueprint_simvsirl.pdf}
+\caption{Example of how the blueprint can be used for instantiation in the real world and simulation.}
+\label{fig:blueprint-simvsirl}
+\end{figure}
+
+Concretely, a blueprint may specify the arrangement of body modules, attachment relationships, actuator locations, and sensor placements in a representation that is independent of the genotype that produced it. A tree-based encoding, a CPPN-derived encoding, or another generative representation can therefore all target the same blueprint format, after which a common phenotype-construction pipeline can be reused.
+
+This separation provides several distinct advantages. It cleanly decouples evolutionary representation from physical construction, thereby separating research on genotypes from research on robot systems. It allows multiple different encodings to share the same downstream processing, makes validation and structural repair significantly easier, and ultimately improves the clarity of the overall pipeline.
+
+Conceptually, the blueprint acts as the exact meeting point between the Evolutionary Computing (EC) side and the modular robotics side of ARIEL. Practically, the blueprint acts as the foundation to support visualisation, simulation, and future physical hardware workflows. The blueprint takes the form of a tree and is agnostic to what happens on either side of it.
+

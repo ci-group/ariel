@@ -16,6 +16,7 @@ Todo
 
 # Standard library
 from pathlib import Path
+from typing import TypeAlias
 
 # Third-party libraries
 import numpy as np
@@ -28,8 +29,8 @@ from pydantic_settings import BaseSettings
 # Type Checking
 # Type Aliases
 # Type Aliases
-type WeightType = float
-type DimensionType = tuple[float, float, float]
+WeightType: TypeAlias = float
+DimensionType: TypeAlias = tuple[float, float, float]
 
 # --- DATA SETUP --- #
 SCRIPT_NAME = __file__.split("/")[-1][:-3]

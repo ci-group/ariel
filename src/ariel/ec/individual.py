@@ -1,12 +1,20 @@
 """ARIEL Individual."""
 from collections.abc import Hashable, Sequence
+from typing import Any, TypeAlias
 
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
-type JSONPrimitive = str | int | float | bool
-type JSONType = JSONPrimitive | Sequence[JSONType] | dict[Hashable, JSONType]
-type JSONIterable = Sequence[JSONType] | dict[Hashable, JSONType]
+# Nested JSON values fall through to `Any` because PEP 613 TypeAlias is
+# evaluated eagerly and self-referential aliases would need forward-ref
+# strings, which then fail at runtime when SQLModel introspects
+# `JSONIterable | None` field annotations. PEP 695's lazy `type X = ...`
+# handled this transparently; the `Any` fallback is the standard
+# pre-3.12 workaround (matches how pydantic.JsonValue and friends model
+# the nested case for runtime use).
+JSONPrimitive: TypeAlias = str | int | float | bool
+JSONType: TypeAlias = JSONPrimitive | Sequence[Any] | dict[Hashable, Any]
+JSONIterable: TypeAlias = Sequence[Any] | dict[Hashable, Any]
 
 
 class Individual(SQLModel, table=True):

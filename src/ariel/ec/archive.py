@@ -2,7 +2,7 @@
 
 import random
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TypeAlias
 
 import numpy as np
 from sqlalchemy import Engine, Select, create_engine, func
@@ -11,9 +11,9 @@ from sqlmodel import Session, col, select
 from ariel.ec.individual import Individual
 from ariel.ec.population import Population
 
-type FitnessMode = Literal["min", "max"]
-type AgeRange = tuple[int, int] | None
-type FitnessRange = tuple[float, float] | None
+FitnessMode: TypeAlias = Literal["min", "max"]
+AgeRange: TypeAlias = tuple[int, int] | None
+FitnessRange: TypeAlias = tuple[float, float] | None
 
 
 class Archive:

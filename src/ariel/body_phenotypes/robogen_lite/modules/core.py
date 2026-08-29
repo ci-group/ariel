@@ -1,5 +1,8 @@
 """TODO(jmdm): description of script."""
 
+# Standard library
+from typing import TypeAlias
+
 # Third-party libraries
 import mujoco
 import numpy as np
@@ -14,8 +17,8 @@ from ariel.body_phenotypes.robogen_lite.config import (
 from ariel.body_phenotypes.robogen_lite.modules.module import Module
 
 # Type Aliases
-type WeightType = float
-type DimensionType = tuple[float, float, float]
+WeightType: TypeAlias = float
+DimensionType: TypeAlias = tuple[float, float, float]
 
 # --- Robogen Configuration --- #
 # Module weights (kg)
