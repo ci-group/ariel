@@ -73,6 +73,7 @@ Quick Start: Modular Robots <source/quickstart_modular_robots>
 Robot Systems <source/robot_systems/index>
 Genotypes <source/genotype_docs/index>
 EAs with ARIEL Introduction <source/EA_intro/index>
+Spatial EA <source/spatial_ea>
 GUI <source/GUI>
 ARIEL Database Handling <source/Db_examples/index>
 MuJoCo Data Variables Documentation <source/Mujoco_docs/mujoco_docs>

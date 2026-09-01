@@ -152,22 +152,33 @@ class BaseWorld:
             type=mj.mjtLightType.mjLIGHT_DIRECTIONAL,
         )
 
-        # Add ortho camera and normal camera
-        # mujoco >= 3.6.0: orthographic= replaced by proj= (mjtProjection)
+        # Add ortho camera and normal camera.
+        # MuJoCo >= 3.6.0 replaced the `orthographic=` boolean with `proj=`
+        # (mjtProjection). The project supports mujoco >= 3.3.6, so select the
+        # keyword the installed build actually understands.
+        if hasattr(mj, "mjtProjection"):
+            ortho_projection = {"proj": mj.mjtProjection.mjPROJ_ORTHOGRAPHIC}
+            perspective_projection = {
+                "proj": mj.mjtProjection.mjPROJ_PERSPECTIVE,
+            }
+        else:
+            ortho_projection = {"orthographic": True}
+            perspective_projection = {"orthographic": False}
+
         spec.worldbody.add_camera(
             name="ortho-cam",
-            proj=mj.mjtProjection.mjPROJ_ORTHOGRAPHIC,
             pos=[-5, 0, 5],
             xyaxes=[0, -1, 0, 0.75, 0, 0.75],
             fovy=5,
+            **ortho_projection,
         )
 
         spec.worldbody.add_camera(
             name="pretty-cam",
-            proj=mj.mjtProjection.mjPROJ_PERSPECTIVE,
             pos=[-0.015, -3.003, 1.765],
             xyaxes=[1.000, -0.005, -0.000, 0.002, 0.507, 0.862],
             fovy=45,
+            **perspective_projection,
         )
         return spec
 

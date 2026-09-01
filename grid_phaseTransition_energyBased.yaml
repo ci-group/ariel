@@ -1,5 +1,0 @@
-# Phase Transition Fine-Grain Sweep
-# Tests zone counts around the critical point (~14.7 zones)
-# Run with: python run_experiments.py --grid-file grid_phaseTransition_energyBased.yaml --grid-base-experiment phaseTransition_base --parallel --num-workers 5
-
-num_mating_zones: [12, 13, 14, 15, 16, 18]

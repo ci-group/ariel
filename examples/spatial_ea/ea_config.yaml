@@ -1,0 +1,111 @@
+# Spatial EA configuration — the research prototype's own settings.
+# Kept as a worked example of the legacy nested schema, which
+# SpatialEAConfig.from_yaml still reads.
+
+# Incubation Phase Parameters
+incubation:
+  enabled: false              # Enable incubation phase before spatial evolution
+  population_size: 30         # Population size during incubation
+  num_generations: 100        # Number of generations in incubation phase (increased for gentler mutation)
+  mutation_rate: 0.8          # Weight mutation probability
+  mutation_power: 0.2         # Weight mutation strength (reduced to prevent weight explosion)
+  add_connection_rate: 0.05   # Probability of adding new connection
+  add_node_rate: 0.03         # Probability of adding new node
+  crossover_rate: 0.9         # Probability of crossover vs cloning
+  tournament_size: 3          # Number of individuals in tournament selection
+  elitism_count: 2            # Number of best individuals to preserve unchanged
+  
+  # Directional fitness parameters
+  use_directional_fitness: true  # Use directional fitness (movement toward target) instead of distance-only
+  target_distance_min: 5.0    # Minimum distance to randomly placed target (meters)
+  target_distance_max: 10.0   # Maximum distance to randomly placed target (meters)
+  progress_weight: 0.5        # Directional bonus multiplier (0.5 = 50% bonus for perfect direction)
+  distance_weight: 0.2        # Weight for total distance traveled component (DEPRECATED - not used in new formula)
+
+# Population and Evolution Parameters
+population:
+  size: 30                    # Number of individuals in the population
+  num_generations: 50         # Total number of generations to evolve
+  max_population_limit: 100   # Absolute maximum population of simulation (simulation stops if reached)
+  min_population_limit: 1     # Minimum population (simulation stops if population drops below this)
+  stop_on_limits: true        # Whether to stop simulation when limits are reached
+
+# Selection Parameters
+selection:
+  pairing_radius: 10.0      # Maximum distance for pairing robots (meters)
+  offspring_radius: 3.0      # Radius around parents where offspring spawn (meters)
+  target_population_size: 30     # Target population size used for non-probabilistic age population. (Doesn't stop the simulation)
+  selection_method: "fitness_based"  # Selection method: "parents_die", "fitness_based", "age_based", "probabilistic_age", "energy_based"
+  pairing_method: "mating_zone"  # Pairing method: "proximity_pairing", "random", "mating_zone"
+  movement_bias: "assigned_zone"  # Directional input source: "nearest_neighbor", "nearest_zone", "assigned_zone", "none"
+                                  # Controllers receive normalized (x,y) direction to target as neural inputs (no post-processing modulation)
+                                  # "none" provides zero directional info, forcing pure locomotion gaits
+  max_age: 10                 # Maximum age for probabilistic_age selection (death probability = age/max_age)
+  
+  # Energy-Based Selection Parameters
+  enable_energy: true         # Enable energy-based survival mechanics
+  initial_energy: 100.0       # Starting energy for each individual
+  energy_depletion_rate: 10.0  # Energy lost per generation (time-based passive depletion)
+  mating_energy_effect: "cost"  # Effect of mating on energy: "restore" (full reset), "cost" (energy penalty), "none" (no effect)
+  mating_energy_amount: 35.0  # Energy restored (if "restore") or cost deducted (if "cost") when mating occurs
+  
+  # Density-Based Selection Parameters
+  locality_radius: 3.0        # Gaussian kernel σ for local density calculation (meters)
+  critical_density: 5.0       # ρ_c threshold where density death probability ≈ 0.63 × P_max
+  base_death_prob: 0.05       # P_base - baseline death probability for isolated individuals
+  max_density_death_prob: 0.4  # P_max - maximum additional death probability from crowding
+  density_fitness_protection: 0.0  # Reduction in death prob for high-fitness individuals (0-1)
+  
+  # Mating Zone Configuration
+  mating_zone_center: [12.5, 12.5]  # Center coordinates (x, y) of the primary mating zone (used if num_zones=1 and zone_relocation_strategy="static")
+  mating_zone_radius: 2.5     # Radius of the mating zone circle (meters)
+  num_mating_zones: 17         # Number of randomly placed mating zones (1 = single zone at mating_zone_center)
+  zone_relocation_strategy: "event_driven"  # Zone relocation strategy: "static" (never move), "generation_interval" (move every N generations), "event_driven" (move after matings)
+  zone_change_interval: 3     # Generations between zone position changes (only used if zone_relocation_strategy="generation_interval")
+  min_zone_distance: 2.0      # Minimum distance between zone centers when using multiple zones (in zone radii units)
+
+# Crossover Parameters
+crossover:
+  rate: 0.9                   # Probability of crossover (1.0 = always crossover)
+
+# Mutation Parameters
+mutation:
+  rate: 0.8                   # Probability of mutating each gene
+  strength: 0.5               # Standard deviation of Gaussian mutation noise
+  add_connection_rate: 0.05   # Probability of adding new connection
+  add_node_rate: 0.03         # Probability of adding new node
+
+# Simulation Parameters
+simulation:
+  time: 60.0                  # Duration of each fitness evaluation (seconds)
+  control_clip_min: -1.5708   # Minimum control value (-pi/2 radians, -90 degrees)
+  control_clip_max: 1.5708    # Maximum control value (pi/2 radians, 90 degrees)
+  use_periodic_boundaries: true  # Enable periodic (toroidal) boundaries
+
+# Multi-Robot Demonstration
+multi_robot:
+  world_size: [25, 25, 0.1]     # World dimensions [x, y, z]
+  spawn_area:
+    x_min: 0.1                # Minimum x spawn position
+    x_max: 24.9                # Maximum x spawn position
+    y_min: 0.1                # Minimum y spawn position
+    y_max: 24.9                # Maximum y spawn position
+    z: 0.05                   # Z spawn position
+  min_spawn_distance: 1.0     # Minimum distance between robot centers to avoid overlap
+  robot_size: 0.4             # Approximate robot size/diameter for visualization (meters)
+
+# Output Paths
+output:
+  video_folder: "./__videos__"      # Path to save video recordings
+  figures_folder: "./__figures__"   # Path to save plots and figures
+  results_folder: "./__results__"       # Path to save evolution results and data
+
+# Logging
+logging:
+  print_generation_stats: true      # Print generation statistics (best, average)
+  print_final_genotype: true        # Print the best evolved genotype at the end
+
+# Video Recording
+video:
+  record_generation_videos: false   # Whether to record videos of mating movement for each generation
+  save_generation_snapshots: true   # Whether to save a single image frame from each generation

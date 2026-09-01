@@ -1,6 +1,0 @@
-# Density-Based Selection Parameter Sensitivity
-# Tests combinations of critical_density and locality_radius
-# Run with: python run_experiments.py --grid-file grid_densitySensitivity.yaml --grid-base-experiment densityBased_validation --parallel --num-workers 5
-
-critical_density: [3.0, 5.0, 8.0]
-locality_radius: [2.0, 3.0, 5.0]
