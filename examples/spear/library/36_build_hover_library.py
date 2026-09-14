@@ -252,7 +252,9 @@ def _load_partial(out_dir: Path) -> list[dict]:
             "median_score":    float(d["median_score"][i]),
             "generations_run": int(d["generations_run"][i]),
             "train_time_s":    float(d["train_time_s"][i]),
-            "genome":          d["genome"][i],
+            "genome":          d["genome"][i],0
+            ,,,0
+            
             "morph_features":  d["morph_features"][i],
             "cmaes_params":    d["cmaes_params"][i],
         })

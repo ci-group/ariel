@@ -1,4 +1,12 @@
-"""MTRL v4 for hexacopter — six changes over v3 to fix the slow,
+"""LEGACY (2026-07-27): superseded by `examples/spear/library/37_train_residual_mtrl.py`,
+which uses `ResidualDroneEnv` (task-aware reward baked into the env, hover-prior-only
+residual architecture). This script keeps a bespoke `_hover_reward` override that lives
+in the training loop rather than the env, so evaluating the env alone will NOT reproduce
+these training rewards. Kept for historical reproducibility; do not extend.
+
+--------------------------------------------------------------------
+
+MTRL v4 for hexacopter — six changes over v3 to fix the slow,
 risk-averse policy revealed by the 80M v3 eval:
 
     1. VELOCITY-TOWARD-GATE REWARD. v3 only had telescoping distance

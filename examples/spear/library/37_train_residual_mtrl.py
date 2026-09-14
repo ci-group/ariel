@@ -636,6 +636,9 @@ def main():
                    help="Path to a previous out_dir; auto-loads the latest "
                         "checkpoint + vecnormalize.pkl and continues training. "
                         "Step count carries over (reset_num_timesteps=False).")
+    p.add_argument("--morph-seed", type=int, default=None,
+                   help="If set, restrict training to the single morph with "
+                        "this seed. Useful for single-morph debugging runs.")
     args = p.parse_args()
 
     np.random.seed(args.seed); torch.manual_seed(args.seed)
@@ -643,6 +646,11 @@ def main():
 
     all_morphs = _load_morph_library(Path(args.library), n_morphs=10**9)
     print(f"loaded {len(all_morphs)} morphs from {args.library}")
+    if args.morph_seed is not None:
+        all_morphs = [m for m in all_morphs if m["morph_seed"] == args.morph_seed]
+        if not all_morphs:
+            raise SystemExit(f"morph_seed {args.morph_seed} not found in library")
+        print(f"restricted to morph_seed={args.morph_seed}")
 
     # Held-out split: reserved morphs never appear in a training worker.
     # Persisted next to the checkpoint so Stage-4 eval uses the same set.

@@ -264,8 +264,7 @@ class TorchDroneGateEnv(VecEnv):
         self.dev   = torch.device(device)
         self.dtype = torch.float32
 
-        if render_mode is not None:
-            self.render_mode = render_mode
+        self.render_mode = render_mode
 
         # Seeding
         self.seed_val = seed
@@ -682,7 +681,10 @@ class TorchDroneGateEnv(VecEnv):
     # ---- required VecEnv stubs ----------------------------------------
     def close(self): pass
     def seed(self, seed=None): pass
-    def get_attr(self, attr_name, indices=None): raise AttributeError()
+    def get_attr(self, attr_name, indices=None):
+        if hasattr(self, attr_name):
+            return [getattr(self, attr_name)] * self.num_envs
+        raise AttributeError(attr_name)
     def set_attr(self, attr_name, value, indices=None): pass
     def env_method(self, method_name, *args, indices=None, **kwargs): pass
     def env_is_wrapped(self, wrapper_class, indices=None): return [False] * self.num_envs

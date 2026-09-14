@@ -39,6 +39,12 @@ analytical hover prior. The prior handles "how to fly this body"; the residual h
 - `.claude/wiki/Swift_Drone_Racing.md` — gate-progress reward shaping
 - `.claude/wiki/ResidualDroneEnv.md` — env API, TASK_ALPHA, reward structure
 
+**Cross-cutting empirical findings** (read before proposing reward or robustness changes):
+- `examples/DRONE_RESEARCH_RECOMMENDATIONS.md` — 2026-07-27 morph-break study
+  results and derived priorities (quadratic centering, ent_coef bump, vf clipping,
+  axis-aware morph randomization). Trajectory tasks likely inherit the specialist's
+  ~0.14 m steady-state drift; std collapse to 0.24 is the over-specialization mode.
+
 ---
 
 ## Files You May Modify
@@ -86,50 +92,74 @@ Rules:
   Hover already converges quickly; the bottleneck is trajectory task performance.
 
 **High-value experiment ideas (roughly priority order):**
-1. Gate-progress reward multiplier for trajectory tasks (Swift-style progress reward:
+
+*Top tier — derived from the morph-break study 2026-07-27 (see*
+*`examples/DRONE_RESEARCH_RECOMMENDATIONS.md`)*. The specialist showed three
+pathologies that likely apply to the multi-task residual policy: (a) telescoping
+distance reward has ~0 gradient at target → ~0.14 m residual drift + biased
+altitude, (b) policy std collapses to 0.24 by 20M steps (over-specialization),
+(c) explained_variance spikes to −3..−5 coinciding with value-loss spikes.
+The tuned intervention held std at 0.59 with all three fixes on. Apply one at a time:
+
+1. **Quadratic centering reward `-c·‖pos−target‖²`, c≈0.1** — one-line env change;
+   addresses the zero-gradient-at-target pathology. Applies to hover and every
+   trajectory task waypoint (~expected +0.5–1.5 on hover, +0.1–0.5 per traj task).
+2. **ent_coef 0.0 → 0.005** (additive to `ent_start`/`ent_end` schedule) — direct
+   guard against std collapse. Cheap, one keyword.
+3. **clip_range_vf 0.2** (currently None) — targets the explained-variance/value-loss
+   spikes; no policy-side change, low risk.
+4. **Morphology domain randomization** (long-shot generalist unlock): axis-aware
+   jitter each epoch — σ_az≈1° (break study cliff at ±2.5°), σ_pitch≈5°
+   (tolerance ±12.5–22.5°). If frozen-feature ablation shows no gap → morph
+   conditioning is broken, needs auxiliary reconstruction loss.
+
+*Standing candidates (unchanged):*
+
+5. Gate-progress reward multiplier for trajectory tasks (Swift-style progress reward:
    `λ × (d_{t-1}^gate − d_t^gate)` — currently zero if not already in env)
-2. Per-task α tuning: hover 0.10 may be too low/high; trajectory tasks may want 0.5-0.7
-3. Entropy annealing shape: try cosine or stepped schedule instead of linear
-4. Critic hidden dim increase (critics currently share ACTOR_HIDDEN; larger critic ↔ better value estimates)
-5. BC-regularization term (pull total action toward prior during early training, per Zhang 2025)
-6. Per-task worker reweighting (more workers on hard trajectory tasks in `tasks` list)
-7. PopArt POP weight correction (add when critic-loss spikes are visible in log)
-8. γ (gamma) adjustment — trajectory tasks with sparse gates may benefit from γ → 0.995
-9. Reward clipping or shaping for crash events
-10. Learning rate schedule (cosine warmup + decay instead of constant 3e-4)
+6. Per-task α tuning: hover 0.10 may be too low/high; trajectory tasks may want 0.5-0.7
+7. Entropy annealing shape: try cosine or stepped schedule instead of linear
+8. Critic hidden dim increase (critics currently share ACTOR_HIDDEN; larger critic ↔ better value estimates)
+9. BC-regularization term (pull total action toward prior during early training, per Zhang 2025)
+10. Per-task worker reweighting (more workers on hard trajectory tasks in `tasks` list)
+11. PopArt POP weight correction (add when critic-loss spikes are visible in log)
+12. γ (gamma) adjustment — trajectory tasks with sparse gates may benefit from γ → 0.995
+13. Reward clipping or shaping for crash events
+14. Learning rate schedule (cosine warmup + decay instead of constant 3e-4)
 
 ### 4. Apply the change
 
 Use `Edit` to make the minimal change. Keep it to <20 lines of diff if possible.
 
-### 5. Run the experiment
+### 5. Launch experiment (~2h, background)
 
-Run the training in the background so the timeout does not cut it short:
-```
-Bash(run_in_background=True, command=
-  "cd /home/user/Desktop/EvoDevo/ariel && uv run examples/spear/library/37_train_residual_mtrl.py
-   --steps 250000 --num-envs 20 --device cpu
-   --out-dir __data__/autoresearch_runs/exp_TIMESTAMP 2>&1 > /tmp/autoresearch_current.log"
-)
+**Always use the explicit `cd` prefix — never use a relative path or rely on CWD.**
+
+Each experiment is a single 20M-step run (seed 0). See Step 6 in the skill for the
+launch procedure (tmux + sentinel). Reference run command:
+
+```bash
+cd /home/user/Desktop/EvoDevo/ariel/.claude/worktrees/autoresearch && \
+  uv run examples/spear/library/37_train_residual_mtrl.py \
+    --steps 20000000 --num-envs 16 --inner-batch 4 \
+    --eval-steps 3000 --device cuda \
+    --library /home/user/Desktop/EvoDevo/ariel/__data__/hex_library/v1/library.npz \
+    --seed 0 --out-dir /tmp/autoresearch_runs/exp_NNN \
+    > /tmp/autoresearch_s0.log 2>&1
 ```
 
-Then watch for completion:
-```
-Monitor("/tmp/autoresearch_current.log")
-```
+After launching, write the sentinel and schedule a 3600s wakeup. Do NOT wait.
 
-Once the process exits, read the last 80 lines of `/tmp/autoresearch_current.log`.
+### 6. Parse the results (when run completes — Step 6b in skill)
 
-### 6. Parse the results
-
-Find the `[after training]` block:
+Find the `[after training]` block in `/tmp/autoresearch_s0.log`:
 ```
-[after training] trained-policy rollout (1500 steps):
-  hover        : reward/ep=+13.300  ...
-  figure8      : reward/ep= -5.200  ...
-  slalom       : reward/ep= -3.100  ...
-  shuttle-run  : reward/ep= -2.500  ...
-  circle       : reward/ep= -4.100  ...
+[after training] trained-policy rollout (3000 steps):
+         hover: reward/ep= +66.619  ...
+       figure8: reward/ep= +16.595  ...
+        slalom: reward/ep= +19.675  ...
+   shuttle-run: reward/ep= +11.202  ...
+        circle: reward/ep= +13.079  ...
 ```
 
 Extract `reward/ep` for each task. If a task shows `nan`, treat it as −100.
@@ -140,10 +170,10 @@ Round to 3 decimal places.
 
 ### 7. Establish or retrieve baseline
 
-The baseline is the metric of the last **COMMITTED** or **BASELINE** row in
-`autoresearch_log.md`. If the log is empty (first run), run a clean eval on the
-unmodified code to get the baseline, log it with status `BASELINE`, then start
-proposing changes.
+The baseline is the metric of the last **COMMITTED** or **BASELINE** row at **20M steps**
+in `autoresearch_log.md`. Old 250k-step metrics are NOT comparable. If the most recent
+BASELINE/COMMITTED entry predates the 20M-step switch, run a clean eval first (no code
+change), log as `BASELINE`, then start proposing changes.
 
 ### 8. Ratchet decision
 
@@ -178,9 +208,10 @@ Once the loop has begun, **do NOT pause to ask the user anything**. Do not say:
 - "Is this a good stopping point?"
 - "Do you want me to try X instead?"
 
-The user may be asleep. Continue indefinitely. Use ScheduleWakeup(delaySeconds=60,
-prompt="/autoresearch", reason="autoresearch experiment N+1") at the end of every
-iteration to queue the next one.
+The user may be asleep. Continue indefinitely. Each experiment runs ~2h in background.
+Use ScheduleWakeup(delaySeconds=3600, prompt="/autoresearch") inside Step 6 (after
+launching) to schedule the first status check. After evaluation completes, use
+ScheduleWakeup(delaySeconds=60) to immediately start proposing the next experiment.
 
 If an experiment crashes, log it as CRASHED, revert, try something different.
 If you hit three crashes in a row, read both modifiable files carefully for syntax

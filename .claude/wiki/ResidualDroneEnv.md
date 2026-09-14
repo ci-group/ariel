@@ -52,15 +52,15 @@ class ResidualDroneEnv(TorchDroneGateEnv):
 
 ## Parameters (Constructor)
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `morph` | `dict` | — | Morphology descriptor with keys: `propellers` (list of dicts), `mass` (float), `inertia` (3×3 array), `prop_size` (int), `cmaes_params` (N+5 array), `morph_features` (22d array), `median_score` (float, optional). Typically one row of `__data__/hex_library/v1/library.npz`. |
-| `task` | `str` | `"hover"` | Task name from `TASK_NAMES` = ("hover", "figure8", "slalom", "shuttle-run", "circle"). Determines gate configuration and reward shaping. |
-| `alpha` | `float \| None` | `None` | Residual scaling factor. If `None`, uses `TASK_ALPHA[task]`. Hover uses 0.10 (prior is near-perfect); trajectory tasks use 0.40. |
-| `num_envs` | `int` | `1` | Per-worker batch size (one VecEnv instance; Stage 3 runs multiple). |
-| `max_steps` | `int` | `600` | Episode length before auto-termination. |
-| `device` | `str` | `"cpu"` | PyTorch device for tensors (`"cpu"`, `"cuda:0"`, etc.). |
-| `seed` | `int \| None` | `None` | Random seed for gate initialization. |
+| Name        | Type            | Default   | Description                                                                                                                                                                                                                                                                      |
+| ----------- | --------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `morph`     | `dict`          | —         | Morphology descriptor with keys: `propellers` (list of dicts), `mass` (float), `inertia` (3×3 array), `prop_size` (int), `cmaes_params` (N+5 array), `morph_features` (22d array), `median_score` (float, optional). Typically one row of `__data__/hex_library/v1/library.npz`. |
+| `task`      | `str`           | `"hover"` | Task name from `TASK_NAMES` = ("hover", "figure8", "slalom", "shuttle-run", "circle"). Determines gate configuration and reward shaping.                                                                                                                                         |
+| `alpha`     | `float \| None` | `None`    | Residual scaling factor. If `None`, uses `TASK_ALPHA[task]`. Hover uses 0.10 (prior is near-perfect); trajectory tasks use 0.40.                                                                                                                                                 |
+| `num_envs`  | `int`           | `1`       | Per-worker batch size (one VecEnv instance; Stage 3 runs multiple).                                                                                                                                                                                                              |
+| `max_steps` | `int`           | `600`     | Episode length before auto-termination.                                                                                                                                                                                                                                          |
+| `device`    | `str`           | `"cpu"`   | PyTorch device for tensors (`"cpu"`, `"cuda:0"`, etc.).                                                                                                                                                                                                                          |
+| `seed`      | `int \| None`   | `None`    | Random seed for gate initialization.                                                                                                                                                                                                                                             |
 
 ## Class Attributes
 

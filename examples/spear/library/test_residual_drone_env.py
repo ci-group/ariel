@@ -20,13 +20,33 @@ import torch
 sys.path.insert(0, str(Path(__file__).parent))
 from envs.residual_drone_env import ResidualDroneEnv  # noqa: E402
 
-LIBRARY = Path(__file__).resolve().parents[3] / "__data__/hex_library/v1/library.npz"
+def _find_library() -> Path | None:
+    """Locate __data__/hex_library/v1/library.npz walking up from this file.
+
+    Walking upward (rather than `parents[N]`) keeps the test valid inside
+    git worktrees, where the worktree root has no `__data__/` of its own.
+    Override with $ARIEL_HEX_LIBRARY for out-of-tree checkouts.
+    """
+    import os
+    env_override = os.environ.get("ARIEL_HEX_LIBRARY")
+    if env_override:
+        p = Path(env_override)
+        return p if p.exists() else None
+    target = Path("__data__/hex_library/v1/library.npz")
+    for base in Path(__file__).resolve().parents:
+        cand = base / target
+        if cand.exists():
+            return cand
+    return None
+
+
+LIBRARY = _find_library()
 
 
 def _load_morph(idx: int = 0) -> dict:
     """Return a morph dict (propellers + cmaes_params + features) from
     the v1 library, or freshly sample one if the library is absent."""
-    if LIBRARY.exists():
+    if LIBRARY is not None:
         d = np.load(LIBRARY)
         # The library stores the morph seed; re-sample the same morph via
         # `sample_feasible` and pick the matching seed.
@@ -79,7 +99,15 @@ def test_zero_alpha_matches_prior():
 
 
 def test_zero_residual_hovers():
-    """α=0.4 + zero residual: env runs the prior alone, drone survives."""
+    """α=0.4 + zero residual: env runs the prior alone, drone survives.
+
+    Requires CMA-ES-tuned params from the library; the fallback (dummy)
+    params cannot certify hover, so we skip rather than mis-attribute the
+    failure to the env.
+    """
+    import pytest
+    if LIBRARY is None:
+        pytest.skip("hex library unavailable; dummy prior params cannot hover")
     morph = _load_morph(0)
     env = ResidualDroneEnv(morph, alpha=0.4, num_envs=1, max_steps=600)
     env.reset()

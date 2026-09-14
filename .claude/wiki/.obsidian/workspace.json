@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "CMA-ES_Practical_Concerns.md",
+                "file": "ResidualDroneEnv.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CMA-ES_Practical_Concerns"
+              "title": "ResidualDroneEnv"
             }
           }
         ]
@@ -41,7 +41,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -180,8 +182,15 @@
       "bases:Create new base": false
     }
   },
-  "active": "e160294adef0b057",
+  "active": "aca771a1fde473b5",
   "lastOpenFiles": [
+    "MjData_Sensor_Variables.md",
+    "MjData_Force_Variables.md",
+    "MjData_Actuator_Variables.md",
+    "MjData.md",
+    "Lee_Geometric_Control_SE3.md",
+    "mjsActuator.md",
+    "CMA-ES_Practical_Concerns.md",
     "CMA-ES_Parameters.md",
     "CMA-ES_Mirrored_Sampling.md",
     "CMA-ES_Algorithm.md",
