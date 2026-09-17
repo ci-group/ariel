@@ -815,29 +815,41 @@ class Evolution:
         genome: Genome,
     ) -> int:
         """Return actuator count for a physically valid morphology."""
-        spec = (
-            self.map_genotype_to_body(
+
+        robot_graph = (
+            self.decode_morphology_graph(
                 genome
             )
         )
 
-
-        if spec is None:
+        if robot_graph is None:
             return 0
 
-
         try:
+            robot = (
+                construct_mjspec_from_graph(
+                    robot_graph
+                )
+            )
+
             model = (
-                spec.compile()
+                robot.spec.compile()
             )
 
             return int(
                 model.nu
             )
 
-        except Exception:
-            return 0
+        except Exception as e:
+            console.log(
+                "[red]"
+                f"MuJoCo construction failed: "
+                f"{type(e).__name__}: {e}"
+                "[/red]"
+            )
 
+            return 0
+        
 
     def mutate_ctrl_vector(
         self,
@@ -995,28 +1007,38 @@ class Evolution:
     def create_individual(
         self,
     ) -> Individual:
-        """Create an initial individual with at least one actuated joint."""
-        while True:
+        """Create one valid initial body+brain individual."""
+
+        max_attempts = 500
+
+        for attempt in range(
+            1,
+            max_attempts + 1,
+        ):
             try:
+                # ------------------------------------------------------------ #
+                # CREATE BASE CPPN
+                # ------------------------------------------------------------ #
+
                 genome = Genome.random(
-                    num_inputs=(
-                        NUM_CPPN_INPUTS
-                    ),
-                    num_outputs=(
-                        NUM_CPPN_OUTPUTS
-                    ),
+                    num_inputs=NUM_CPPN_INPUTS,
+                    num_outputs=NUM_CPPN_OUTPUTS,
+
+                    # All initial CPPNs share the same
+                    # base node/innovation numbering.
                     next_node_id=(
-                        self.id_manager.get_next_node_id()
+                        NUM_CPPN_INPUTS
+                        + NUM_CPPN_OUTPUTS
                     ),
-                    next_innov_id=(
-                        self.id_manager.get_next_innov_id()
-                    ),
+                    next_innov_id=0,
                 )
 
 
-                for _ in range(
-                    3
-                ):
+                # ------------------------------------------------------------ #
+                # INITIAL STRUCTURAL MUTATION
+                # ------------------------------------------------------------ #
+
+                for _ in range(3):
                     genome.mutate(
                         1.0,
                         1.0,
@@ -1025,56 +1047,101 @@ class Evolution:
                     )
 
 
-                joint_count = (
-                    self.get_joint_count(
-                        genome
+                # ------------------------------------------------------------ #
+                # SERIALIZE FIRST
+                #
+                # Test exactly the representation that will actually be
+                # stored inside Individual.
+                # ------------------------------------------------------------ #
+
+                genome_dict = (
+                    genome.to_dict()
+                )
+
+                stored_genome = (
+                    Genome.from_dict(
+                        genome_dict
                     )
                 )
 
 
+                # ------------------------------------------------------------ #
+                # SINGLE VALIDITY CHECK
+                # ------------------------------------------------------------ #
+
+                joint_count = (
+                    self.get_joint_count(
+                        stored_genome
+                    )
+                )
+
+                if joint_count <= 0:
+                    if (
+                        attempt % 50
+                        == 0
+                    ):
+                        console.log(
+                            "[yellow]"
+                            f"Initialization: "
+                            f"{attempt} attempts, "
+                            f"still searching for "
+                            f"a valid actuated body."
+                            "[/yellow]"
+                        )
+
+                    continue
+
+
+                # ------------------------------------------------------------ #
+                # CREATE INDIVIDUAL
+                # ------------------------------------------------------------ #
+
+                ind = Individual()
+
+                ind.genotype = {
+                    "morph": genome_dict,
+
+                    "ctrl": RNG.uniform(
+                        -1.0,
+                        1.0,
+                        size=CTRL_GENOME_SIZE,
+                    ).tolist(),
+                }
+
+                ind.tags[
+                    "ps"
+                ] = False
+
+                ind.tags[
+                    "valid"
+                ] = True
+
+                ind.tags[
+                    "debug_joints"
+                ] = joint_count
+
+                return ind
+
+
+            except Exception as e:
                 if (
-                    joint_count
-                    > 0
+                    attempt % 50
+                    == 0
                 ):
-                    break
+                    console.log(
+                        "[yellow]"
+                        f"Initialization attempt "
+                        f"{attempt} failed: "
+                        f"{type(e).__name__}: "
+                        f"{e}"
+                        "[/yellow]"
+                    )
 
 
-            except Exception:
-                continue
-
-
-        ind = Individual()
-
-
-        ind.genotype = {
-            "morph": (
-                genome.to_dict()
-            ),
-            "ctrl": (
-                RNG.uniform(
-                    -1.0,
-                    1.0,
-                    size=CTRL_GENOME_SIZE,
-                ).tolist()
-            ),
-        }
-
-
-        ind.tags[
-            "ps"
-        ] = False
-
-        ind.tags[
-            "valid"
-        ] = True
-
-        ind.tags[
-            "debug_joints"
-        ] = 0
-
-
-        return ind
-
+        raise RuntimeError(
+            "Unable to create a valid actuated "
+            f"individual after {max_attempts} attempts."
+        )
 
     def reproduction(
         self,

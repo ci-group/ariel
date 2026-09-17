@@ -32,13 +32,31 @@ def has_self_intersection(
     bool
         True if non-adjacent robot parts physically intersect.
     """
+
+    # MuJoCo's control callback is global.
+    #
+    # A locomotion simulation may have installed a
+    # controller for a previously evaluated robot.
+    # mj_forward() invokes the global callback, so
+    # allowing that callback to remain active here
+    # can run an old controller against this new
+    # morphology and incorrectly make validation fail.
+    #
+    # Collision checking does not require a controller.
+    mujoco.set_mjcb_control(
+        None
+    )
+
     try:
         robot = construct_mjspec_from_graph(
             graph
         )
 
         model = robot.spec.compile()
-        data = mujoco.MjData(model)
+
+        data = mujoco.MjData(
+            model
+        )
 
         mujoco.mj_forward(
             model,
