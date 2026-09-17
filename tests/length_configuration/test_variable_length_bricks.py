@@ -1,416 +1,481 @@
-"""Test CPPN evolution with variable-length brick modules."""
+"""Tests for variable-length brick scaling and physical collision validation."""
 
 # Standard library
-import copy
-import random
+from unittest.mock import patch
 
 # Third-party libraries
-import numpy as np
+import mujoco
+import networkx as nx
+import pytest
 
 # Local libraries
+from ariel.body_phenotypes.robogen_lite.collision_validation import (
+    has_self_intersection,
+    is_physically_valid,
+)
 from ariel.body_phenotypes.robogen_lite.config import (
-    NUM_OF_ROTATIONS,
-    NUM_OF_TYPES_OF_MODULES,
+    ModuleFaces,
+    ModuleRotationsIdx,
     ModuleType,
 )
-from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
-from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
-    MorphologyDecoderBestFirst,
+    scale_brick_length,
 )
 from ariel.parameters.ariel_modules import ArielModulesConfig
 
 
-SEED = 42
-RNG = np.random.default_rng(SEED)
-random.seed(SEED)
-
-T = NUM_OF_TYPES_OF_MODULES
-R = NUM_OF_ROTATIONS
-
-NUM_CPPN_INPUTS = 6
-NUM_CPPN_OUTPUTS = 1 + T + R + 1
-
-MAX_MODULES = 15
-
 ariel_modules_config = ArielModulesConfig()
 
-id_manager = IdManager(
-    node_start=(
-        NUM_CPPN_INPUTS
-        + NUM_CPPN_OUTPUTS
-        - 1
-    ),
-    innov_start=(
-        NUM_CPPN_INPUTS
-        * NUM_CPPN_OUTPUTS
-    ) - 1,
-)
+
+# ============================================================================
+# CPPN LENGTH SCALING TESTS
+# ============================================================================
 
 
-def create_random_genome() -> Genome:
-    """Create a random CPPN genome with a brick-length output."""
-    genome = Genome.random(
-        num_inputs=NUM_CPPN_INPUTS,
-        num_outputs=NUM_CPPN_OUTPUTS,
-        next_node_id=(
-            NUM_CPPN_INPUTS
-            + NUM_CPPN_OUTPUTS
-        ),
-        next_innov_id=0,
+def test_scale_brick_length_minimum() -> None:
+    """A CPPN output of 0.0 should produce the minimum brick length."""
+    length = scale_brick_length(
+        0.0
     )
 
-    # Apply initial mutations
-    for _ in range(3):
-        genome.mutate(
-            0.6,
-            0.6,
-            id_manager.get_next_innov_id,
-            id_manager.get_next_node_id,
+    assert length == pytest.approx(
+        ariel_modules_config.BRICK_LENGTH_MIN
+    )
+
+    print()
+    print(
+        "0.0 ->",
+        length,
+        "m",
+    )
+
+
+def test_scale_brick_length_middle() -> None:
+    """A CPPN output of 0.5 should produce the midpoint brick length."""
+    length = scale_brick_length(
+        0.5
+    )
+
+    expected = (
+        ariel_modules_config.BRICK_LENGTH_MIN
+        + ariel_modules_config.BRICK_LENGTH_MAX
+    ) / 2.0
+
+    assert length == pytest.approx(
+        expected
+    )
+
+    print()
+    print(
+        "0.5 ->",
+        length,
+        "m",
+    )
+
+
+def test_scale_brick_length_maximum() -> None:
+    """A CPPN output of 1.0 should produce the maximum brick length."""
+    length = scale_brick_length(
+        1.0
+    )
+
+    assert length == pytest.approx(
+        ariel_modules_config.BRICK_LENGTH_MAX
+    )
+
+    print()
+    print(
+        "1.0 ->",
+        length,
+        "m",
+    )
+
+
+def test_scale_brick_length_clamps_below_range() -> None:
+    """Values below zero should be clamped to the minimum."""
+    length = scale_brick_length(
+        -100.0
+    )
+
+    assert length == pytest.approx(
+        ariel_modules_config.BRICK_LENGTH_MIN
+    )
+
+
+def test_scale_brick_length_clamps_above_range() -> None:
+    """Values above one should be clamped to the maximum."""
+    length = scale_brick_length(
+        100.0
+    )
+
+    assert length == pytest.approx(
+        ariel_modules_config.BRICK_LENGTH_MAX
+    )
+
+
+# ============================================================================
+# SYNTHETIC MUJOCO COLLISION TESTS
+# ============================================================================
+
+
+class FakeSpec:
+    """Small wrapper that behaves like an ARIEL robot spec."""
+
+    def __init__(
+        self,
+        xml: str,
+    ) -> None:
+        self.xml = xml
+
+    def compile(
+        self,
+    ) -> mujoco.MjModel:
+        """Compile the stored XML into a MuJoCo model."""
+        return mujoco.MjModel.from_xml_string(
+            self.xml
         )
 
-    return genome
+
+class FakeRobot:
+    """Minimal object matching the constructor return interface."""
+
+    def __init__(
+        self,
+        xml: str,
+    ) -> None:
+        self.spec = FakeSpec(
+            xml
+        )
 
 
-def decode_genome(
-    genome: Genome,
-):
-    """Decode a CPPN genome into a robot graph."""
-    decoder = MorphologyDecoderBestFirst(
-        cppn_genome=genome,
-        max_modules=MAX_MODULES,
+def empty_graph() -> nx.DiGraph:
+    """Return a placeholder graph for mocked collision tests."""
+    return nx.DiGraph()
+
+
+def test_two_separate_boxes_do_not_collide() -> None:
+    """Two clearly separated sibling bodies should be physically valid."""
+    xml = """
+    <mujoco>
+        <worldbody>
+            <body name="body1" pos="0 0 0">
+                <geom
+                    name="geom1"
+                    type="box"
+                    size="0.1 0.1 0.1"
+                />
+            </body>
+
+            <body name="body2" pos="1 0 0">
+                <geom
+                    name="geom2"
+                    type="box"
+                    size="0.1 0.1 0.1"
+                />
+            </body>
+        </worldbody>
+    </mujoco>
+    """
+
+    fake_robot = FakeRobot(
+        xml
     )
 
-    return decoder.decode()
-
-
-def get_brick_lengths(
-    graph,
-) -> list[float]:
-    """Return all brick lengths from a decoded graph."""
-    lengths = []
-
-    for _, node_data in graph.nodes(
-        data=True
+    with patch(
+        "ariel.body_phenotypes.robogen_lite."
+        "collision_validation."
+        "construct_mjspec_from_graph",
+        return_value=fake_robot,
     ):
-        if (
-            node_data["type"]
-            == ModuleType.BRICK.name
-        ):
-            assert "length" in node_data, (
-                "Decoded BRICK node does not "
-                "contain a length attribute."
-            )
+        result = has_self_intersection(
+            empty_graph()
+        )
 
-            lengths.append(
-                float(
-                    node_data["length"]
-                )
-            )
-
-    return lengths
+    assert result is False
 
 
-def validate_lengths(
-    lengths: list[float],
-) -> None:
-    """Check that all brick lengths are valid."""
-    for length in lengths:
+def test_two_overlapping_boxes_are_detected() -> None:
+    """Two overlapping sibling bodies should be detected."""
+    xml = """
+    <mujoco>
+        <worldbody>
+            <body name="body1" pos="0 0 0">
+                <geom
+                    name="geom1"
+                    type="box"
+                    size="0.2 0.2 0.2"
+                />
+            </body>
+
+            <body name="body2" pos="0.1 0 0">
+                <geom
+                    name="geom2"
+                    type="box"
+                    size="0.2 0.2 0.2"
+                />
+            </body>
+        </worldbody>
+    </mujoco>
+    """
+
+    fake_robot = FakeRobot(
+        xml
+    )
+
+    with patch(
+        "ariel.body_phenotypes.robogen_lite."
+        "collision_validation."
+        "construct_mjspec_from_graph",
+        return_value=fake_robot,
+    ):
+        result = has_self_intersection(
+            empty_graph()
+        )
+
+    assert result is True
+
+
+def test_is_physically_valid_is_inverse() -> None:
+    """is_physically_valid should invert the collision result."""
+    xml = """
+    <mujoco>
+        <worldbody>
+            <body name="body1" pos="0 0 0">
+                <geom
+                    type="box"
+                    size="0.1 0.1 0.1"
+                />
+            </body>
+
+            <body name="body2" pos="1 0 0">
+                <geom
+                    type="box"
+                    size="0.1 0.1 0.1"
+                />
+            </body>
+        </worldbody>
+    </mujoco>
+    """
+
+    fake_robot = FakeRobot(
+        xml
+    )
+
+    with patch(
+        "ariel.body_phenotypes.robogen_lite."
+        "collision_validation."
+        "construct_mjspec_from_graph",
+        return_value=fake_robot,
+    ):
         assert (
-            ariel_modules_config.BRICK_LENGTH_MIN
-            <= length
-            <= ariel_modules_config.BRICK_LENGTH_MAX
-        ), (
-            f"Invalid brick length: {length}"
-        )
-
-
-def test_creation_and_decoding() -> None:
-    """Test initial CPPN creation and decoding."""
-    genome = create_random_genome()
-
-    graph = decode_genome(
-        genome
-    )
-
-    lengths = get_brick_lengths(
-        graph
-    )
-
-    validate_lengths(
-        lengths
-    )
-
-    print()
-    print("=" * 70)
-    print(
-        "INITIAL CPPN DECODING"
-    )
-    print("=" * 70)
-
-    print(
-        f"Modules decoded: "
-        f"{graph.number_of_nodes()}"
-    )
-
-    print(
-        f"Brick modules: "
-        f"{len(lengths)}"
-    )
-
-    if lengths:
-        print(
-            "Brick lengths:"
-        )
-
-        for length in lengths:
-            print(
-                f"  {length:.6f} m "
-                f"({length * 1000:.2f} mm)"
+            is_physically_valid(
+                empty_graph()
             )
-
-    print(
-        "Initial genome decoding passed."
-    )
-
-
-def test_mutation() -> None:
-    """Test that mutated CPPNs still decode valid brick lengths."""
-    parent = create_random_genome()
-
-    child = parent.copy()
-
-    child.mutate(
-        0.2,
-        0.3,
-        id_manager.get_next_innov_id,
-        id_manager.get_next_node_id,
-    )
-
-    parent_graph = decode_genome(
-        parent
-    )
-
-    child_graph = decode_genome(
-        child
-    )
-
-    parent_lengths = get_brick_lengths(
-        parent_graph
-    )
-
-    child_lengths = get_brick_lengths(
-        child_graph
-    )
-
-    validate_lengths(
-        parent_lengths
-    )
-
-    validate_lengths(
-        child_lengths
-    )
-
-    print()
-    print("=" * 70)
-    print(
-        "CPPN MUTATION TEST"
-    )
-    print("=" * 70)
-
-    print(
-        "Parent brick lengths:",
-        parent_lengths,
-    )
-
-    print(
-        "Child brick lengths:",
-        child_lengths,
-    )
-
-    print(
-        "Mutation produced a valid "
-        "decoded morphology."
-    )
-
-
-def test_crossover() -> None:
-    """Test that CPPN crossover still produces valid brick lengths."""
-    parent_a = create_random_genome()
-    parent_b = create_random_genome()
-
-    child = parent_a.crossover(
-        parent_b,
-        is_maximisation=False,
-    )
-
-    graph = decode_genome(
-        child
-    )
-
-    lengths = get_brick_lengths(
-        graph
-    )
-
-    validate_lengths(
-        lengths
-    )
-
-    print()
-    print("=" * 70)
-    print(
-        "CPPN CROSSOVER TEST"
-    )
-    print("=" * 70)
-
-    print(
-        f"Child modules: "
-        f"{graph.number_of_nodes()}"
-    )
-
-    print(
-        "Child brick lengths:",
-        lengths,
-    )
-
-    print(
-        "Crossover produced a valid "
-        "decoded morphology."
-    )
-
-
-def test_multiple_generations() -> None:
-    """Simulate multiple generations of CPPN mutation and crossover."""
-    population_size = 20
-    generations = 10
-
-    population = [
-        create_random_genome()
-        for _ in range(
-            population_size
+            is True
         )
-    ]
 
-    all_lengths = []
 
-    print()
-    print("=" * 70)
-    print(
-        "MULTI-GENERATION CPPN TEST"
-    )
-    print("=" * 70)
+def test_compile_failure_is_rejected() -> None:
+    """An unconstructable morphology should be considered invalid."""
 
-    for generation in range(
-        generations
-    ):
-        next_population = []
-
-        generation_lengths = []
-
-        while (
-            len(next_population)
-            < population_size
+    class BrokenSpec:
+        def compile(
+            self,
         ):
-            if (
-                len(population) >= 2
-                and RNG.random() < 0.5
-            ):
-                parent_a, parent_b = (
-                    random.sample(
-                        population,
-                        2,
-                    )
-                )
-
-                child = parent_a.crossover(
-                    parent_b,
-                    is_maximisation=False,
-                )
-
-            else:
-                parent = random.choice(
-                    population
-                )
-
-                child = parent.copy()
-
-            child.mutate(
-                0.2,
-                0.3,
-                id_manager.get_next_innov_id,
-                id_manager.get_next_node_id,
+            raise RuntimeError(
+                "Intentional test failure"
             )
 
-            graph = decode_genome(
-                child
+    class BrokenRobot:
+        spec = BrokenSpec()
+
+    with patch(
+        "ariel.body_phenotypes.robogen_lite."
+        "collision_validation."
+        "construct_mjspec_from_graph",
+        return_value=BrokenRobot(),
+    ):
+        assert (
+            has_self_intersection(
+                empty_graph()
             )
-
-            lengths = get_brick_lengths(
-                graph
-            )
-
-            validate_lengths(
-                lengths
-            )
-
-            generation_lengths.extend(
-                lengths
-            )
-
-            next_population.append(
-                child
-            )
-
-        population = next_population
-
-        all_lengths.extend(
-            generation_lengths
+            is True
         )
 
-        print(
-            f"Generation "
-            f"{generation + 1}: "
-            f"{len(generation_lengths)} bricks"
+        assert (
+            is_physically_valid(
+                empty_graph()
+            )
+            is False
         )
 
-        if generation_lengths:
-            print(
-                f"  min = "
-                f"{min(generation_lengths) * 1000:.2f} mm"
-            )
 
-            print(
-                f"  max = "
-                f"{max(generation_lengths) * 1000:.2f} mm"
-            )
+# ============================================================================
+# PARENT-CHILD BEHAVIOUR
+# ============================================================================
 
-            print(
-                f"  mean = "
-                f"{np.mean(generation_lengths) * 1000:.2f} mm"
-            )
 
-    assert len(all_lengths) > 0, (
-        "No brick modules were produced "
-        "during the multi-generation test."
+def test_direct_parent_child_contact_is_ignored() -> None:
+    """Directly connected bodies are intentionally excluded from checking.
+
+    This test documents the current collision-validation policy.
+    """
+    xml = """
+    <mujoco>
+        <worldbody>
+            <body name="parent" pos="0 0 0">
+                <geom
+                    name="parent_geom"
+                    type="box"
+                    size="0.2 0.2 0.2"
+                />
+
+                <body name="child" pos="0.1 0 0">
+                    <geom
+                        name="child_geom"
+                        type="box"
+                        size="0.2 0.2 0.2"
+                    />
+                </body>
+            </body>
+        </worldbody>
+    </mujoco>
+    """
+
+    fake_robot = FakeRobot(
+        xml
     )
 
-    print()
-    print(
-        "All generations produced "
-        "valid variable-length bricks."
+    with patch(
+        "ariel.body_phenotypes.robogen_lite."
+        "collision_validation."
+        "construct_mjspec_from_graph",
+        return_value=fake_robot,
+    ):
+        result = has_self_intersection(
+            empty_graph()
+        )
+
+    # These geoms overlap heavily, but the bodies
+    # are directly connected, so the validator
+    # deliberately ignores them.
+    assert result is False
+
+
+# ============================================================================
+# REAL ARIEL MORPHOLOGY TESTS
+# ============================================================================
+
+
+def create_short_chain() -> nx.DiGraph:
+    """Create a simple core -> short brick morphology."""
+    graph = nx.DiGraph()
+
+    graph.add_node(
+        0,
+        type=ModuleType.CORE.name,
+        rotation=ModuleRotationsIdx.DEG_0.name,
+    )
+
+    graph.add_node(
+        1,
+        type=ModuleType.BRICK.name,
+        rotation=ModuleRotationsIdx.DEG_0.name,
+        length=0.075,
+    )
+
+    graph.add_edge(
+        0,
+        1,
+        face=ModuleFaces.FRONT.name,
+    )
+
+    return graph
+
+
+def create_long_chain() -> nx.DiGraph:
+    """Create a straight chain containing two maximum-length bricks."""
+    graph = nx.DiGraph()
+
+    graph.add_node(
+        0,
+        type=ModuleType.CORE.name,
+        rotation=ModuleRotationsIdx.DEG_0.name,
+    )
+
+    graph.add_node(
+        1,
+        type=ModuleType.BRICK.name,
+        rotation=ModuleRotationsIdx.DEG_0.name,
+        length=0.225,
+    )
+
+    graph.add_node(
+        2,
+        type=ModuleType.BRICK.name,
+        rotation=ModuleRotationsIdx.DEG_0.name,
+        length=0.225,
+    )
+
+    graph.add_edge(
+        0,
+        1,
+        face=ModuleFaces.FRONT.name,
+    )
+
+    graph.add_edge(
+        1,
+        2,
+        face=ModuleFaces.FRONT.name,
+    )
+
+    return graph
+
+
+def test_real_short_ariel_robot_is_valid() -> None:
+    """A simple standard-size brick robot should compile and be valid."""
+    graph = create_short_chain()
+
+    assert (
+        is_physically_valid(
+            graph
+        )
+        is True
+    )
+
+
+def test_real_long_straight_robot_is_valid() -> None:
+    """A straight chain of long bricks should not self-intersect."""
+    graph = create_long_chain()
+
+    assert (
+        is_physically_valid(
+            graph
+        )
+        is True
     )
 
 
 if __name__ == "__main__":
-    test_creation_and_decoding()
-    test_mutation()
-    test_crossover()
-    test_multiple_generations()
+    test_scale_brick_length_minimum()
+    test_scale_brick_length_middle()
+    test_scale_brick_length_maximum()
+    test_scale_brick_length_clamps_below_range()
+    test_scale_brick_length_clamps_above_range()
+
+    test_two_separate_boxes_do_not_collide()
+    test_two_overlapping_boxes_are_detected()
+    test_is_physically_valid_is_inverse()
+    test_compile_failure_is_rejected()
+    test_direct_parent_child_contact_is_ignored()
+
+    test_real_short_ariel_robot_is_valid()
+    test_real_long_straight_robot_is_valid()
 
     print()
     print("=" * 70)
     print(
-        "PASSED: FULL CPPN VARIABLE-LENGTH "
-        "EVOLUTION PIPELINE WORKS."
+        "PASSED: VARIABLE-LENGTH AND "
+        "COLLISION VALIDATION TESTS"
     )
     print("=" * 70)
