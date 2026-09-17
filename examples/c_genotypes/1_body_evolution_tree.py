@@ -48,6 +48,7 @@ from ariel.ec import (
 from ariel.ec.genotypes.tree.operators import (
     _prune_invalid_edges,
     crossover_subtree,
+    mutate_brick_length,
     mutate_hoist,
     mutate_replace_node,
     mutate_shrink,
@@ -247,39 +248,69 @@ class MorphologyEvolution:
 
         # Choose mutation type (standard GP mutation operators)
         mutation_type = RNG.choice(
-            ["point", "subtree", "shrink", "hoist"], p=[0.4, 0.4, 0.1, 0.1],
+            ["point", "subtree", "shrink", "hoist"],
+            p=[0.4, 0.4, 0.1, 0.1],
         )
 
         if mutation_type == "point":
             # Point mutation: change node type/rotation
             mutate_replace_node(new)
+
         elif mutation_type == "subtree":
             # Subtree mutation: replace subtree with new random tree
-            mutate_subtree_replacement(new, max_modules=NUM_MODULES)
+            mutate_subtree_replacement(
+                new,
+                max_modules=NUM_MODULES,
+            )
+
         elif mutation_type == "shrink":
             # Shrink mutation: replace node+subtree with single leaf
             mutate_shrink(new)
+
         elif mutation_type == "hoist":
             # Hoist mutation: promote child to replace parent
             mutate_hoist(new)
 
+        # Additional brick length mutation (20% chance)
+        if RNG.random() < 0.2:
+            mutate_brick_length(new)
+
         # Additional rotation mutation (20% chance)
         if RNG.random() < 0.2:
-            noncore = [nid for nid in new.nodes if nid != IDX_OF_CORE]
+            noncore = [
+                nid
+                for nid in new.nodes
+                if nid != IDX_OF_CORE
+            ]
+
             if noncore:
                 nid = random.choice(noncore)
+
                 # choose a new rotation allowed for its type
-                mtype = ModuleType[new.nodes[nid]["type"]]
-                rots = [r.name for r in ALLOWED_ROTATIONS[mtype]]
+                mtype = ModuleType[
+                    new.nodes[nid]["type"]
+                ]
+
+                rots = [
+                    r.name
+                    for r in ALLOWED_ROTATIONS[mtype]
+                ]
+
                 if rots:
-                    new.nodes[nid]["rotation"] = random.choice(rots)
+                    new.nodes[nid]["rotation"] = random.choice(
+                        rots
+                    )
 
         # prune any invalid edges before returning
         _prune_invalid_edges(new)
-        with contextlib.suppress(ValueError):
-            validate_genome_dict(new.to_dict())
-        return new
 
+        with contextlib.suppress(ValueError):
+            validate_genome_dict(
+                new.to_dict()
+            )
+
+        return new
+    
     def crossover_morphologies(
         self, parent1: Individual, parent2: Individual,
     ) -> TreeGenome:

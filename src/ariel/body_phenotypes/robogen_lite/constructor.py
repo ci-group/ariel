@@ -17,6 +17,11 @@ from ariel.body_phenotypes.robogen_lite.config import (
 from ariel.body_phenotypes.robogen_lite.modules.brick import BrickModule
 from ariel.body_phenotypes.robogen_lite.modules.core import CoreModule
 from ariel.body_phenotypes.robogen_lite.modules.hinge import HingeModule
+from ariel.parameters.ariel_modules import ArielModulesConfig
+
+# Global functions
+ariel_modules_config = ArielModulesConfig()
+
 
 # Type checking
 if TYPE_CHECKING:
@@ -60,7 +65,13 @@ def construct_mjspec_from_graph(graph: DiGraph[Any]) -> CoreModule:
             case ModuleType.HINGE.name:
                 module = HingeModule(index=node)
             case ModuleType.BRICK.name:
-                module = BrickModule(index=node)
+                module = BrickModule(
+                    index=node,
+                    length=graph.nodes[node].get(
+                        "length",
+                        ariel_modules_config.BRICK_LENGTH_DEFAULT,
+                    ),
+                )
             case ModuleType.NONE.name:
                 module = None
             case _:

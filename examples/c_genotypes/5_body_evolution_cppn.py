@@ -70,7 +70,7 @@ SPAWN_POSITION = (-0.8, 0.0, 0.1)
 T = NUM_OF_TYPES_OF_MODULES
 R = NUM_OF_ROTATIONS
 NUM_CPPN_INPUTS = 6
-NUM_CPPN_OUTPUTS = 1 + T + R
+NUM_CPPN_OUTPUTS = 1 + T + R + 1
 
 # Id manager for mutations
 id_manager = IdManager(node_start=NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS - 1,

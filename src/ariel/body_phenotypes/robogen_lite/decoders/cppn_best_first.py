@@ -7,19 +7,51 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ALLOWED_FACES,
     ALLOWED_ROTATIONS,
     IDX_OF_CORE,
+    NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
     ModuleFaces,
     ModuleRotationsIdx,
     ModuleType,
 )
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
+from ariel.parameters.ariel_modules import ArielModulesConfig
+
 
 console = Console()
+ariel_modules_config = ArielModulesConfig()
 
 
 def softmax(raw_scores: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
     e_x = np.exp(raw_scores - np.max(raw_scores))
     return e_x / e_x.sum()
+
+
+def scale_brick_length(raw_length_output: float) -> float:
+    """Scale a CPPN output to the valid brick length range.
+
+    Parameters
+    ----------
+    raw_length_output
+        Raw CPPN output value.
+
+    Returns
+    -------
+    float
+        Brick length in meters, constrained to the configured range.
+    """
+    normalized = (
+        np.tanh(raw_length_output)
+        + 1.0
+    ) / 2.0
+
+    return (
+        ariel_modules_config.BRICK_LENGTH_MIN
+        + normalized
+        * (
+            ariel_modules_config.BRICK_LENGTH_MAX
+            - ariel_modules_config.BRICK_LENGTH_MIN
+        )
+    )
 
 
 class MorphologyDecoderBestFirst:
@@ -37,8 +69,13 @@ class MorphologyDecoderBestFirst:
             ModuleFaces.LEFT: (0, 0, -1),
         }
 
-    def _get_child_coords(self, parent_pos: tuple, face: ModuleFaces) -> tuple:
+    def _get_child_coords(
+        self,
+        parent_pos: tuple,
+        face: ModuleFaces,
+    ) -> tuple:
         delta = self.face_deltas[face]
+
         return (
             parent_pos[0] + delta[0],
             parent_pos[1] + delta[1],
@@ -56,10 +93,15 @@ class MorphologyDecoderBestFirst:
             ModuleType.CORE,
             ModuleRotationsIdx.DEG_0,
         )
+
         robot_graph.add_node(
-            core_id, type=core_type.name, rotation=core_rot.name
+            core_id,
+            type=core_type.name,
+            rotation=core_rot.name,
         )
+
         occupied_coords[core_pos] = core_id
+
         module_data[core_id] = {
             "pos": core_pos,
             "type": core_type,
@@ -78,43 +120,98 @@ class MorphologyDecoderBestFirst:
             for parent_id in frontier:
                 parent_pos = module_data[parent_id]["pos"]
                 parent_type = module_data[parent_id]["type"]
+
                 for face in ModuleFaces:
                     if face not in ALLOWED_FACES[parent_type]:
                         continue
 
-                    child_pos = self._get_child_coords(parent_pos, face)
+                    child_pos = self._get_child_coords(
+                        parent_pos,
+                        face,
+                    )
 
                     if child_pos in occupied_coords:
                         continue
 
-                    cppn_inputs = list(parent_pos) + list(child_pos)
-                    raw_outputs = self.cppn_genome.activate(cppn_inputs)
+                    cppn_inputs = (
+                        list(parent_pos)
+                        + list(child_pos)
+                    )
 
+                    raw_outputs = self.cppn_genome.activate(
+                        cppn_inputs
+                    )
+
+                    # CPPN output layout:
+                    # 0                              -> connection score
+                    # 1 ... T                        -> module type scores
+                    # 1 + T ... 1 + T + R - 1      -> rotation scores
+                    # final output                   -> brick length
                     conn_score = raw_outputs[0]
-                    type_scores = np.array(
-                        raw_outputs[1 : 1 + NUM_OF_TYPES_OF_MODULES]
-                    )
-                    rot_scores = np.array(
-                        raw_outputs[1 + NUM_OF_TYPES_OF_MODULES :]
+
+                    type_start = 1
+                    type_end = (
+                        type_start
+                        + NUM_OF_TYPES_OF_MODULES
                     )
 
-                    type_probs = softmax(type_scores)
+                    rot_start = type_end
+                    rot_end = (
+                        rot_start
+                        + NUM_OF_ROTATIONS
+                    )
+
+                    type_scores = np.array(
+                        raw_outputs[
+                            type_start:type_end
+                        ]
+                    )
+
+                    rot_scores = np.array(
+                        raw_outputs[
+                            rot_start:rot_end
+                        ]
+                    )
+
+                    raw_length_output = raw_outputs[
+                        rot_end
+                    ]
+
+                    type_probs = softmax(
+                        type_scores
+                    )
 
                     type_probs[
                         ModuleType.NONE.value
                     ] = -1.0  # Ignore NONE if that's the output
+
                     type_probs[
                         ModuleType.CORE.value
                     ] = -1.0  # Ignore CORE if that's the output
 
-                    child_type = ModuleType(np.argmax(type_probs))
-                    child_rot = ModuleRotationsIdx(
-                        np.argmax(softmax(rot_scores))
+                    child_type = ModuleType(
+                        np.argmax(
+                            type_probs
+                        )
                     )
+
+                    child_rot = ModuleRotationsIdx(
+                        np.argmax(
+                            softmax(rot_scores)
+                        )
+                    )
+
+                    child_length = None
+
+                    if child_type == ModuleType.BRICK:
+                        child_length = scale_brick_length(
+                            raw_length_output
+                        )
 
                     if (
                         face in ALLOWED_FACES[child_type]
-                        and child_rot in ALLOWED_ROTATIONS[child_type]
+                        and child_rot
+                        in ALLOWED_ROTATIONS[child_type]
                     ):
                         potential_connections.append({
                             "score": conn_score,
@@ -122,37 +219,73 @@ class MorphologyDecoderBestFirst:
                             "child_pos": child_pos,
                             "child_type": child_type,
                             "child_rot": child_rot,
+                            "child_length": child_length,
                             "face": face,
                         })
 
             if not potential_connections:
                 console.log(
-                    "[yellow]Decoder stalled: No valid connections found anywhere on the robot.[/yellow]"
+                    "[yellow]Decoder stalled: "
+                    "No valid connections found anywhere "
+                    "on the robot.[/yellow]"
                 )
                 break
 
-            best_conn = max(potential_connections, key=lambda x: x["score"])
+            best_conn = max(
+                potential_connections,
+                key=lambda x: x["score"],
+            )
 
             child_id = next_module_id
+
+            node_data = {
+                "type": best_conn["child_type"].name,
+                "rotation": best_conn["child_rot"].name,
+            }
+
+            if (
+                best_conn["child_type"]
+                == ModuleType.BRICK
+            ):
+                node_data["length"] = best_conn[
+                    "child_length"
+                ]
+
             robot_graph.add_node(
                 child_id,
-                type=best_conn["child_type"].name,
-                rotation=best_conn["child_rot"].name,
-            )
-            robot_graph.add_edge(
-                best_conn["parent_id"], child_id, face=best_conn["face"].name
+                **node_data,
             )
 
-            occupied_coords[best_conn["child_pos"]] = child_id
+            robot_graph.add_edge(
+                best_conn["parent_id"],
+                child_id,
+                face=best_conn["face"].name,
+            )
+
+            occupied_coords[
+                best_conn["child_pos"]
+            ] = child_id
+
             module_data[child_id] = {
                 "pos": best_conn["child_pos"],
                 "type": best_conn["child_type"],
                 "rot": best_conn["child_rot"],
             }
 
+            if (
+                best_conn["child_type"]
+                == ModuleType.BRICK
+            ):
+                module_data[child_id]["length"] = (
+                    best_conn["child_length"]
+                )
+
             # I no longer remove the parent, I just add the new child.
             # (I think this makes snakes less likely)
-            frontier.append(child_id)
+            frontier.append(
+                child_id
+            )
+
             next_module_id += 1
 
         return robot_graph
