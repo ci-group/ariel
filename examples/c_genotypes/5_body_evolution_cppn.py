@@ -26,7 +26,6 @@ from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
-from ariel.body_phenotypes.robogen_lite.decoders.score_cube import MorphologyDecoderCubePruning
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
@@ -99,7 +98,6 @@ def visualize_genome(cppn_genome: Genome) -> None:
     """Decode a CPPN genome to a graph, build an MJCF spec and launch MuJoCo viewer."""
     try:
         decoder = MorphologyDecoderBestFirst(cppn_genome=cppn_genome, max_modules=NUM_MODULES)
-        # decoder = MorphologyDecoderCubePruning(cppn_genome=cppn_genome, max_modules=NUM_MODULES)
         graph = decoder.decode()
         if graph.number_of_nodes() == 0:
             console.log("[red]Cannot visualize empty decoded graph[/red]")

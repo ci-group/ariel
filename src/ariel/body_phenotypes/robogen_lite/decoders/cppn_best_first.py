@@ -32,17 +32,18 @@ def scale_brick_length(raw_length_output: float) -> float:
     Parameters
     ----------
     raw_length_output
-        Raw CPPN output value.
+        CPPN output value in the range [0, 1].
 
     Returns
     -------
     float
-        Brick length in meters, constrained to the configured range.
+        Brick length in meters.
     """
-    normalized = (
-        np.tanh(raw_length_output)
-        + 1.0
-    ) / 2.0
+    normalized = np.clip(
+        raw_length_output,
+        0.0,
+        1.0,
+    )
 
     return (
         ariel_modules_config.BRICK_LENGTH_MIN
@@ -52,7 +53,6 @@ def scale_brick_length(raw_length_output: float) -> float:
             - ariel_modules_config.BRICK_LENGTH_MIN
         )
     )
-
 
 class MorphologyDecoderBestFirst:
     """Decodes a CPPN using a true greedy, best-first search strategy."""

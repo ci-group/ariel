@@ -86,7 +86,7 @@ TARGET_POSITION = np.array([2.0, 0.0, 0.5])
 # CPPN Config
 T, R = NUM_OF_TYPES_OF_MODULES, NUM_OF_ROTATIONS
 NUM_CPPN_INPUTS = 6
-NUM_CPPN_OUTPUTS = 1 + T + R
+NUM_CPPN_OUTPUTS = 1 + T + R + 1
 
 # Type Aliases
 type ViewerTypes = Literal["launcher", "video", "simple"]
