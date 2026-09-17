@@ -30,6 +30,9 @@ from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
 )
+from ariel.body_phenotypes.robogen_lite.collision_validation import (
+    is_physically_valid,
+)
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
 from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
@@ -156,7 +159,19 @@ class CPPNEvolution:
         for ind in track(to_eval, description="Evaluating..."):
             cppn = Genome.from_dict(ind.genotype["cppn"])
             graph = self.decode_to_graph(cppn)
-            score = morpho_score_from_graph(graph)
+
+            if not is_physically_valid(
+                graph
+            ):
+                ind.fitness = float(
+                    "inf"
+                )
+                ind.requires_eval = False
+                continue
+
+            score = morpho_score_from_graph(
+                graph
+            )
             # EA expects minimization; store negative score
             ind.fitness = -score if not np.isnan(score) else float("inf")
             ind.requires_eval = False
