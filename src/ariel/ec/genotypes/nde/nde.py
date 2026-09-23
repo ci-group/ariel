@@ -60,7 +60,8 @@ class NeuralDevelopmentalEncoding(nn.Module):
         Neural developmental encoder.
 
         Given a genotype (list of chromosomes), output the phenotype
-        (probability matrices corresponding to module types, connections, rotations).
+        (probability matrices corresponding to module types, connections, rotations,
+        and optionally variable brick lengths).
 
         Parameters
         ----------
@@ -96,15 +97,25 @@ class NeuralDevelopmentalEncoding(nn.Module):
             number_of_modules * NUM_OF_ROTATIONS,
         )
 
+        # One normalized [0, 1] length value per possible module.
+        # The decoder maps this value into the configured physical brick range.
+        self.length_p_shape = (number_of_modules,)
+        self.length_p_out = nn.Linear(
+            128,
+            number_of_modules,
+        )
+
         self.output_layers = [
             self.type_p_out,
             self.conn_p_out,
             self.rot_p_out,
+            self.length_p_out,
         ]
         self.output_shapes = [
             self.type_p_shape,
             self.conn_p_shape,
             self.rot_p_shape,
+            self.length_p_shape,
         ]
         # ------------------------------------------------------------------- #
 
@@ -126,13 +137,22 @@ class NeuralDevelopmentalEncoding(nn.Module):
         Parameters
         ----------
         genotype : list[npt.NDArray[np.float32]]
-            List of chromosomes (numpy arrays).
+            List of chromosomes (numpy arrays). The first three chromosomes
+            encode type, connection, and rotation probabilities. An optional
+            fourth chromosome encodes per-module variable brick lengths.
 
         Returns
         -------
         list[npt.NDArray[np.float32]]
             List of phenotype outputs (numpy arrays).
         """
+        if len(genotype) > len(self.output_layers):
+            msg = (
+                f"Expected at most {len(self.output_layers)} chromosomes, "
+                f"got {len(genotype)}"
+            )
+            raise ValueError(msg)
+
         outputs: list[npt.NDArray[np.float32]] = []
         for idx, chromosome in enumerate(genotype):
             with torch.no_grad():  # double safety
@@ -167,11 +187,13 @@ if __name__ == "__main__":
     type_p_genes = RNG.random(genotype_size)
     conn_p_genes = RNG.random(genotype_size)
     rot_p_genes = RNG.random(genotype_size)
+    length_p_genes = RNG.random(genotype_size)
 
     genotype = [
         type_p_genes,
         conn_p_genes,
         rot_p_genes,
+        length_p_genes,
     ]
 
     outputs = nde.forward(genotype)

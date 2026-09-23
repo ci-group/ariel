@@ -29,9 +29,22 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleRotationsIdx,
     ModuleType,
 )
+from ariel.parameters.ariel_modules import ArielModulesConfig
 
 # Third-party libraries
 from ariel.body_phenotypes.robogen_lite.decoders._blueprint import Blueprint
+
+
+ariel_modules_config = ArielModulesConfig()
+
+
+def scale_brick_length(raw_length_output: float) -> float:
+    """Scale a normalized NDE output to the configured brick length range."""
+    normalized = float(np.clip(raw_length_output, 0.0, 1.0))
+    return ariel_modules_config.BRICK_LENGTH_MIN + normalized * (
+        ariel_modules_config.BRICK_LENGTH_MAX
+        - ariel_modules_config.BRICK_LENGTH_MIN
+    )
 
 
 class HighProbabilityDecoder(Blueprint):
@@ -42,6 +55,7 @@ class HighProbabilityDecoder(Blueprint):
         type_probability_space: npt.NDArray[np.float32],
         connection_probability_space: npt.NDArray[np.float32],
         rotation_probability_space: npt.NDArray[np.float32],
+        length_probability_space: npt.NDArray[np.float32] | None = None,
     ) -> DiGraph[Any]:
         """
         Convert probability matrices to a graph.
@@ -54,6 +68,9 @@ class HighProbabilityDecoder(Blueprint):
             Probability space for connections between modules.
         rotation_probability_space
             Probability space for module rotations.
+        length_probability_space
+            Optional normalized per-module brick length values. Values are
+            mapped from [0, 1] into the configured physical brick length range.
 
         Returns
         -------
@@ -68,6 +85,21 @@ class HighProbabilityDecoder(Blueprint):
         self.conn_p_space = connection_probability_space.copy()
         self.rot_p_space = rotation_probability_space.copy()
         self.type_p_space = type_probability_space.copy()
+        self.length_p_space = (
+            None
+            if length_probability_space is None
+            else length_probability_space.copy()
+        )
+
+        if (
+            self.length_p_space is not None
+            and self.length_p_space.shape != (self.num_modules,)
+        ):
+            msg = (
+                "Length probability space must have shape "
+                f"({self.num_modules},), got {self.length_p_space.shape}"
+            )
+            raise ValueError(msg)
 
         # Apply constraints
         self.apply_connection_constraints()
@@ -80,6 +112,15 @@ class HighProbabilityDecoder(Blueprint):
 
         # Create the final graph from the simple graph
         self.generate_networkx_graph()
+
+        # Add variable physical lengths only to decoded brick modules.
+        if self.length_p_space is not None:
+            for node in self.nodes:
+                if self.type_dict[node] == ModuleType.BRICK:
+                    self.graph.nodes[node]["length"] = scale_brick_length(
+                        float(self.length_p_space[node]),
+                    )
+
         return self.graph
 
     def decode_probability_to_graph(

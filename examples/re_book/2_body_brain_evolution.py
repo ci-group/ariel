@@ -14,8 +14,9 @@ import random
 from pathlib import Path
 from typing import Literal
 
-# Third-party libraries
 import mujoco
+
+# Third-party libraries
 import numpy as np
 import torch
 from mujoco import viewer
@@ -42,13 +43,7 @@ from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
-from ariel.ec import (
-    EA,
-    EAOperation,
-    EASettings,
-    Individual,
-    Population,
-)
+from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.parameters.ariel_modules import ArielModulesConfig
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.controllers.simple_cpg import (
@@ -62,11 +57,9 @@ from ariel.utils.renderers import video_renderer
 from ariel.utils.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
 
-
 # Initialize rich console
 install()
 console = Console()
-
 
 # ============================================================================ #
 #                               CONFIGURATION                                  #
@@ -74,98 +67,48 @@ console = Console()
 
 ariel_modules_config = ArielModulesConfig()
 
-
-parser = argparse.ArgumentParser(
-    description="Dual Evolution: Body + Brain",
-)
-
+parser = argparse.ArgumentParser(description="Dual Evolution: Body + Brain")
 parser.add_argument(
-    "--budget",
-    type=int,
-    default=80,
-    help="Number of generations",
+    "--budget", type=int, default=80, help="Number of generations",
 )
-
-parser.add_argument(
-    "--pop",
-    type=int,
-    default=80,
-    help="Population size",
-)
-
-parser.add_argument(
-    "--dur",
-    type=int,
-    default=30,
-    help="Simulation duration",
-)
-
-parser.add_argument(
-    "--seed",
-    type=int,
-    default=42,
-    help="Random seed",
-)
-
+parser.add_argument("--pop", type=int, default=80, help="Population size")
+parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
+parser.add_argument("--seed", type=int, default=42, help="Random seed")
 parser.add_argument(
     "--bone-mode",
-    choices=[
-        "fixed",
-        "evolvable",
-    ],
+    choices=["fixed", "evolvable"],
     default="evolvable",
-    help=(
-        "Use fixed-length bricks or "
-        "evolvable variable-length bricks"
-    ),
+    help="Use fixed-length bricks or evolvable variable-length bricks",
 )
-
 parser.add_argument(
     "--fixed-length",
     type=float,
     default=ariel_modules_config.BRICK_LENGTH_DEFAULT,
-    help=(
-        "Brick length in meters when "
-        "--bone-mode=fixed"
-    ),
+    help="Brick length in meters when --bone-mode=fixed",
 )
-
 parser.add_argument(
     "--max-modules",
     type=int,
     default=10,
     help="Maximum number of modules",
 )
-
 parser.add_argument(
     "--visualize",
     action=argparse.BooleanOptionalAction,
     default=True,
     help="Launch MuJoCo viewer for best individual",
 )
-
 args = parser.parse_args()
 
-
-# ============================================================================ #
-#                                  CONSTANTS                                   #
-# ============================================================================ #
-
+# Constants
 DURATION: int = args.dur
 POP_SIZE: int = args.pop
 BUDGET: int = args.budget
 NUM_MODULES: int = args.max_modules
-
-CTRL_GENOME_SIZE: int = (
-    NUM_MODULES
-    * 5
-)
-
+CTRL_GENOME_SIZE: int = NUM_MODULES * 5
 
 BONE_MODE = args.bone_mode
 FIXED_BRICK_LENGTH = args.fixed_length
-
-
 if not (
     ariel_modules_config.BRICK_LENGTH_MIN
     <= FIXED_BRICK_LENGTH
@@ -174,118 +117,34 @@ if not (
     parser.error(
         "--fixed-length must be between "
         f"{ariel_modules_config.BRICK_LENGTH_MIN} and "
-        f"{ariel_modules_config.BRICK_LENGTH_MAX} meters"
+        f"{ariel_modules_config.BRICK_LENGTH_MAX} meters",
     )
 
+SPAWN_POSITION = (-0.8, 0.0, 0.1)
+TARGET_POSITION = np.array([2.0, 0.0, 0.5])
 
-SPAWN_POSITION = (
-    -0.8,
-    0.0,
-    0.1,
-)
-
-TARGET_POSITION = np.array([
-    2.0,
-    0.0,
-    0.5,
-])
-
-
-# --------------------------------------------------------------------------- #
-# CPPN CONFIGURATION
-# --------------------------------------------------------------------------- #
-
-T = NUM_OF_TYPES_OF_MODULES
-R = NUM_OF_ROTATIONS
-
+# CPPN Config
+T, R = NUM_OF_TYPES_OF_MODULES, NUM_OF_ROTATIONS
 NUM_CPPN_INPUTS = 6
+NUM_CPPN_OUTPUTS = 1 + T + R + 1
 
-# CPPN outputs:
-#
-# 0
-#   Connection score
-#
-# next T
-#   Module type scores
-#
-# next R
-#   Rotation scores
-#
-# final output
-#   Continuous brick length
-#
-NUM_CPPN_OUTPUTS = (
-    1
-    + T
-    + R
-    + 1
-)
+# Type Aliases
+type ViewerTypes = Literal["launcher", "video", "simple"]
 
-
-# --------------------------------------------------------------------------- #
-# TYPE ALIASES
-# --------------------------------------------------------------------------- #
-
-type ViewerTypes = Literal[
-    "launcher",
-    "video",
-    "simple",
-]
-
-
-# --------------------------------------------------------------------------- #
-# DETERMINISM
-# --------------------------------------------------------------------------- #
-
+# Determinism
 SEED = args.seed
+RNG = np.random.default_rng(SEED)
+torch.manual_seed(SEED)
+# reproduction() draws parents with random.sample / random.choice, so the
+# stdlib RNG has to be seeded too or runs are not reproducible.
+random.seed(SEED)
 
-RNG = np.random.default_rng(
-    SEED
-)
-
-torch.manual_seed(
-    SEED
-)
-
-random.seed(
-    SEED
-)
-
-
-# --------------------------------------------------------------------------- #
-# DATA SETUP
-# --------------------------------------------------------------------------- #
-
-SCRIPT_NAME = Path(
-    __file__
-).stem
-
+SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
+DATA = CWD / "__data__" / SCRIPT_NAME / f"{BONE_MODE}_seed_{SEED}"
+DATA.mkdir(exist_ok=True, parents=True)
 
-DATA = (
-    CWD
-    / "__data__"
-    / SCRIPT_NAME
-    / f"{BONE_MODE}_seed_{SEED}"
-)
-
-DATA.mkdir(
-    exist_ok=True,
-    parents=True,
-)
-
-
-LOG_FILE = (
-    DATA
-    / "variable_bones.csv"
-)
-
-
-# Remove results from an earlier run with
-# the same mode and seed.
-#
-# This prevents CSV rows from multiple smoke
-# tests being mixed together.
+LOG_FILE = DATA / "variable_bones.csv"
 if LOG_FILE.exists():
     LOG_FILE.unlink()
 
@@ -293,242 +152,97 @@ if LOG_FILE.exists():
 # ============================================================================ #
 #                            EVOLUTION CLASS                                   #
 # ============================================================================ #
-
-
 class Evolution:
-    def __init__(
-        self,
-    ) -> None:
+    def __init__(self) -> None:
         self.id_manager = IdManager(
-            node_start=(
-                NUM_CPPN_INPUTS
-                + NUM_CPPN_OUTPUTS
-                - 1
-            ),
-            innov_start=(
-                NUM_CPPN_INPUTS
-                * NUM_CPPN_OUTPUTS
-            )
-            - 1,
+            node_start=NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS - 1,
+            innov_start=(NUM_CPPN_INPUTS * NUM_CPPN_OUTPUTS) - 1,
         )
 
         self.config = EASettings(
-            is_maximisation=False,
+            is_maximisation=False,  # Minimize Distance to Target
             num_steps=BUDGET,
             target_population_size=POP_SIZE,
             output_folder=DATA,
             db_file_name="database.db",
         )
 
-        # 0 = initial population.
         self.evaluation_round = 0
-
-        # Used when Individual.id has not yet
-        # been assigned by the EA/database.
         self.evaluation_counter = 0
 
-
-    # ======================================================================== #
-    #                    MORPHOLOGY / BONE HELPERS                             #
-    # ======================================================================== #
-
-    def apply_bone_mode(
-        self,
-        graph,
-    ) -> None:
-        """Apply the selected variable-bone experiment condition.
-
-        In evolvable mode, CPPN-generated brick lengths remain unchanged.
-
-        In fixed mode, all brick lengths are overwritten with
-        FIXED_BRICK_LENGTH.
-
-        The CPPN still contains the length output in both cases so that
-        fixed and evolvable experiments use the same network architecture.
-        """
-        if (
-            BONE_MODE
-            != "fixed"
-        ):
+    # ------------------------------------------------------------------------ #
+    #                          HELPER METHODS                                  #
+    # ------------------------------------------------------------------------ #
+    def apply_bone_mode(self, graph) -> None:
+        """Apply the selected fixed/evolvable brick-length condition."""
+        if BONE_MODE != "fixed":
             return
 
-        for _, node_data in graph.nodes(
-            data=True
-        ):
-            if (
-                node_data["type"]
-                == ModuleType.BRICK.name
-            ):
-                node_data["length"] = (
-                    FIXED_BRICK_LENGTH
-                )
+        for _, node_data in graph.nodes(data=True):
+            if node_data["type"] == ModuleType.BRICK.name:
+                node_data["length"] = FIXED_BRICK_LENGTH
 
-
-    def decode_morphology_graph(
-        self,
-        genome_data: dict | Genome,
-    ):
-        """Decode CPPN morphology and check physical validity."""
+    def decode_morphology_graph(self, genome_data: dict | Genome):
+        """Decode a CPPN into a physically valid morphology graph."""
         genome = (
-            Genome.from_dict(
-                genome_data
-            )
-            if isinstance(
-                genome_data,
-                dict,
-            )
+            Genome.from_dict(genome_data)
+            if isinstance(genome_data, dict)
             else genome_data
         )
 
         try:
-            # Ensure the CPPN can be evaluated.
-            genome.get_node_ordering()
-
-            decoder = (
-                MorphologyDecoderBestFirst(
-                    cppn_genome=genome,
-                    max_modules=NUM_MODULES,
-                )
+            genome.get_node_ordering()  # Topological check (deep stuff)
+            decoder = MorphologyDecoderBestFirst(
+                cppn_genome=genome, max_modules=NUM_MODULES,
             )
+            robot_graph = decoder.decode()
 
-            robot_graph = (
-                decoder.decode()
-            )
-
-            if (
-                robot_graph.number_of_nodes()
-                == 0
-            ):
+            if robot_graph.number_of_nodes() == 0:
                 return None
 
-            # Apply fixed/evolvable experiment.
-            self.apply_bone_mode(
-                robot_graph
-            )
-
-            # Reject geometric self-intersections.
-            if not is_physically_valid(
-                robot_graph
-            ):
+            self.apply_bone_mode(robot_graph)
+            if not is_physically_valid(robot_graph):
                 return None
 
             return robot_graph
-
         except Exception:
             return None
 
-
-    def get_morphology_statistics(
-        self,
-        graph,
-    ) -> dict:
+    def get_morphology_statistics(self, graph) -> dict:
         """Calculate morphology and variable-bone statistics."""
         brick_lengths = [
-            float(
-                node_data[
-                    "length"
-                ]
-            )
-            for _, node_data
-            in graph.nodes(
-                data=True
-            )
-            if (
-                node_data["type"]
-                == ModuleType.BRICK.name
-                and "length"
-                in node_data
-            )
+            float(node_data["length"])
+            for _, node_data in graph.nodes(data=True)
+            if node_data["type"] == ModuleType.BRICK.name
+            and "length" in node_data
         ]
-
-
         num_hinges = sum(
             1
-            for _, node_data
-            in graph.nodes(
-                data=True
-            )
-            if (
-                node_data["type"]
-                == ModuleType.HINGE.name
-            )
+            for _, node_data in graph.nodes(data=True)
+            if node_data["type"] == ModuleType.HINGE.name
         )
 
-
         if brick_lengths:
-            lengths = np.asarray(
-                brick_lengths,
-                dtype=float,
-            )
-
-            mean_length = float(
-                np.mean(
-                    lengths
-                )
-            )
-
-            min_length = float(
-                np.min(
-                    lengths
-                )
-            )
-
-            max_length = float(
-                np.max(
-                    lengths
-                )
-            )
-
-            std_length = float(
-                np.std(
-                    lengths
-                )
-            )
-
+            lengths = np.asarray(brick_lengths, dtype=float)
+            mean_length = float(np.mean(lengths))
+            min_length = float(np.min(lengths))
+            max_length = float(np.max(lengths))
+            std_length = float(np.std(lengths))
         else:
-            mean_length = float(
-                "nan"
-            )
-
-            min_length = float(
-                "nan"
-            )
-
-            max_length = float(
-                "nan"
-            )
-
-            std_length = float(
-                "nan"
-            )
-
+            mean_length = float("nan")
+            min_length = float("nan")
+            max_length = float("nan")
+            std_length = float("nan")
 
         return {
-            "num_modules": (
-                graph.number_of_nodes()
-            ),
-            "num_bricks": (
-                len(
-                    brick_lengths
-                )
-            ),
-            "num_hinges": (
-                num_hinges
-            ),
-            "mean_length": (
-                mean_length
-            ),
-            "min_length": (
-                min_length
-            ),
-            "max_length": (
-                max_length
-            ),
-            "std_length": (
-                std_length
-            ),
+            "num_modules": graph.number_of_nodes(),
+            "num_bricks": len(brick_lengths),
+            "num_hinges": num_hinges,
+            "mean_length": mean_length,
+            "min_length": min_length,
+            "max_length": max_length,
+            "std_length": std_length,
         }
-
 
     def log_evaluation(
         self,
@@ -538,37 +252,13 @@ class Evolution:
         fitness: float,
     ) -> None:
         """Log locomotion fitness and morphology statistics."""
-        stats = (
-            self.get_morphology_statistics(
-                graph
-            )
-        )
-
-
-        # Individual IDs may not yet have
-        # been allocated by the EA.
-        individual_id = getattr(
-            ind,
-            "id",
-            None,
-        )
-
+        stats = self.get_morphology_statistics(graph)
+        individual_id = getattr(ind, "id", None)
         if individual_id is None:
-            individual_id = (
-                self.evaluation_counter
-            )
+            individual_id = self.evaluation_counter
 
-
-        file_exists = (
-            LOG_FILE.exists()
-        )
-
-
-        with open(
-            LOG_FILE,
-            "a",
-            newline="",
-        ) as file:
+        file_exists = LOG_FILE.exists()
+        with open(LOG_FILE, "a", newline="") as file:
             writer = csv.DictWriter(
                 file,
                 fieldnames=[
@@ -588,456 +278,145 @@ class Evolution:
                 ],
             )
 
-
             if not file_exists:
                 writer.writeheader()
 
-
             writer.writerow({
-                "generation": (
-                    generation
-                ),
-                "individual_id": (
-                    individual_id
-                ),
-                "seed": (
-                    SEED
-                ),
-                "fitness": (
-                    fitness
-                ),
-                "bone_mode": (
-                    BONE_MODE
-                ),
+                "generation": generation,
+                "individual_id": individual_id,
+                "seed": SEED,
+                "fitness": fitness,
+                "bone_mode": BONE_MODE,
                 "fixed_length_mm": (
-                    FIXED_BRICK_LENGTH
-                    * 1000
-                    if (
-                        BONE_MODE
-                        == "fixed"
-                    )
-                    else ""
+                    FIXED_BRICK_LENGTH * 1000 if BONE_MODE == "fixed" else ""
                 ),
-                "num_modules": (
-                    stats[
-                        "num_modules"
-                    ]
-                ),
-                "num_bricks": (
-                    stats[
-                        "num_bricks"
-                    ]
-                ),
-                "num_hinges": (
-                    stats[
-                        "num_hinges"
-                    ]
-                ),
-                "mean_length_mm": (
-                    stats[
-                        "mean_length"
-                    ]
-                    * 1000
-                ),
-                "min_length_mm": (
-                    stats[
-                        "min_length"
-                    ]
-                    * 1000
-                ),
-                "max_length_mm": (
-                    stats[
-                        "max_length"
-                    ]
-                    * 1000
-                ),
-                "std_length_mm": (
-                    stats[
-                        "std_length"
-                    ]
-                    * 1000
-                ),
+                "num_modules": stats["num_modules"],
+                "num_bricks": stats["num_bricks"],
+                "num_hinges": stats["num_hinges"],
+                "mean_length_mm": stats["mean_length"] * 1000,
+                "min_length_mm": stats["min_length"] * 1000,
+                "max_length_mm": stats["max_length"] * 1000,
+                "std_length_mm": stats["std_length"] * 1000,
             })
-
 
         self.evaluation_counter += 1
 
-
-    # ======================================================================== #
-    #                          BODY / BRAIN HELPERS                             #
-    # ======================================================================== #
-
     def map_genotype_to_body(
-        self,
-        genome_data: dict | Genome,
+        self, genome_data: dict | Genome,
     ) -> mujoco.MjSpec | None:
-        """Decode CPPN into a physically valid MuJoCo body specification."""
-        robot_graph = (
-            self.decode_morphology_graph(
-                genome_data
-            )
-        )
-
+        """Decodes CPPN into a MuJoCo Body Spec."""
+        robot_graph = self.decode_morphology_graph(genome_data)
         if robot_graph is None:
             return None
 
-
         try:
-            return (
-                construct_mjspec_from_graph(
-                    robot_graph
-                ).spec
-            )
-
+            # Note: construct_mjspec_from_graph returns a wrapper, access .spec
+            return construct_mjspec_from_graph(robot_graph).spec
         except Exception:
             return None
 
-
     def map_genotype_to_brain(
-        self,
-        cpg: SimpleCPG,
-        full_genome: list[float],
+        self, cpg: SimpleCPG, full_genome: list[float],
     ) -> None:
-        """Decode float vector into CPG parameters."""
-        n = cpg.phase.shape[
-            0
-        ]
+        """Decodes Float Vector into CPG Parameters."""
+        n = cpg.phase.shape[0]
+        params = np.array(full_genome)
 
-
-        params = np.array(
-            full_genome
-        )
-
-
-        required_size = (
-            n
-            * 5
-        )
-
-
-        if (
-            required_size
-            > len(params)
-        ):
-            params = np.resize(
-                params,
-                required_size,
-            )
-
+        # Resize logic if body changed size
+        required_size = n * 5
+        if required_size > len(params):
+            params = np.resize(params, required_size)
         else:
-            params = params[
-                :required_size
-            ]
+            params = params[:required_size]
 
-
-        p_phase = params[
-            0 * n : 1 * n
-        ]
-
-        p_w = params[
-            1 * n : 2 * n
-        ]
-
-        p_amp = params[
-            2 * n : 3 * n
-        ]
-
-        p_ha = params[
-            3 * n : 4 * n
-        ]
-
-        p_b = params[
-            4 * n : 5 * n
-        ]
-
+        p_phase = params[0 * n : 1 * n]
+        p_w = params[1 * n : 2 * n]
+        p_amp = params[2 * n : 3 * n]
+        p_ha = params[3 * n : 4 * n]
+        p_b = params[4 * n : 5 * n]
 
         with torch.no_grad():
-            cpg.phase.data.copy_(
-                torch.from_numpy(
-                    p_phase
-                    * np.pi
-                ).float()
-            )
-
-
-            # Frequency:
-            # [0.2, 4.0] Hz
+            cpg.phase.data.copy_(torch.from_numpy(p_phase * np.pi).float())
+            # Frequency: [0.2, 4.0] Hz - Faster movements for quicker walking
             cpg.w.data.copy_(
-                torch.from_numpy(
-                    0.2
-                    + (
-                        3.8
-                        * (
-                            p_w
-                            + 1.0
-                        )
-                        / 2.0
-                    )
-                ).float()
+                torch.from_numpy(0.2 + (3.8 * (p_w + 1.0) / 2.0)).float(),
             )
-
-
-            # Amplitude:
-            # [0.5, 4.0]
+            # Amplitude: [0.5, 4.0] - MUCH stronger motor commands
             cpg.amplitudes.data.copy_(
-                torch.from_numpy(
-                    0.5
-                    + (
-                        3.5
-                        * (
-                            p_amp
-                            + 1.0
-                        )
-                        / 2.0
-                    )
-                ).float()
+                torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float(),
             )
+            cpg.ha.data.copy_(torch.from_numpy(p_ha * 2.0).float())
+            cpg.b.data.copy_(torch.from_numpy(p_b * 0.5).float())
 
-
-            cpg.ha.data.copy_(
-                torch.from_numpy(
-                    p_ha
-                    * 2.0
-                ).float()
-            )
-
-
-            cpg.b.data.copy_(
-                torch.from_numpy(
-                    p_b
-                    * 0.5
-                ).float()
-            )
-
-
-    def get_joint_count(
-        self,
-        genome: Genome,
-    ) -> int:
-        """Return actuator count for a physically valid morphology."""
-
-        robot_graph = (
-            self.decode_morphology_graph(
-                genome
-            )
-        )
-
-        if robot_graph is None:
+    def get_joint_count(self, genome: Genome) -> int:
+        """Checks if the genome produces a body with actuators."""
+        spec = self.map_genotype_to_body(genome)
+        if spec is None:
             return 0
-
         try:
-            robot = (
-                construct_mjspec_from_graph(
-                    robot_graph
-                )
-            )
-
-            model = (
-                robot.spec.compile()
-            )
-
-            return int(
-                model.nu
-            )
-
-        except Exception as e:
-            console.log(
-                "[red]"
-                f"MuJoCo construction failed: "
-                f"{type(e).__name__}: {e}"
-                "[/red]"
-            )
-
+            return spec.compile().nu
+        except:
             return 0
-        
 
-    def mutate_ctrl_vector(
-        self,
-        genome: list[float],
-    ) -> list[float]:
-        """Gaussian mutation for controller vector."""
-        arr = np.array(
-            genome
-        )
-
-
-        mask = (
-            RNG.random(
-                arr.shape
-            )
-            < 0.40
-        )
-
-
-        noise = RNG.normal(
-            0,
-            0.6,
-            arr.shape,
-        )
-
-
-        arr[
-            mask
-        ] += noise[
-            mask
-        ]
-
-
-        return np.clip(
-            arr,
-            -1.0,
-            1.0,
-        ).tolist()
-
+    def mutate_ctrl_vector(self, genome: list[float]) -> list[float]:
+        """Gaussian mutation for brain vector - (very) aggressive to find strong solutions."""
+        arr = np.array(genome)
+        # 40% of genes mutated with larger noise for faster exploration
+        mask = RNG.random(arr.shape) < 0.40
+        noise = RNG.normal(0, 0.6, arr.shape)  # Increased from 0.4 to 0.6
+        arr[mask] += noise[mask]
+        return np.clip(arr, -1.0, 1.0).tolist()
 
     def crossover_ctrl_vectors(
-        self,
-        ctrl1: list[float],
-        ctrl2: list[float],
+        self, ctrl1: list[float], ctrl2: list[float],
     ) -> list[float]:
         """Uniform crossover for controller float vectors."""
-        arr1 = np.array(
-            ctrl1
-        )
-
-        arr2 = np.array(
-            ctrl2
-        )
-
-
-        size = max(
-            len(arr1),
-            len(arr2),
-        )
-
-
-        if (
-            len(arr1)
-            < size
-        ):
-            arr1 = np.resize(
-                arr1,
-                size,
-            )
-
-
-        if (
-            len(arr2)
-            < size
-        ):
-            arr2 = np.resize(
-                arr2,
-                size,
-            )
-
-
-        mask = (
-            RNG.random(
-                size
-            )
-            < 0.5
-        )
-
-
-        child = np.where(
-            mask,
-            arr1,
-            arr2,
-        )
-
-
-        return (
-            child.tolist()
-        )
-
+        arr1 = np.array(ctrl1)
+        arr2 = np.array(ctrl2)
+        # Align sizes in case of mismatch
+        size = max(len(arr1), len(arr2))
+        if len(arr1) < size:
+            arr1 = np.resize(arr1, size)
+        if len(arr2) < size:
+            arr2 = np.resize(arr2, size)
+        # Uniform crossover: take each gene from either parent with 50% probability
+        mask = RNG.random(size) < 0.5
+        child = np.where(mask, arr1, arr2)
+        return child.tolist()
 
     def crossover_morphologies(
-        self,
-        parent1: Individual,
-        parent2: Individual,
+        self, parent1: Individual, parent2: Individual,
     ) -> Genome:
-        """Crossover two CPPN morphologies using NEAT crossover."""
-        morph1 = Genome.from_dict(
-            parent1.genotype[
-                "morph"
-            ]
-        )
+        """Crossover two parent individual morphologies using NEAT crossover."""
+        # Convert dictionaries to Genome objects
+        morph1 = Genome.from_dict(parent1.genotype["morph"])
+        morph2 = Genome.from_dict(parent2.genotype["morph"])
 
-        morph2 = Genome.from_dict(
-            parent2.genotype[
-                "morph"
-            ]
-        )
-
-
+        # Set fitness values so NEAT crossover knows which parent is fitter
         morph1.fitness = (
-            parent1.fitness
-            if (
-                parent1.fitness
-                is not None
-            )
-            else float(
-                "inf"
-            )
+            parent1.fitness if parent1.fitness is not None else float("inf")
         )
-
-
         morph2.fitness = (
-            parent2.fitness
-            if (
-                parent2.fitness
-                is not None
-            )
-            else float(
-                "inf"
-            )
+            parent2.fitness if parent2.fitness is not None else float("inf")
         )
 
+        # Use the proper NEAT crossover
+        # This handles weights AND structural changes (topology)
+        return morph1.crossover(morph2, is_maximisation=False)
 
-        return morph1.crossover(
-            morph2,
-            is_maximisation=False,
-        )
-
-
-    # ======================================================================== #
+    # ------------------------------------------------------------------------ #
     #                          EA OPERATORS                                    #
-    # ======================================================================== #
-
-    def create_individual(
-        self,
-    ) -> Individual:
-        """Create one valid initial body+brain individual."""
-
-        max_attempts = 500
-
-        for attempt in range(
-            1,
-            max_attempts + 1,
-        ):
+    # ------------------------------------------------------------------------ #
+    def create_individual(self) -> Individual:
+        """Initialization: Ensures valid physical body."""
+        while True:
             try:
-                # ------------------------------------------------------------ #
-                # CREATE BASE CPPN
-                # ------------------------------------------------------------ #
-
                 genome = Genome.random(
                     num_inputs=NUM_CPPN_INPUTS,
                     num_outputs=NUM_CPPN_OUTPUTS,
-
-                    # All initial CPPNs share the same
-                    # base node/innovation numbering.
-                    next_node_id=(
-                        NUM_CPPN_INPUTS
-                        + NUM_CPPN_OUTPUTS
-                    ),
-                    next_innov_id=0,
+                    next_node_id=self.id_manager.get_next_node_id(),
+                    next_innov_id=self.id_manager.get_next_innov_id(),
                 )
-
-
-                # ------------------------------------------------------------ #
-                # INITIAL STRUCTURAL MUTATION
-                # ------------------------------------------------------------ #
-
                 for _ in range(3):
                     genome.mutate(
                         1.0,
@@ -1046,528 +425,110 @@ class Evolution:
                         self.id_manager.get_next_node_id,
                     )
 
+                if self.get_joint_count(genome) > 0:
+                    break
+            except Exception:
+                continue
 
-                # ------------------------------------------------------------ #
-                # SERIALIZE FIRST
-                #
-                # Test exactly the representation that will actually be
-                # stored inside Individual.
-                # ------------------------------------------------------------ #
+        ind = Individual()
+        ind.genotype = {
+            "morph": genome.to_dict(),
+            "ctrl": RNG.uniform(-1.0, 1.0, size=CTRL_GENOME_SIZE).tolist(),
+        }
+        # Initialize all tags
+        ind.tags["ps"] = False
+        ind.tags["valid"] = True
+        ind.tags["debug_joints"] = 0
+        return ind
 
-                genome_dict = (
-                    genome.to_dict()
-                )
+    def reproduction(self, population: Population) -> Population:
+        """Joint Reproduction: Crossover (Body + Brain) + Mutation."""
+        parents = [ind for ind in population if ind.tags.get("ps", False)]
 
-                stored_genome = (
-                    Genome.from_dict(
-                        genome_dict
-                    )
-                )
-
-
-                # ------------------------------------------------------------ #
-                # SINGLE VALIDITY CHECK
-                # ------------------------------------------------------------ #
-
-                joint_count = (
-                    self.get_joint_count(
-                        stored_genome
-                    )
-                )
-
-                if joint_count <= 0:
-                    if (
-                        attempt % 50
-                        == 0
-                    ):
-                        console.log(
-                            "[yellow]"
-                            f"Initialization: "
-                            f"{attempt} attempts, "
-                            f"still searching for "
-                            f"a valid actuated body."
-                            "[/yellow]"
-                        )
-
-                    continue
-
-
-                # ------------------------------------------------------------ #
-                # CREATE INDIVIDUAL
-                # ------------------------------------------------------------ #
-
-                ind = Individual()
-
-                ind.genotype = {
-                    "morph": genome_dict,
-
-                    "ctrl": RNG.uniform(
-                        -1.0,
-                        1.0,
-                        size=CTRL_GENOME_SIZE,
-                    ).tolist(),
-                }
-
-                ind.tags[
-                    "ps"
-                ] = False
-
-                ind.tags[
-                    "valid"
-                ] = True
-
-                ind.tags[
-                    "debug_joints"
-                ] = joint_count
-
-                return ind
-
-
-            except Exception as e:
-                if (
-                    attempt % 50
-                    == 0
-                ):
-                    console.log(
-                        "[yellow]"
-                        f"Initialization attempt "
-                        f"{attempt} failed: "
-                        f"{type(e).__name__}: "
-                        f"{e}"
-                        "[/yellow]"
-                    )
-
-
-        raise RuntimeError(
-            "Unable to create a valid actuated "
-            f"individual after {max_attempts} attempts."
-        )
-
-    def reproduction(
-        self,
-        population: Population,
-    ) -> Population:
-        """Joint reproduction with guaranteed actuated offspring."""
-        parents = [
-            ind
-            for ind in population
-            if ind.tags.get(
-                "ps",
-                False,
-            )
-        ]
-
-
+        # Fallback: if no ps parents, use all individuals
         if not parents:
             console.log(
-                "[yellow]"
-                "Warning: No ps-tagged individuals, "
-                "using entire population as parents"
-                "[/yellow]"
+                "[yellow]Warning: No ps-tagged individuals, using entire population as parents[/yellow]",
             )
-
             parents = population
 
-
         new_offspring = []
+        target_pool = self.config.target_population_size * 2
 
-        target_pool = (
-            self.config.target_population_size
-            * 2
-        )
-
-
-        while (
-            len(population)
-            + len(new_offspring)
-            < target_pool
-        ):
-            use_sexual = (
-                len(parents)
-                >= 2
-                and RNG.random()
-                < 0.5
-            )
-
-
-            # --------------------------------------------------------------- #
-            # CREATE BASE CHILD
-            # --------------------------------------------------------------- #
+        while len(population) + len(new_offspring) < target_pool:
+            # Sexual Reproduction (50% chance if we have 2+ parents)
+            use_sexual = len(parents) >= 2 and RNG.random() < 0.5
 
             if use_sexual:
-                p1, p2 = random.sample(
-                    parents,
-                    2,
+                # Select two parents for crossover
+                p1, p2 = random.sample(parents, 2)
+
+                # Crossover morphologies (method handles Genome conversion)
+                c_morph = self.crossover_morphologies(p1, p2)
+
+                # Crossover brain vectors
+                c_ctrl = self.crossover_ctrl_vectors(
+                    p1.genotype["ctrl"], p2.genotype["ctrl"],
                 )
-
-
-                c_morph = (
-                    self.crossover_morphologies(
-                        p1,
-                        p2,
-                    )
-                )
-
-
-                c_ctrl = (
-                    self.crossover_ctrl_vectors(
-                        p1.genotype[
-                            "ctrl"
-                        ],
-                        p2.genotype[
-                            "ctrl"
-                        ],
-                    )
-                )
-
-
-                # Keep the fitter parent as a
-                # known fallback morphology.
-                #
-                # Lower fitness is better.
-                p1_fitness = (
-                    p1.fitness
-                    if (
-                        p1.fitness
-                        is not None
-                    )
-                    else float(
-                        "inf"
-                    )
-                )
-
-                p2_fitness = (
-                    p2.fitness
-                    if (
-                        p2.fitness
-                        is not None
-                    )
-                    else float(
-                        "inf"
-                    )
-                )
-
-
-                fallback_parent = (
-                    p1
-                    if (
-                        p1_fitness
-                        <= p2_fitness
-                    )
-                    else p2
-                )
-
-
-                fallback_morph = (
-                    Genome.from_dict(
-                        fallback_parent.genotype[
-                            "morph"
-                        ]
-                    )
-                )
-
-
             else:
-                parent = random.choice(
-                    parents
-                )
-
-
-                p_morph = (
-                    Genome.from_dict(
-                        parent.genotype[
-                            "morph"
-                        ]
-                    )
-                )
-
-
-                c_morph = (
-                    p_morph.copy()
-                )
-
-
-                fallback_morph = (
-                    p_morph.copy()
-                )
-
-
+                # Asexual reproduction: single parent
+                parent = random.choice(parents)
+                p_morph = Genome.from_dict(parent.genotype["morph"])
+                c_morph = p_morph.copy()
                 c_ctrl = (
-                    parent.genotype[
-                        "ctrl"
-                    ].copy()
-                    if isinstance(
-                        parent.genotype[
-                            "ctrl"
-                        ],
-                        list,
-                    )
-                    else parent.genotype[
-                        "ctrl"
-                    ]
+                    parent.genotype["ctrl"].copy()
+                    if isinstance(parent.genotype["ctrl"], list)
+                    else parent.genotype["ctrl"]
                 )
 
-
-            # --------------------------------------------------------------- #
-            # BODY MUTATION
-            # --------------------------------------------------------------- #
-
+            # Body Mutation (with Validity Retry)
             valid_child = False
             attempts = 0
-
-
-            while (
-                not valid_child
-                and attempts
-                < 20
-            ):
-                mutant = (
-                    c_morph.copy()
-                )
-
-
+            while not valid_child and attempts < 20:
+                mutant = c_morph.copy()
                 mutant.mutate(
                     0.8,
                     0.5,
                     self.id_manager.get_next_innov_id,
                     self.id_manager.get_next_node_id,
                 )
-
-
-                joint_count = (
-                    self.get_joint_count(
-                        mutant
-                    )
-                )
-
-
-                if (
-                    joint_count
-                    > 0
-                ):
-                    c_morph = (
-                        mutant
-                    )
-
-                    valid_child = (
-                        True
-                    )
-
-
+                if self.get_joint_count(mutant) > 0:
+                    c_morph = mutant
+                    valid_child = True
                 attempts += 1
 
-
-            # --------------------------------------------------------------- #
-            # FALLBACK IF MUTATION FAILED
-            # --------------------------------------------------------------- #
-
-            if not valid_child:
-                fallback_joint_count = (
-                    self.get_joint_count(
-                        fallback_morph
-                    )
-                )
-
-
-                if (
-                    fallback_joint_count
-                    > 0
-                ):
-                    c_morph = (
-                        fallback_morph.copy()
-                    )
-
-                    valid_child = (
-                        True
-                    )
-
-
-            # Absolute safety:
-            # never allow an unactuated morphology
-            # to enter the offspring population.
-            if (
-                not valid_child
-            ):
-                continue
-
-
-            final_joint_count = (
-                self.get_joint_count(
-                    c_morph
-                )
-            )
-
-
-            if (
-                final_joint_count
-                <= 0
-            ):
-                continue
-
-
-            # --------------------------------------------------------------- #
-            # BRAIN MUTATION
-            # --------------------------------------------------------------- #
-
-            c_ctrl = (
-                self.mutate_ctrl_vector(
-                    c_ctrl
-                )
-            )
-
-
-            # --------------------------------------------------------------- #
-            # CREATE OFFSPRING INDIVIDUAL
-            # --------------------------------------------------------------- #
+            # Brain Mutation (always applied after crossover/selection)
+            c_ctrl = self.mutate_ctrl_vector(c_ctrl)
 
             ind = Individual()
+            # Initialize all tags
+            ind.genotype = {"morph": c_morph.to_dict(), "ctrl": c_ctrl}
+            ind.tags["ps"] = False
+            ind.tags["valid"] = True
+            ind.tags["debug_joints"] = 0
+            new_offspring.append(ind)
 
-
-            ind.genotype = {
-                "morph": (
-                    c_morph.to_dict()
-                ),
-                "ctrl": (
-                    c_ctrl
-                ),
-            }
-
-
-            ind.tags[
-                "ps"
-            ] = False
-
-            ind.tags[
-                "valid"
-            ] = True
-
-            ind.tags[
-                "debug_joints"
-            ] = (
-                final_joint_count
-            )
-
-
-            new_offspring.append(
-                ind
-            )
-
-
-        population.extend(
-            new_offspring
-        )
-
-
+        population.extend(new_offspring)
         return population
 
-
-    def evaluate(
-        self,
-        population: Population,
-    ) -> Population:
-        """Evaluate locomotion and log variable-bone statistics."""
+    def evaluate(self, population: Population) -> Population:
+        """Evaluation Loop: Calls run_simulation in 'simple' mode."""
         to_eval = [
             ind
             for ind in population
-            if (
-                ind.alive
-                and ind.tags.get(
-                    "valid"
-                )
-                and ind.requires_eval
-            )
+            if ind.alive and ind.tags.get("valid") and ind.requires_eval
         ]
-
 
         if not to_eval:
             return population
 
+        for ind in track(to_eval, description="Evaluating..."):
+            # Pass mode="simple" for fast, headless evaluation
+            fitness = self.run_simulation("simple", ind)
+            ind.fitness = fitness
+            ind.requires_eval = False
 
-        for ind in track(
-            to_eval,
-            description="Evaluating...",
-        ):
-            # --------------------------------------------------------------- #
-            # VERIFY BODY BEFORE SIMULATION
-            # --------------------------------------------------------------- #
-
-            genome = Genome.from_dict(
-                ind.genotype[
-                    "morph"
-                ]
-            )
-
-
-            joint_count = (
-                self.get_joint_count(
-                    genome
-                )
-            )
-
-
-            if (
-                joint_count
-                <= 0
-            ):
-                ind.fitness = float(
-                    "inf"
-                )
-
-                ind.requires_eval = (
-                    False
-                )
-
-                console.log(
-                    "[yellow]"
-                    "Rejected individual with "
-                    "zero actuated joints."
-                    "[/yellow]"
-                )
-
-                continue
-
-
-            ind.tags[
-                "debug_joints"
-            ] = (
-                joint_count
-            )
-
-
-            # --------------------------------------------------------------- #
-            # SIMULATE
-            # --------------------------------------------------------------- #
-
-            fitness = (
-                self.run_simulation(
-                    "simple",
-                    ind,
-                )
-            )
-
-
-            ind.fitness = (
-                fitness
-            )
-
-            ind.requires_eval = (
-                False
-            )
-
-
-            # --------------------------------------------------------------- #
-            # LOG MORPHOLOGY
-            # --------------------------------------------------------------- #
-
-            graph = (
-                self.decode_morphology_graph(
-                    ind.genotype[
-                        "morph"
-                    ]
-                )
-            )
-
-
+            graph = self.decode_morphology_graph(ind.genotype["morph"])
             if graph is not None:
                 self.log_evaluation(
                     self.evaluation_round,
@@ -1576,939 +537,295 @@ class Evolution:
                     fitness,
                 )
 
-
         self.evaluation_round += 1
-
-
         return population
 
+    def parent_selection(self, population: Population) -> Population:
+        population = population.sort(sort="min", attribute="fitness_")
+        cutoff = len(population) // 2
+        for i, ind in enumerate(population):
+            ind.tags["ps"] = i < cutoff
 
-    def parent_selection(
-        self,
-        population: Population,
-    ) -> Population:
-        """Select top half as parents."""
-        population = population.sort(
-            sort="min",
-            attribute="fitness_",
-        )
-
-
-        cutoff = (
-            len(population)
-            // 2
-        )
-
-
-        for i, ind in enumerate(
-            population
-        ):
-            ind.tags[
-                "ps"
-            ] = (
-                i
-                < cutoff
-            )
-
-
-        ps_count = sum(
-            1
-            for ind in population
-            if ind.tags.get(
-                "ps",
-                False,
-            )
-        )
-
-
+        # Diagnostics
+        ps_count = sum(1 for ind in population if ind.tags.get("ps", False))
         console.log(
-            f"[cyan]"
-            f"Parent Selection: "
-            f"{ps_count}/{len(population)} "
-            f"marked for reproduction"
-            f"[/cyan]"
+            f"[cyan]Parent Selection: {ps_count}/{len(population)} marked for reproduction[/cyan]",
         )
-
 
         return population
 
-
-    def survivor_selection(
-        self,
-        population: Population,
-    ) -> Population:
-        """Keep the best POP_SIZE individuals."""
-        population = population.sort(
-            sort="min",
-            attribute="fitness_",
-        )
-
-
-        survivors = population[
-            : self.config.target_population_size
-        ]
-
-
+    def survivor_selection(self, population: Population) -> Population:
+        population = population.sort(sort="min", attribute="fitness_")
+        survivors = population[: self.config.target_population_size]
         for ind in population:
-            if (
-                ind
-                not in survivors
-            ):
+            if ind not in survivors:
                 ind.alive = False
 
-
+        # Diagnostics
         scored = [
             ind.fitness_
             for ind in survivors
-            if (
-                ind.fitness_
-                is not None
-                and ind.fitness_
-                != float(
-                    "inf"
-                )
-            )
+            if ind.fitness_ is not None and ind.fitness_ != float("inf")
         ]
-
-
+        # np.mean([]) is nan and emits a RuntimeWarning; a generation where
+        # every body failed to compile is unusual but not an error.
         if scored:
             console.log(
-                "[green]"
-                "Survivor Selection: "
-                f"Avg fitness = "
-                f"{np.mean(scored):.4f}, "
-                f"Best = "
-                f"{min(scored):.4f}, "
-                f"Worst = "
-                f"{max(scored):.4f}"
-                "[/green]"
+                f"[green]Survivor Selection: Avg fitness = {np.mean(scored):.4f}[/green]",
             )
-
         else:
             console.log(
-                "[yellow]"
-                "Survivor Selection: "
-                "no finite fitness values "
-                "this generation"
-                "[/yellow]"
+                "[yellow]Survivor Selection: no finite fitness values this generation[/yellow]",
             )
-
 
         return population
 
-
-    # ======================================================================== #
-    #                            ID MANAGEMENT                                  #
-    # ======================================================================== #
-
-    def sync_ids(
-        self,
-        population: Population,
-    ) -> None:
-        """Sync ID manager with population CPPNs."""
-        max_nid = (
-            self.id_manager._node_id
-        )
-
-        max_inn = (
-            self.id_manager._innov_id
-        )
-
-
+    def sync_ids(self, population: Population) -> None:
+        """Syncs ID manager with population CPPNs."""
+        # This function assumes that the ID manager is correct
+        max_nid = self.id_manager._node_id
+        max_inn = self.id_manager._innov_id
         for ind in population:
-            g = ind.genotype[
-                "morph"
-            ]
+            g = ind.genotype["morph"]
+            if "nodes" in g:
+                for n in g["nodes"].values():
+                    nid = n.get("id", n.get("_id"))
+                    if nid and nid > max_nid:
+                        max_nid = nid
+            if "connections" in g:
+                for c in g["connections"]:
+                    inn = c.get("innovation", c.get("innov_id"))
+                    if inn and inn > max_inn:
+                        max_inn = inn
+        self.id_manager._node_id = max_nid
+        self.id_manager._innov_id = max_inn
 
-
-            if (
-                "nodes"
-                in g
-            ):
-                for n in g[
-                    "nodes"
-                ].values():
-                    nid = n.get(
-                        "id",
-                        n.get(
-                            "_id"
-                        ),
-                    )
-
-
-                    if (
-                        nid
-                        and nid
-                        > max_nid
-                    ):
-                        max_nid = (
-                            nid
-                        )
-
-
-            if (
-                "connections"
-                in g
-            ):
-                for c in g[
-                    "connections"
-                ]:
-                    inn = c.get(
-                        "innovation",
-                        c.get(
-                            "innov_id"
-                        ),
-                    )
-
-
-                    if (
-                        inn
-                        and inn
-                        > max_inn
-                    ):
-                        max_inn = (
-                            inn
-                        )
-
-
-        self.id_manager._node_id = (
-            max_nid
-        )
-
-        self.id_manager._innov_id = (
-            max_inn
-        )
-
-
-    # ======================================================================== #
-    #                            PHYSICS RUNNER                                 #
-    # ======================================================================== #
 
     def fast_physics_runner(
-        self,
-        model: mujoco.MjModel,
-        data: mujoco.MjData,
-        duration: float,
+        self, model: mujoco.MjModel, data: mujoco.MjData, duration: float,
     ) -> None:
-        """Run physics as fast as possible without rendering."""
-        steps_required = int(
-            duration
-            / model.opt.timestep
-        )
-
-
+        """
+        Optimized physics-only simulation runner (no rendering).
+        Uses render_skip and speed multiplier tricks from 4_robot_with_camera.py.
+        Runs physics as fast as possible without visualization overhead.
+        """
+        steps_required = int(duration / model.opt.timestep)
         step = 0
 
-
-        while (
-            step
-            < steps_required
-        ):
-            mujoco.mj_step(
-                model,
-                data,
-            )
-
+        while step < steps_required:
+            mujoco.mj_step(model, data)
             step += 1
 
-
-    # ======================================================================== #
+    # ------------------------------------------------------------------------ #
     #                          SIMULATION RUNNER                               #
-    # ======================================================================== #
+    # ------------------------------------------------------------------------ #
+    def run_simulation(self, mode: ViewerTypes, ind: Individual) -> float:
+        """
+        Builds phenotype and runs simulation.
+        Handles reconstruction retries for visualization.
+        """
+        mujoco.set_mjcb_control(None)
 
-    def run_simulation(
-        self,
-        mode: ViewerTypes,
-        ind: Individual,
-    ) -> float:
-        """Build phenotype and run locomotion simulation."""
-        mujoco.set_mjcb_control(
-            None
-        )
-
-
-        # -------------------------------------------------------------------- #
-        # 1. RECONSTRUCT BODY
-        # -------------------------------------------------------------------- #
-
-        expected_joints = (
-            ind.tags.get(
-                "debug_joints",
-                0,
-            )
-        )
-
-
+        # 1. Reconstruct Body (Retry Logic for Determinism)
+        expected_joints = ind.tags.get("debug_joints", 0)
         spec = None
         model = None
 
+        # In evaluation mode, we just try once. In visual mode, we retry.
+        attempts = 15 if mode != "simple" else 1
 
-        attempts = (
-            15
-            if (
-                mode
-                != "simple"
-            )
-            else 1
-        )
-
-
-        for _ in range(
-            attempts
-        ):
-            temp_spec = (
-                self.map_genotype_to_body(
-                    ind.genotype[
-                        "morph"
-                    ]
-                )
-            )
-
-
+        for _ in range(attempts):
+            temp_spec = self.map_genotype_to_body(ind.genotype["morph"])
             if temp_spec:
                 try:
-                    temp_model = (
-                        temp_spec.compile()
-                    )
-
-
-                    if (
-                        mode
-                        == "simple"
-                        or temp_model.nu
-                        == expected_joints
-                    ):
-                        spec = (
-                            temp_spec
-                        )
-
-                        model = (
-                            temp_model
-                        )
-
+                    temp_model = temp_spec.compile()
+                    # If simple mode (first run) or joints match expected (replay)
+                    if mode == "simple" or temp_model.nu == expected_joints:
+                        spec = temp_spec
+                        model = temp_model
                         break
-
-
-                except Exception:
+                except:
                     pass
 
-
         if model is None:
-            spec = (
-                self.map_genotype_to_body(
-                    ind.genotype[
-                        "morph"
-                    ]
-                )
-            )
-
-
+            # Fallback
+            spec = self.map_genotype_to_body(ind.genotype["morph"])
             if spec:
-                try:
-                    model = (
-                        spec.compile()
-                    )
-
-                except Exception:
-                    return float(
-                        "inf"
-                    )
-
+                model = spec.compile()
             else:
-                return float(
-                    "inf"
-                )
+                return float("inf")
 
+        # 2. Setup Environment & Physics
+        if mode == "simple":
+            # If simple, we check joints here to fail fast
+            if model.nu == 0:
+                ind.tags["debug_joints"] = 0
+                return float("inf")
+            ind.tags["debug_joints"] = model.nu  # Save for replay
 
-        # -------------------------------------------------------------------- #
-        # 2. PRE-WORLD ACTUATOR CHECK
-        # -------------------------------------------------------------------- #
+        world = SimpleFlatWorldWithTarget()
+        world.spawn(spec, position=SPAWN_POSITION)
+        model = world.spec.compile()
+        data = mujoco.MjData(model)
 
-        if (
-            model.nu
-            <= 0
-        ):
-            ind.tags[
-                "debug_joints"
-            ] = 0
+        # 3. Setup Brain
+        adj_dict = create_fully_connected_adjacency(model.nu)
+        cpg = SimpleCPG(adj_dict)
+        self.map_genotype_to_brain(cpg, ind.genotype["ctrl"])
 
-            return float(
-                "inf"
-            )
-
-
-        if (
-            mode
-            == "simple"
-        ):
-            ind.tags[
-                "debug_joints"
-            ] = (
-                model.nu
-            )
-
-
-        # -------------------------------------------------------------------- #
-        # 3. SETUP ENVIRONMENT
-        # -------------------------------------------------------------------- #
-
-        world = (
-            SimpleFlatWorldWithTarget()
-        )
-
-
-        world.spawn(
-            spec,
-            position=SPAWN_POSITION,
-        )
-
-
-        try:
-            model = (
-                world.spec.compile()
-            )
-
-        except Exception:
-            return float(
-                "inf"
-            )
-
-
-        # Check again after adding the world.
-        if (
-            model.nu
-            <= 0
-        ):
-            return float(
-                "inf"
-            )
-
-
-        data = mujoco.MjData(
-            model
-        )
-
-
-        # -------------------------------------------------------------------- #
-        # 4. SETUP BRAIN
-        # -------------------------------------------------------------------- #
-
-        adj_dict = (
-            create_fully_connected_adjacency(
-                model.nu
-            )
-        )
-
-
-        cpg = SimpleCPG(
-            adj_dict
-        )
-
-
-        self.map_genotype_to_brain(
-            cpg,
-            ind.genotype[
-                "ctrl"
-            ],
-        )
-
-
-        if (
-            mode
-            != "simple"
-        ):
+        if mode != "simple":
             console.log(
-                f"[green]"
-                f"Simulating with "
-                f"{model.nu} joints "
-                f"(Target: "
-                f"{expected_joints})"
-                f"[/green]"
+                f"[green]Simulating with {model.nu} joints (Target: {expected_joints})[/green]",
             )
 
-
-        # -------------------------------------------------------------------- #
-        # 5. SETUP CONTROLLER
-        # -------------------------------------------------------------------- #
-
-        tracker = Tracker(
-            mujoco.mjtObj.mjOBJ_BODY,
-            "core",
-            [
-                "xpos"
-            ],
-        )
-
-
+        # 4. Setup Controller
+        tracker = Tracker(mujoco.mjtObj.mjOBJ_BODY, "core", ["xpos"])
         ctrl = Controller(
-            controller_callback_function=(
-                lambda m, d, *a, **k:
-                cpg.forward(
-                    d.time
-                )
+            controller_callback_function=lambda m, d, *a, **k: cpg.forward(
+                d.time,
             ),
             tracker=tracker,
         )
+        ctrl.tracker.setup(world.spec, data)
 
-
-        ctrl.tracker.setup(
-            world.spec,
-            data,
-        )
-
-
+        # Bind Control Loop
+        # Note: *args and **kwargs in lambda ensure compatibility with runner
         mujoco.set_mjcb_control(
-            lambda m, d:
-            ctrl.set_control(
-                m,
-                d,
-                duration=DURATION,
-            )
+            lambda m, d: ctrl.set_control(m, d, duration=DURATION),
         )
+        mujoco.mj_resetData(model, data)
 
-
-        mujoco.mj_resetData(
-            model,
-            data,
-        )
-
-
-        # -------------------------------------------------------------------- #
-        # 6. EXECUTE
-        # -------------------------------------------------------------------- #
-
+        # 5. Execute
         match mode:
             case "simple":
-                self.fast_physics_runner(
-                    model,
-                    data,
-                    duration=DURATION,
-                )
-
-
+                # Use optimized physics-only runner (no rendering overhead)
+                self.fast_physics_runner(model, data, duration=DURATION)
             case "video":
                 recorder = VideoRecorder(
-                    output_folder=str(
-                        DATA
-                        / "videos"
-                    ),
-                    file_name=(
-                        f"dual_{getattr(ind, 'id', 'best')}"
-                    ),
+                    output_folder=str(DATA / "videos"),
+                    file_name=f"dual_{ind.id}",
                 )
-
-
                 video_renderer(
-                    model,
-                    data,
-                    duration=DURATION,
-                    video_recorder=(
-                        recorder
-                    ),
+                    model, data, duration=DURATION, video_recorder=recorder,
                 )
-
-
             case "launcher":
-                viewer.launch(
-                    model=model,
-                    data=data,
-                )
+                viewer.launch(model=model, data=data)
 
-
-        # -------------------------------------------------------------------- #
-        # 7. CALCULATE FITNESS
-        # -------------------------------------------------------------------- #
-
-        # Ignore first second to reduce
-        # benefit from falling immediately
-        # after spawning.
+        # 6. Calculate Fitness (Distance to Target)
+        # 1-Second Delay Implementation to penalize falling strategies
+        # Always enforce 1 second delay if simulation duration allows
         delay_time = min(
-            1.0,
-            DURATION,
-        )
+            1.0, DURATION,
+        )  # Delay is always 1 second (or full duration if shorter)
+        delay_fraction = delay_time / DURATION if DURATION > 0 else 0
 
+        dist = float("inf")
 
-        delay_fraction = (
-            delay_time
-            / DURATION
-            if (
-                DURATION
-                > 0
-            )
-            else 0
-        )
-
-
-        dist = float(
-            "inf"
-        )
-
-
-        if tracker.history[
-            "xpos"
-        ]:
-            first_key = next(
-                iter(
-                    tracker.history[
-                        "xpos"
-                    ].keys()
-                )
-            )
-
-
-            traj = (
-                tracker.history[
-                    "xpos"
-                ][
-                    first_key
-                ]
-            )
-
+        if tracker.history["xpos"]:
+            first_key = next(iter(tracker.history["xpos"].keys()))
+            traj = tracker.history["xpos"][first_key]
 
             if traj:
-                start_idx = max(
-                    0,
-                    int(
-                        len(
-                            traj
-                        )
-                        * delay_fraction
-                    ),
-                )
-
-
-                pos_after_delay = (
-                    np.array(
-                        traj[
-                            start_idx
-                        ]
-                    )
-                )
-
-
-                pos_final = (
-                    np.array(
-                        traj[
-                            -1
-                        ]
-                    )
-                )
-
-
-                valid_movement_vector = (
-                    pos_final
-                    - pos_after_delay
-                )
-
-
-                effective_pos = (
-                    np.array(
-                        SPAWN_POSITION
-                    )
-                    + valid_movement_vector
-                )
-
-
+                # Skip the first N% of trajectory that corresponds to 1 second of elapsed time
+                start_idx = max(0, int(len(traj) * delay_fraction))
+                pos_after_delay = np.array(traj[start_idx])
+                pos_final = np.array(traj[-1])
+                valid_movement_vector = pos_final - pos_after_delay
+                effective_pos = np.array(SPAWN_POSITION) + valid_movement_vector
                 dist = np.sqrt(
-                    np.sum(
-                        (
-                            effective_pos[
-                                :2
-                            ]
-                            - TARGET_POSITION[
-                                :2
-                            ]
-                        )
-                        ** 2
-                    )
+                    np.sum((effective_pos[:2] - TARGET_POSITION[:2]) ** 2),
                 )
 
-
-                if (
-                    mode
-                    != "simple"
-                ):
+                if mode != "simple":
                     console.log(
-                        f"[blue]"
-                        f"Traj len: "
-                        f"{len(traj)}, "
-                        f"start_idx: "
-                        f"{start_idx}, "
-                        f"movement: "
-                        f"{np.linalg.norm(valid_movement_vector):.3f}"
-                        f"[/blue]"
+                        f"[blue]Traj len: {len(traj)}, start_idx: {start_idx}, movement: {np.linalg.norm(valid_movement_vector):.3f}[/blue]",
                     )
 
+        return dist
 
-        return float(
-            dist
-        )
-
-
-    # ======================================================================== #
-    #                              MAIN LOOP                                    #
-    # ======================================================================== #
-
-    def evolve(
-        self,
-    ) -> Individual | None:
-        """Run joint body/controller evolution."""
-        console.log(
-            "Initializing population..."
-        )
-
-
+    # ------------------------------------------------------------------------ #
+    #                          MAIN LOOP                                       #
+    # ------------------------------------------------------------------------ #
+    def evolve(self) -> Individual | None:
+        console.log("Initializing population...")
         population = Population([
-            self.create_individual()
-            for _ in range(
-                POP_SIZE
-            )
+            self.create_individual() for _ in range(POP_SIZE)
         ])
+        self.sync_ids(population)
 
-
-        self.sync_ids(
-            population
-        )
-
-
-        # Initial evaluation
-        population = (
-            self.evaluate(
-                population
-            )
-        )
-
+        # Initial Eval
+        population = self.evaluate(population)
 
         ops = [
-            EAOperation(
-                self.parent_selection
-            ),
-            EAOperation(
-                self.reproduction
-            ),
-            EAOperation(
-                self.evaluate
-            ),
-            EAOperation(
-                self.survivor_selection
-            ),
+            EAOperation(self.parent_selection),
+            EAOperation(self.reproduction),
+            EAOperation(self.evaluate),
+            EAOperation(self.survivor_selection),
         ]
-
 
         ea = EA(
             population,
             operations=ops,
             num_steps=BUDGET,
-            is_maximisation=(
-                self.config.is_maximisation
-            ),
-            db_file_path=(
-                self.config.db_file_path
-            ),
-            db_handling=(
-                self.config.db_handling
-            ),
-            quiet=(
-                self.config.quiet
-            ),
+            # Must be forwarded explicitly: EA falls back to the global
+            # ariel.ec.config singleton, which still says "maximise", so
+            # get_solution("best") would otherwise return the individual
+            # furthest from the target.
+            is_maximisation=self.config.is_maximisation,
+            db_file_path=self.config.db_file_path,
+            db_handling=self.config.db_handling,
+            quiet=self.config.quiet,
         )
-
-
         ea.run()
 
-
-        return ea.get_solution(
-            "best",
-            only_alive=False,
-        )
+        return ea.get_solution("best", only_alive=False)
 
 
-# ============================================================================ #
-#                                  MAIN                                        #
-# ============================================================================ #
-
-
-def main(
-) -> None:
+def main() -> None:
     console.rule(
-        "[bold purple]"
-        "Starting Joint Evolution "
-        "(Morph + Ctrl)"
-        "[/bold purple]"
+        "[bold purple]Starting Joint Evolution (Morph + Ctrl)[/bold purple]",
     )
-
 
     console.log(
-        f"Population: "
-        f"{POP_SIZE}"
+        f"Population: {POP_SIZE}, Budget: {BUDGET}, Duration: {DURATION}s, "
+        f"Seed: {SEED}, Max Modules: {NUM_MODULES}, Bone Mode: {BONE_MODE}",
     )
-
-
-    console.log(
-        f"Budget: "
-        f"{BUDGET}"
-    )
-
-
-    console.log(
-        f"Duration: "
-        f"{DURATION}s"
-    )
-
-
-    console.log(
-        f"Seed: "
-        f"{SEED}"
-    )
-
-
-    console.log(
-        f"Max Modules: "
-        f"{NUM_MODULES}"
-    )
-
-
-    console.log(
-        f"Bone Mode: "
-        f"{BONE_MODE}"
-    )
-
-
-    if (
-        BONE_MODE
-        == "fixed"
-    ):
-        console.log(
-            f"Fixed Brick Length: "
-            f"{FIXED_BRICK_LENGTH * 1000:.2f} mm"
-        )
-
+    if BONE_MODE == "fixed":
+        console.log(f"Fixed Brick Length: {FIXED_BRICK_LENGTH * 1000:.2f} mm")
 
     evo = Evolution()
-
-
-    best = (
-        evo.evolve()
-    )
-
+    best = evo.evolve()
 
     if best:
-        console.rule(
-            "[bold green]"
-            "Final Best Result"
-            "[/bold green]"
-        )
+        console.rule("[bold green]Final Best Result")
+        console.log(f"Best Fitness (Dist to Target): {best.fitness:.4f}")
 
-
-        console.log(
-            f"Experiment Condition: "
-            f"{BONE_MODE}"
-        )
-
-
-        console.log(
-            f"Seed: "
-            f"{SEED}"
-        )
-
-
-        console.log(
-            f"Best Fitness "
-            f"(Dist to Target): "
-            f"{best.fitness:.4f}"
-        )
-
-
-        graph = (
-            evo.decode_morphology_graph(
-                best.genotype[
-                    "morph"
-                ]
-            )
-        )
-
-
+        graph = evo.decode_morphology_graph(best.genotype["morph"])
         if graph is not None:
-            stats = (
-                evo.get_morphology_statistics(
-                    graph
-                )
-            )
-
-
-            console.log(
-                f"Modules: "
-                f"{stats['num_modules']}"
-            )
-
-
-            console.log(
-                f"Bricks: "
-                f"{stats['num_bricks']}"
-            )
-
-
-            console.log(
-                f"Hinges: "
-                f"{stats['num_hinges']}"
-            )
-
-
-            if (
-                stats[
-                    "num_bricks"
-                ]
-                > 0
-            ):
+            stats = evo.get_morphology_statistics(graph)
+            console.log(f"Experiment Condition: {BONE_MODE}")
+            console.log(f"Seed: {SEED}")
+            console.log(f"Modules: {stats['num_modules']}")
+            console.log(f"Bricks: {stats['num_bricks']}")
+            console.log(f"Hinges: {stats['num_hinges']}")
+            if stats["num_bricks"] > 0:
                 console.log(
-                    f"Mean Brick Length: "
-                    f"{stats['mean_length'] * 1000:.2f} mm"
+                    f"Mean Brick Length: {stats['mean_length'] * 1000:.2f} mm",
                 )
-
-
                 console.log(
-                    f"Minimum Brick Length: "
-                    f"{stats['min_length'] * 1000:.2f} mm"
+                    f"Minimum Brick Length: {stats['min_length'] * 1000:.2f} mm",
                 )
-
-
                 console.log(
-                    f"Maximum Brick Length: "
-                    f"{stats['max_length'] * 1000:.2f} mm"
+                    f"Maximum Brick Length: {stats['max_length'] * 1000:.2f} mm",
                 )
-
-
                 console.log(
-                    f"Brick Length SD: "
-                    f"{stats['std_length'] * 1000:.2f} mm"
+                    f"Brick Length SD: {stats['std_length'] * 1000:.2f} mm",
                 )
+            console.log(f"Physically Valid: {is_physically_valid(graph)}")
 
-
-            console.log(
-                f"Physically Valid: "
-                f"{is_physically_valid(graph)}"
-            )
-
-
-        console.log(
-            f"Results Log: "
-            f"{LOG_FILE}"
-        )
-
-
+        console.log(f"Results Log: {LOG_FILE}")
         if args.visualize:
-            evo.run_simulation(
-                "launcher",
-                best,
-            )
-
-
-    else:
-        console.log(
-            "[red]"
-            "No solution found"
-            "[/red]"
-        )
+            evo.run_simulation("launcher", best)
 
 
 if __name__ == "__main__":
