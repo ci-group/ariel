@@ -303,19 +303,21 @@ def test_direct_length_encoding_uses_first_module_genes() -> None:
     )
 
 
-def test_direct_length_encoding_clips_values() -> None:
-    """Direct length genes outside [0, 1] should be clipped."""
-    n = 4
+def test_direct_length_encoding_reflects_values() -> None:
+    """Length values outside [0, 1] should reflect back into range."""
+    n = 6
     nde = _nde(n)
 
     genotype = _genotype(include_length=True)
 
     genotype[3][:n] = np.array(
         [
-            -1.0,
+            -0.2,
             0.25,
             0.75,
-            2.0,
+            1.2,
+            2.2,
+            -1.2,
         ],
         dtype=np.float32,
     )
@@ -325,14 +327,15 @@ def test_direct_length_encoding_clips_values() -> None:
     assert np.allclose(
         outputs[3],
         [
-            0.0,
+            0.2,
             0.25,
             0.75,
-            1.0,
+            0.8,
+            0.2,
+            0.8,
         ],
     )
-
-
+    
 def test_nde_output_feeds_hi_prob_decoder_without_lengths() -> None:
     """Existing three-output NDE decoding remains supported."""
     from networkx import DiGraph
