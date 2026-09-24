@@ -32,19 +32,17 @@ def _is_direct_parent_child(
     bool
         True when either body is the direct parent of the other.
     """
+    parent_of_body1 = int(
+        model.body_parentid[body1]
+    )
+
+    parent_of_body2 = int(
+        model.body_parentid[body2]
+    )
+
     return (
-        int(
-            model.body_parentid[
-                body1
-            ]
-        )
-        == body2
-        or int(
-            model.body_parentid[
-                body2
-            ]
-        )
-        == body1
+        parent_of_body1 == body2
+        or parent_of_body2 == body1
     )
 
 
@@ -56,9 +54,9 @@ def _geom_distance(
 ) -> float:
     """Return signed distance between two MuJoCo geometries.
 
-    A negative value means the geometries penetrate each other.
+    Negative values indicate penetration.
     Zero means touching.
-    A positive value means they are separated.
+    Positive values indicate separation.
 
     Parameters
     ----------
@@ -74,26 +72,64 @@ def _geom_distance(
     Returns
     -------
     float
-        Signed geometry distance in meters.
+        Signed geometry distance in metres.
     """
     fromto = np.zeros(
         6,
         dtype=float,
     )
 
-    return float(
-        mujoco.mj_geomDistance(
-            model,
-            data,
-            geom1,
-            geom2,
+    distance = mujoco.mj_geomDistance(
+        model,
+        data,
+        geom1,
+        geom2,
+        0.0,
+        fromto,
+    )
 
-            # We only need to know whether the
-            # geometries touch / penetrate.
-            0.0,
+    return float(distance)
 
-            fromto,
-        )
+
+def _get_current_control_callback():
+    """Return the currently installed MuJoCo control callback when possible.
+
+    Some MuJoCo Python releases expose ``get_mjcb_control`` while others only
+    expose ``set_mjcb_control``. Returning ``None`` on versions without the
+    getter preserves compatibility.
+
+    Returns
+    -------
+    object | None
+        Existing MuJoCo control callback, when retrievable.
+    """
+    getter = getattr(
+        mujoco,
+        "get_mjcb_control",
+        None,
+    )
+
+    if getter is None:
+        return None
+
+    try:
+        return getter()
+    except Exception:
+        return None
+
+
+def _restore_control_callback(
+    callback,
+) -> None:
+    """Restore the MuJoCo control callback.
+
+    Parameters
+    ----------
+    callback
+        Previously installed callback or ``None``.
+    """
+    mujoco.set_mjcb_control(
+        callback
     )
 
 
@@ -104,63 +140,61 @@ def has_self_intersection(
 ) -> bool:
     """Check whether a decoded robot contains physical self-intersections.
 
-    The validator uses MuJoCo's geometry-distance query after compiling the
-    actual ARIEL phenotype.
+    The graph is first converted into the real ARIEL MuJoCo phenotype. The
+    compiled geometry is then inspected using ``mj_geomDistance``.
 
-    Non-adjacent body pairs are rejected whenever penetration exceeds
+    Non-adjacent bodies are considered invalid when their penetration exceeds
     ``tolerance``.
 
-    Directly connected parent-child bodies are allowed a slightly larger
-    penetration tolerance because modules intentionally meet at their
-    attachment interface. However, large parent-child overlap is rejected.
+    Directly attached parent-child modules are allowed slightly more
+    penetration because their geometries may intentionally meet at attachment
+    interfaces. Penetration larger than ``parent_child_tolerance`` is still
+    rejected.
 
     Parameters
     ----------
     graph
         NetworkX morphology graph.
     tolerance
-        Maximum allowed penetration between non-adjacent bodies, in meters.
-        Default is 1e-5 m.
+        Maximum allowed penetration for non-adjacent bodies, in metres.
     parent_child_tolerance
-        Maximum allowed penetration between directly attached parent-child
-        bodies, in meters. Default is 1e-3 m (1 mm).
+        Maximum allowed penetration for directly connected bodies, in metres.
 
     Returns
     -------
     bool
-        True if the morphology contains an invalid physical intersection.
-        False if it is physically valid.
+        True when an invalid physical intersection exists.
 
     Notes
     -----
     Validation is fail-closed: if construction, compilation, or MuJoCo
-    evaluation raises an exception, the morphology is treated as invalid.
-    """
+    evaluation fails, the morphology is treated as invalid.
 
-    # MuJoCo's control callback is global.
-    #
-    # A locomotion simulation may have installed a controller for a
-    # previously evaluated robot. mj_forward() invokes the global callback,
-    # so leaving a stale callback active can make collision validation fail
-    # for reasons unrelated to geometry.
-    #
-    # Collision checking does not need a controller.
+    MuJoCo's control callback is process-global. Collision checking temporarily
+    disables it so ``mj_forward`` cannot invoke a controller belonging to a
+    different robot. The previous callback is restored afterward whenever the
+    installed MuJoCo Python API permits retrieving it.
+    """
+    previous_callback = _get_current_control_callback()
+
+    # Collision checking is purely geometric and must not invoke an unrelated
+    # simulation controller.
     mujoco.set_mjcb_control(
         None
     )
 
     try:
-        # ------------------------------------------------------------------ #
-        # 1. CONSTRUCT THE REAL ARIEL PHENOTYPE
-        # ------------------------------------------------------------------ #
+        # ==============================================================
+        # 1. CONSTRUCT THE ACTUAL ARIEL PHENOTYPE
+        # ==============================================================
 
         robot = construct_mjspec_from_graph(
             graph
         )
 
-        # ------------------------------------------------------------------ #
-        # 2. COMPILE AND FORWARD THE MODEL
-        # ------------------------------------------------------------------ #
+        # ==============================================================
+        # 2. COMPILE THE MODEL
+        # ==============================================================
 
         model = robot.spec.compile()
 
@@ -168,22 +202,19 @@ def has_self_intersection(
             model
         )
 
+        # Compute world-space transforms for all geometries.
         mujoco.mj_forward(
             model,
             data,
         )
 
-        # ------------------------------------------------------------------ #
-        # 3. CHECK EVERY GEOMETRY PAIR
-        # ------------------------------------------------------------------ #
+        # ==============================================================
+        # 3. CHECK GEOMETRY PAIRS
+        # ==============================================================
 
-        for geom1 in range(
-            model.ngeom
-        ):
+        for geom1 in range(model.ngeom):
             body1 = int(
-                model.geom_bodyid[
-                    geom1
-                ]
+                model.geom_bodyid[geom1]
             )
 
             for geom2 in range(
@@ -191,41 +222,30 @@ def has_self_intersection(
                 model.ngeom,
             ):
                 body2 = int(
-                    model.geom_bodyid[
-                        geom2
-                    ]
+                    model.geom_bodyid[geom2]
                 )
 
-                # Geometries belonging to the same rigid body are expected
-                # to overlap / touch as part of that module's construction.
+                # Multiple geometries belonging to the same rigid body may
+                # intentionally overlap as part of one module.
                 if body1 == body2:
                     continue
 
                 distance = _geom_distance(
-                    model,
-                    data,
-                    geom1,
-                    geom2,
+                    model=model,
+                    data=data,
+                    geom1=geom1,
+                    geom2=geom2,
                 )
 
-                is_parent_child = (
-                    _is_direct_parent_child(
-                        model,
-                        body1,
-                        body2,
-                    )
+                is_parent_child = _is_direct_parent_child(
+                    model=model,
+                    body1=body1,
+                    body2=body2,
                 )
 
-                # ---------------------------------------------------------- #
-                # DIRECT PARENT-CHILD PAIRS
-                # ---------------------------------------------------------- #
-                #
-                # Connected modules are expected to meet at their attachment
-                # sites, so tiny penetration can be acceptable.
-                #
-                # However, we no longer ignore these pairs completely.
-                # A deeply embedded child module is an invalid morphology.
-                # ---------------------------------------------------------- #
+                # ------------------------------------------------------
+                # DIRECT PARENT / CHILD
+                # ------------------------------------------------------
 
                 if is_parent_child:
                     if (
@@ -236,13 +256,9 @@ def has_self_intersection(
 
                     continue
 
-                # ---------------------------------------------------------- #
-                # NON-ADJACENT BODY PAIRS
-                # ---------------------------------------------------------- #
-                #
-                # Any penetration larger than the tiny numerical tolerance
-                # is treated as a self-intersection.
-                # ---------------------------------------------------------- #
+                # ------------------------------------------------------
+                # NON-ADJACENT BODIES
+                # ------------------------------------------------------
 
                 if (
                     distance
@@ -253,17 +269,13 @@ def has_self_intersection(
         return False
 
     except Exception:
-        # Fail closed.
-        #
-        # A morphology that cannot be constructed, compiled, or evaluated
-        # safely should not enter the evolutionary population.
+        # Fail closed. If a morphology cannot be built and verified safely,
+        # it should not enter the evolutionary population.
         return True
 
     finally:
-        # Collision validation should never leave a MuJoCo controller callback
-        # installed for subsequent models.
-        mujoco.set_mjcb_control(
-            None
+        _restore_control_callback(
+            previous_callback
         )
 
 
@@ -279,18 +291,18 @@ def is_physically_valid(
     graph
         NetworkX morphology graph.
     tolerance
-        Maximum allowed penetration between non-adjacent bodies, in meters.
+        Maximum allowed penetration between non-adjacent bodies, in metres.
     parent_child_tolerance
-        Maximum allowed penetration between directly attached bodies, in
-        meters.
+        Maximum allowed penetration between directly connected bodies, in
+        metres.
 
     Returns
     -------
     bool
-        True when no invalid self-intersection is detected.
+        True when no invalid self-intersection is found.
     """
     return not has_self_intersection(
-        graph,
+        graph=graph,
         tolerance=tolerance,
         parent_child_tolerance=parent_child_tolerance,
     )

@@ -32,25 +32,36 @@ from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_TYPES_OF_MODULES,
 )
 
-# Global constants
-# Global functions
-# Warning Control
-# Type Checking
-# Type Aliases
-
-# --- DATA SETUP --- #
 SCRIPT_NAME = __file__.split("/")[-1][:-3]
 CWD = Path.cwd()
 DATA = CWD / "__data__"
 DATA.mkdir(exist_ok=True)
 
-# --- RANDOM GENERATOR SETUP --- #
 SEED = 42
 RNG = np.random.default_rng(SEED)
 
-# --- TERMINAL OUTPUT SETUP --- #
 install(show_locals=False)
 console = Console()
+
+
+def reflect_to_unit_interval(values: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+    """Reflect values into the interval [0, 1].
+
+    Reflection avoids the boundary pile-up produced by clipping.
+
+    Examples
+    --------
+    -0.2 -> 0.2
+     1.2 -> 0.8
+     2.2 -> 0.2
+    """
+    reflected = np.mod(values, 2.0)
+    reflected = np.where(
+        reflected > 1.0,
+        2.0 - reflected,
+        reflected,
+    )
+    return reflected.astype(np.float32)
 
 
 class NeuralDevelopmentalEncoding(nn.Module):
@@ -60,8 +71,8 @@ class NeuralDevelopmentalEncoding(nn.Module):
         Neural developmental encoder.
 
         Given a genotype (list of chromosomes), output the phenotype
-        (probability matrices corresponding to module types, connections, rotations,
-        and optionally variable brick lengths).
+        (probability matrices corresponding to module types, connections,
+        rotations, and optionally directly encoded variable brick lengths).
 
         Parameters
         ----------
@@ -81,14 +92,11 @@ class NeuralDevelopmentalEncoding(nn.Module):
         self.number_of_modules = number_of_modules
         self.genotype_size = genotype_size
 
-        # Hidden Layers
         self.fc1 = nn.Linear(genotype_size, 64)
         self.fc2 = nn.Linear(64, 32)
         self.fc3 = nn.Linear(32, 64)
         self.fc4 = nn.Linear(64, 128)
 
-        # ------------------------------------------------------------------- #
-        # OUTPUTS
         self.type_p_shape = (number_of_modules, NUM_OF_TYPES_OF_MODULES)
         self.type_p_out = nn.Linear(
             128,
@@ -107,32 +115,21 @@ class NeuralDevelopmentalEncoding(nn.Module):
             number_of_modules * NUM_OF_ROTATIONS,
         )
 
-        self.length_p_shape = (number_of_modules,)
-        self.length_p_out = nn.Linear(
-            128,
-            number_of_modules,
-        )
-
         self.output_layers = [
             self.type_p_out,
             self.conn_p_out,
             self.rot_p_out,
-            self.length_p_out,
         ]
         self.output_shapes = [
             self.type_p_shape,
             self.conn_p_shape,
             self.rot_p_shape,
-            self.length_p_shape,
         ]
-        # ------------------------------------------------------------------- #
 
-        # Activations
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
         self.sigmoid = nn.Sigmoid()
 
-        # Disable gradients for all parameters
         for param in self.parameters():
             param.requires_grad = False
 
@@ -145,21 +142,17 @@ class NeuralDevelopmentalEncoding(nn.Module):
         Parameters
         ----------
         genotype : list[npt.NDArray[np.float32]]
-            List of chromosomes (numpy arrays). The first three chromosomes
-            encode type, connection, and rotation probabilities. An optional
-            fourth chromosome directly encodes normalized per-module variable
-            brick lengths.
+            The first three chromosomes encode type, connection, and rotation.
+            An optional fourth chromosome directly encodes normalized
+            per-module brick lengths.
 
         Returns
         -------
         list[npt.NDArray[np.float32]]
-            List of phenotype outputs (numpy arrays).
+            Phenotype outputs.
         """
-        if len(genotype) > len(self.output_layers):
-            msg = (
-                f"Expected at most {len(self.output_layers)} chromosomes, "
-                f"got {len(genotype)}"
-            )
+        if len(genotype) > 4:
+            msg = f"Expected at most 4 chromosomes, got {len(genotype)}"
             raise ValueError(msg)
 
         if len(genotype) < 3:
@@ -169,7 +162,7 @@ class NeuralDevelopmentalEncoding(nn.Module):
         outputs: list[npt.NDArray[np.float32]] = []
 
         for idx, chromosome in enumerate(genotype[:3]):
-            with torch.no_grad():  # double safety
+            with torch.no_grad():
                 np_chromosome = np.asarray(
                     chromosome,
                     dtype=np.float32,
@@ -215,11 +208,9 @@ class NeuralDevelopmentalEncoding(nn.Module):
                 )
                 raise ValueError(msg)
 
-            length_p = np.clip(
-                length_chromosome[: self.number_of_modules],
-                0.0,
-                1.0,
-            ).astype(np.float32)
+            length_p = reflect_to_unit_interval(
+                length_chromosome[: self.number_of_modules]
+            )
 
             outputs.append(length_p)
 
@@ -227,7 +218,6 @@ class NeuralDevelopmentalEncoding(nn.Module):
 
 
 if __name__ == "__main__":
-    """Usage example."""
     nde = NeuralDevelopmentalEncoding(number_of_modules=20)
 
     genotype_size = 64
@@ -244,5 +234,6 @@ if __name__ == "__main__":
     ]
 
     outputs = nde.forward(genotype)
+
     for output in outputs:
         console.log(output.shape)
