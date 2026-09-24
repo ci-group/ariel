@@ -11,21 +11,29 @@ from pathlib import Path
 
 import numpy as np
 
-from ariel.body_phenotypes.robogen_lite.collision_validation import is_physically_valid
+from ariel.body_phenotypes.robogen_lite.collision_validation import (
+    is_physically_valid,
+)
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
     ModuleType,
 )
-from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
+from ariel.body_phenotypes.robogen_lite.constructor import (
+    construct_mjspec_from_graph,
+)
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
 from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
+from ariel.parameters.ariel_modules import ArielModulesConfig
+
 
 NUM_CPPN_INPUTS = 6
 NUM_CPPN_OUTPUTS = 1 + NUM_OF_TYPES_OF_MODULES + NUM_OF_ROTATIONS + 1
+
+ariel_modules_config = ArielModulesConfig()
 
 
 @dataclass(frozen=True)
@@ -38,21 +46,20 @@ class SamplingConfig:
 
 
 def seed_everything(seed: int) -> np.random.Generator:
+    """Seed Python's random module and return a NumPy RNG."""
     random.seed(seed)
     return np.random.default_rng(seed)
 
 
 def make_id_manager() -> IdManager:
+    """Create an ID manager for random CPPN generation."""
     return IdManager(
         node_start=(NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS - 1),
         innov_start=(NUM_CPPN_INPUTS * NUM_CPPN_OUTPUTS) - 1,
     )
 
 
-def create_random_cppn(
-    id_manager: IdManager,
-    initial_structural_mutations: int = 3,
-) -> Genome:
+def create_random_cppn(id_manager: IdManager, initial_structural_mutations: int = 3) -> Genome:
     """Create one independent CPPN using the current body+brain initialization."""
     genome = Genome.random(
         num_inputs=NUM_CPPN_INPUTS,
@@ -75,21 +82,47 @@ def create_random_cppn(
 def decode_graph(genome: Genome, max_modules: int):
     """Decode a CPPN while suppressing decoder console noise."""
     sink = io.StringIO()
+
     with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
         decoder = MorphologyDecoderBestFirst(
             cppn_genome=genome,
             max_modules=max_modules,
         )
+
         return decoder.decode()
 
 
+def assign_uniform_bone_lengths(graph, rng: np.random.Generator) -> None:
+    min_length = ariel_modules_config.BRICK_LENGTH_MIN
+    max_length = ariel_modules_config.BRICK_LENGTH_MAX
+
+    for _, node_data in graph.nodes(data=True):
+        if node_data["type"] == ModuleType.BRICK.name:
+            new_length = float(
+                rng.uniform(
+                    min_length,
+                    max_length,
+                )
+            )
+
+            # print(
+            #     "UNIFORM LENGTH:",
+            #     new_length * 1000.0,
+            #     "mm",
+            # )
+
+            node_data["length"] = new_length
+
 def get_actuator_count(graph) -> int:
+    """Compile the robot and return the number of actuators."""
     robot = construct_mjspec_from_graph(graph)
     model = robot.spec.compile()
+
     return int(model.nu)
 
 
 def graph_statistics(graph) -> dict[str, float | int]:
+    """Calculate morphology-level statistics for one decoded graph."""
     brick_lengths_m = [
         float(node_data["length"])
         for _, node_data in graph.nodes(data=True)
@@ -107,11 +140,13 @@ def graph_statistics(graph) -> dict[str, float | int]:
 
     if brick_lengths_m:
         arr = np.asarray(brick_lengths_m, dtype=float)
+
         mean_mm = float(np.mean(arr) * 1000.0)
         median_mm = float(np.median(arr) * 1000.0)
         min_mm = float(np.min(arr) * 1000.0)
         max_mm = float(np.max(arr) * 1000.0)
         std_mm = float(np.std(arr) * 1000.0)
+
     else:
         mean_mm = float("nan")
         median_mm = float("nan")
@@ -132,7 +167,9 @@ def graph_statistics(graph) -> dict[str, float | int]:
 
 
 def iter_bones(graph):
+    """Yield one record for every brick/bone in the graph."""
     brick_index = 0
+
     for node_id, node_data in graph.nodes(data=True):
         if (
             node_data["type"] == ModuleType.BRICK.name
@@ -143,24 +180,38 @@ def iter_bones(graph):
                 "node_id": int(node_id),
                 "length_mm": float(node_data["length"]) * 1000.0,
             }
+
             brick_index += 1
 
 
 def graph_to_jsonable(graph) -> dict:
+    """Convert a NetworkX morphology graph to a JSON-serializable object."""
     return {
         "nodes": [
-            {"id": int(node_id), **dict(node_data)}
+            {
+                "id": int(node_id),
+                **dict(node_data),
+            }
             for node_id, node_data in graph.nodes(data=True)
         ],
         "edges": [
-            {"parent": int(parent), "child": int(child), **dict(edge_data)}
+            {
+                "parent": int(parent),
+                "child": int(child),
+                **dict(edge_data),
+            }
             for parent, child, edge_data in graph.edges(data=True)
         ],
     }
 
 
 def write_json(path: Path, data: dict) -> None:
+    """Write a dictionary to a JSON file."""
     path.write_text(
-        json.dumps(data, indent=2, sort_keys=True),
+        json.dumps(
+            data,
+            indent=2,
+            sort_keys=True,
+        ),
         encoding="utf-8",
     )

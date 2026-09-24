@@ -71,6 +71,16 @@ class NeuralDevelopmentalEncoding(nn.Module):
             Size of each genotype chromosome, by default 64.
         """
 
+        if number_of_modules > genotype_size:
+            msg = (
+                "number_of_modules cannot exceed genotype_size when variable "
+                "brick lengths are encoded directly."
+            )
+            raise ValueError(msg)
+
+        self.number_of_modules = number_of_modules
+        self.genotype_size = genotype_size
+
         # Hidden Layers
         self.fc1 = nn.Linear(genotype_size, 64)
         self.fc2 = nn.Linear(64, 32)
@@ -97,8 +107,6 @@ class NeuralDevelopmentalEncoding(nn.Module):
             number_of_modules * NUM_OF_ROTATIONS,
         )
 
-        # One normalized [0, 1] length value per possible module.
-        # The decoder maps this value into the configured physical brick range.
         self.length_p_shape = (number_of_modules,)
         self.length_p_out = nn.Linear(
             128,
@@ -139,7 +147,8 @@ class NeuralDevelopmentalEncoding(nn.Module):
         genotype : list[npt.NDArray[np.float32]]
             List of chromosomes (numpy arrays). The first three chromosomes
             encode type, connection, and rotation probabilities. An optional
-            fourth chromosome encodes per-module variable brick lengths.
+            fourth chromosome directly encodes normalized per-module variable
+            brick lengths.
 
         Returns
         -------
@@ -153,10 +162,26 @@ class NeuralDevelopmentalEncoding(nn.Module):
             )
             raise ValueError(msg)
 
+        if len(genotype) < 3:
+            msg = f"Expected at least 3 chromosomes, got {len(genotype)}"
+            raise ValueError(msg)
+
         outputs: list[npt.NDArray[np.float32]] = []
-        for idx, chromosome in enumerate(genotype):
+
+        for idx, chromosome in enumerate(genotype[:3]):
             with torch.no_grad():  # double safety
-                np_chromosome = np.array(chromosome)
+                np_chromosome = np.asarray(
+                    chromosome,
+                    dtype=np.float32,
+                )
+
+                if np_chromosome.shape != (self.genotype_size,):
+                    msg = (
+                        f"Chromosome {idx} must have shape "
+                        f"({self.genotype_size},), got {np_chromosome.shape}"
+                    )
+                    raise ValueError(msg)
+
                 x = torch.from_numpy(np_chromosome).to(torch.float32)
 
                 x = self.fc1(x)
@@ -176,6 +201,28 @@ class NeuralDevelopmentalEncoding(nn.Module):
 
                 x = x.view(self.output_shapes[idx])
                 outputs.append(x.detach().numpy())
+
+        if len(genotype) == 4:
+            length_chromosome = np.asarray(
+                genotype[3],
+                dtype=np.float32,
+            )
+
+            if length_chromosome.shape != (self.genotype_size,):
+                msg = (
+                    "Length chromosome must have shape "
+                    f"({self.genotype_size},), got {length_chromosome.shape}"
+                )
+                raise ValueError(msg)
+
+            length_p = np.clip(
+                length_chromosome[: self.number_of_modules],
+                0.0,
+                1.0,
+            ).astype(np.float32)
+
+            outputs.append(length_p)
+
         return outputs
 
 
