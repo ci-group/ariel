@@ -44,7 +44,9 @@ install(show_locals=False)
 console = Console()
 
 
-def reflect_to_unit_interval(values: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+def reflect_to_unit_interval(
+    values: npt.NDArray[np.float32],
+) -> npt.NDArray[np.float32]:
     """Reflect values into the interval [0, 1].
 
     Reflection avoids the boundary pile-up produced by clipping.
@@ -65,14 +67,18 @@ def reflect_to_unit_interval(values: npt.NDArray[np.float32]) -> npt.NDArray[np.
 
 
 class NeuralDevelopmentalEncoding(nn.Module):
-    def __init__(self, number_of_modules: int, genotype_size: int = 64) -> None:
+    def __init__(
+        self,
+        number_of_modules: int,
+        genotype_size: int = 64,
+    ) -> None:
         super().__init__()
         """
         Neural developmental encoder.
 
         Given a genotype (list of chromosomes), output the phenotype
-        (probability matrices corresponding to module types, connections,
-        rotations, and optionally directly encoded variable brick lengths).
+        probability matrices corresponding to module types, connections,
+        rotations, and optionally directly encoded variable brick lengths.
 
         Parameters
         ----------
@@ -82,13 +88,6 @@ class NeuralDevelopmentalEncoding(nn.Module):
             Size of each genotype chromosome, by default 64.
         """
 
-        if number_of_modules > genotype_size:
-            msg = (
-                "number_of_modules cannot exceed genotype_size when variable "
-                "brick lengths are encoded directly."
-            )
-            raise ValueError(msg)
-
         self.number_of_modules = number_of_modules
         self.genotype_size = genotype_size
 
@@ -97,19 +96,29 @@ class NeuralDevelopmentalEncoding(nn.Module):
         self.fc3 = nn.Linear(32, 64)
         self.fc4 = nn.Linear(64, 128)
 
-        self.type_p_shape = (number_of_modules, NUM_OF_TYPES_OF_MODULES)
+        self.type_p_shape = (
+            number_of_modules,
+            NUM_OF_TYPES_OF_MODULES,
+        )
         self.type_p_out = nn.Linear(
             128,
             number_of_modules * NUM_OF_TYPES_OF_MODULES,
         )
 
-        self.conn_p_shape = (number_of_modules, number_of_modules, NUM_OF_FACES)
+        self.conn_p_shape = (
+            number_of_modules,
+            number_of_modules,
+            NUM_OF_FACES,
+        )
         self.conn_p_out = nn.Linear(
             128,
             number_of_modules * number_of_modules * NUM_OF_FACES,
         )
 
-        self.rot_p_shape = (number_of_modules, NUM_OF_ROTATIONS)
+        self.rot_p_shape = (
+            number_of_modules,
+            NUM_OF_ROTATIONS,
+        )
         self.rot_p_out = nn.Linear(
             128,
             number_of_modules * NUM_OF_ROTATIONS,
@@ -120,6 +129,7 @@ class NeuralDevelopmentalEncoding(nn.Module):
             self.conn_p_out,
             self.rot_p_out,
         ]
+
         self.output_shapes = [
             self.type_p_shape,
             self.conn_p_shape,
@@ -175,7 +185,9 @@ class NeuralDevelopmentalEncoding(nn.Module):
                     )
                     raise ValueError(msg)
 
-                x = torch.from_numpy(np_chromosome).to(torch.float32)
+                x = torch.from_numpy(
+                    np_chromosome,
+                ).to(torch.float32)
 
                 x = self.fc1(x)
                 x = self.relu(x)
@@ -192,10 +204,22 @@ class NeuralDevelopmentalEncoding(nn.Module):
                 x = self.output_layers[idx](x)
                 x = self.sigmoid(x)
 
-                x = x.view(self.output_shapes[idx])
-                outputs.append(x.detach().numpy())
+                x = x.view(
+                    self.output_shapes[idx],
+                )
+
+                outputs.append(
+                    x.detach().numpy(),
+                )
 
         if len(genotype) == 4:
+            if self.number_of_modules > self.genotype_size:
+                msg = (
+                    "number_of_modules cannot exceed genotype_size when "
+                    "variable brick lengths are encoded directly."
+                )
+                raise ValueError(msg)
+
             length_chromosome = np.asarray(
                 genotype[3],
                 dtype=np.float32,
@@ -209,22 +233,51 @@ class NeuralDevelopmentalEncoding(nn.Module):
                 raise ValueError(msg)
 
             length_p = reflect_to_unit_interval(
-                length_chromosome[: self.number_of_modules]
+                length_chromosome[
+                    : self.number_of_modules
+                ],
             )
 
-            outputs.append(length_p)
+            outputs.append(
+                length_p,
+            )
 
         return outputs
 
 
 if __name__ == "__main__":
-    nde = NeuralDevelopmentalEncoding(number_of_modules=20)
-
+    number_of_modules = 20
     genotype_size = 64
-    type_p_genes = RNG.random(genotype_size)
-    conn_p_genes = RNG.random(genotype_size)
-    rot_p_genes = RNG.random(genotype_size)
-    length_p_genes = RNG.random(genotype_size)
+    scale = 8192.0
+
+    nde = NeuralDevelopmentalEncoding(
+        number_of_modules=number_of_modules,
+        genotype_size=genotype_size,
+    )
+
+    type_p_genes = RNG.uniform(
+        -scale,
+        scale,
+        genotype_size,
+    ).astype(np.float32)
+
+    conn_p_genes = RNG.uniform(
+        -scale,
+        scale,
+        genotype_size,
+    ).astype(np.float32)
+
+    rot_p_genes = RNG.uniform(
+        -scale,
+        scale,
+        genotype_size,
+    ).astype(np.float32)
+
+    length_p_genes = RNG.uniform(
+        0.0,
+        1.0,
+        genotype_size,
+    ).astype(np.float32)
 
     genotype = [
         type_p_genes,
@@ -233,7 +286,11 @@ if __name__ == "__main__":
         length_p_genes,
     ]
 
-    outputs = nde.forward(genotype)
+    outputs = nde.forward(
+        genotype,
+    )
 
     for output in outputs:
-        console.log(output.shape)
+        console.log(
+            output.shape,
+        )

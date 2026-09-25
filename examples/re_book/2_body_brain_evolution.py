@@ -73,7 +73,6 @@ parser.add_argument(
 )
 parser.add_argument("--pop", type=int, default=80, help="Population size")
 parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
-parser.add_argument("--seed", type=int, default=42, help="Random seed")
 parser.add_argument(
     "--bone-mode",
     choices=["fixed", "evolvable"],
@@ -87,12 +86,6 @@ parser.add_argument(
     help="Brick length in meters when --bone-mode=fixed",
 )
 parser.add_argument(
-    "--max-modules",
-    type=int,
-    default=10,
-    help="Maximum number of modules",
-)
-parser.add_argument(
     "--visualize",
     action=argparse.BooleanOptionalAction,
     default=True,
@@ -104,7 +97,7 @@ args = parser.parse_args()
 DURATION: int = args.dur
 POP_SIZE: int = args.pop
 BUDGET: int = args.budget
-NUM_MODULES: int = args.max_modules
+NUM_MODULES: int = 10
 CTRL_GENOME_SIZE: int = NUM_MODULES * 5
 
 BONE_MODE = args.bone_mode
@@ -132,7 +125,7 @@ NUM_CPPN_OUTPUTS = 1 + T + R + 1
 type ViewerTypes = Literal["launcher", "video", "simple"]
 
 # Determinism
-SEED = args.seed
+SEED = 42
 RNG = np.random.default_rng(SEED)
 torch.manual_seed(SEED)
 # reproduction() draws parents with random.sample / random.choice, so the
@@ -785,13 +778,6 @@ def main() -> None:
     console.rule(
         "[bold purple]Starting Joint Evolution (Morph + Ctrl)[/bold purple]",
     )
-
-    console.log(
-        f"Population: {POP_SIZE}, Budget: {BUDGET}, Duration: {DURATION}s, "
-        f"Seed: {SEED}, Max Modules: {NUM_MODULES}, Bone Mode: {BONE_MODE}",
-    )
-    if BONE_MODE == "fixed":
-        console.log(f"Fixed Brick Length: {FIXED_BRICK_LENGTH * 1000:.2f} mm")
 
     evo = Evolution()
     best = evo.evolve()
