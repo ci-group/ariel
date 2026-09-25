@@ -7,19 +7,34 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ALLOWED_FACES,
     ALLOWED_ROTATIONS,
     IDX_OF_CORE,
+    NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
     ModuleFaces,
     ModuleRotationsIdx,
     ModuleType,
 )
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
+from ariel.parameters.ariel_modules import ArielModulesConfig
 
 console = Console()
+ariel_modules_config = ArielModulesConfig()
 
 
 def softmax(raw_scores: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
     e_x = np.exp(raw_scores - np.max(raw_scores))
     return e_x / e_x.sum()
+
+
+def scale_brick_length(raw_length_output: float) -> float:
+    """Scale a CPPN output to the configured brick length range.
+
+    Values outside [0, 1] are clipped to the nearest endpoint.
+    """
+    normalized = float(np.clip(raw_length_output, 0.0, 1.0))
+    return ariel_modules_config.BRICK_LENGTH_MIN + normalized * (
+        ariel_modules_config.BRICK_LENGTH_MAX
+        - ariel_modules_config.BRICK_LENGTH_MIN
+    )
 
 
 class MorphologyDecoderBestFirst:
@@ -90,13 +105,20 @@ class MorphologyDecoderBestFirst:
                     cppn_inputs = list(parent_pos) + list(child_pos)
                     raw_outputs = self.cppn_genome.activate(cppn_inputs)
 
+                    # CPPN output layout:
+                    # 0                              -> connection score
+                    # 1 ... T                        -> module type scores
+                    # 1 + T ... 1 + T + R - 1      -> rotation scores
+                    # final output                   -> brick length
                     conn_score = raw_outputs[0]
-                    type_scores = np.array(
-                        raw_outputs[1 : 1 + NUM_OF_TYPES_OF_MODULES]
-                    )
-                    rot_scores = np.array(
-                        raw_outputs[1 + NUM_OF_TYPES_OF_MODULES :]
-                    )
+                    type_start = 1
+                    type_end = type_start + NUM_OF_TYPES_OF_MODULES
+                    rot_start = type_end
+                    rot_end = rot_start + NUM_OF_ROTATIONS
+
+                    type_scores = np.array(raw_outputs[type_start:type_end])
+                    rot_scores = np.array(raw_outputs[rot_start:rot_end])
+                    raw_length_output = raw_outputs[rot_end]
 
                     type_probs = softmax(type_scores)
 
@@ -112,6 +134,10 @@ class MorphologyDecoderBestFirst:
                         np.argmax(softmax(rot_scores))
                     )
 
+                    child_length = None
+                    if child_type == ModuleType.BRICK:
+                        child_length = scale_brick_length(raw_length_output)
+
                     if (
                         face in ALLOWED_FACES[child_type]
                         and child_rot in ALLOWED_ROTATIONS[child_type]
@@ -122,6 +148,7 @@ class MorphologyDecoderBestFirst:
                             "child_pos": child_pos,
                             "child_type": child_type,
                             "child_rot": child_rot,
+                            "child_length": child_length,
                             "face": face,
                         })
 
@@ -134,11 +161,14 @@ class MorphologyDecoderBestFirst:
             best_conn = max(potential_connections, key=lambda x: x["score"])
 
             child_id = next_module_id
-            robot_graph.add_node(
-                child_id,
-                type=best_conn["child_type"].name,
-                rotation=best_conn["child_rot"].name,
-            )
+            node_data = {
+                "type": best_conn["child_type"].name,
+                "rotation": best_conn["child_rot"].name,
+            }
+            if best_conn["child_type"] == ModuleType.BRICK:
+                node_data["length"] = best_conn["child_length"]
+
+            robot_graph.add_node(child_id, **node_data)
             robot_graph.add_edge(
                 best_conn["parent_id"], child_id, face=best_conn["face"].name
             )
@@ -149,6 +179,8 @@ class MorphologyDecoderBestFirst:
                 "type": best_conn["child_type"],
                 "rot": best_conn["child_rot"],
             }
+            if best_conn["child_type"] == ModuleType.BRICK:
+                module_data[child_id]["length"] = best_conn["child_length"]
 
             # I no longer remove the parent, I just add the new child.
             # (I think this makes snakes less likely)

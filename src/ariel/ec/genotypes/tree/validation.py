@@ -13,6 +13,10 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleRotationsIdx,
     ModuleType,
 )
+from ariel.parameters.ariel_modules import ArielModulesConfig
+
+
+ariel_modules_config = ArielModulesConfig()
 
 
 def _to_int_node_id(node_id: int | str) -> int:
@@ -88,6 +92,26 @@ def validate_genome_dict(genome: dict[str, Any]) -> None:
         if rot not in ModuleRotationsIdx.__members__:
             msg = f"Node {nid} has invalid rotation '{rot}'"
             raise ValueError(msg)
+
+        # Validate brick length if present
+        if t == ModuleType.BRICK.name and "length" in v:
+            length = v["length"]
+            # Check that the brick length is numeric
+            if isinstance(length, bool) or not isinstance(length, (int, float)):
+                msg = f"Node {nid} has invalid brick length '{length}'"
+                raise ValueError(msg)
+            # Check that the brick length is within the allowed range
+            if not (
+                ariel_modules_config.BRICK_LENGTH_MIN
+                <= float(length)
+                <= ariel_modules_config.BRICK_LENGTH_MAX
+            ):
+                msg = (
+                    f"Node {nid} has brick length {length}, which must be between "
+                    f"{ariel_modules_config.BRICK_LENGTH_MIN} and "
+                    f"{ariel_modules_config.BRICK_LENGTH_MAX} meters"
+                )
+                raise ValueError(msg)
 
     # Validate edges
     occupied = {}  # (parent, face) -> child
