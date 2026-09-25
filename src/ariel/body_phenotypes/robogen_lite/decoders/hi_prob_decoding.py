@@ -19,6 +19,9 @@ from networkx import DiGraph
 
 # Local libraries
 from ariel import log
+from ariel.body_phenotypes.robogen_lite.collision_validation import (
+    is_physically_valid,
+)
 from ariel.body_phenotypes.robogen_lite.config import (
     ALLOWED_FACES,
     ALLOWED_ROTATIONS,
@@ -123,6 +126,67 @@ class HighProbabilityDecoder(Blueprint):
 
         return self.graph
 
+    def _generate_candidate_graph(
+        self,
+        nodes: set[int],
+        edges: list[tuple[int, int, int]],
+    ) -> DiGraph[Any]:
+        """Generate a candidate graph for physical validation."""
+        graph: DiGraph[Any] = nx.DiGraph()
+
+        for node in nodes:
+            graph.add_node(
+                node,
+                type=self.type_dict[node].name,
+                rotation=self.rot_dict[node].name,
+            )
+
+            if (
+                self.length_p_space is not None
+                and self.type_dict[node] == ModuleType.BRICK
+            ):
+                graph.nodes[node]["length"] = scale_brick_length(
+                    float(self.length_p_space[node]),
+                )
+
+        for parent, child, face in edges:
+            graph.add_edge(
+                parent,
+                child,
+                face=ModuleFaces(face).name,
+            )
+
+        return graph
+
+    def _connection_is_physically_valid(
+        self,
+        pre_nodes: dict[int, int],
+        from_module: int,
+        to_module: int,
+        conn_face: int,
+    ) -> bool:
+        """Return whether a candidate connection keeps the body valid."""
+        candidate_nodes = {
+            i
+            for i, instantiated in pre_nodes.items()
+            if instantiated == 1
+        }
+        candidate_nodes.add(to_module)
+
+        candidate_edges = [
+            *self.edges,
+            (from_module, to_module, conn_face),
+        ]
+
+        candidate_graph = self._generate_candidate_graph(
+            nodes=candidate_nodes,
+            edges=candidate_edges,
+        )
+
+        return is_physically_valid(
+            candidate_graph,
+        )
+
     def decode_probability_to_graph(
         self,
     ) -> None:
@@ -157,7 +221,12 @@ class HighProbabilityDecoder(Blueprint):
         # Available faces for connections
         available_faces = np.zeros_like(self.conn_p_space)
         available_faces[IDX_OF_CORE, :, :] = 1.0
-        for _ in range(len(pre_nodes)):
+
+        while True:
+            # Stop after all available modules have been instantiated
+            if all(pre_nodes.values()):
+                break
+
             # Get the current state of the connection probability space
             current_state = self.conn_p_space * available_faces
 
@@ -178,6 +247,13 @@ class HighProbabilityDecoder(Blueprint):
                 log.debug(msg)
                 break
 
+            # Ensure this exact failed candidate cannot be selected again
+            self.conn_p_space[
+                from_module,
+                to_module,
+                conn_face,
+            ] = 0.0
+
             # Ensure the core module is never a child
             if to_module == IDX_OF_CORE:
                 msg = "Cannot connect to the core module as a child.\n"
@@ -194,6 +270,15 @@ class HighProbabilityDecoder(Blueprint):
                 msg = "Cannot instantiate a NONE module.\n"
                 msg += "This indicates an error in decoding."
                 raise ValueError(msg)
+
+            # Skip connections that would make the partial robot invalid
+            if not self._connection_is_physically_valid(
+                pre_nodes=pre_nodes,
+                from_module=from_module,
+                to_module=to_module,
+                conn_face=conn_face,
+            ):
+                continue
 
             # Get module types and rotations
             self.edges.append(
@@ -216,7 +301,7 @@ class HighProbabilityDecoder(Blueprint):
         self.nodes = {i for i in pre_nodes if pre_nodes[i] == 1}
 
     def set_module_types_and_rotations(self) -> None:
-        """Set the module types and rotations using probability spaces."""
+        """Set module types and rotations using probability spaces."""
         # Module type from argmax of type probability space
         type_from_argmax = np.argmax(self.type_p_space, axis=1)
         self.type_dict = {
