@@ -113,9 +113,14 @@ def main_numpy(parser: argparse.ArgumentParser) -> None:
     model.learn(total_timesteps=args.total_timesteps)
     dt = time.time() - t0
 
+    # sb3 PPO only stops at the end of a full rollout (n_steps × num_envs
+    # env-steps), so the steps actually run can exceed --total-timesteps.
+    steps_run = model.num_timesteps
     print(f"\n=== training complete ===")
     print(f"  wall time : {dt:.1f} s")
-    print(f"  steps/sec : {args.total_timesteps / dt:.0f}")
+    print(f"  steps run : {steps_run} (requested {args.total_timesteps}; "
+          f"sb3 rounds up to whole rollouts of {model.n_steps} x {args.num_envs})")
+    print(f"  steps/sec : {steps_run / dt:.0f}")
 
 
 # ---------- isaaclab backend: rl_games PPO + DirectRLEnv ------------------------

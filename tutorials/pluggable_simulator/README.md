@@ -385,8 +385,20 @@ python tutorials/pluggable_simulator/train.py \
 
 Uses `DroneSimulator` (pure NumPy + SymPy) via `NumpyBlueprintGateEnv`
 — a thin shim that calls `blueprint_to_propellers` and forwards to
-the established `DroneGateEnv`. >100× real-time on CPU. ~6600 env-
-steps/sec on 8 parallel envs.
+the established `DroneGateEnv`. Runs on CPU only.
+
+`--total-timesteps` is a minimum, not an exact count: sb3 PPO always
+finishes a whole rollout of 2048 steps per env. With 8 envs, a request
+for 5000 steps therefore runs 16,384 (2048 × 8), and `train.py` prints
+both numbers.
+
+Throughput with 8 envs, measured on an AMD Ryzen 9 PRO 7940HS laptop
+(2026-09-28, three runs each; expect different numbers on other CPUs):
+
+| What | Rate |
+|---|---|
+| PPO training, end to end (`--total-timesteps 50000`) | 3,600–4,000 env-steps/s |
+| Simulation stepping alone, random actions | ~25,000 env-steps/s — with `dt` = 0.01 s, about 250 simulated seconds per wall-clock second in total, i.e. ~31× real-time per drone |
 
 ### Isaac Lab backend (hover task)
 
