@@ -175,6 +175,7 @@ def _isaaclab_rl_games_train(env, args) -> None:
         max_epochs=args.max_iterations,
         minibatch_size=24 * args.num_envs,
         device=args.device,
+        seed=args.seed,
     )
     if args.experiment_prefix:
         agent_cfg_kwargs["experiment_name"] = args.experiment_prefix

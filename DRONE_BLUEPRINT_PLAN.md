@@ -251,6 +251,12 @@ What's landed (in order of commit):
    `DirectRLEnv` shape rather than the `BlueprintGateEnv` Protocol —
    "two-Protocols-one-trainer" as picked during planning. See §6
    entry 17.
+   *(Superseded 2026-09-28: the reward is now Isaac Lab's quadcopter
+   reward, because `-distance × step_dt` made crashing early pay. The
+   default actuation is now `action_mode="mixer"`: per-rotor thrust
+   through the blueprint's allocation matrix, with the root wrench kept
+   as `"wrench"`. See the module docstring of
+   `src/ariel/simulation/tasks/isaaclab_hover_env.py`.)*
 
 **Still pending — to pick up next session:**
 
@@ -756,7 +762,8 @@ Each entry: **decision** — *why*; alternatives considered.
       computes `-distance × step_dt` rewards. v1 smoke-tests via a
       random-action stepping loop (PPO training deferred to
       Phase 2.5; see below). 72 steps in 1.6 s on 16 envs through
-      Isaac Sim PhysX.
+      Isaac Sim PhysX. *(Superseded 2026-09-28: reward and default
+      actuation changed; see the note under §5 entry 8.)*
     - `tutorials/pluggable_simulator/{README.md, train.py}` — the
       tutorial doc + a unified entry point with `--simulator
       {numpy,isaaclab}` dispatch and the five-step "add your own
