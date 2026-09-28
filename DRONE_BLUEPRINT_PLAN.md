@@ -294,6 +294,26 @@ What's landed (in order of commit):
     one documented install command, and one short `rl_games` PPO
     smoke run from `tutorials/pluggable_simulator/train.py`.
 
+  > **Superseded 2026-09-28 — do not follow this recipe for new setups.**
+  > It is kept as the record of how Phase 2.5 was done. The maintained,
+  > end-to-end-rehearsed setup is `tutorials/pluggable_simulator/README.md`
+  > §3b. That recipe differs from this one in three ways:
+  > - Isaac Lab is pinned to commit `f4aa17f87e2` instead of vendoring
+  >   its env spec.
+  > - The env is created with `./isaaclab.sh --conda`, which also
+  >   installs the activation hook. The `conda env create` below doesn't,
+  >   so Isaac Sim is missing in every new terminal unless
+  >   `setup_conda_env.sh` is sourced by hand.
+  > - The guardrail no longer calls `exit 1`, which closes an interactive
+  >   shell.
+  >
+  > The vendored `tutorials/pluggable_simulator/isaaclab-env.yml` was
+  > deleted on 2026-09-28. Recover it with
+  > `git show 7dfaea4:tutorials/pluggable_simulator/isaaclab-env.yml`.
+  > Step 7's comment is also wrong: importing `DroneGateEnv` loads
+  > neither sqlmodel nor pydantic-settings. It needs torch, gymnasium and
+  > stable-baselines3, which `./isaaclab.sh -i` installs.
+
   **Option A execution recipe (copy/paste):**
 
   ```bash

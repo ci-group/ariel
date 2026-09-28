@@ -124,117 +124,218 @@ forced uniformity.
 
 ## 3. Environment setup
 
-The two backends have different runtime requirements, so each gets its
-own env. Pick the one matching the backend(s) you want to use.
+The two backends need different software, so each gets its own Python
+environment. You only need the one(s) you intend to run:
+
+| Backend | Environment | Needs an NVIDIA GPU? |
+|---|---|---|
+| NumPy (gate task, sb3) | ariel's own `uv` venv (`.venv/`) | No |
+| Isaac Lab (hover task, rl_games) | a conda env built around a standalone Isaac Sim (~18 GB) | Yes |
+
+If you are new to the tutorial, start with §3a: it has no GPU or
+simulator prerequisites and lets you run §4's NumPy example right away.
+
+Both recipes below were rehearsed end-to-end from fresh clones on
+Ubuntu 24.04 on 2026-09-28 (the Isaac Sim download in §3b step 1 was
+not repeated; an existing unpack of the same 5.1.0 zip was reused).
 
 ### 3a. NumPy backend (gate task, stable-baselines3)
 
-Works in any ariel venv with the `rl-sb3` and `torch` extras installed.
-From the ariel repo root:
+**Prerequisites:** Linux (tested on Ubuntu 24.04), `git` and [`uv`](https://docs.astral.sh/uv/)
+(`curl -LsSf https://astral.sh/uv/install.sh | sh`). `uv` downloads a
+suitable Python (≥ 3.11) by itself.
 
 ```bash
+# 1) Get the code. The tutorial lives on the `pluggable-simulator` branch.
+git clone -b pluggable-simulator https://github.com/itokeiic/ariel.git
+cd ariel
+
+# 2) Create .venv/ with ariel + the RL extras (stable-baselines3, gymnasium, torch).
 uv sync --extra rl-sb3 --extra torch
+
+# 3) Activate it. Do this in every new terminal before running the tutorial.
+source .venv/bin/activate
+
+# 4) Smoke test: a short PPO run on the NumPy simulator (a few seconds).
+python tutorials/pluggable_simulator/train.py --simulator numpy \
+    --num-envs 8 --total-timesteps 5000
 ```
 
-That's it — the NumPy backend has no further setup. See the [project
-root README](../../README.md) for the broader ariel install matrix.
+Success looks like `=== training complete ===` followed by the wall
+time. See the [project root README](../../README.md) for ariel's other
+install options.
 
 ### 3b. Isaac Lab backend (hover task, rl_games)
 
-Isaac Lab owns its own torch / gymnasium / numpy ABI stack, so we
-install ariel **into** Isaac Lab's env rather than the other way
-around. The reproducible recipe:
+Isaac Lab and Isaac Sim own their binary stack (torch, gymnasium,
+numpy), so ariel is installed **into** Isaac Lab's conda env, never the
+other way round.
+
+#### Prerequisites
+
+| Requirement | Detail |
+|---|---|
+| OS | Linux x86_64, Ubuntu 22.04 or 24.04 (NVIDIA's supported list for Isaac Sim 5.1.0) |
+| GPU | NVIDIA RTX GPU (needs RT cores — A100/H100 are **not** supported), driver ≥ 580.65.06. Check with `nvidia-smi`. |
+| Memory | NVIDIA's stated minimum is 32 GB RAM and 16 GB VRAM. The tutorial's small runs (16 parallel envs) also worked on an 8 GB-VRAM laptop GPU. |
+| Disk | ~18 GB for Isaac Sim, ~8 GB for the conda env, ~1 GB for Isaac Lab |
+| Tools | `git`, [Miniconda](https://docs.anaconda.com/miniconda/) with `conda init` run once, and `cmake` + `build-essential` (`sudo apt install cmake build-essential`) |
+
+Versions this recipe is tested with: **Isaac Sim 5.1.0** (standalone
+build) and **Isaac Lab commit `f4aa17f87e2`** (v2.3.2 + 13). Newer
+versions may work but are untested; pin these if in doubt.
+
+#### Step 1 — Install Isaac Sim 5.1.0
+
+Download the standalone Linux build (~18 GB unpacked) and unzip it to
+`~/isaacsim`, following NVIDIA's
+[workstation install guide](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_workstation.html):
 
 ```bash
-# 0) Paths (adjust if your checkout differs)
-export ARIEL_ROOT="$HOME/Documents/sandbox/ariel"
-export ISAACLAB_ROOT="$HOME/Documents/sandbox/IsaacLab"
-export ENV_NAME="ariel-isaaclab-train"
-
-# 1) Create a clean env from this repo's *vendored* copy of Isaac Lab's
-#    env spec. We vendor (rather than read $ISAACLAB_ROOT/environment.yml
-#    directly) so the recipe is stable across upstream Isaac Lab churn —
-#    refresh deliberately, not silently. See the SHA in the file header.
-conda env remove -n "$ENV_NAME" -y || true
-conda env create -n "$ENV_NAME" \
-    -f "$ARIEL_ROOT/tutorials/pluggable_simulator/isaaclab-env.yml"
-conda activate "$ENV_NAME"
-
-# 2) Install Isaac Lab into the env (it owns torch / gymnasium / numpy).
-cd "$ISAACLAB_ROOT"
-./isaaclab.sh -i
-
-# 3) Sanity-check Isaac Lab's python path first.
-./isaaclab.sh -p -c "import isaaclab; print('isaaclab import OK')"
-
-# 3b) Source Isaac Sim's conda-env setup so bare `python` invocations
-#     that follow can find `isaacsim` / `omni.*` / `pxr` on PYTHONPATH.
-#     `./isaaclab.sh -p` (above) handles this internally; bare `python`
-#     does not. The recipe uses bare `python` from step 7 onward.
-source "$ISAACLAB_ROOT/_isaac_sim/setup_conda_env.sh"
-
-# 4) Snapshot simulator-owned binary versions BEFORE ariel install.
-#    The next step (pip install -e . --no-deps) MUST leave these
-#    untouched; the post-install diff confirms it.
-pip list --format=freeze \
-    | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
-    | sort > /tmp/ariel_phase25_binaries_before.txt
-cat /tmp/ariel_phase25_binaries_before.txt
-
-# 5) Install ariel WITHOUT dependency resolution side effects.
-#    --no-deps is the load-bearing flag: pip MUST NOT replace the
-#    simulator-owned torch / gymnasium / numpy here.
-cd "$ARIEL_ROOT"
-pip install -e . --no-deps
-
-# 6) Guardrail check: verify ariel install did not bump binaries.
-#    Expected output: "BINARIES UNCHANGED ✓" with an empty diff.
-pip list --format=freeze \
-    | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
-    | sort > /tmp/ariel_phase25_binaries_after.txt
-if diff -u /tmp/ariel_phase25_binaries_before.txt \
-            /tmp/ariel_phase25_binaries_after.txt; then
-    echo "BINARIES UNCHANGED ✓"
-else
-    echo "ERROR: simulator-owned binaries were bumped by ariel install" >&2
-    echo "       inspect pyproject.toml [project.dependencies] for leaks" >&2
-    exit 1
-fi
-
-# 6b) Install ariel's pure-Python deps that --no-deps skipped, but
-#     pin the simulator-owned binaries against accidental upgrade.
-#     The before-snapshot from step 4 doubles as a pip constraints
-#     file: any line `torch==2.7.0+cu128` in there acts as a hard
-#     ceiling on what pip can do here. Skip evotorch and mujoco-mjx
-#     — they bring torch / jax / numpy deps that fight Isaac Lab's
-#     stack.
-pip install --constraint /tmp/ariel_phase25_binaries_before.txt \
-    "networkx>=3.2.1" \
-    "rich>=14.1.0" \
-    "pydantic>=2.11.9" \
-    "pydantic-settings>=2.10.1" \
-    "sqlalchemy>=2.0.43" \
-    "sqlmodel>=0.0.25" \
-    "numpy-quaternion>=2023.0.3" \
-    "matplotlib>=3.9.4" \
-    "mujoco>=3.3.6"
-
-# 7) Quick import smoke for ariel (Blueprint chain — what the Isaac
-#    Lab path actually uses). Importing `DroneGateEnv` here would test
-#    the NumPy backend's chain, which transitively needs EA orchestration
-#    deps the Isaac Lab env intentionally doesn't pull in.
-python -c "
-from ariel.body_phenotypes.drone.blueprint import DroneBlueprint
-from ariel.body_phenotypes.drone.decoders import spherical_angular_to_blueprint
-from ariel.body_phenotypes.drone.backends import blueprint_to_urdf
-print('ariel Blueprint chain: OK')
-"
+mkdir -p ~/isaacsim
+cd ~/Downloads
+wget https://downloads.isaacsim.nvidia.com/isaac-sim-standalone-5.1.0-linux-x86_64.zip
+unzip isaac-sim-standalone-5.1.0-linux-x86_64.zip -d ~/isaacsim
+cd ~/isaacsim
+./post_install.sh
 ```
 
-Why this shape: ariel's base `pyproject.toml` pins `numpy>=1.26,<2`
-specifically to be safe to install into an Isaac Lab env. Going the
-other way — installing Isaac Lab into an ariel-managed env — drags in
-sb3's compiled deps against numpy 2 and segfaults.
+Optional: `./isaac-sim.compatibility_check.sh` opens a small app that
+checks your driver and GPU against Isaac Sim's requirements.
+
+#### Step 2 — Set the paths used below
+
+Adjust these if you put things elsewhere. Every later step uses them,
+so run all the steps in the **same terminal**.
+
+```bash
+export ISAACSIM_ROOT="$HOME/isaacsim"     # where you unzipped Isaac Sim
+export ISAACLAB_ROOT="$HOME/IsaacLab"     # where Isaac Lab will be cloned
+export ARIEL_ROOT="$HOME/ariel"           # where ariel will be cloned
+export ENV_NAME="ariel-isaaclab-train"    # name of the conda env to create
+```
+
+#### Step 3 — Clone Isaac Lab at the tested commit and link Isaac Sim
+
+```bash
+git clone https://github.com/isaac-sim/IsaacLab.git "$ISAACLAB_ROOT"
+cd "$ISAACLAB_ROOT"
+git checkout f4aa17f87e2
+ln -s "$ISAACSIM_ROOT" _isaac_sim
+```
+
+The `_isaac_sim` link is how Isaac Lab finds a standalone Isaac Sim.
+Create it **before** step 4.
+
+#### Step 4 — Create the conda env and install Isaac Lab
+
+```bash
+cd "$ISAACLAB_ROOT"
+./isaaclab.sh --conda "$ENV_NAME"     # creates a Python 3.11 env
+conda activate "$ENV_NAME"
+./isaaclab.sh --install               # Isaac Lab + torch 2.7 (cu128) + RL libraries
+```
+
+Use `./isaaclab.sh --conda`, not a plain `conda env create`: besides
+creating the env, it installs an activation hook that puts Isaac Sim on
+the Python path every time you run `conda activate "$ENV_NAME"`.
+Without the hook you get `ModuleNotFoundError: No module named
+'isaacsim'` (or `'pxr'`) in every new terminal.
+
+`--install` pulls in all of Isaac Lab's RL libraries (rl_games,
+rsl_rl, skrl, stable-baselines3). It takes a few minutes with a warm
+pip cache and longer on a first download. It may ask for `sudo` if
+`cmake` is missing.
+
+#### Step 5 — Install ariel into the env without touching its binaries
+
+`pip install -e . --no-deps` is the key line: it installs ariel without
+letting pip replace the torch / gymnasium / numpy that Isaac Lab just
+installed. The snapshot-and-diff around it proves nothing moved.
+
+```bash
+git clone -b pluggable-simulator https://github.com/itokeiic/ariel.git "$ARIEL_ROOT"
+cd "$ARIEL_ROOT"
+
+# Snapshot the simulator-owned binaries.
+SNAP="$(mktemp -d)"
+pip list --format=freeze | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
+    | sort > "$SNAP/before.txt"
+
+# Install ariel itself, with no dependency resolution.
+pip install -e . --no-deps
+
+# Install ariel's pure-Python dependencies. The snapshot doubles as a
+# constraints file, so pip cannot upgrade torch/gymnasium/numpy here.
+# evotorch and mujoco-mjx are skipped on purpose: they drag in their own
+# torch / jax / numpy and are not needed by this tutorial.
+pip install --constraint "$SNAP/before.txt" \
+    "networkx>=3.2.1" "rich>=14.1.0" \
+    "pydantic>=2.11.9" "pydantic-settings>=2.10.1" \
+    "sqlalchemy>=2.0.43" "sqlmodel>=0.0.25" \
+    "numpy-quaternion>=2023.0.3" "matplotlib>=3.9.4" "mujoco>=3.3.6"
+
+# Guardrail: expect "BINARIES UNCHANGED" and an empty diff.
+pip list --format=freeze | grep -iE "^(torch|torchvision|gymnasium|numpy)==" \
+    | sort > "$SNAP/after.txt"
+diff -u "$SNAP/before.txt" "$SNAP/after.txt" \
+    && echo "BINARIES UNCHANGED" \
+    || echo "WARNING: simulator binaries changed; see pyproject.toml [project.dependencies]"
+```
+
+If you see the warning, the env is suspect: delete it
+(`conda env remove -n "$ENV_NAME"`) and start again from step 4.
+
+#### Step 6 — Verify, from a fresh terminal
+
+Open a **new** terminal. This checks that `conda activate` alone is
+enough, which is how you will use the env from now on.
+
+```bash
+conda activate ariel-isaaclab-train
+cd ~/ariel
+
+# Imports: both the Isaac Lab chain and the NumPy chain.
+python -c "
+from ariel.body_phenotypes.drone.backends import blueprint_to_urdf
+from ariel.simulation.tasks.blueprint_gate_env import NumpyBlueprintGateEnv
+print('ariel imports OK')
+"
+
+# Launch Isaac Sim headless, build the Blueprint drone, step it randomly.
+python tutorials/pluggable_simulator/train.py --simulator isaaclab \
+    --mode step --headless --num-envs 16 --max-iterations 3
+```
+
+Success is `=== env-stepping smoke complete ===` then `exiting (code 0)`.
+On a warm machine this takes about 10 s. The very first launch on a new
+machine is slower while Isaac Sim fills its caches. You are now ready
+for §4.
+
+#### Troubleshooting
+
+- **`No module named 'isaacsim'` / `'pxr'` / `'omni'`** — the activation
+  hook is missing (the env was not created with `./isaaclab.sh --conda`, or
+  the `_isaac_sim` link did not exist at the time). Re-run
+  `./isaaclab.sh --conda "$ENV_NAME"` from `$ISAACLAB_ROOT`; for an
+  existing env it just rewrites the hook. Then `conda deactivate` and
+  `conda activate` again.
+- **`conda activate` fails in a script or cron job** ("Run 'conda init'
+  before 'conda activate'") — non-interactive shells do not load conda.
+  Add `source "$(conda info --base)/etc/profile.d/conda.sh"` before
+  `conda activate`.
+- **Wrong Python** — `which python` must point into
+  `.../envs/ariel-isaaclab-train/bin/`. If it points at `.venv/` or another
+  env, deactivate that first.
+- **A run seems to hang, or a core stays busy after a failure** — see §3c.
+
+**Why ariel goes into Isaac Lab's env and not the reverse.** Isaac Sim
+5.1 is built against specific binaries (Python 3.11, torch 2.7.0+cu128,
+numpy 1.x), and `./isaaclab.sh --install` pins exactly those. ariel's
+base `pyproject.toml` keeps `numpy>=1.26,<2` and lists no torch or
+gymnasium directly, so it fits inside that env; the one base dependency
+that would pull in torch (`evotorch`) is the one step 5 skips. Installing
+Isaac Lab into ariel's `uv` venv instead is not supported.
 
 ### 3c. Operational gotcha: stale Isaac Sim processes after a failed run
 
@@ -270,6 +371,10 @@ silently burning while you debug.
 
 ### NumPy backend (gate task, sb3 PPO)
 
+Run from the ariel repo root with the `.venv` from §3a activated
+(`source .venv/bin/activate`). The Isaac Lab env from §3b can run it
+too.
+
 ```bash
 python tutorials/pluggable_simulator/train.py \
     --simulator numpy \
@@ -285,7 +390,8 @@ steps/sec on 8 parallel envs.
 
 ### Isaac Lab backend (hover task)
 
-Run from the env you built in §3b. Two modes:
+Run from the ariel repo root after `conda activate ariel-isaaclab-train`
+(the env you built in §3b). Two modes:
 
 **`--mode train` (default): real `rl_games` PPO training.** This is
 the headline workflow — full Blueprint → URDF → USD → Isaac Sim
