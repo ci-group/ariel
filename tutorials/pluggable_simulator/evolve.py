@@ -34,6 +34,7 @@ Override defaults:
 from __future__ import annotations
 
 import argparse
+import math
 import re
 import subprocess
 import sys
@@ -192,21 +193,26 @@ def main() -> None:
                     keep_path.parent.mkdir(parents=True, exist_ok=True)
                     keep_path.write_text(bp_path.read_text())
 
-            best = max(fitnesses)
-            worst = min(fitnesses)
-            mean = sum(fitnesses) / len(fitnesses)
-            history.append({"gen": gen, "best": best, "mean": mean, "worst": worst})
+            # Individuals without a fitness (nan: the child crashed or left
+            # no checkpoint) are counted, not averaged in.
+            valid = [f for f in fitnesses if not math.isnan(f)]
+            n_failed = len(fitnesses) - len(valid)
+            if valid:
+                best, worst = max(valid), min(valid)
+                mean = sum(valid) / len(valid)
+            else:
+                best = worst = mean = float("nan")
+            history.append({"gen": gen, "best": best, "mean": mean,
+                            "worst": worst, "failed": n_failed})
             _log(
                 f"  -- gen {gen + 1}: best={best:.4f}  mean={mean:.4f}  "
-                f"worst={worst:.4f}"
+                f"worst={worst:.4f}  failed={n_failed}/{len(fitnesses)}"
             )
 
             # Tournament-of-2 select → Gaussian mutate to fill new population.
             new_pop: list[ArmLengthGenome] = []
             for _ in range(len(population)):
-                i1 = int(rng.integers(0, len(population)))
-                i2 = int(rng.integers(0, len(population)))
-                winner_idx = i1 if fitnesses[i1] >= fitnesses[i2] else i2
+                winner_idx = _tournament_select(fitnesses, rng)
                 new_pop.append(population[winner_idx].mutate(args.mut_sigma, rng))
             population = new_pop
 
@@ -216,8 +222,25 @@ def main() -> None:
     for h in history:
         _log(
             f"  gen {h['gen'] + 1}: best={h['best']:.4f}  "
-            f"mean={h['mean']:.4f}  worst={h['worst']:.4f}"
+            f"mean={h['mean']:.4f}  worst={h['worst']:.4f}  "
+            f"failed={h['failed']}"
         )
+
+
+# ---------- selection -----------------------------------------------------------
+
+def _tournament_select(fitnesses: list[float], rng: np.random.Generator) -> int:
+    """Tournament of 2; return the index of the winner.
+
+    A nan fitness (failed evaluation) ranks below every real fitness.
+    Comparing nan directly would be wrong: ``x >= nan`` is always False,
+    so a failed individual drawn second would win its tournament.
+    """
+    i1 = int(rng.integers(0, len(fitnesses)))
+    i2 = int(rng.integers(0, len(fitnesses)))
+    f1 = -math.inf if math.isnan(fitnesses[i1]) else fitnesses[i1]
+    f2 = -math.inf if math.isnan(fitnesses[i2]) else fitnesses[i2]
+    return i1 if f1 >= f2 else i2
 
 
 # ---------- per-individual subprocess --------------------------------------------
