@@ -30,7 +30,7 @@ pipeline into ariel's EA layer.
 ```
 ariel offers: EA loop  +  RL trainers  +  DroneBlueprint IR
 ─────────────────────────────────────────────────────────────
-   genome handlers │ EA operators │ scripts/train.py dispatch
+   genome handlers │ EA operators │ train.py dispatch
                               │
                               ▼
               ─── Plug point: simulator+trainer pair ───
@@ -113,12 +113,16 @@ class IsaacLabBlueprintHoverEnv(DirectRLEnv):
     def _reset_idx(self, env_ids): ...
 ```
 
-Why two contracts and not one universal? Trying to force both
-simulator ecosystems through a single shape (e.g., wrapping Isaac
-Lab to gymnasium VecEnv via `isaaclab_rl.sb3`) drags in
-stable-baselines3, which collides with the numpy-2 ABI in the
-unified isaaclab conda env. Honest heterogeneity is cheaper than
-forced uniformity.
+Why two contracts and not one universal? Forcing both simulator
+ecosystems through a single shape (e.g., wrapping Isaac Lab to a
+gymnasium VecEnv via `isaaclab_rl.sb3`) would mean giving up the RL
+libraries each ecosystem is built around. Honest heterogeneity is
+cheaper than forced uniformity.
+
+*(Corrected 2026-09-28: this paragraph used to say that
+stable-baselines3 collides with the numpy-2 ABI in the Isaac Lab env.
+It doesn't: the env built in §3b has numpy 1.26 and
+stable-baselines3 2.8 installed together, and both import fine.)*
 
 ---
 
@@ -424,8 +428,7 @@ python tutorials/pluggable_simulator/train.py \
 useful for verifying env construction or debugging the Isaac-Lab-
 side env-stack without paying for a PPO run. Steps the env with
 `uniform(-1, 1)` actions for `max_iterations × 24` steps, computing
-observations + rewards (`-distance_to_goal × step_dt`) + done flags
-per step.
+observations, rewards and done flags per step.
 
 ```bash
 python tutorials/pluggable_simulator/train.py \
@@ -438,6 +441,105 @@ python tutorials/pluggable_simulator/train.py \
 
 Both modes share the same `IsaacLabBlueprintHoverEnv`; only the
 post-construction code path differs.
+
+#### The hover task
+
+**What the policy controls.** Each step, the policy outputs four numbers:
+a collective thrust and roll, pitch and yaw torques. Action 0 means
+"hover". With the default `action_mode="mixer"`, a mixer turns these
+requests into one thrust per rotor, as a real flight controller does:
+
+- It uses the blueprint's allocation matrix, built from each rotor's
+  position relative to the centre of mass, its thrust axis and its spin
+  direction.
+- It clips each rotor to what its propeller can physically produce.
+  For the tutorial's 5-inch propellers that is up to 10.66 N, so a
+  0.5 kg quad has a thrust-to-weight ratio of about 8.7.
+- Motor speed follows a first-order lag (τ = 0.04 s), with the same
+  rotor model as the NumPy backend. Each rotor's thrust and drag torque
+  act at its own motor.
+
+So the drone gets what its rotors can deliver. A short-armed drone
+cannot produce as much roll torque as a long-armed one, and a request
+beyond its reach is clipped. That is how the morphology enters the
+control. Two other modes are kept for comparison:
+
+- `"rotor"`: the policy commands each rotor directly. It has the same
+  physics, but PPO learned it much less reliably.
+- `"wrench"`: Isaac Lab's quadcopter abstraction, in which one force and
+  torque are applied to the body and the rotors play no part.
+
+**Reward and termination.** The reward is Isaac Lab's quadcopter reward.
+Per step it is `(15·(1 − tanh(d/0.8)) − 0.05·|v|² − 0.01·|ω|²) × step_dt`,
+where `d` is the distance to the goal, and `v` and `ω` are the body's
+linear and angular velocity. An episode ends after 5 s (250 steps) or
+when the drone leaves the 0.1–3 m altitude band. Rewards are
+non-negative apart from the small velocity penalties, so staying
+airborne always pays.
+
+**Mass differs from the NumPy backend (open item).** This backend takes
+mass and inertia from the blueprint's URDF: a 0.4 kg core plate plus
+arms and motors. The NumPy backend builds its own mass model, so fitness
+is not comparable across the two backends yet.
+
+### EA + RL loop (`evolve.py`, Isaac Lab backend)
+
+[`evolve.py`](./evolve.py) evolves the arm lengths of a quadcopter; for
+every candidate it launches `train.py` in a subprocess. The fitness is
+rl_games' mean return over the last training episodes, read from the
+final checkpoint's filename. Run it from the same env and directory as
+above, in one of two sizes:
+
+**Smoke test (the defaults, ~3 min): does the EA ↔ RL pipeline work?**
+
+```bash
+python tutorials/pluggable_simulator/evolve.py
+```
+
+3 generations × 4 individuals × 30 PPO epochs × 16 envs. Success means
+all 12 evaluations finish and every generation prints `failed=0/4`.
+30 epochs is too short for PPO to learn to hover, so the fitness values
+(−7.2 to −0.6 in our run) are not meaningful. The run took 172 s.
+
+**Hovering check (~8 min): do the trained policies actually hover?**
+
+```bash
+python tutorials/pluggable_simulator/evolve.py --epochs-per-eval 200 --num-envs 64
+```
+
+Each step's reward is at most 15 × 0.02 = 0.3, and the velocity terms
+only subtract. A fitness of F therefore needs episodes averaging at
+least F / 0.3 steps. **A fitness ≥ 37.5 proves the drone stayed up for
+at least half of the 250-step (5 s) episode.** In our run (2026-09-28,
+mixer mode), 8 of 12 individuals passed, with fitness 7.8–51.6. Each
+individual took 38–46 s, of which 29–36 s was PPO; the whole run took
+498.6 s.
+
+The four that did not pass had not learned to hover within 200 epochs.
+Whether PPO learns in time varies between runs, and the EA cannot tell
+"failed to learn" from "bad morphology". Read single fitness values
+with that in mind.
+
+**What this does not show yet: morphology evolution.** The mixer makes
+morphology part of the control, but we have not yet shown that arm
+length changes fitness by more than PPO's own randomness. The
+hovering check's generation means went 43.7 → 37.3 → 35.0, with no
+upward trend. Training fixed arm lengths with three seeds each gave:
+
+| Arm length (all four arms), mixer mode, 200 epochs × 64 envs | Fitness, seeds 42 / 43 / 44 | Mean |
+|---|---|---|
+| 0.10 m | 49.0 / 3.3 / 51.5 | 34.6 |
+| 0.18 m (`evolve.py`'s starting quad) | 45.0 / 48.6 / 53.8 | 49.1 |
+| 0.30 m | 25.2 / 40.9 / 43.2 | 36.4 |
+
+The spread between seeds, up to 48.2 when one 0.10 m seed failed to
+learn, is larger than the differences between arm lengths. The 0.18 m
+quad did best and most consistently, and the 0.30 m quad learned
+visibly more slowly. That pattern was noticed only after the runs,
+though, and three seeds are too few to confirm it. A check with more
+seeds is the next step. For contrast, `"wrench"` mode showed no effect
+at all: tripling the arm length moved mean fitness by 1.6, against seed
+noise of 8.6–20.0.
 
 ---
 

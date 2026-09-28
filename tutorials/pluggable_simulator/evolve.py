@@ -1,14 +1,33 @@
 """Demonstrate the EA + PPO workflow on the Isaac Lab backend.
 
 Outer evolutionary loop evolves drone arm lengths; inner PPO loop
-trains a hover-to-goal policy for each candidate morphology. Both
-improvements are visible from one run:
+trains a hover-to-goal policy for each candidate morphology. Two
+curves come out of one run:
 
 * **Within each individual:** ``rl_games`` logs PPO mean reward
   per epoch — that's the *learning* curve.
-* **Across generations:** best / mean fitness over the population
-  improves as the EA selects the morphologies that hover better —
+* **Across generations:** best / mean fitness over the population —
   that's the *evolution* curve.
+
+Two run sizes (details: tutorials/pluggable_simulator/README.md §4):
+
+* Defaults (~3 min) — a smoke test of the EA <-> RL pipeline. 30 PPO
+  epochs × 16 envs is too short to learn to hover, so fitness (-7.2 to
+  -0.6 on 2026-09-28) is not meaningful.
+* ``--epochs-per-eval 200 --num-envs 64`` (~8 min) — a hovering check.
+  Per-step reward is at most 0.3, so fitness >= 37.5 proves episodes
+  averaged at least 125 of 250 steps. On 2026-09-28, 8 of 12
+  individuals passed; the other 4 had not learned to hover in 200
+  epochs, which the EA cannot tell apart from a bad morphology.
+
+The hover env's default ``action_mode="mixer"`` routes the policy's
+thrust/torque commands through the blueprint's rotors (allocation
+matrix, per-rotor limits), so the morphology is part of the control.
+Whether that makes fitness depend on arm length by more than PPO's seed
+noise is not yet established: with 3 seeds per arm length, 0.10 / 0.18
+/ 0.30 m gave means 34.6 / 49.1 / 36.4 with seed spreads up to 48.2,
+and the hovering check's generation means went 43.7 -> 37.3 -> 35.0.
+(In ``"wrench"`` mode arm length had no measurable effect at all.)
 
 Implementation: one subprocess per individual. The parent holds the
 EA state; each child runs a fresh Isaac Sim + rl_games training
@@ -16,13 +35,14 @@ process from ``train.py --blueprint-json ... --experiment-prefix
 ...``. Why subprocesses?  In-process reuse of ``DirectRLEnv`` across
 genomes was unreliable in our tests (env teardown left the second
 build hanging); subprocesses give each individual a clean Isaac Sim
-state. Cost: ~6 s Isaac-Sim startup per individual.
+state. Cost: ~10 s of Isaac Sim startup + scene build per individual
+(about two-thirds of each ~14-16 s individual at the defaults below).
 
 Defaults are sized for a few-minute smoke (3 gen × 4 ind × 30
-epochs); scale them up via CLI for a more convincing curve.
+epochs); see the two run sizes above.
 
-Run (from the ariel-isaaclab-train env with setup_conda_env.sh
-already sourced — see tutorials/pluggable_simulator/README.md §3b):
+Run from the ariel repo root, after ``conda activate ariel-isaaclab-train``
+(env setup: tutorials/pluggable_simulator/README.md §3b):
 
     python tutorials/pluggable_simulator/evolve.py
 
