@@ -66,6 +66,99 @@ DroneSimulator
 The EA evolves the same morphology variables either way; 
 only the fitness function and the trained policy are backend-specific.
 
+### From genome to trained policy, file by file
+
+Two programs share the work. [`evolve.py`](./evolve.py) owns the
+evolution: it turns each genome into a `DroneBlueprint` and asks for a
+fitness. [`train.py`](./train.py) owns the learning: it turns one
+blueprint into a simulated drone and trains one policy on it. One
+`train.py` run always means one fixed morphology; comparing
+morphologies is `evolve.py`'s job.
+
+**Chart 1 — evolution to blueprint (`evolve.py`, Isaac Lab backend).**
+
+```mermaid
+flowchart TD
+    POP["<b>evolve.py</b> main()<br/>ArmLengthGenome.default_quad() + .mutate(init_sigma)<br/>= initial population of arm-length genomes"]
+    GM["<b>evolve.py</b><br/>individual.to_genome_matrix()<br/>one row per arm: length, arm azimuth, arm pitch,<br/>motor azimuth, motor pitch, spin"]
+    DEC["<b>src/ariel/body_phenotypes/drone/decoders.py</b><br/>spherical_angular_to_blueprint(matrix, propsize)"]
+    BP["<b>src/ariel/body_phenotypes/drone/blueprint.py</b><br/>DroneBlueprint: core plate, arms, motors, rotors"]
+    JS["<b>blueprint.py</b><br/>DroneBlueprint.save_json()<br/>temp dir ariel_evolve_*/ariel_evolve_NNNN.json"]
+    EVAL["<b>evolve.py</b><br/>_evaluate_in_subprocess()"]
+    TR["<b>train.py</b> in a child process (Chart 2)<br/>--simulator isaaclab --mode train<br/>--blueprint-json JSON --experiment-prefix EXP"]
+    FIT["<b>evolve.py</b><br/>_extract_reward_from_checkpoint()<br/>parses the reward from runs/EXP_*/nn/last_*.pth"]
+    SEL["<b>evolve.py</b><br/>_tournament_select() + .mutate(mut_sigma)<br/>= next generation"]
+    POP --> GM --> DEC --> BP --> JS --> EVAL
+    EVAL -- "subprocess.run" --> TR
+    TR -- "checkpoint written to disk" --> FIT
+    FIT -- "fitness (nan if the child failed)" --> SEL
+    SEL -- "repeat for each generation" --> GM
+```
+
+**Chart 2 — blueprint to RL training (`train.py`).**
+
+```mermaid
+flowchart TD
+    PRE["--preset quad or hex: PRESETS genome matrix<br/>→ spherical_angular_to_blueprint()"]
+    JIN["--blueprint-json PATH<br/>→ DroneBlueprint.load_json()<br/>(Isaac Lab backend only)"]
+    BP["DroneBlueprint"]
+    PRE --> BP
+    JIN --> BP
+    BP --> NP
+    BP --> CFG
+
+    subgraph NUMPY["--simulator numpy — train.py main_numpy()"]
+        NP["NumpyBlueprintGateEnv(blueprint=...)<br/>src/ariel/simulation/tasks/blueprint_gate_env.py"]
+        PROP["blueprint_to_propellers(bp, convention='ned')<br/>src/ariel/body_phenotypes/drone/backends.py<br/>list of rotors: position, thrust direction, spin, propsize"]
+        GATE["DroneGateEnv(propellers=...)<br/>src/ariel/simulation/tasks/drone_gate_env.py<br/>→ DroneSimulator → DroneConfiguration (mass, inertia, allocation)"]
+        SB3["VecMonitor → stable_baselines3 PPO.learn()"]
+        NP --> PROP --> GATE --> SB3
+    end
+
+    subgraph ISAAC["--simulator isaaclab — train.py main_isaaclab()"]
+        CFG["IsaacLabBlueprintHoverEnvCfg.from_blueprint(bp, num_envs=N)<br/>src/ariel/simulation/tasks/isaaclab_hover_env.py"]
+        USD["make_blueprint_usd()<br/>→ blueprint_to_urdf() (backends.py): base_link, arm_ID, motor_ID links<br/>→ Isaac Lab UrdfConverter → drone.usd"]
+        MOT["cfg.robot.spawn.usd_path = drone.usd<br/>cfg.motor_names / motor_propsizes / motor_spins<br/>from blueprint.nodes_of_type('Motor')"]
+        ENV["IsaacLabBlueprintHoverEnv(cfg)<br/>_setup_scene(): Articulation spawned N times<br/>_init_rotors(): get_propeller_specs() per motor<br/>_init_mixer(): allocation matrix about the CoM"]
+        RLG["_isaaclab_rl_games_train(): make_rl_games_agent_cfg()<br/>→ RlGamesVecEnvWrapper → rl_games Runner.run()"]
+        SMK["_isaaclab_step_smoke():<br/>random actions, no PPO"]
+        STEP["every env step:<br/>_pre_physics_step(): mixer turns thrust + torques into per-rotor thrust<br/>_apply_action(): motor lag, forces on each motor_ID link<br/>_get_observations() / _get_rewards() / _get_dones()"]
+        CKPT["checkpoint: runs/EXP_TIMESTAMP/nn/last_EXP_ep_E_rew__R_.pth"]
+        CFG --> USD --> MOT --> ENV
+        ENV -- "--mode train (default)" --> RLG
+        ENV -- "--mode step" --> SMK
+        RLG -.-> STEP
+        RLG --> CKPT
+    end
+```
+
+**Train your own morphology.** Build a blueprint from any genome matrix,
+save it, and hand it to `train.py`. In the matrix, each row is one arm:
+length (m), arm azimuth, arm pitch, motor azimuth, motor pitch
+(radians), and spin (0 = counter-clockwise, 1 = clockwise). The example
+below is a quad with two long and two short arms:
+
+```bash
+python - <<'EOF'
+import numpy as np
+from ariel.body_phenotypes.drone.decoders import spherical_angular_to_blueprint
+
+genome = np.array([
+    [0.22, 0.0,           0.0, 0.0, 0.0, 1.0],
+    [0.15, np.pi / 2,     0.0, 0.0, 0.0, 0.0],
+    [0.22, np.pi,         0.0, 0.0, 0.0, 1.0],
+    [0.15, 3 * np.pi / 2, 0.0, 0.0, 0.0, 0.0],
+])
+spherical_angular_to_blueprint(genome, propsize=5).save_json("my_drone.json")
+EOF
+
+python tutorials/pluggable_simulator/train.py --simulator isaaclab --headless \
+    --blueprint-json my_drone.json --num-envs 16 --max-iterations 3
+```
+
+Run it in the Isaac Lab env (§3b). The NumPy backend has no
+`--blueprint-json` flag; it trains only the `--preset` morphologies.
+
 ---
 
 ## 2. The two contracts

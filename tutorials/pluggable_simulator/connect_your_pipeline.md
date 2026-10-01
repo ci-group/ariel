@@ -125,6 +125,11 @@ for gen in range(args.generations):
 
 ## 3. Files to look at, by role
 
+For how these files call each other at run time, from genome to
+blueprint to trained policy, see the two flowcharts in
+[`README.md`](./README.md) §1, "From genome to trained policy, file by
+file".
+
 | Role | File | Why |
 |---|---|---|
 | Blueprint IR | [`src/ariel/body_phenotypes/drone/blueprint.py`](../../src/ariel/body_phenotypes/drone/blueprint.py) | The surface the decoder must populate; ships `to_dict`/`from_dict`/`save_json`/`load_json` for caching and subprocess hand-off |
