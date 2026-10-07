@@ -95,9 +95,15 @@ class HingeModule(Module):
         )
 
         # ========= Servo =========
-        # Robot actuators
+        # Robot actuators — DSS-M15 digital servo (180° range, 1.47 N·m stall,
+        # ~0.14 s/60° no-load). PD gains chosen for critical damping at the
+        # typical ariel-leg load inertia (~1.5e-4 kg·m² ≈ one brick on a
+        # 0.05 m lever); dynprm[0] = 0.05 approximates the servo's internal
+        # position-tracking delay; forcerange clips at the servo stall torque.
         kp = 1
-        kv = 1  # critically damp oscillator
+        kv = 0.025
+        servo_tau = 0.05
+        servo_torque_limit = 1.47
         servo_axis = (0, 0, 1)
 
         servo_name = "servo"
@@ -116,6 +122,7 @@ class HingeModule(Module):
         # ... but only a few of the parameters are actually used
         gainprm[0] = kp
         biasprm[:3] = [0, -kp, -kv]
+        dynprm[0] = servo_tau
 
         # Contact exclusion
         spec.add_exclude(
@@ -124,7 +131,10 @@ class HingeModule(Module):
         )
 
         # --- Actuator(s) --- #
-        dyntype = mujoco.mjtDyn.mjDYN_NONE
+        # FILTEREXACT: ctrl is low-passed through a first-order filter of time
+        # constant dynprm[0] before reaching the PD gain, simulating the servo's
+        # internal position-tracking lag.
+        dyntype = mujoco.mjtDyn.mjDYN_FILTEREXACT
         gaintype = mujoco.mjtGain.mjGAIN_FIXED
         biastype = mujoco.mjtBias.mjBIAS_AFFINE
         trntype = mujoco.mjtTrn.mjTRN_JOINT
@@ -142,6 +152,8 @@ class HingeModule(Module):
                 -np.pi / 2,
                 np.pi / 2,
             ),  # [-90, 90] degrees (range of 180)
+            forcerange=(-servo_torque_limit, servo_torque_limit),
+            forcelimited=True,
         )
 
         # Save model specifications
