@@ -81,7 +81,7 @@ BATCH_SIZE = BATCH_RATIO * NUM_ENVS // NUM_MINIBATCHES
 
 # ============================================================================ #
 #                              MuJoCo model build                              #
-# ============================================================================ #
+# ============================================================================ # 
 def _build_insect_mj_model(sim_dt: float) -> mujoco.MjModel:
     """Compile the ariel insect spawned on a flat world."""
     world = SimpleFlatWorld(load_precompiled=False)
@@ -147,7 +147,10 @@ def default_config() -> config_dict.ConfigDict:
         sim_dt=0.005,
         episode_length=500,  # 10 s of sim time
         action_repeat=1,
-        action_scale=jp.pi / 2.0,  # policy outputs in [-1, 1] → ±60° joint target
+        action_scale=jp.pi / 2.0,  # policy outputs in [-1, 1] → ±90° joint target
+        # NOTE: motor-target low-pass filtering is now modeled at the actuator
+        # level in ariel's HingeModule (dyntype=FILTEREXACT, τ=50 ms), so no
+        # python-side filter is needed here.
         upright_termination_z=-0.3,  # terminate when torso 'up' projection drops below this
         reward_config=config_dict.create(
             # xy_speed threshold below which the stall penalty activates.
