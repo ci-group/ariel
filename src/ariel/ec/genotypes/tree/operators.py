@@ -16,14 +16,35 @@ from ariel.body_phenotypes.robogen_lite.config import (
     ModuleType,
     IDX_OF_CORE,
 )
+from ariel.parameters.ariel_modules import ArielModulesConfig
 
 from .tree_genome import TreeGenome
 from .validation import validate_genome_dict
 
 
+ariel_modules_config = ArielModulesConfig()
+
+
+def random_brick_length() -> float:
+    """Generate a random valid brick length.
+
+    Returns
+    -------
+    float
+        A random brick length in meters.
+    """
+    return random.uniform(
+        ariel_modules_config.BRICK_LENGTH_MIN,
+        ariel_modules_config.BRICK_LENGTH_MAX,
+    )
+
+
 def add_node(genome: TreeGenome, parent: int, face: str, node_id: int, mtype: str, rotation: str) -> None:
     # add node and edge if allowed; caller should ensure face is free
-    genome.nodes[node_id] = {"type": mtype, "rotation": rotation}
+    node_data: dict[str, Any] = {"type": mtype, "rotation": rotation}
+    if mtype == ModuleType.BRICK.name:
+        node_data["length"] = random_brick_length()
+    genome.nodes[node_id] = node_data
     genome.edges.append({"parent": parent, "child": node_id, "face": face})
 
 
@@ -54,7 +75,7 @@ def get_top_ancestor(genome: TreeGenome, node_id: int) -> int:
         if not preds:
             break
         parent = preds[0]
-        # stop if parent is core 
+        # stop if parent is core
         if parent == IDX_OF_CORE:
             break
         current = parent
@@ -78,10 +99,10 @@ def subtree_swap(a: TreeGenome, b: TreeGenome, a_node: int, b_node: int) -> None
         return nodes, internal_edges
 
     def reassign_ids(
-        nodes: dict[int, dict[str, str]],
+        nodes: dict[int, dict[str, Any]],
         edges: list[dict[str, Any]],
         existing_ids: set[int],
-    ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]:
+    ) -> tuple[dict[int, dict[str, Any]], list[dict[str, Any]], dict[int, int]]:
         """Return copies of *nodes* and *edges* with fresh identifiers.
 
         IDs are remapped to the smallest integers greater than any value in
@@ -158,7 +179,7 @@ def crossover_subtree(a: TreeGenome, b: TreeGenome) -> tuple[TreeGenome, TreeGen
     # Standard GP: swap subtrees directly at selected nodes (no ancestor expansion)
     subtree_swap(child1, child2, n1, n2)
     # Validate after crossover
-    
+
     try:
         validate_genome_dict(child1.to_dict())
         validate_genome_dict(child2.to_dict())
@@ -198,7 +219,11 @@ def mutate_replace_node(genome: TreeGenome) -> None:
     rotations = [r.name for r in ALLOWED_ROTATIONS[ModuleType[new_type]]]
     new_rot = random.choice(rotations) if rotations else genome.nodes[nid]["rotation"]
 
-    genome.nodes[nid] = {"type": new_type, "rotation": new_rot}
+    node_data: dict[str, Any] = {"type": new_type, "rotation": new_rot}
+    # Assign a length when replacing the node with a brick
+    if new_type == ModuleType.BRICK.name:
+        node_data["length"] = random_brick_length()
+    genome.nodes[nid] = node_data
 
     # drop any children on now-disallowed faces
     allowed = [f.name for f in ALLOWED_FACES[ModuleType[new_type]]]
@@ -215,6 +240,43 @@ def mutate_replace_node(genome: TreeGenome) -> None:
         genome.edges = old_edges
 
 
+def mutate_brick_length(genome: TreeGenome, sigma: float = 0.02) -> None:
+    """Mutate the length of a randomly selected brick module.
+
+    A random brick module is selected and its length is changed using a
+    Gaussian mutation. The new length is constrained to the configured
+    minimum and maximum brick lengths.
+
+    Parameters
+    ----------
+    genome
+        The tree genome to mutate.
+    sigma
+        Standard deviation of the Gaussian mutation in meters.
+    """
+    bricks = [
+        nid
+        for nid, node in genome.nodes.items()
+        if node["type"] == ModuleType.BRICK.name
+    ]
+    if not bricks:
+        return
+
+    node_id = random.choice(bricks)
+    current_length = float(
+        genome.nodes[node_id].get(
+            "length",
+            ariel_modules_config.BRICK_LENGTH_DEFAULT,
+        )
+    )
+    new_length = random.gauss(current_length, sigma)
+    new_length = max(
+        ariel_modules_config.BRICK_LENGTH_MIN,
+        min(new_length, ariel_modules_config.BRICK_LENGTH_MAX),
+    )
+    genome.nodes[node_id]["length"] = new_length
+
+
 def mutate_subtree_replacement(genome: TreeGenome, max_modules: int = 10) -> None:
     """Standard GP subtree mutation: replace a random subtree with a newly generated one.
 
@@ -223,10 +285,10 @@ def mutate_subtree_replacement(genome: TreeGenome, max_modules: int = 10) -> Non
     in canonical GP (Koza, 1992).
     """
     def reassign_ids(
-        nodes: dict[int, dict[str, str]],
+        nodes: dict[int, dict[str, Any]],
         edges: list[dict[str, Any]],
         existing_ids: set[int],
-    ) -> tuple[dict[int, dict[str, str]], list[dict[str, Any]], dict[int, int]]:
+    ) -> tuple[dict[int, dict[str, Any]], list[dict[str, Any]], dict[int, int]]:
         """Return copies of *nodes* and *edges* with fresh identifiers."""
         if not nodes:
             return {}, [], {}
@@ -349,7 +411,12 @@ def mutate_shrink(genome: TreeGenome) -> None:
     rotations = [r.name for r in ALLOWED_ROTATIONS[ModuleType[new_type]]]
     new_rot = random.choice(rotations) if rotations else "DEG_0"
 
-    genome.nodes[node_id] = {"type": new_type, "rotation": new_rot}
+    node_data: dict[str, Any] = {"type": new_type, "rotation": new_rot}
+    # Assign a length to brick modules
+    if new_type == ModuleType.BRICK.name:
+        node_data["length"] = random_brick_length()
+
+    genome.nodes[node_id] = node_data
     genome.edges.append({"parent": parent_id, "child": node_id, "face": parent_face})
 
     # Clean up and validate
@@ -489,7 +556,7 @@ def validate_tree_depth(genome: TreeGenome, max_depth: int) -> bool:
 
 def _prune_invalid_edges(genome: TreeGenome) -> None:
     """Remove any edges that violate face constraints or are duplicated.
-    
+
     This is a safety check that filters out edges where the parent type does
     not allow the specified face, removes duplicate parent-face pairs, and
     drops any edges pointing at nonexistent nodes.  Child subtrees flagged for

@@ -89,7 +89,7 @@ config = EASettings(is_maximisation=True)
 # (the old rotation count) makes the decoder index a rotation enum that no
 # longer exists and crashes with "N is not a valid ModuleRotationsIdx".
 NUM_CPPN_INPUTS = 6
-NUM_CPPN_OUTPUTS = 1 + NUM_OF_TYPES_OF_MODULES + NUM_OF_ROTATIONS
+NUM_CPPN_OUTPUTS = 1 + NUM_OF_TYPES_OF_MODULES + NUM_OF_ROTATIONS + 1
 ID_MANAGER = IdManager(
     node_start=NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS - 1,
     innov_start=(NUM_CPPN_INPUTS * NUM_CPPN_OUTPUTS) - 1,

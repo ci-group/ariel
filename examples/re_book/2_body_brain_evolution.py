@@ -9,6 +9,7 @@ Genotype:
 
 # Standard library
 import argparse
+import csv
 import random
 from pathlib import Path
 from typing import Literal
@@ -24,9 +25,13 @@ from rich.progress import track
 from rich.traceback import install
 
 # --- ARIEL IMPORTS ---
+from ariel.body_phenotypes.robogen_lite.collision_validation import (
+    is_physically_valid,
+)
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
+    ModuleType,
 )
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
@@ -39,6 +44,7 @@ from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
     MorphologyDecoderBestFirst,
 )
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
+from ariel.parameters.ariel_modules import ArielModulesConfig
 from ariel.simulation.controllers.controller import Controller
 from ariel.simulation.controllers.simple_cpg import (
     SimpleCPG,
@@ -59,12 +65,26 @@ console = Console()
 #                               CONFIGURATION                                  #
 # ============================================================================ #
 
+ariel_modules_config = ArielModulesConfig()
+
 parser = argparse.ArgumentParser(description="Dual Evolution: Body + Brain")
 parser.add_argument(
     "--budget", type=int, default=80, help="Number of generations",
 )
 parser.add_argument("--pop", type=int, default=80, help="Population size")
 parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
+parser.add_argument(
+    "--bone-mode",
+    choices=["fixed", "evolvable"],
+    default="evolvable",
+    help="Use fixed-length bricks or evolvable variable-length bricks",
+)
+parser.add_argument(
+    "--fixed-length",
+    type=float,
+    default=ariel_modules_config.BRICK_LENGTH_DEFAULT,
+    help="Brick length in meters when --bone-mode=fixed",
+)
 parser.add_argument(
     "--visualize",
     action=argparse.BooleanOptionalAction,
@@ -80,13 +100,26 @@ BUDGET: int = args.budget
 NUM_MODULES: int = 10
 CTRL_GENOME_SIZE: int = NUM_MODULES * 5
 
+BONE_MODE = args.bone_mode
+FIXED_BRICK_LENGTH = args.fixed_length
+if not (
+    ariel_modules_config.BRICK_LENGTH_MIN
+    <= FIXED_BRICK_LENGTH
+    <= ariel_modules_config.BRICK_LENGTH_MAX
+):
+    parser.error(
+        "--fixed-length must be between "
+        f"{ariel_modules_config.BRICK_LENGTH_MIN} and "
+        f"{ariel_modules_config.BRICK_LENGTH_MAX} meters",
+    )
+
 SPAWN_POSITION = (-0.8, 0.0, 0.1)
 TARGET_POSITION = np.array([2.0, 0.0, 0.5])
 
 # CPPN Config
 T, R = NUM_OF_TYPES_OF_MODULES, NUM_OF_ROTATIONS
 NUM_CPPN_INPUTS = 6
-NUM_CPPN_OUTPUTS = 1 + T + R
+NUM_CPPN_OUTPUTS = 1 + T + R + 1
 
 # Type Aliases
 type ViewerTypes = Literal["launcher", "video", "simple"]
@@ -101,8 +134,12 @@ random.seed(SEED)
 
 SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
-DATA = CWD / "__data__" / SCRIPT_NAME
+DATA = CWD / "__data__" / SCRIPT_NAME / f"{BONE_MODE}_seed_{SEED}"
 DATA.mkdir(exist_ok=True, parents=True)
+
+LOG_FILE = DATA / "variable_bones.csv"
+if LOG_FILE.exists():
+    LOG_FILE.unlink()
 
 
 # ============================================================================ #
@@ -123,13 +160,23 @@ class Evolution:
             db_file_name="database.db",
         )
 
+        self.evaluation_round = 0
+        self.evaluation_counter = 0
+
     # ------------------------------------------------------------------------ #
     #                          HELPER METHODS                                  #
     # ------------------------------------------------------------------------ #
-    def map_genotype_to_body(
-        self, genome_data: dict | Genome,
-    ) -> mujoco.MjSpec | None:
-        """Decodes CPPN into a MuJoCo Body Spec."""
+    def apply_bone_mode(self, graph) -> None:
+        """Apply the selected fixed/evolvable brick-length condition."""
+        if BONE_MODE != "fixed":
+            return
+
+        for _, node_data in graph.nodes(data=True):
+            if node_data["type"] == ModuleType.BRICK.name:
+                node_data["length"] = FIXED_BRICK_LENGTH
+
+    def decode_morphology_graph(self, genome_data: dict | Genome):
+        """Decode a CPPN into a physically valid morphology graph."""
         genome = (
             Genome.from_dict(genome_data)
             if isinstance(genome_data, dict)
@@ -146,6 +193,116 @@ class Evolution:
             if robot_graph.number_of_nodes() == 0:
                 return None
 
+            self.apply_bone_mode(robot_graph)
+            if not is_physically_valid(robot_graph):
+                return None
+
+            return robot_graph
+        except Exception:
+            return None
+
+    def get_morphology_statistics(self, graph) -> dict:
+        """Calculate morphology and variable-bone statistics."""
+        brick_lengths = [
+            float(node_data["length"])
+            for _, node_data in graph.nodes(data=True)
+            if node_data["type"] == ModuleType.BRICK.name
+            and "length" in node_data
+        ]
+        num_hinges = sum(
+            1
+            for _, node_data in graph.nodes(data=True)
+            if node_data["type"] == ModuleType.HINGE.name
+        )
+
+        if brick_lengths:
+            lengths = np.asarray(brick_lengths, dtype=float)
+            mean_length = float(np.mean(lengths))
+            min_length = float(np.min(lengths))
+            max_length = float(np.max(lengths))
+            std_length = float(np.std(lengths))
+        else:
+            mean_length = float("nan")
+            min_length = float("nan")
+            max_length = float("nan")
+            std_length = float("nan")
+
+        return {
+            "num_modules": graph.number_of_nodes(),
+            "num_bricks": len(brick_lengths),
+            "num_hinges": num_hinges,
+            "mean_length": mean_length,
+            "min_length": min_length,
+            "max_length": max_length,
+            "std_length": std_length,
+        }
+
+    def log_evaluation(
+        self,
+        generation: int,
+        ind: Individual,
+        graph,
+        fitness: float,
+    ) -> None:
+        """Log locomotion fitness and morphology statistics."""
+        stats = self.get_morphology_statistics(graph)
+        individual_id = getattr(ind, "id", None)
+        if individual_id is None:
+            individual_id = self.evaluation_counter
+
+        file_exists = LOG_FILE.exists()
+        with open(LOG_FILE, "a", newline="") as file:
+            writer = csv.DictWriter(
+                file,
+                fieldnames=[
+                    "generation",
+                    "individual_id",
+                    "seed",
+                    "fitness",
+                    "bone_mode",
+                    "fixed_length_mm",
+                    "num_modules",
+                    "num_bricks",
+                    "num_hinges",
+                    "mean_length_mm",
+                    "min_length_mm",
+                    "max_length_mm",
+                    "std_length_mm",
+                ],
+            )
+
+            if not file_exists:
+                writer.writeheader()
+
+            writer.writerow({
+                "generation": generation,
+                "individual_id": individual_id,
+                "seed": SEED,
+                "fitness": fitness,
+                "bone_mode": BONE_MODE,
+                "fixed_length_mm": (
+                    FIXED_BRICK_LENGTH * 1000 if BONE_MODE == "fixed" else ""
+                ),
+                "num_modules": stats["num_modules"],
+                "num_bricks": stats["num_bricks"],
+                "num_hinges": stats["num_hinges"],
+                "mean_length_mm": stats["mean_length"] * 1000,
+                "min_length_mm": stats["min_length"] * 1000,
+                "max_length_mm": stats["max_length"] * 1000,
+                "std_length_mm": stats["std_length"] * 1000,
+            })
+
+        self.evaluation_counter += 1
+
+    def map_genotype_to_body(
+        self, genome_data: dict | Genome,
+    ) -> mujoco.MjSpec | None:
+        """Decodes CPPN into a MuJoCo Body Spec."""
+        robot_graph = self.decode_morphology_graph(genome_data)
+        if robot_graph is None:
+            return None
+
+        try:
             # Note: construct_mjspec_from_graph returns a wrapper, access .spec
             return construct_mjspec_from_graph(robot_graph).spec
         except Exception:
@@ -364,6 +521,16 @@ class Evolution:
             ind.fitness = fitness
             ind.requires_eval = False
 
+            graph = self.decode_morphology_graph(ind.genotype["morph"])
+            if graph is not None:
+                self.log_evaluation(
+                    self.evaluation_round,
+                    ind,
+                    graph,
+                    fitness,
+                )
+
+        self.evaluation_round += 1
         return population
 
     def parent_selection(self, population: Population) -> Population:
@@ -425,6 +592,7 @@ class Evolution:
                         max_inn = inn
         self.id_manager._node_id = max_nid
         self.id_manager._innov_id = max_inn
+
 
     def fast_physics_runner(
         self, model: mujoco.MjModel, data: mujoco.MjData, duration: float,
@@ -617,6 +785,31 @@ def main() -> None:
     if best:
         console.rule("[bold green]Final Best Result")
         console.log(f"Best Fitness (Dist to Target): {best.fitness:.4f}")
+
+        graph = evo.decode_morphology_graph(best.genotype["morph"])
+        if graph is not None:
+            stats = evo.get_morphology_statistics(graph)
+            console.log(f"Experiment Condition: {BONE_MODE}")
+            console.log(f"Seed: {SEED}")
+            console.log(f"Modules: {stats['num_modules']}")
+            console.log(f"Bricks: {stats['num_bricks']}")
+            console.log(f"Hinges: {stats['num_hinges']}")
+            if stats["num_bricks"] > 0:
+                console.log(
+                    f"Mean Brick Length: {stats['mean_length'] * 1000:.2f} mm",
+                )
+                console.log(
+                    f"Minimum Brick Length: {stats['min_length'] * 1000:.2f} mm",
+                )
+                console.log(
+                    f"Maximum Brick Length: {stats['max_length'] * 1000:.2f} mm",
+                )
+                console.log(
+                    f"Brick Length SD: {stats['std_length'] * 1000:.2f} mm",
+                )
+            console.log(f"Physically Valid: {is_physically_valid(graph)}")
+
+        console.log(f"Results Log: {LOG_FILE}")
         if args.visualize:
             evo.run_simulation("launcher", best)
 

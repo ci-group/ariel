@@ -58,11 +58,12 @@ class SER0019(BaseSettings):
 
 class ArielModulesConfig(BaseSettings):
     # --- Brick Config --- #
-    # Module weights (kg)
-    BRICK_MASS: WeightType = 0.055  # 55 grams
-
-    # Module dimensions (length, width, height) in meters
-    BRICK_DIMENSIONS: DimensionType = (0.05, 0.05, 0.05)
+    # Module dimensions in meters
+    BRICK_LENGTH_DEFAULT: float = 0.075
+    BRICK_LENGTH_MIN: float = 0.075
+    BRICK_LENGTH_MAX: float = 0.225
+    BRICK_WIDTH: float = 0.075
+    BRICK_HEIGHT: float = 0.075
     # ------------------------------ #
 
     # --- Hinge Config --- #

@@ -21,6 +21,9 @@ from rich.traceback import install
 install()
 console = Console()
 
+from ariel.body_phenotypes.robogen_lite.collision_validation import (
+    is_physically_valid,
+)
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
 from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
 from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
@@ -30,6 +33,7 @@ from ariel.body_phenotypes.robogen_lite.decoders.score_cube import MorphologyDec
 from ariel.body_phenotypes.robogen_lite.config import (
     NUM_OF_ROTATIONS,
     NUM_OF_TYPES_OF_MODULES,
+    ModuleType,
 )
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.utils.morphological_descriptor import MorphologicalMeasures
@@ -66,11 +70,11 @@ DATA.mkdir(exist_ok=True, parents=True)
 # Default spawn position for visualization
 SPAWN_POSITION = (-0.8, 0.0, 0.1)
 
-# CPPN input/output sizes (6 inputs: parent type, parent rotation, face; outputs: 1 for add/remove decision, T for module type, R for rotation)
+# CPPN input/output sizes (6 inputs: parent type, parent rotation, face; outputs: 1 for add/remove decision, T for module type, R for rotation, 1 for variable brick length)
 T = NUM_OF_TYPES_OF_MODULES
 R = NUM_OF_ROTATIONS
 NUM_CPPN_INPUTS = 6
-NUM_CPPN_OUTPUTS = 1 + T + R
+NUM_CPPN_OUTPUTS = 1 + T + R + 1
 
 # Id manager for mutations
 id_manager = IdManager(node_start=NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS - 1,
@@ -158,6 +162,13 @@ class CPPNEvolution:
         for ind in track(to_eval, description="Evaluating..."):
             cppn = Genome.from_dict(ind.genotype["cppn"])
             graph = self.decode_to_graph(cppn)
+
+            # Reject physically invalid morphologies
+            if not is_physically_valid(graph):
+                ind.fitness = float("inf")
+                ind.requires_eval = False
+                continue
+
             score = morpho_score_from_graph(graph)
             # EA expects minimization; store negative score
             ind.fitness = -score if not np.isnan(score) else float("inf")
@@ -248,6 +259,22 @@ if __name__ == "__main__":
         score = morpho_score_from_graph(graph)
         console.log(f"Best morphological score: {score:.4f}")
         console.log(f"Modules: {measures.num_modules}, Joints: {measures.num_active_hinges}, Symmetry: {measures.symmetry:.4f}, Diversity: {measures.module_diversity:.4f}")
+
+        brick_lengths = [
+            float(data["length"])
+            for _, data in graph.nodes(data=True)
+            if data["type"] == ModuleType.BRICK.name and "length" in data
+        ]
+        if brick_lengths:
+            console.log(
+                "Brick Lengths: "
+                + ", ".join(f"{length * 1000:.2f} mm" for length in brick_lengths),
+            )
+            console.log(f"Mean Brick Length: {np.mean(brick_lengths) * 1000:.2f} mm")
+            console.log(f"Min Brick Length: {min(brick_lengths) * 1000:.2f} mm")
+            console.log(f"Max Brick Length: {max(brick_lengths) * 1000:.2f} mm")
+
+        console.log(f"Physically Valid: {is_physically_valid(graph)}")
         console.log(f"Elapsed: {elapsed:.2f}s")
         # Optionally visualize the best individual
         if args.visualize:
