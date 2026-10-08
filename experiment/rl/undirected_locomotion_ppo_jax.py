@@ -49,6 +49,7 @@ from mujoco_playground import wrapper
 from mujoco_playground._src import locomotion, mjx_env
 
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.insect import insect_small
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.centipede import body_centipede_n
 
 from ariel.simulation.environments import SimpleFlatWorld
 
@@ -56,10 +57,39 @@ from ariel.simulation.environments import SimpleFlatWorld
 ENV_NAME = "ArielInsectUndirectedLocomotion"
 TORSO_BODY_NAME = "robot1_core"
 FLOOR_BODY_NAME = "floor"
-# Six leg-tip bricks (see insect_small in prebuilt_robots/insect.py). The
-# spine bricks (brick_0, brick_1) and the core are intentionally excluded —
-# touching the ground with those is not "stepping".
-FOOT_BODY_NAMES = tuple(f"robot1_brick_{i}brick" for i in range(2, 8))
+
+
+def _build_body(morphology: str, n_pairs: int):
+    """Return the ariel body factory output for the requested morphology."""
+    if morphology == "insect":
+        return insect_small()
+    if morphology == "centipede":
+        return body_centipede_n(n_pairs)
+    raise ValueError(f"unknown morphology={morphology!r}; use 'insect' or 'centipede'")
+
+
+def _discover_foot_body_names(mj_model: mujoco.MjModel) -> tuple[str, ...]:
+    """Enumerate foot bodies for either morphology.
+
+    - insect_small: six leaf bricks named ``robot1_brick_{2..7}brick``.
+    - body_centipede_n: the terminal foot brick of each leg has a name ending
+      in ``-FB-brick`` (see add_limbs in centipede.py).
+    """
+    names: list[str] = []
+    for i in range(mj_model.nbody):
+        n = mj_model.body(i).name
+        if n.endswith("-FB-brick"):
+            names.append(n)
+            continue
+        if n.startswith("robot1_brick_") and n.endswith("brick"):
+            tail = n[len("robot1_brick_"):-len("brick")]
+            if tail.isdigit() and int(tail) >= 2:
+                names.append(n)
+    if not names:
+        raise ValueError(
+            "Could not auto-discover foot bodies; check morphology naming."
+        )
+    return tuple(names)
 
 # ---- Batch-size and solver-buffer budgets ---------------------------------- #
 # All sizing is derived from NUM_ENVS so changing it doesn't silently under- or
@@ -84,10 +114,12 @@ BATCH_SIZE = BATCH_RATIO * NUM_ENVS // NUM_MINIBATCHES
 # ============================================================================ #
 #                              MuJoCo model build                              #
 # ============================================================================ # 
-def _build_insect_mj_model(sim_dt: float) -> mujoco.MjModel:
-    """Compile the ariel insect spawned on a flat world."""
+def _build_insect_mj_model(
+    sim_dt: float, morphology: str = "insect", n_pairs: int = 2,
+) -> mujoco.MjModel:
+    """Compile the ariel body (insect or centipede) spawned on a flat world."""
     world = SimpleFlatWorld(load_precompiled=False)
-    body = insect_small()
+    body = _build_body(morphology, n_pairs)
     world.spawn(body.spec, position=[0, 0, 0.1])
 
     # Tracking camera that follows the robot torso centre-of-mass.
@@ -177,6 +209,8 @@ def default_config() -> config_dict.ConfigDict:
         njmax=NJMAX_PER_ENV,                           # per-world
         naconmax=NUM_ENVS * NACONMAX_PER_ENV,          # total across all worlds
         naccdmax=NUM_ENVS * NACCDMAX_PER_ENV,          # total across all worlds
+        morphology="insect",                           # or "centipede"
+        n_pairs=2,                                     # only used when morphology=="centipede"
     )
 
 
@@ -190,7 +224,11 @@ class UndirectedLocomotionInsect(mjx_env.MjxEnv):
     ) -> None:
         super().__init__(config, config_overrides)
 
-        self._mj_model = _build_insect_mj_model(self._config.sim_dt)
+        self._mj_model = _build_insect_mj_model(
+            self._config.sim_dt,
+            morphology=self._config.morphology,
+            n_pairs=self._config.n_pairs,
+        )
         self._mjx_model = mjx_env.put_model(self._mj_model, impl=self._config.impl)
         self._xml_path = ""  # programmatically generated
 
@@ -203,8 +241,9 @@ class UndirectedLocomotionInsect(mjx_env.MjxEnv):
         # rather than iterating data._impl.contact__*, because the WARP contact
         # pool is shared across all worlds — filtering by worldid under vmap is
         # fragile, while xpos is cleanly per-world.
+        foot_names = _discover_foot_body_names(self._mj_model)
         self._foot_body_ids = jp.array(
-            [self._mj_model.body(n).id for n in FOOT_BODY_NAMES]
+            [self._mj_model.body(n).id for n in foot_names]
         )
         self._n_feet = int(self._foot_body_ids.shape[0])
         # Brick half-width is 0.05 (BRICK_DIMENSIONS); foot COM sits ~0.05
@@ -437,11 +476,15 @@ def train(args: argparse.Namespace) -> tuple[Any, Any, Path]:
     rl_cfg = ppo_config(args.num_timesteps)
 
     env_cfg = default_config()
+    env_cfg.morphology = args.morphology
+    env_cfg.n_pairs = args.n_pairs
     env = UndirectedLocomotionInsect(env_cfg)
     # Eval env runs with far fewer worlds (num_eval_envs vs NUM_ENVS). Shrink
     # its naconmax/naccdmax to match — otherwise it keeps a full training-sized
     # CCD workspace alive during eval and OOMs the GPU.
     eval_cfg = default_config()
+    eval_cfg.morphology = args.morphology
+    eval_cfg.n_pairs = args.n_pairs
     eval_cfg.naconmax = int(rl_cfg.num_eval_envs) * NACONMAX_PER_ENV
     eval_cfg.naccdmax = int(rl_cfg.num_eval_envs) * NACCDMAX_PER_ENV
     eval_env = UndirectedLocomotionInsect(eval_cfg)
@@ -542,11 +585,15 @@ def render_rollout(
     out_dir: Path,
     episode_length: int,
     seed: int,
+    morphology: str = "insect",
+    n_pairs: int = 2,
 ) -> None:
     # Shrink the solver buffers for the single-env rollout. The training
     # config sizes buffers for NUM_ENVS worlds; replaying it here would compile
     # a second WARP graph alongside training's, OOMing the GPU.
     rollout_cfg = default_config()
+    rollout_cfg.morphology = morphology
+    rollout_cfg.n_pairs = n_pairs
     rollout_cfg.naconmax = NACONMAX_PER_ENV           # single env
     rollout_cfg.naccdmax = NACCDMAX_PER_ENV           # single env
     env = UndirectedLocomotionInsect(rollout_cfg)
@@ -623,6 +670,17 @@ def _parse_args() -> argparse.Namespace:
         default=500,
         help="Episode length for the post-training rollout.",
     )
+    parser.add_argument(
+        "--morphology",
+        choices=["insect", "centipede"],
+        default="insect",
+    )
+    parser.add_argument(
+        "--n-pairs",
+        type=int,
+        default=2,
+        help="Number of leg-bearing spine segments (centipede only).",
+    )
     return parser.parse_args()
 
 
@@ -637,7 +695,10 @@ def main() -> None:
     jax.clear_caches()
     gc.collect()
     try:
-        render_rollout(make_inference_fn, params, out_dir, args.episode_length, args.seed)
+        render_rollout(
+            make_inference_fn, params, out_dir, args.episode_length, args.seed,
+            morphology=args.morphology, n_pairs=args.n_pairs,
+        )
     except Exception as e:
         print(f"render_rollout skipped: {type(e).__name__}: {e}")
 
