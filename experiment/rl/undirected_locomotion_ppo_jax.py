@@ -202,6 +202,7 @@ def default_config() -> config_dict.ConfigDict:
                 joint_vel=-5e-4,       # softened from -5e-3: give π/2 action range room to explore
                 lin_vel_z=-1.0,        # anti-hover: 2× to counter flutter re-emergence with soft action_rate
                 ang_vel_xy=-0.2,       # anti-flutter: 4× for same reason
+                head_yaw_rate=-1.0,    # penalize yaw oscillation / circling → keeps head heading stable
                 feet_air_time=1.0,     # reward natural stepping (air→ground events)
             ),
         ),
@@ -425,6 +426,7 @@ class UndirectedLocomotionInsect(mjx_env.MjxEnv):
             "joint_vel": jp.sum(jp.square(data.qvel[6:])),
             "lin_vel_z": jp.square(data.qvel[2]),
             "ang_vel_xy": jp.sum(jp.square(data.qvel[3:5])),
+            "head_yaw_rate": jp.square(data.qvel[5]),
             "feet_air_time": feet_air_time_reward,
         }
 
@@ -473,11 +475,24 @@ def ppo_config(num_timesteps: int) -> config_dict.ConfigDict:
 def train(args: argparse.Namespace) -> tuple[Any, Any, Path]:
     print(f"jax backend: {jax.default_backend()}  devices: {jax.devices()}")
 
+    # CLI buffer-size overrides. Larger morphologies (centipede with n_pairs>=3)
+    # have ~2× the geoms of insect_small, so warp's CCD workspace grows. If you
+    # OOM mid-training, reduce --num-envs (halve to 3072 is a safe default for
+    # centipede n_pairs=3) and keep per-env budgets the same.
+    num_envs = args.num_envs if args.num_envs is not None else NUM_ENVS
+    nacc = args.naccdmax_per_env if args.naccdmax_per_env is not None else NACCDMAX_PER_ENV
+    nacn = args.naconmax_per_env if args.naconmax_per_env is not None else NACONMAX_PER_ENV
+    print(f"NUM_ENVS={num_envs}  NACONMAX/env={nacn}  NACCDMAX/env={nacc}")
+
     rl_cfg = ppo_config(args.num_timesteps)
+    rl_cfg.num_envs = num_envs
+    rl_cfg.batch_size = BATCH_RATIO * num_envs // NUM_MINIBATCHES
 
     env_cfg = default_config()
     env_cfg.morphology = args.morphology
     env_cfg.n_pairs = args.n_pairs
+    env_cfg.naconmax = num_envs * nacn
+    env_cfg.naccdmax = num_envs * nacc
     env = UndirectedLocomotionInsect(env_cfg)
     # Eval env runs with far fewer worlds (num_eval_envs vs NUM_ENVS). Shrink
     # its naconmax/naccdmax to match — otherwise it keeps a full training-sized
@@ -485,8 +500,8 @@ def train(args: argparse.Namespace) -> tuple[Any, Any, Path]:
     eval_cfg = default_config()
     eval_cfg.morphology = args.morphology
     eval_cfg.n_pairs = args.n_pairs
-    eval_cfg.naconmax = int(rl_cfg.num_eval_envs) * NACONMAX_PER_ENV
-    eval_cfg.naccdmax = int(rl_cfg.num_eval_envs) * NACCDMAX_PER_ENV
+    eval_cfg.naconmax = int(rl_cfg.num_eval_envs) * nacn
+    eval_cfg.naccdmax = int(rl_cfg.num_eval_envs) * nacc
     eval_env = UndirectedLocomotionInsect(eval_cfg)
 
     out_dir = (
@@ -680,6 +695,24 @@ def _parse_args() -> argparse.Namespace:
         type=int,
         default=2,
         help="Number of leg-bearing spine segments (centipede only).",
+    )
+    parser.add_argument(
+        "--num-envs",
+        type=int,
+        default=None,
+        help="Override NUM_ENVS (default 6144 for insect; recommend 3072 for centipede n_pairs>=3).",
+    )
+    parser.add_argument(
+        "--naccdmax-per-env",
+        type=int,
+        default=None,
+        help="Override NACCDMAX_PER_ENV (default 100).",
+    )
+    parser.add_argument(
+        "--naconmax-per-env",
+        type=int,
+        default=None,
+        help="Override NACONMAX_PER_ENV (default 320).",
     )
     return parser.parse_args()
 
