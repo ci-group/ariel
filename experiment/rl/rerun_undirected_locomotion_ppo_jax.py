@@ -41,14 +41,33 @@ from undirected_locomotion_ppo_jax import (
 )
 
 
-def _build_make_inference_fn(run_dir: Path):
+def _load_morph_config(run_dir: Path) -> tuple[str, int]:
+    """Read morphology / n_pairs from the training run's env_config.json.
+
+    Falls back to the default_config() values for older runs that pre-date the
+    multi-morphology CLI switch.
+    """
+    env_cfg_path = run_dir / "env_config.json"
+    defaults = default_config()
+    if not env_cfg_path.exists():
+        return str(defaults.morphology), int(defaults.n_pairs)
+    env_cfg = json.loads(env_cfg_path.read_text())
+    morphology = str(env_cfg.get("morphology", defaults.morphology))
+    n_pairs = int(env_cfg.get("n_pairs", defaults.n_pairs))
+    return morphology, n_pairs
+
+
+def _build_make_inference_fn(run_dir: Path, morphology: str, n_pairs: int):
     """Rebuild the PPO policy factory from the saved ppo_config.json."""
     ppo_cfg = json.loads((run_dir / "ppo_config.json").read_text())
     network_factory_kwargs = ppo_cfg["network_factory"]
     normalize_observations = ppo_cfg.get("normalize_observations", False)
 
-    # Single-env sizing (matches render_rollout's internal env).
+    # Single-env sizing (matches render_rollout's internal env). Morphology
+    # must match the trained policy — action/observation sizes depend on it.
     rollout_cfg = default_config()
+    rollout_cfg.morphology = morphology
+    rollout_cfg.n_pairs = n_pairs
     rollout_cfg.naconmax = NACONMAX_PER_ENV
     rollout_cfg.naccdmax = NACCDMAX_PER_ENV
     env = UndirectedLocomotionInsect(rollout_cfg)
@@ -101,9 +120,19 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"writing rollout artefacts to {out_dir}")
 
-    make_inference_fn = _build_make_inference_fn(run_dir)
+    morphology, n_pairs = _load_morph_config(run_dir)
+    print(f"morphology={morphology}  n_pairs={n_pairs}")
+    make_inference_fn = _build_make_inference_fn(run_dir, morphology, n_pairs)
     params = model.load_params(str(params_path))
-    render_rollout(make_inference_fn, params, out_dir, args.episode_length, args.seed)
+    render_rollout(
+        make_inference_fn,
+        params,
+        out_dir,
+        args.episode_length,
+        args.seed,
+        morphology=morphology,
+        n_pairs=n_pairs,
+    )
 
 
 if __name__ == "__main__":
