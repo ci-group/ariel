@@ -2,7 +2,7 @@
 type: api_reference
 tags: [mujoco, mjx, jax, gpu, simulation, api]
 source: https://mujoco.readthedocs.io/en/stable/mjx.html
-date_ingested: 2026-04-13
+date_ingested: 2026-10-07
 ---
 
 # mjx_core_functions
@@ -122,6 +122,44 @@ Advances simulation by one timestep. Returns a new `mjx.Data`; does not mutate i
 ### Notes
 - Not JIT-compiled by default; wrap with `jax.jit`.
 - Use `jax.vmap` over `step` (or a function calling it) for batched parallel simulation.
+
+## forward
+
+```python
+mjx.forward(model: mjx.Model, data: mjx.Data) -> mjx.Data
+```
+
+Runs forward dynamics without integrating — computes positions-dependent quantities (contact forces, actuator forces, acceleration) but does **not** advance `qpos`/`qvel`. Equivalent to `mj_forward` in the C API.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `model` | `mjx.Model` | Device model |
+| `data` | `mjx.Data` | Current simulation state |
+
+Typical use: after a `reset` that writes `qpos`/`qvel` directly, call `forward` so dependent quantities (sensors, contact state, actuator forces) are consistent before stepping or reading observations.
+
+### Example
+```python
+data = mjx_env.make_data(mj_model, qpos=qpos, qvel=qvel, impl='jax')
+data = mjx.forward(mjx_model, data)   # populate sensor and contact state
+obs = read_sensors(data)
+```
+
+## inverse
+
+```python
+mjx.inverse(model: mjx.Model, data: mjx.Data) -> mjx.Data
+```
+
+Inverse dynamics: given `qpos`, `qvel`, `qacc`, computes the generalized forces (`qfrc_inverse`) required to produce the specified accelerations. Supported in both MJX-JAX and MJX-Warp.
+
+## data.where (MJX-Warp only)
+
+```python
+data = data.where(done: jax.Array, reset_data: mjx.Data) -> mjx.Data
+```
+
+Batched reset-on-done helper: in each world where `done[i]` is true, replace that world's state with the corresponding slice of `reset_data`. Needed because MJX-Warp stores contacts in `data._impl` (private), so a naive `jnp.where` on `mjx.Data` fields does not fully reset contact state.
 
 ## Notes
 

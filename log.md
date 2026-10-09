@@ -17,3 +17,8 @@
 - Files created: mjx_overview.md, mjx_core_functions.md, mjx_warp.md, mjx_performance.md, Source - MuJoCo MJX Documentation.md
 - Files updated: (none)
 - Model: Claude (subscription)
+
+## [2026-10-07] Ingest | MuJoCo MJX docs
+- Files updated: mjx_core_functions.md (added mjx.forward, mjx.inverse, data.where sections and bumped date)
+- Files created: Source - MuJoCo MJX docs.md
+- Model: Claude (subscription)
