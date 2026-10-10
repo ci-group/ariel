@@ -31,6 +31,13 @@ eggs/
 lib/
 lib64/
 parts/
+# Don't let the buildout-style `parts/` rule above silently swallow
+# source-tree `parts/` packages (e.g.
+# src/ariel/body_phenotypes/drone/phenotype_assembly/parts/).
+!src/**/parts/
+# rl_games auto-creates ./runs/<experiment>/nn/ when training launches
+# from the repo root (tutorials/pluggable_simulator/train.py --mode train).
+runs/
 sdist/
 var/
 wheels/

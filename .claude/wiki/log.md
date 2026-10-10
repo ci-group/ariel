@@ -1,3 +1,8 @@
+## [2026-05-14] Ingest | Evolving Neural Networks through Augmenting Topologies
+- Files created: NEAT_Algorithm.md, neat_speciation.md, competing_conventions.md, Source - Evolving Neural Networks through Augmenting Topologies.md
+- Files updated: (none)
+- Model: Claude (subscription)
+
 ## [2026-04-13] Ingest | MuJoCo Model Editing
 - Files created: mujoco_model_editing_c_api.md, mjsBody.md, mjsGeom.md, mjsJoint.md, mjsActuator.md, mjsSensor.md, mujoco_mjspec_enums.md, Source - MuJoCo Model Editing.md
 - Files updated: MjSpec.md

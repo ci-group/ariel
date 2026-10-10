@@ -2,7 +2,7 @@
 
 # Standard library
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, cast
 
 import matplotlib.pyplot as plt
 import mujoco as mj
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from networkx import DiGraph
 
 # Type Aliases
-type ViewerTypes = Literal[
+ViewerTypes: TypeAlias = Literal[
     "launcher",
     "video",
     "simple",
@@ -46,7 +46,7 @@ type ViewerTypes = Literal[
     "no_control",
     "frame",
 ]
-type Vector = npt.NDArray[np.float64]
+Vector: TypeAlias = npt.NDArray[np.float64]
 
 # --- RANDOM GENERATOR SETUP --- #
 SEED = 42
