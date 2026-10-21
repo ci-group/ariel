@@ -17,6 +17,7 @@ class LowCeilingWorld(BaseWorld):
     corridor_width: float = 2.0
     clearance_height: float = 0.30
     ceiling_thickness: float = 0.05
+    floor_thickness: float = 0.05
 
     load_precompiled: bool = False
 
@@ -34,11 +35,7 @@ class LowCeilingWorld(BaseWorld):
     def _expand_spec(self) -> None:
         floor = self.spec.worldbody.add_body(
             name="floor",
-            pos=[
-                0,
-                0,
-                -0.025,
-            ],
+            pos=[0, 0, -self.floor_thickness / 2],
         )
 
         floor.add_geom(
@@ -47,16 +44,10 @@ class LowCeilingWorld(BaseWorld):
             size=[
                 self.corridor_length / 2,
                 self.corridor_width / 2,
-                0.025,
+                self.floor_thickness / 2,
             ],
-            rgba=[
-                0.3,
-                0.3,
-                0.3,
-                1.0,
-            ],
+            rgba=[0.3, 0.3, 0.3, 1.0],
         )
-
         ceiling = self.spec.worldbody.add_body(
             name="ceiling",
             pos=[
