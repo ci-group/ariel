@@ -102,7 +102,7 @@ def morpho_score_from_graph(graph) -> float:
 def visualize_genome(cppn_genome: Genome) -> None:
     """Decode a CPPN genome to a graph, build an MJCF spec and launch MuJoCo viewer."""
     try:
-        decoder = MorphologyDecoderBestFirst(cppn_genome=cppn_genome, max_modules=NUM_MODULES)
+        decoder = MorphologyDecoderBestFirst(cppn_genome=cppn_genome, max_modules=NUM_MODULES, variable_brick_length=True)
         # decoder = MorphologyDecoderCubePruning(cppn_genome=cppn_genome, max_modules=NUM_MODULES)
         graph = decoder.decode()
         if graph.number_of_nodes() == 0:
@@ -152,7 +152,7 @@ class CPPNEvolution:
         return ind
 
     def decode_to_graph(self, genome: Genome):
-        decoder = MorphologyDecoderBestFirst(cppn_genome=genome, max_modules=NUM_MODULES)
+        decoder = MorphologyDecoderBestFirst(cppn_genome=genome, max_modules=NUM_MODULES, variable_brick_length=True)
         return decoder.decode()
 
     def evaluate(self, population: Population) -> Population:
