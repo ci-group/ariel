@@ -25,34 +25,19 @@ from rich.progress import track
 from rich.traceback import install
 
 # --- ARIEL IMPORTS ---
-from ariel.body_phenotypes.robogen_lite.collision_validation import (
-    is_physically_valid,
-)
-from ariel.body_phenotypes.robogen_lite.config import (
-    NUM_OF_ROTATIONS,
-    NUM_OF_TYPES_OF_MODULES,
-    ModuleType,
-)
-from ariel.body_phenotypes.robogen_lite.constructor import (
-    construct_mjspec_from_graph,
-)
+from ariel.body_phenotypes.robogen_lite.collision_validation import is_physically_valid
+from ariel.body_phenotypes.robogen_lite.config import NUM_OF_ROTATIONS, NUM_OF_TYPES_OF_MODULES, ModuleType
+from ariel.body_phenotypes.robogen_lite.constructor import construct_mjspec_from_graph
 
 # --- GENOTYPE IMPORTS ---
 from ariel.body_phenotypes.robogen_lite.cppn_neat.genome import Genome
 from ariel.body_phenotypes.robogen_lite.cppn_neat.id_manager import IdManager
-from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
-    MorphologyDecoderBestFirst,
-)
+from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import MorphologyDecoderBestFirst
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.parameters.ariel_modules import ArielModulesConfig
 from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.controllers.simple_cpg import (
-    SimpleCPG,
-    create_fully_connected_adjacency,
-)
-from ariel.simulation.environments._simple_flat_with_target import (
-    SimpleFlatWorldWithTarget,
-)
+from ariel.simulation.controllers.simple_cpg import SimpleCPG, create_fully_connected_adjacency
+from ariel.simulation.environments._simple_flat_with_target import SimpleFlatWorldWithTarget
 from ariel.utils.renderers import video_renderer
 from ariel.utils.tracker import Tracker
 from ariel.utils.video_recorder import VideoRecorder
@@ -68,9 +53,7 @@ console = Console()
 ariel_modules_config = ArielModulesConfig()
 
 parser = argparse.ArgumentParser(description="Dual Evolution: Body + Brain")
-parser.add_argument(
-    "--budget", type=int, default=80, help="Number of generations",
-)
+parser.add_argument("--budget", type=int, default=80, help="Number of generations")
 parser.add_argument("--pop", type=int, default=80, help="Population size")
 parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
 parser.add_argument(
@@ -83,7 +66,7 @@ parser.add_argument(
     "--brick-length",
     type=float,
     default=ariel_modules_config.BRICK_LENGTH_DEFAULT,
-    help="Brick length in meters when --bone-mode=fixed",
+    help="Brick length in meters when --brick-mode=fixed",
 )
 parser.add_argument(
     "--visualize",
@@ -100,15 +83,11 @@ BUDGET: int = args.budget
 NUM_MODULES: int = 10
 CTRL_GENOME_SIZE: int = NUM_MODULES * 5
 
-BONE_MODE = args.bone_mode
-FIXED_BRICK_LENGTH = args.fixed_length
-if not (
-    ariel_modules_config.BRICK_LENGTH_MIN
-    <= FIXED_BRICK_LENGTH
-    <= ariel_modules_config.BRICK_LENGTH_MAX
-):
+BRICK_MODE = args.brick_mode
+FIXED_BRICK_LENGTH = args.brick_length
+if not ariel_modules_config.BRICK_LENGTH_MIN <= FIXED_BRICK_LENGTH <= ariel_modules_config.BRICK_LENGTH_MAX:
     parser.error(
-        "--fixed-length must be between "
+        "--brick-length must be between "
         f"{ariel_modules_config.BRICK_LENGTH_MIN} and "
         f"{ariel_modules_config.BRICK_LENGTH_MAX} meters",
     )
@@ -134,10 +113,10 @@ random.seed(SEED)
 
 SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
-DATA = CWD / "__data__" / SCRIPT_NAME / f"{BONE_MODE}_seed_{SEED}"
+DATA = CWD / "__data__" / SCRIPT_NAME / f"{BRICK_MODE}_seed_{SEED}"
 DATA.mkdir(exist_ok=True, parents=True)
 
-LOG_FILE = DATA / "variable_bones.csv"
+LOG_FILE = DATA / "variable_bricks.csv"
 if LOG_FILE.exists():
     LOG_FILE.unlink()
 
@@ -166,9 +145,9 @@ class Evolution:
     # ------------------------------------------------------------------------ #
     #                          HELPER METHODS                                  #
     # ------------------------------------------------------------------------ #
-    def apply_bone_mode(self, graph) -> None:
+    def apply_brick_mode(self, graph) -> None:
         """Apply the selected fixed/evolvable brick-length condition."""
-        if BONE_MODE != "fixed":
+        if BRICK_MODE != "fixed":
             return
 
         for _, node_data in graph.nodes(data=True):
@@ -177,23 +156,17 @@ class Evolution:
 
     def decode_morphology_graph(self, genome_data: dict | Genome):
         """Decode a CPPN into a physically valid morphology graph."""
-        genome = (
-            Genome.from_dict(genome_data)
-            if isinstance(genome_data, dict)
-            else genome_data
-        )
+        genome = Genome.from_dict(genome_data) if isinstance(genome_data, dict) else genome_data
 
         try:
             genome.get_node_ordering()  # Topological check (deep stuff)
-            decoder = MorphologyDecoderBestFirst(
-                cppn_genome=genome, max_modules=NUM_MODULES,
-            )
+            decoder = MorphologyDecoderBestFirst(cppn_genome=genome, max_modules=NUM_MODULES, variable_brick_length=True)
             robot_graph = decoder.decode()
 
             if robot_graph.number_of_nodes() == 0:
                 return None
 
-            self.apply_bone_mode(robot_graph)
+            self.apply_brick_mode(robot_graph)
             if not is_physically_valid(robot_graph):
                 return None
 
@@ -202,7 +175,7 @@ class Evolution:
             return None
 
     def get_morphology_statistics(self, graph) -> dict:
-        """Calculate morphology and variable-bone statistics."""
+        """Calculate morphology and variable-brick statistics."""
         brick_lengths = [
             float(node_data["length"])
             for _, node_data in graph.nodes(data=True)
@@ -237,13 +210,7 @@ class Evolution:
             "std_length": std_length,
         }
 
-    def log_evaluation(
-        self,
-        generation: int,
-        ind: Individual,
-        graph,
-        fitness: float,
-    ) -> None:
+    def log_evaluation(self, generation: int, ind: Individual, graph, fitness: float) -> None:
         """Log locomotion fitness and morphology statistics."""
         stats = self.get_morphology_statistics(graph)
         individual_id = getattr(ind, "id", None)
@@ -259,7 +226,7 @@ class Evolution:
                     "individual_id",
                     "seed",
                     "fitness",
-                    "bone_mode",
+                    "brick_mode",
                     "fixed_length_mm",
                     "num_modules",
                     "num_bricks",
@@ -279,9 +246,9 @@ class Evolution:
                 "individual_id": individual_id,
                 "seed": SEED,
                 "fitness": fitness,
-                "bone_mode": BONE_MODE,
+                "brick_mode": BRICK_MODE,
                 "fixed_length_mm": (
-                    FIXED_BRICK_LENGTH * 1000 if BONE_MODE == "fixed" else ""
+                    FIXED_BRICK_LENGTH * 1000 if BRICK_MODE == "fixed" else ""
                 ),
                 "num_modules": stats["num_modules"],
                 "num_bricks": stats["num_bricks"],
@@ -294,9 +261,7 @@ class Evolution:
 
         self.evaluation_counter += 1
 
-    def map_genotype_to_body(
-        self, genome_data: dict | Genome,
-    ) -> mujoco.MjSpec | None:
+    def map_genotype_to_body(self, genome_data: dict | Genome) -> mujoco.MjSpec | None:
         """Decodes CPPN into a MuJoCo Body Spec."""
         robot_graph = self.decode_morphology_graph(genome_data)
         if robot_graph is None:
@@ -308,9 +273,7 @@ class Evolution:
         except Exception:
             return None
 
-    def map_genotype_to_brain(
-        self, cpg: SimpleCPG, full_genome: list[float],
-    ) -> None:
+    def map_genotype_to_brain(self, cpg: SimpleCPG, full_genome: list[float]) -> None:
         """Decodes Float Vector into CPG Parameters."""
         n = cpg.phase.shape[0]
         params = np.array(full_genome)
@@ -331,13 +294,9 @@ class Evolution:
         with torch.no_grad():
             cpg.phase.data.copy_(torch.from_numpy(p_phase * np.pi).float())
             # Frequency: [0.2, 4.0] Hz - Faster movements for quicker walking
-            cpg.w.data.copy_(
-                torch.from_numpy(0.2 + (3.8 * (p_w + 1.0) / 2.0)).float(),
-            )
+            cpg.w.data.copy_(torch.from_numpy(0.2 + (3.8 * (p_w + 1.0) / 2.0)).float())
             # Amplitude: [0.5, 4.0] - MUCH stronger motor commands
-            cpg.amplitudes.data.copy_(
-                torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float(),
-            )
+            cpg.amplitudes.data.copy_(torch.from_numpy(0.5 + (3.5 * (p_amp + 1.0) / 2.0)).float())
             cpg.ha.data.copy_(torch.from_numpy(p_ha * 2.0).float())
             cpg.b.data.copy_(torch.from_numpy(p_b * 0.5).float())
 
@@ -360,9 +319,7 @@ class Evolution:
         arr[mask] += noise[mask]
         return np.clip(arr, -1.0, 1.0).tolist()
 
-    def crossover_ctrl_vectors(
-        self, ctrl1: list[float], ctrl2: list[float],
-    ) -> list[float]:
+    def crossover_ctrl_vectors(self, ctrl1: list[float], ctrl2: list[float]) -> list[float]:
         """Uniform crossover for controller float vectors."""
         arr1 = np.array(ctrl1)
         arr2 = np.array(ctrl2)
@@ -377,21 +334,15 @@ class Evolution:
         child = np.where(mask, arr1, arr2)
         return child.tolist()
 
-    def crossover_morphologies(
-        self, parent1: Individual, parent2: Individual,
-    ) -> Genome:
+    def crossover_morphologies(self, parent1: Individual, parent2: Individual) -> Genome:
         """Crossover two parent individual morphologies using NEAT crossover."""
         # Convert dictionaries to Genome objects
         morph1 = Genome.from_dict(parent1.genotype["morph"])
         morph2 = Genome.from_dict(parent2.genotype["morph"])
 
         # Set fitness values so NEAT crossover knows which parent is fitter
-        morph1.fitness = (
-            parent1.fitness if parent1.fitness is not None else float("inf")
-        )
-        morph2.fitness = (
-            parent2.fitness if parent2.fitness is not None else float("inf")
-        )
+        morph1.fitness = parent1.fitness if parent1.fitness is not None else float("inf")
+        morph2.fitness = parent2.fitness if parent2.fitness is not None else float("inf")
 
         # Use the proper NEAT crossover
         # This handles weights AND structural changes (topology)
@@ -460,19 +411,13 @@ class Evolution:
                 c_morph = self.crossover_morphologies(p1, p2)
 
                 # Crossover brain vectors
-                c_ctrl = self.crossover_ctrl_vectors(
-                    p1.genotype["ctrl"], p2.genotype["ctrl"],
-                )
+                c_ctrl = self.crossover_ctrl_vectors(p1.genotype["ctrl"], p2.genotype["ctrl"])
             else:
                 # Asexual reproduction: single parent
                 parent = random.choice(parents)
                 p_morph = Genome.from_dict(parent.genotype["morph"])
                 c_morph = p_morph.copy()
-                c_ctrl = (
-                    parent.genotype["ctrl"].copy()
-                    if isinstance(parent.genotype["ctrl"], list)
-                    else parent.genotype["ctrl"]
-                )
+                c_ctrl = parent.genotype["ctrl"].copy() if isinstance(parent.genotype["ctrl"], list) else parent.genotype["ctrl"]
 
             # Body Mutation (with Validity Retry)
             valid_child = False
@@ -594,9 +539,7 @@ class Evolution:
         self.id_manager._innov_id = max_inn
 
 
-    def fast_physics_runner(
-        self, model: mujoco.MjModel, data: mujoco.MjData, duration: float,
-    ) -> None:
+    def fast_physics_runner(self, model: mujoco.MjModel, data: mujoco.MjData, duration: float) -> None:
         """
         Optimized physics-only simulation runner (no rendering).
         Uses render_skip and speed multiplier tricks from 4_robot_with_camera.py.
@@ -683,9 +626,7 @@ class Evolution:
 
         # Bind Control Loop
         # Note: *args and **kwargs in lambda ensure compatibility with runner
-        mujoco.set_mjcb_control(
-            lambda m, d: ctrl.set_control(m, d, duration=DURATION),
-        )
+        mujoco.set_mjcb_control(lambda m, d: ctrl.set_control(m, d, duration=DURATION))
         mujoco.mj_resetData(model, data)
 
         # 5. Execute
@@ -698,18 +639,14 @@ class Evolution:
                     output_folder=str(DATA / "videos"),
                     file_name=f"dual_{ind.id}",
                 )
-                video_renderer(
-                    model, data, duration=DURATION, video_recorder=recorder,
-                )
+                video_renderer(model, data, duration=DURATION, video_recorder=recorder)
             case "launcher":
                 viewer.launch(model=model, data=data)
 
         # 6. Calculate Fitness (Distance to Target)
         # 1-Second Delay Implementation to penalize falling strategies
         # Always enforce 1 second delay if simulation duration allows
-        delay_time = min(
-            1.0, DURATION,
-        )  # Delay is always 1 second (or full duration if shorter)
+        delay_time = min(1.0, DURATION)  # Delay is always 1 second (or full duration if shorter)
         delay_fraction = delay_time / DURATION if DURATION > 0 else 0
 
         dist = float("inf")
@@ -789,7 +726,7 @@ def main() -> None:
         graph = evo.decode_morphology_graph(best.genotype["morph"])
         if graph is not None:
             stats = evo.get_morphology_statistics(graph)
-            console.log(f"Experiment Condition: {BONE_MODE}")
+            console.log(f"Experiment Condition: {BRICK_MODE}")
             console.log(f"Seed: {SEED}")
             console.log(f"Modules: {stats['num_modules']}")
             console.log(f"Bricks: {stats['num_bricks']}")

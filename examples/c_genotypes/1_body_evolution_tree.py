@@ -421,14 +421,9 @@ class MorphologyEvolution:
             min_fitness = min(valid_fitnesses)
             max_fitness = max(valid_fitnesses)
 
-            console.log(
-                f"[green]Survivor Selection:[/green] "
-                f"Avg={avg_fitness:.4f}, Min={min_fitness:.4f}, Max={max_fitness:.4f}",
-            )
+            console.log(f"[green]Survivor Selection:[/green] " f"Avg={avg_fitness:.4f}, Min={min_fitness:.4f}, Max={max_fitness:.4f}",)
         else:
-            console.log(
-                "[yellow]Survivor Selection: No physically valid survivors[/yellow]",
-            )
+            console.log("[yellow]Survivor Selection: No physically valid survivors[/yellow]")
 
         return population
 
@@ -491,19 +486,10 @@ def main() -> None:
             console.log(f"Branching: {measures.branching:.4f}")
             console.log(f"Length of Limbs: {measures.length_of_limbs:.4f}")
 
-            brick_lengths = [
-                float(data["length"])
-                for _, data in graph.nodes(data=True)
-                if data["type"] == ModuleType.BRICK.name and "length" in data
-            ]
+            brick_lengths = [float(data["length"]) for _, data in graph.nodes(data=True) if data["type"] == ModuleType.BRICK.name and "length" in data]
             if brick_lengths:
-                console.log(
-                    "Brick Lengths: "
-                    + ", ".join(f"{length * 1000:.2f} mm" for length in brick_lengths),
-                )
-                console.log(
-                    f"Mean Brick Length: {np.mean(brick_lengths) * 1000:.2f} mm",
-                )
+                console.log("Brick Lengths: " + ", ".join(f"{length * 1000:.2f} mm" for length in brick_lengths),)
+                console.log(f"Mean Brick Length: {np.mean(brick_lengths) * 1000:.2f} mm")
 
             console.log(f"Physically Valid: {is_physically_valid(graph)}")
             console.log(f"\nElapsed time: {elapsed:.2f}s")

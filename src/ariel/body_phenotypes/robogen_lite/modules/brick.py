@@ -58,16 +58,8 @@ class BrickModule(Module):
         self.length = (length if length is not None else ariel_modules_config.BRICK_LENGTH_DEFAULT)
 
         # Check that the length is within the allowed range
-        if not (
-            ariel_modules_config.BRICK_LENGTH_MIN
-            <= self.length
-            <= ariel_modules_config.BRICK_LENGTH_MAX
-        ):
-            msg = (
-                "Brick length must be between "
-                f"{ariel_modules_config.BRICK_LENGTH_MIN} and "
-                f"{ariel_modules_config.BRICK_LENGTH_MAX} meters."
-            )
+        if not (ariel_modules_config.BRICK_LENGTH_MIN <= self.length <= ariel_modules_config.BRICK_LENGTH_MAX):
+            msg = ("Brick length must be between "f"{ariel_modules_config.BRICK_LENGTH_MIN} and "f"{ariel_modules_config.BRICK_LENGTH_MAX} meters.")
             raise ValueError(msg)
 
         # Set the fixed dimensions of the module

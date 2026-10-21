@@ -60,20 +60,12 @@ def reflect_to_unit_interval(
      2.2 -> 0.2
     """
     reflected = np.mod(values, 2.0)
-    reflected = np.where(
-        reflected > 1.0,
-        2.0 - reflected,
-        reflected,
-    )
+    reflected = np.where(reflected > 1.0, 2.0 - reflected, reflected,)
     return reflected.astype(np.float32)
 
 
 class NeuralDevelopmentalEncoding(nn.Module):
-    def __init__(
-        self,
-        number_of_modules: int,
-        genotype_size: int = 64,
-    ) -> None:
+    def __init__(self, number_of_modules: int, genotype_size: int = 64,) -> None:
         super().__init__()
         """
         Neural developmental encoder.
@@ -181,10 +173,7 @@ class NeuralDevelopmentalEncoding(nn.Module):
                 )
 
                 if np_chromosome.shape != (self.genotype_size,):
-                    msg = (
-                        f"Chromosome {idx} must have shape "
-                        f"({self.genotype_size},), got {np_chromosome.shape}"
-                    )
+                    msg = (f"Chromosome {idx} must have shape " f"({self.genotype_size},), got {np_chromosome.shape}")
                     raise ValueError(msg)
 
                 x = torch.from_numpy(
@@ -214,33 +203,20 @@ class NeuralDevelopmentalEncoding(nn.Module):
 
         if len(genotype) == 4:
             if self.number_of_modules > self.genotype_size:
-                msg = (
-                    "number_of_modules cannot exceed genotype_size when "
-                    "variable brick lengths are encoded directly."
-                )
+                msg = ("number_of_modules cannot exceed genotype_size when " "variable brick lengths are encoded directly.")
                 raise ValueError(msg)
 
-            length_chromosome = np.asarray(
-                genotype[3],
-                dtype=np.float32,
-            )
+            length_chromosome = np.asarray(genotype[3], dtype=np.float32,)
 
             if length_chromosome.shape != (self.genotype_size,):
                 msg = (
-                    "Length chromosome must have shape "
-                    f"({self.genotype_size},), got {length_chromosome.shape}"
-                )
+                    "Length chromosome must have shape " f"({self.genotype_size},), got {length_chromosome.shape}")
                 raise ValueError(msg)
 
-            length_p = reflect_to_unit_interval(
-                length_chromosome[
-                    : self.number_of_modules
-                ],
+            length_p = reflect_to_unit_interval(length_chromosome[: self.number_of_modules],
             )
 
-            outputs.append(
-                length_p,
-            )
+            outputs.append(length_p,)
 
         return outputs
 
@@ -286,11 +262,7 @@ if __name__ == "__main__":
         length_p_genes,
     ]
 
-    outputs = nde.forward(
-        genotype,
-    )
+    outputs = nde.forward(genotype,)
 
     for output in outputs:
-        console.log(
-            output.shape,
-        )
+        console.log(output.shape,)

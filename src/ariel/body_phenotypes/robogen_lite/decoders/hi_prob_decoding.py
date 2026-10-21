@@ -53,6 +53,10 @@ def scale_brick_length(raw_length_output: float) -> float:
 class HighProbabilityDecoder(Blueprint):
     """Implements the high-probability-decoding algorithm."""
 
+    def __init__(self, num_modules: int) -> None:
+        super().__init__(num_modules)
+        self.length_p_space = None
+
     def probability_matrices_to_graph(
         self,
         type_probability_space: npt.NDArray[np.float32],
@@ -88,20 +92,10 @@ class HighProbabilityDecoder(Blueprint):
         self.conn_p_space = connection_probability_space.copy()
         self.rot_p_space = rotation_probability_space.copy()
         self.type_p_space = type_probability_space.copy()
-        self.length_p_space = (
-            None
-            if length_probability_space is None
-            else length_probability_space.copy()
-        )
+        self.length_p_space = (None if length_probability_space is None else length_probability_space.copy())
 
-        if (
-            self.length_p_space is not None
-            and self.length_p_space.shape != (self.num_modules,)
-        ):
-            msg = (
-                "Length probability space must have shape "
-                f"({self.num_modules},), got {self.length_p_space.shape}"
-            )
+        if (self.length_p_space is not None and self.length_p_space.shape != (self.num_modules,)):
+            msg = ("Length probability space must have shape " f"({self.num_modules},), got {self.length_p_space.shape}")
             raise ValueError(msg)
 
         # Apply constraints
@@ -120,41 +114,24 @@ class HighProbabilityDecoder(Blueprint):
         if self.length_p_space is not None:
             for node in self.nodes:
                 if self.type_dict[node] == ModuleType.BRICK:
-                    self.graph.nodes[node]["length"] = scale_brick_length(
-                        float(self.length_p_space[node]),
-                    )
+                    self.graph.nodes[node]["length"] = scale_brick_length(float(self.length_p_space[node]))
 
         return self.graph
 
-    def _generate_candidate_graph(
-        self,
-        nodes: set[int],
-        edges: list[tuple[int, int, int]],
-    ) -> DiGraph[Any]:
+    def _generate_candidate_graph(self, nodes: set[int], edges: list[tuple[int, int, int]]) -> DiGraph[Any]:
         """Generate a candidate graph for physical validation."""
         graph: DiGraph[Any] = nx.DiGraph()
 
         for node in nodes:
-            graph.add_node(
-                node,
-                type=self.type_dict[node].name,
-                rotation=self.rot_dict[node].name,
-            )
+            graph.add_node(node, type=self.type_dict[node].name, rotation=self.rot_dict[node].name,)
 
-            if (
-                self.length_p_space is not None
-                and self.type_dict[node] == ModuleType.BRICK
-            ):
+            if (self.length_p_space is not None and self.type_dict[node] == ModuleType.BRICK):
                 graph.nodes[node]["length"] = scale_brick_length(
                     float(self.length_p_space[node]),
                 )
 
         for parent, child, face in edges:
-            graph.add_edge(
-                parent,
-                child,
-                face=ModuleFaces(face).name,
-            )
+            graph.add_edge(parent, child,face=ModuleFaces(face).name,)
 
         return graph
 
@@ -166,26 +143,17 @@ class HighProbabilityDecoder(Blueprint):
         conn_face: int,
     ) -> bool:
         """Return whether a candidate connection keeps the body valid."""
-        candidate_nodes = {
-            i
-            for i, instantiated in pre_nodes.items()
-            if instantiated == 1
-        }
+        candidate_nodes = {i for i, instantiated in pre_nodes.items() if instantiated == 1}
         candidate_nodes.add(to_module)
 
-        candidate_edges = [
-            *self.edges,
-            (from_module, to_module, conn_face),
-        ]
+        candidate_edges = [*self.edges, (from_module, to_module, conn_face),]
 
         candidate_graph = self._generate_candidate_graph(
             nodes=candidate_nodes,
             edges=candidate_edges,
         )
 
-        return is_physically_valid(
-            candidate_graph,
-        )
+        return is_physically_valid(candidate_graph,)
 
     def decode_probability_to_graph(
         self,
@@ -248,11 +216,7 @@ class HighProbabilityDecoder(Blueprint):
                 break
 
             # Ensure this exact failed candidate cannot be selected again
-            self.conn_p_space[
-                from_module,
-                to_module,
-                conn_face,
-            ] = 0.0
+            self.conn_p_space[from_module, to_module, conn_face,] = 0.0
 
             # Ensure the core module is never a child
             if to_module == IDX_OF_CORE:

@@ -260,16 +260,9 @@ if __name__ == "__main__":
         console.log(f"Best morphological score: {score:.4f}")
         console.log(f"Modules: {measures.num_modules}, Joints: {measures.num_active_hinges}, Symmetry: {measures.symmetry:.4f}, Diversity: {measures.module_diversity:.4f}")
 
-        brick_lengths = [
-            float(data["length"])
-            for _, data in graph.nodes(data=True)
-            if data["type"] == ModuleType.BRICK.name and "length" in data
-        ]
+        brick_lengths = [float(data["length"]) for _, data in graph.nodes(data=True) if data["type"] == ModuleType.BRICK.name and "length" in data]
         if brick_lengths:
-            console.log(
-                "Brick Lengths: "
-                + ", ".join(f"{length * 1000:.2f} mm" for length in brick_lengths),
-            )
+            console.log("Brick Lengths: " + ", ".join(f"{length * 1000:.2f} mm" for length in brick_lengths),)
             console.log(f"Mean Brick Length: {np.mean(brick_lengths) * 1000:.2f} mm")
             console.log(f"Min Brick Length: {min(brick_lengths) * 1000:.2f} mm")
             console.log(f"Max Brick Length: {max(brick_lengths) * 1000:.2f} mm")

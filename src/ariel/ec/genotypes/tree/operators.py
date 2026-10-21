@@ -33,10 +33,7 @@ def random_brick_length() -> float:
     float
         A random brick length in meters.
     """
-    return random.uniform(
-        ariel_modules_config.BRICK_LENGTH_MIN,
-        ariel_modules_config.BRICK_LENGTH_MAX,
-    )
+    return random.uniform(ariel_modules_config.BRICK_LENGTH_MIN, ariel_modules_config.BRICK_LENGTH_MAX,)
 
 
 def add_node(genome: TreeGenome, parent: int, face: str, node_id: int, mtype: str, rotation: str) -> None:
@@ -254,26 +251,14 @@ def mutate_brick_length(genome: TreeGenome, sigma: float = 0.02) -> None:
     sigma
         Standard deviation of the Gaussian mutation in meters.
     """
-    bricks = [
-        nid
-        for nid, node in genome.nodes.items()
-        if node["type"] == ModuleType.BRICK.name
-    ]
+    bricks = [nid for nid, node in genome.nodes.items() if node["type"] == ModuleType.BRICK.name]
     if not bricks:
         return
 
     node_id = random.choice(bricks)
-    current_length = float(
-        genome.nodes[node_id].get(
-            "length",
-            ariel_modules_config.BRICK_LENGTH_DEFAULT,
-        )
-    )
+    current_length = float(genome.nodes[node_id].get("length", ariel_modules_config.BRICK_LENGTH_DEFAULT,))
     new_length = random.gauss(current_length, sigma)
-    new_length = max(
-        ariel_modules_config.BRICK_LENGTH_MIN,
-        min(new_length, ariel_modules_config.BRICK_LENGTH_MAX),
-    )
+    new_length = max(ariel_modules_config.BRICK_LENGTH_MIN, min(new_length, ariel_modules_config.BRICK_LENGTH_MAX),)
     genome.nodes[node_id]["length"] = new_length
 
 
