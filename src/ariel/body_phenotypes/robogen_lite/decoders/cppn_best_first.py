@@ -40,9 +40,10 @@ def scale_brick_length(raw_length_output: float) -> float:
 class MorphologyDecoderBestFirst:
     """Decodes a CPPN using a true greedy, best-first search strategy."""
 
-    def __init__(self, cppn_genome: Genome, max_modules: int = 20):
+    def __init__(self, cppn_genome: Genome, max_modules: int = 20, variable_brick_length: bool = False):
         self.cppn_genome = cppn_genome
         self.max_modules = max_modules
+        self.variable_brick_length = variable_brick_length
         self.face_deltas = {
             ModuleFaces.FRONT: (1, 0, 0),
             ModuleFaces.BACK: (-1, 0, 0),
@@ -118,7 +119,9 @@ class MorphologyDecoderBestFirst:
 
                     type_scores = np.array(raw_outputs[type_start:type_end])
                     rot_scores = np.array(raw_outputs[rot_start:rot_end])
-                    raw_length_output = raw_outputs[rot_end]
+                    raw_length_output = None
+                    if self.variable_brick_length:
+                        raw_length_output = raw_outputs[rot_end]
 
                     type_probs = softmax(type_scores)
 
@@ -135,7 +138,7 @@ class MorphologyDecoderBestFirst:
                     )
 
                     child_length = None
-                    if child_type == ModuleType.BRICK:
+                    if (child_type == ModuleType.BRICKand self.variable_brick_length):
                         child_length = scale_brick_length(raw_length_output)
 
                     if (
@@ -165,7 +168,7 @@ class MorphologyDecoderBestFirst:
                 "type": best_conn["child_type"].name,
                 "rotation": best_conn["child_rot"].name,
             }
-            if best_conn["child_type"] == ModuleType.BRICK:
+            if (best_conn["child_type"] == ModuleType.BRICK and best_conn["child_length"] is not None):
                 node_data["length"] = best_conn["child_length"]
 
             robot_graph.add_node(child_id, **node_data)
@@ -179,7 +182,7 @@ class MorphologyDecoderBestFirst:
                 "type": best_conn["child_type"],
                 "rot": best_conn["child_rot"],
             }
-            if best_conn["child_type"] == ModuleType.BRICK:
+            if (best_conn["child_type"] == ModuleType.BRICK and best_conn["child_length"] is not None):
                 module_data[child_id]["length"] = best_conn["child_length"]
 
             # I no longer remove the parent, I just add the new child.

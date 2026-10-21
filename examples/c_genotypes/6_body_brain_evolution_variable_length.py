@@ -74,13 +74,13 @@ parser.add_argument(
 parser.add_argument("--pop", type=int, default=80, help="Population size")
 parser.add_argument("--dur", type=int, default=30, help="Sim Duration")
 parser.add_argument(
-    "--bone-mode",
+    "--brick-mode",
     choices=["fixed", "evolvable"],
     default="evolvable",
     help="Use fixed-length bricks or evolvable variable-length bricks",
 )
 parser.add_argument(
-    "--fixed-length",
+    "--brick-length",
     type=float,
     default=ariel_modules_config.BRICK_LENGTH_DEFAULT,
     help="Brick length in meters when --bone-mode=fixed",
