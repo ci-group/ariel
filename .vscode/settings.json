@@ -23,6 +23,7 @@
         ".typings": false,
         ".venv": false
     },
+    "python-envs.pythonProjects": [],
     "python.testing.pytestArgs": [
         "tests"
     ],
@@ -31,6 +32,5 @@
     "ruff.path": [
         "/home/vscode/.local/bin/ruff"
     ],
-    "workbench.iconTheme": "material-icon-theme",
-    "python-envs.defaultEnvManager": "ms-python.python:venv"
+    "workbench.iconTheme": "material-icon-theme"
 }
