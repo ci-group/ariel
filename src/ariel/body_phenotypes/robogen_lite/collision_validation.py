@@ -40,18 +40,10 @@ def _is_direct_parent_child(
         model.body_parentid[body2]
     )
 
-    return (
-        parent_of_body1 == body2
-        or parent_of_body2 == body1
-    )
+    return (parent_of_body1 == body2 or parent_of_body2 == body1)
 
 
-def _geom_distance(
-    model: mujoco.MjModel,
-    data: mujoco.MjData,
-    geom1: int,
-    geom2: int,
-) -> float:
+def _geom_distance(model: mujoco.MjModel, data: mujoco.MjData, geom1: int, geom2: int) -> float:
     """Return signed distance between two MuJoCo geometries.
 
     Negative values indicate penetration.

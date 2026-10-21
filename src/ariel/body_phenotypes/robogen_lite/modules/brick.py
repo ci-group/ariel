@@ -55,11 +55,7 @@ class BrickModule(Module):
         self.index = index
 
         # Set the length of the module
-        self.length = (
-            length
-            if length is not None
-            else ariel_modules_config.BRICK_LENGTH_DEFAULT
-        )
+        self.length = (length if length is not None else ariel_modules_config.BRICK_LENGTH_DEFAULT)
 
         # Check that the length is within the allowed range
         if not (

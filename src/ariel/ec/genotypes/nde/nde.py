@@ -40,6 +40,8 @@ DATA.mkdir(exist_ok=True)
 SEED = 42
 RNG = np.random.default_rng(SEED)
 
+# --- TERMINAL OUTPUT SETUP --- #
+
 install(show_locals=False)
 console = Console()
 
@@ -208,9 +210,7 @@ class NeuralDevelopmentalEncoding(nn.Module):
                     self.output_shapes[idx],
                 )
 
-                outputs.append(
-                    x.detach().numpy(),
-                )
+                outputs.append(x.detach().numpy())
 
         if len(genotype) == 4:
             if self.number_of_modules > self.genotype_size:
