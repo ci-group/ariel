@@ -207,16 +207,16 @@ class Genome:
                 fitter_parent = self
                 less_fit_parent = other
             else:
-                # make the fitter parent the parent "B"
                 fitter_parent = other
+                less_fit_parent = self
+
         else:
             if self.fitness <= other.fitness:
                 fitter_parent = self
                 less_fit_parent = other
             else:
-                # make the fitter parent the parent "B"
                 fitter_parent = other
-            less_fit_parent = self
+                less_fit_parent = self
 
         # If fitnesses are equal, the shorter genome (fewer genes) should be the 'less_fit_parent'
         # to ensure symmetry in gene inheritance.
