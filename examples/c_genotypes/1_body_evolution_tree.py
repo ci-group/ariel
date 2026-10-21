@@ -11,7 +11,6 @@ import contextlib
 import copy
 
 # Standard library
-import random
 import time
 from pathlib import Path
 
@@ -114,7 +113,6 @@ MAX_DEPTH: int = 12  # Maximum tree depth to prevent bloat
 # Determinism
 SEED = 42
 RNG = np.random.default_rng(SEED)
-random.seed(SEED)
 
 SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
@@ -280,12 +278,12 @@ class MorphologyEvolution:
         if RNG.random() < 0.2:
             noncore = [nid for nid in new.nodes if nid != IDX_OF_CORE]
             if noncore:
-                nid = random.choice(noncore)
+                nid = RNG.choice(noncore)
                 # choose a new rotation allowed for its type
                 mtype = ModuleType[new.nodes[nid]["type"]]
                 rots = [r.name for r in ALLOWED_ROTATIONS[mtype]]
                 if rots:
-                    new.nodes[nid]["rotation"] = random.choice(rots)
+                    new.nodes[nid]["rotation"] = RNG.choice(rots)
 
         # prune any invalid edges before returning
         _prune_invalid_edges(new)
@@ -311,7 +309,7 @@ class MorphologyEvolution:
 
         # If disconnected, return copy of a parent instead
         if not is_connected_tree(chosen):
-            return TreeGenome.from_dict(random.choice([t1, t2]).to_dict())
+            return TreeGenome.from_dict(RNG.choice([t1, t2]).to_dict())
 
         return chosen
 
@@ -342,10 +340,11 @@ class MorphologyEvolution:
         while len(population) + len(new_offspring) < target_pool:
             use_sexual = len(parents) >= 2 and RNG.random() < 0.5
             if use_sexual:
-                p1, p2 = random.sample(parents, 2)
+                i1, i2 = RNG.choice(len(parents), size=2, replace=False)
+                p1, p2 = parents[i1], parents[i2]
                 c_morph = self.crossover_morphologies(p1, p2)
             else:
-                parent = random.choice(parents)
+                parent = parents[RNG.integers(len(parents))]
                 c_morph = TreeGenome.from_dict(parent.genotype)
 
             # mutate morphology
