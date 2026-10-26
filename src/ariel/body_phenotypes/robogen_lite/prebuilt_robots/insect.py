@@ -94,3 +94,103 @@ def insect_small() -> CoreModule:
         prefix="brick_7",
     )
     return core
+
+
+# --------------------------------------------------------------------------- #
+# Parametric variants used for scaling studies.
+#
+# Foot bricks are tagged with the name "FB" so their final mujoco body names
+# end in "-FB-brick", matching the foot-discovery convention used by the
+# centipede morphology (see experiment/rl/undirected_locomotion_ppo_jax.py).
+# --------------------------------------------------------------------------- #
+
+SUBMODULES = HingeModule | BrickModule
+MODULES = CoreModule | SUBMODULES
+
+_F = ModuleFaces.FRONT
+_L = ModuleFaces.LEFT
+_R = ModuleFaces.RIGHT
+
+
+def _attach(parent: MODULES, face: ModuleFaces, module: SUBMODULES, name: str) -> SUBMODULES:
+    full = f"{parent.name}-{name}" if getattr(parent, "name", None) else name
+    parent.sites[face].attach_body(body=module.body, prefix=full + "-")
+    module.name = full
+    return module
+
+
+def _add_leg_pair(
+    block: MODULES, start_idx: int, right_rot: float, left_rot: float,
+) -> int:
+    """Attach a L/R hinge-plus-foot pair to ``block``; returns next free index."""
+    rh = HingeModule(index=start_idx); rh.rotate(right_rot)
+    _attach(block, _R, rh, "RH")
+    _attach(rh, _F, BrickModule(index=start_idx + 1), "FB")
+
+    lh = HingeModule(index=start_idx + 2); lh.rotate(left_rot)
+    _attach(block, _L, lh, "LH")
+    _attach(lh, _F, BrickModule(index=start_idx + 3), "FB")
+    return start_idx + 4
+
+
+def insect_n(n_segments: int) -> CoreModule:
+    """Insect with a scalable forward spine; the core and every spine brick
+    carry one L/R leg pair.
+
+    ``legs = 2 * (n_segments + 1)``. ``n_segments=2`` matches the leg count
+    and topology of :func:`insect_small` (6 legs, 2 spine segments).
+    """
+    if n_segments < 0:
+        raise ValueError(f"n_segments must be >= 0, got {n_segments}")
+
+    core = CoreModule(index=0)
+    core.name = "C"
+    idx = 1
+
+    spine_bricks: list[BrickModule] = []
+    prev: MODULES = core
+    for i in range(n_segments):
+        h = HingeModule(index=idx); idx += 1
+        _attach(prev, _F, h, f"H{i}")
+        b = BrickModule(index=idx); idx += 1
+        _attach(h, _F, b, f"B{i}")
+        spine_bricks.append(b)
+        prev = b
+
+    # Core legs: right hinge rotates -90, left +90 (as in insect_small).
+    idx = _add_leg_pair(core, idx, right_rot=-90, left_rot=90)
+    # Spine-brick legs: right hinge rotates +90, left -90 (as in insect_small).
+    for block in spine_bricks:
+        idx = _add_leg_pair(block, idx, right_rot=90, left_rot=-90)
+
+    return core
+
+
+def insect_longspine_n(n_segments: int) -> CoreModule:
+    """Scale spine length while keeping legs only on the core and the terminal
+    spine brick. Fixed leg count (4 legs, 2 pairs); the action dimension grows
+    only through added spine hinges, isolating spine-mass/length effects from
+    leg-count scaling.
+    """
+    if n_segments < 1:
+        raise ValueError(f"n_segments must be >= 1, got {n_segments}")
+
+    core = CoreModule(index=0)
+    core.name = "C"
+    idx = 1
+
+    prev: MODULES = core
+    tip: BrickModule | None = None
+    for i in range(n_segments):
+        h = HingeModule(index=idx); idx += 1
+        _attach(prev, _F, h, f"H{i}")
+        b = BrickModule(index=idx); idx += 1
+        _attach(h, _F, b, f"B{i}")
+        prev = b
+        tip = b
+
+    idx = _add_leg_pair(core, idx, right_rot=-90, left_rot=90)
+    assert tip is not None
+    idx = _add_leg_pair(tip, idx, right_rot=90, left_rot=-90)
+
+    return core
