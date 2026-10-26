@@ -48,7 +48,11 @@ from mujoco import mjx
 from mujoco_playground import wrapper
 from mujoco_playground._src import locomotion, mjx_env
 
-from ariel.body_phenotypes.robogen_lite.prebuilt_robots.insect import insect_small
+from ariel.body_phenotypes.robogen_lite.prebuilt_robots.insect import (
+    insect_small,
+    insect_n,
+    insect_longspine_n,
+)
 from ariel.body_phenotypes.robogen_lite.prebuilt_robots.centipede import body_centipede_n
 
 from ariel.simulation.environments import SimpleFlatWorld
@@ -60,12 +64,23 @@ FLOOR_BODY_NAME = "floor"
 
 
 def _build_body(morphology: str, n_pairs: int):
-    """Return the ariel body factory output for the requested morphology."""
+    """Return the ariel body factory output for the requested morphology.
+
+    For scaling variants (centipede, insect_n, insect_longspine_n) ``n_pairs``
+    is reused as the single scaling parameter (n_pairs / n_segments).
+    """
     if morphology == "insect":
         return insect_small()
     if morphology == "centipede":
         return body_centipede_n(n_pairs)
-    raise ValueError(f"unknown morphology={morphology!r}; use 'insect' or 'centipede'")
+    if morphology == "insect_n":
+        return insect_n(n_pairs)
+    if morphology == "insect_longspine_n":
+        return insect_longspine_n(n_pairs)
+    raise ValueError(
+        f"unknown morphology={morphology!r}; use 'insect', 'centipede', "
+        "'insect_n' or 'insect_longspine_n'"
+    )
 
 
 def _discover_foot_body_names(mj_model: mujoco.MjModel) -> tuple[str, ...]:
@@ -504,9 +519,16 @@ def train(args: argparse.Namespace) -> tuple[Any, Any, Path]:
     eval_cfg.naccdmax = int(rl_cfg.num_eval_envs) * nacc
     eval_env = UndirectedLocomotionInsect(eval_cfg)
 
+    # Dir name encodes morphology + scaling + seed so sweeps don't collide.
+    # Fixed-size morphologies ("insect") skip the n{N} segment.
+    tag_bits = [args.morphology]
+    if args.morphology in ("centipede", "insect_n", "insect_longspine_n"):
+        tag_bits.append(f"n{args.n_pairs}")
+    tag_bits.append(f"seed{args.seed}")
+    run_tag = "_".join(tag_bits)
     out_dir = (
         Path(args.outdir)
-        / f"insect_undirected-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        / f"{run_tag}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     )
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "env_config.json").write_text(json.dumps(env_cfg.to_dict(), indent=2))
@@ -687,14 +709,15 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--morphology",
-        choices=["insect", "centipede"],
+        choices=["insect", "centipede", "insect_n", "insect_longspine_n"],
         default="insect",
     )
     parser.add_argument(
         "--n-pairs",
         type=int,
         default=2,
-        help="Number of leg-bearing spine segments (centipede only).",
+        help="Scaling parameter: n_pairs for centipede, n_segments for "
+        "insect_n / insect_longspine_n. Ignored for fixed-size 'insect'.",
     )
     parser.add_argument(
         "--num-envs",
