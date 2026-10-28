@@ -10,6 +10,9 @@ import subprocess
 import sys
 
 os.environ.setdefault("MUJOCO_GL", "glfw")
+# See note in view_insect.py — stops a fatal GLib-GIO-ERROR from the GNOME
+# xsettings schema lookup during window creation on this Wayland setup.
+os.environ.setdefault("GSETTINGS_BACKEND", "memory")
 
 import mujoco
 import mujoco.viewer
