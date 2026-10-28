@@ -43,6 +43,26 @@ repo) has the same name. If `echo $VIRTUAL_ENV` points outside `ariel/`,
 deactivate and re-source the local `.venv/bin/activate` — otherwise
 `uv pip install` writes to the wrong env.
 
+### Fresh-clone checklist
+
+Things that trip people up on a brand-new machine, in one place:
+
+1. **Python must be 3.12.** The playground pins `<3.13`. If `uv venv` picks a
+   different interpreter, pass `--python 3.12` explicitly.
+2. **Use the playground venv, not the top-level ariel one.** `uv sync` at the
+   repo root creates a different venv that will not have brax / mujoco-warp /
+   jax[cuda]. All PPO commands assume
+   `experiment/mujoco_playground/.venv` is active.
+3. **`ariel` is an editable path dep** (`{path = "../..", editable = true}` in
+   `experiment/mujoco_playground/pyproject.toml`). This resolves correctly
+   only because you ran `uv sync` from inside `experiment/mujoco_playground/`.
+   Edits to `src/ariel/` are picked up without reinstalling.
+4. **`jax.default_backend()` must print `gpu`.** If it prints `cpu`, run
+   `unset LD_LIBRARY_PATH` and retry — a stale system-CUDA `LD_LIBRARY_PATH`
+   shadows the jax wheel's bundled CUDA libs.
+5. **Check `$VIRTUAL_ENV` points inside `ariel/`** before any `uv pip install`
+   — see the sibling-checkout gotcha above.
+
 ## 2. Train
 
 All commands assume you've activated the venv at
