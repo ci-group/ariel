@@ -197,9 +197,6 @@ def default_config() -> config_dict.ConfigDict:
         episode_length=500,  # 10 s of sim time
         action_repeat=1,
         action_scale=jp.pi / 2.0,  # policy outputs in [-1, 1] → ±90° joint target
-        # NOTE: motor-target low-pass filtering is now modeled at the actuator
-        # level in ariel's HingeModule (dyntype=FILTEREXACT, τ=50 ms), so no
-        # python-side filter is needed here.
         upright_termination_z=-0.3,  # terminate when torso 'up' projection drops below this
         reward_config=config_dict.create(
             # xy_speed threshold below which the stall penalty activates.
@@ -209,7 +206,13 @@ def default_config() -> config_dict.ConfigDict:
             # → longer swings. Go1 uses 0.1 s.
             air_time_target=0.1,
             scales=config_dict.create(
-                forward_speed=5.0,     # strong push for locomotion
+                # NOTE: forward_speed is now the *outward* speed Δ|pos|/dt
+                # (potential-based shaping of distance from origin), not raw
+                # |v_xy|. Over an episode this telescopes to |pos_final| -
+                # |pos_initial|, so the term can't be farmed by oscillating
+                # in place. Scale doubled from 5→10 to keep per-meter payoff
+                # similar once oscillation-hacking is removed.
+                forward_speed=10.0,    # strong push for locomotion
                 stall=-3.0,            # penalize staying nearly stationary
                 upright=0.01,          # mild upright bonus
                 action_rate=-0.1,      # softened from -0.5: give π/2 action range room to explore
@@ -313,6 +316,9 @@ class UndirectedLocomotionInsect(mjx_env.MjxEnv):
             "step": jp.int32(0),
             "feet_air_time": jp.zeros(self._n_feet),
             "last_contact": jp.zeros(self._n_feet, dtype=bool),
+            # Previous horizontal displacement from origin, used for the
+            # potential-based forward_speed reward (Δ|pos|/dt).
+            "prev_displacement": jp.linalg.norm(data.qpos[:2]),
         }
         metrics = {f"reward/{k}": jp.zeros(()) for k in self._config.reward_config.scales.keys()}
         metrics["displacement"] = jp.zeros(())
@@ -356,11 +362,13 @@ class UndirectedLocomotionInsect(mjx_env.MjxEnv):
         reward = jp.where(jp.isnan(reward) | nan_state, 0.0, reward)
         reward = jp.clip(reward, -10.0, 10.0)
 
-        # Bookkeeping.
+        # Bookkeeping. prev_displacement is updated AFTER _compute_rewards
+        # has read it (above), so the Δ|pos| reward uses the correct baseline.
         state.info["last_act"] = action
         state.info["step"] = state.info["step"] + 1
         state.info["feet_air_time"] = air_time
         state.info["last_contact"] = contact
+        state.info["prev_displacement"] = jp.linalg.norm(data.qpos[:2])
         for k, v in rewards.items():
             state.metrics[f"reward/{k}"] = v
         state.metrics["displacement"] = jp.linalg.norm(data.qpos[:2])
@@ -423,6 +431,15 @@ class UndirectedLocomotionInsect(mjx_env.MjxEnv):
         stall_speed = self._config.reward_config.stall_speed
         air_time_target = self._config.reward_config.air_time_target
 
+        # Potential-based "outward" speed: rate of change of distance from
+        # origin. Positive moving away, negative returning, zero if
+        # stationary or tangential. Over an episode this telescopes to
+        # (|pos_final| - |pos_initial|)/dt — the policy can't farm this by
+        # oscillating in place the way raw |v_xy| could be farmed.
+        prev_displacement = info["prev_displacement"]
+        current_displacement = jp.linalg.norm(data.qpos[:2])
+        outward_speed = (current_displacement - prev_displacement) / self.dt
+
         # feet_air_time: sum over feet of (air_time - target) at the moment a
         # foot lands. Rewards swings close to `target`; zero if no landing
         # events. Gated by xy_speed > stall_speed so the policy can't farm the
@@ -433,7 +450,7 @@ class UndirectedLocomotionInsect(mjx_env.MjxEnv):
         )
 
         return {
-            "forward_speed": xy_speed,
+            "forward_speed": outward_speed,
             "stall": jp.clip(stall_speed - xy_speed, 0.0, stall_speed),
             "upright": jp.clip(up_proj, 0.0, 1.0),
             "action_rate": jp.sum(jp.square(action - info["last_act"])),
@@ -476,8 +493,8 @@ def ppo_config(num_timesteps: int) -> config_dict.ConfigDict:
         max_grad_norm=1.0,
         num_resets_per_eval=10,
         network_factory=config_dict.create(
-            policy_hidden_layer_sizes=(64, 64),
-            value_hidden_layer_sizes=(128, 128),
+            policy_hidden_layer_sizes=(32, 32),
+            value_hidden_layer_sizes=(64, 64),
             policy_obs_key="state",
             value_obs_key="state",
         ),
