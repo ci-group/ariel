@@ -47,10 +47,10 @@ from stable_baselines3.common.policies import ActorCriticPolicy  # noqa: F401
 from stable_baselines3.common.vec_env import VecEnv, VecNormalize
 
 sys.path.insert(0, str(Path(__file__).parent))
-from envs.residual_drone_env import (  # noqa: E402
+from examples.spear.under_development.library.envs.residual_drone_env import (  # noqa: E402
     MORPH_FEAT_DIM, NUM_TASKS, PRIOR_TAIL_DIM, ResidualDroneEnv, TASK_NAMES,
 )
-from hex_sampler import _stratify_key, sample_feasible  # noqa: E402
+from examples.spear.under_development.library.hex_sampler import _stratify_key, sample_feasible  # noqa: E402
 
 # Obs layout (must match ResidualDroneEnv expansion):
 #   base = TorchDroneGateEnv.state_len   (gate_obs + drone + motor_w)

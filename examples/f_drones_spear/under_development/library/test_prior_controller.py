@@ -24,8 +24,8 @@ from ariel.simulation.drone.drone_configuration import DroneConfiguration
 from ariel.simulation.tasks.torch_drone_gate_env import _build_torch_dynamics
 
 sys.path.insert(0, str(Path(__file__).parent))
-from hex_sampler import sample_feasible              # noqa: E402
-from prior_controller import (                       # noqa: E402
+from examples.spear.under_development.library.hex_sampler import sample_feasible              # noqa: E402
+from examples.spear.under_development.library.prior_controller import (                       # noqa: E402
     HoverPrior,
     N_GAINS,
     compute_u_hover,

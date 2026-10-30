@@ -36,7 +36,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.vec_env import VecNormalize
 
-from common import dump_config, dump_results, load_37, load_40, new_out_dir
+from examples.spear.under_development.library.paper_impls.common import dump_config, dump_results, load_37, load_40, new_out_dir
 
 _t37 = load_37()
 _t40 = load_40()
@@ -209,7 +209,7 @@ def main():
     print(_t37._format_eval(ep_r, ep_g, tg, nspt, mar))
 
     mean_by_task = {t: (float(np.mean(ep_r[t])) if ep_r[t] else 0.0) for t in TASK_NAMES}
-    from common import standard_metric
+    from examples.spear.under_development.library.paper_impls.common import standard_metric
     metric = standard_metric(mean_by_task)
     print(f"\n[P3] standard metric = {metric:+.3f}")
 

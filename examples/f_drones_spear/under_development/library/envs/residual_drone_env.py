@@ -39,7 +39,7 @@ from ariel.simulation.drone.dynamics_params import derive_reference_params
 from ariel.simulation.tasks.torch_drone_gate_env import TorchDroneGateEnv
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from prior_controller import HoverPrior  # noqa: E402
+from examples.spear.under_development.library.prior_controller import HoverPrior  # noqa: E402
 
 TASK_NAMES = ("hover", "figure8", "slalom", "shuttle-run", "circle")
 NUM_TASKS = len(TASK_NAMES)

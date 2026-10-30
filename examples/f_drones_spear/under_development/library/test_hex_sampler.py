@@ -14,7 +14,7 @@ import numpy as np
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
-from hex_sampler import (  # noqa: E402
+from examples.spear.under_development.library.hex_sampler import (  # noqa: E402
     HexMorph,
     MIN_AZIMUTH_GAP_DEG,
     MIN_GAP_DEG_HARD,
@@ -164,7 +164,7 @@ def test_featurizer_accepts_sampler_output():
 
     This is the integration that downstream stages depend on; if it
     breaks, Stage 1's library is unusable."""
-    from morphology_features import morph_features
+    from examples.spear.under_development.library.morphology_features import morph_features
 
     morphs = sample_feasible(10, seed=0, stratify=False)
     for m in morphs:

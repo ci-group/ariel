@@ -29,7 +29,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from hex_sampler import sample_feasible  # noqa: E402
+from examples.spear.under_development.library.hex_sampler import sample_feasible  # noqa: E402
 
 _lib36 = importlib.import_module("36_build_hover_library")
 

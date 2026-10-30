@@ -33,9 +33,9 @@ from ariel.simulation.drone.dynamics_params import derive_reference_params
 from ariel.simulation.tasks.torch_drone_gate_env import _build_torch_dynamics
 
 sys.path.insert(0, str(Path(__file__).parent))
-from hex_sampler import HexMorph, sample_feasible           # noqa: E402
-from morphology_features import FEATURE_DIM, morph_features  # noqa: E402
-from prior_controller import HoverPrior, N_GAINS             # noqa: E402
+from examples.spear.under_development.library.hex_sampler import HexMorph, sample_feasible           # noqa: E402
+from examples.spear.under_development.library.morphology_features import FEATURE_DIM, morph_features  # noqa: E402
+from examples.spear.under_development.library.prior_controller import HoverPrior, N_GAINS             # noqa: E402
 
 console = Console()
 

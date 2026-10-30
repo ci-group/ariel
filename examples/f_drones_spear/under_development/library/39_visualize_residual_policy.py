@@ -27,7 +27,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import VecNormalize
 
 sys.path.insert(0, str(Path(__file__).parent))
-from envs.residual_drone_env import ResidualDroneEnv, TASK_NAMES  # noqa: E402
+from examples.spear.under_development.library.envs.residual_drone_env import ResidualDroneEnv, TASK_NAMES  # noqa: E402
 
 # Reuse helpers + classes from the sibling scripts so we render with exactly
 # the same scene/NED→ENU pipeline as the prior-only baseline.

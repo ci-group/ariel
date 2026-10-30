@@ -36,8 +36,8 @@ from ariel.body_phenotypes.drone.decoders import spherical_angular_to_blueprint
 from ariel.simulation.environments import SimpleFlatWorld
 
 sys.path.insert(0, str(Path(__file__).parent))
-from envs.residual_drone_env import ResidualDroneEnv, TASK_NAMES  # noqa: E402
-from hex_sampler import sample_feasible  # noqa: E402
+from examples.spear.under_development.library.envs.residual_drone_env import ResidualDroneEnv, TASK_NAMES  # noqa: E402
+from examples.spear.under_development.library.hex_sampler import sample_feasible  # noqa: E402
 
 GRAVITY = 9.81
 

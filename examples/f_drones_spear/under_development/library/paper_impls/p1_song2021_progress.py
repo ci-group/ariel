@@ -37,7 +37,7 @@ import torch
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import VecNormalize
 
-from common import dump_config, dump_results, load_42a, load_42b, new_out_dir
+from examples.spear.under_development.library.paper_impls.common import dump_config, dump_results, load_42a, load_42b, new_out_dir
 
 
 class ProgressRewardEnv(load_42b().BlueprintTrajEnv):

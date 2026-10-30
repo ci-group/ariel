@@ -170,8 +170,8 @@ def build_morph_with_bp(base_genome, offsets, mode: str = "az"):
     from ariel.simulation.drone.drone_configuration import DroneConfiguration
     from ariel.simulation.drone.dynamics_params import derive_reference_params
     from ariel.simulation.drone import GRAVITY
-    from morphology_features import morph_features, _compute_twr
-    from prior_controller import N_GAINS
+    from examples.spear.under_development.library.morphology_features import morph_features, _compute_twr
+    from examples.spear.under_development.library.prior_controller import N_GAINS
     cfg = DroneConfiguration(props)
     mass = float(cfg.mass); inertia = np.asarray(cfg.inertia_matrix, dtype=np.float64)
     params = derive_reference_params(

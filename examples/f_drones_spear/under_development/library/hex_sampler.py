@@ -27,7 +27,7 @@ from ariel.simulation.drone.drone_configuration import DroneConfiguration
 from ariel.simulation.drone.dynamics_params import derive_reference_params
 
 sys.path.insert(0, str(Path(__file__).parent))
-from morphology_features import _compute_u_hover, _compute_twr  # noqa: E402
+from examples.spear.under_development.library.morphology_features import _compute_u_hover, _compute_twr  # noqa: E402
 
 
 # ─────────────────────────────────────────────────────────────────────────────

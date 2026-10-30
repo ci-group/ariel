@@ -34,7 +34,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.vec_env import VecNormalize
 
-from common import (
+from examples.spear.under_development.library.paper_impls.common import (
     dump_config, dump_results, load_40, load_37, new_out_dir,
 )
 

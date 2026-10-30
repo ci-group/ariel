@@ -50,9 +50,9 @@ from ariel.simulation.drone.drone_configuration import DroneConfiguration
 from ariel.simulation.drone.dynamics_params import derive_reference_params
 from ariel.simulation.drone import GRAVITY
 
-from morphology_features import morph_features, _compute_twr  # noqa: E402
-from prior_controller import N_GAINS  # noqa: E402
-from envs.residual_drone_env import ResidualDroneEnv  # noqa: E402
+from examples.spear.under_development.library.morphology_features import morph_features, _compute_twr  # noqa: E402
+from examples.spear.under_development.library.prior_controller import N_GAINS  # noqa: E402
+from examples.spear.under_development.library.envs.residual_drone_env import ResidualDroneEnv  # noqa: E402
 
 N_MOTORS = 6
 ARM_LENGTH = 0.15

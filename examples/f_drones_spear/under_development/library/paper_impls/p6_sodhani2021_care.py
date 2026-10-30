@@ -41,7 +41,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.vec_env import VecNormalize
 
-from common import dump_config, dump_results, load_37, new_out_dir, standard_metric
+from examples.spear.under_development.library.paper_impls.common import dump_config, dump_results, load_37, new_out_dir, standard_metric
 
 _t37 = load_37()
 MTRLActorCriticPolicy = _t37.MTRLActorCriticPolicy

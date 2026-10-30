@@ -18,7 +18,7 @@ import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).parent))
-from envs.residual_drone_env import ResidualDroneEnv  # noqa: E402
+from examples.spear.under_development.library.envs.residual_drone_env import ResidualDroneEnv  # noqa: E402
 
 def _find_library() -> Path | None:
     """Locate __data__/hex_library/v1/library.npz walking up from this file.
@@ -50,7 +50,7 @@ def _load_morph(idx: int = 0) -> dict:
         d = np.load(LIBRARY)
         # The library stores the morph seed; re-sample the same morph via
         # `sample_feasible` and pick the matching seed.
-        from hex_sampler import sample_feasible
+        from examples.spear.under_development.library.hex_sampler import sample_feasible
         target_seed = int(d["morph_seed"][idx])
         morphs = sample_feasible(100, seed=42, stratify=True)
         m = next(mm for mm in morphs if mm.seed == target_seed)
@@ -64,12 +64,12 @@ def _load_morph(idx: int = 0) -> dict:
             "morph_features": d["morph_features"][idx].astype(np.float32),
         }
     # Fallback: synthesise a single morph + dummy cmaes_params
-    from hex_sampler import sample_feasible
-    from morphology_features import morph_features
+    from examples.spear.under_development.library.hex_sampler import sample_feasible
+    from examples.spear.under_development.library.morphology_features import morph_features
     m = sample_feasible(1, seed=42, stratify=False)[0]
     # Use the prior's default warm-start so the test still demonstrates
     # the integration. Library scores will be better, of course.
-    from prior_controller import HoverPrior, N_GAINS
+    from examples.spear.under_development.library.prior_controller import HoverPrior, N_GAINS
     n = len(m.propellers)
     return {
         "propellers":     m.propellers,

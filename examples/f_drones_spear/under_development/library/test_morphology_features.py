@@ -15,7 +15,7 @@ import pytest
 
 # examples/ isn't a Python package; add the sibling source file directly.
 sys.path.insert(0, str(Path(__file__).parent))
-from morphology_features import (  # noqa: E402
+from examples.spear.under_development.library.morphology_features import (  # noqa: E402
     FEATURE_DIM,
     morph_features,
 )
