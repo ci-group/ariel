@@ -3,6 +3,8 @@
 *.mp4
 # Dirs
 __data__
+# CSVs
+.csv
 # Mujoco
 MUJOCO_LOG.TXT
 # DrawIo
