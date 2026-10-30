@@ -40,9 +40,6 @@ from ariel.body_phenotypes.robogen_lite.decoders.cppn_best_first import (
 )
 from ariel.ec import EA, EAOperation, EASettings, Individual, Population
 from ariel.simulation.controllers.controller import Controller
-from ariel.simulation.controllers.na_cpg import (
-    create_fully_connected_adjacency,
-)
 from ariel.simulation.controllers.simple_cpg import (
     SimpleCPG,
     create_fully_connected_adjacency,
@@ -98,6 +95,9 @@ type ViewerTypes = Literal["launcher", "video", "simple"]
 SEED = 42
 RNG = np.random.default_rng(SEED)
 torch.manual_seed(SEED)
+# reproduction() draws parents with random.sample / random.choice, so the
+# stdlib RNG has to be seeded too or runs are not reproducible.
+random.seed(SEED)
 
 SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
@@ -388,14 +388,21 @@ class Evolution:
                 ind.alive = False
 
         # Diagnostics
-        avg_fitness = np.mean([
+        scored = [
             ind.fitness_
             for ind in survivors
             if ind.fitness_ is not None and ind.fitness_ != float("inf")
-        ])
-        console.log(
-            f"[green]Survivor Selection: Avg fitness = {avg_fitness:.4f}[/green]",
-        )
+        ]
+        # np.mean([]) is nan and emits a RuntimeWarning; a generation where
+        # every body failed to compile is unusual but not an error.
+        if scored:
+            console.log(
+                f"[green]Survivor Selection: Avg fitness = {np.mean(scored):.4f}[/green]",
+            )
+        else:
+            console.log(
+                "[yellow]Survivor Selection: no finite fitness values this generation[/yellow]",
+            )
 
         return population
 
@@ -585,6 +592,11 @@ class Evolution:
             population,
             operations=ops,
             num_steps=BUDGET,
+            # Must be forwarded explicitly: EA falls back to the global
+            # ariel.ec.config singleton, which still says "maximise", so
+            # get_solution("best") would otherwise return the individual
+            # furthest from the target.
+            is_maximisation=self.config.is_maximisation,
             db_file_path=self.config.db_file_path,
             db_handling=self.config.db_handling,
             quiet=self.config.quiet,

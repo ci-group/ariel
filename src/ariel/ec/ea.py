@@ -277,6 +277,10 @@ class EA:
     first_generation_id : int or None, optional
         Starting value of the internal generation counter. Falls back to
         ``config.first_generation_id`` when ``None``. Default is ``None``.
+    is_maximisation : bool or None, optional
+        Whether higher fitness is better. Determines the ranking used by
+        ``get_solution``. Falls back to ``config.is_maximisation`` when
+        ``None``. Default is ``None``.
     quiet : bool or None, optional
         Suppress Rich console output. Falls back to ``config.quiet`` when
         ``None``. Default is ``None``.
@@ -313,6 +317,7 @@ class EA:
         restart: "tuple[Path | str, int] | Path | str | None" = None,
         num_steps: int | None = None,
         first_generation_id: int | None = None,
+        is_maximisation: bool | None = None,
         quiet: bool | None = None,
         db_file_path: Path | None = None,
         db_handling: DBHandlingMode | None = None,
@@ -380,7 +385,11 @@ class EA:
             raise ValueError(msg)
 
         self.operations: list[EAOperation] = operations
-        self.is_maximisation: bool = config.is_maximisation
+        self.is_maximisation: bool = (
+            is_maximisation
+            if is_maximisation is not None
+            else config.is_maximisation
+        )
         self.target_population_size: int = config.target_population_size
         self.current_generation: int = (
             first_generation_id
@@ -589,8 +598,10 @@ class EA:
         Individual
             The selected individual.
         """
+        # pop[0] must be the *best* individual: highest fitness first when
+        # maximising, lowest fitness first when minimising.
         sort: Literal["asc", "desc"] = (
-            "desc" if not self.is_maximisation else "asc"
+            "desc" if self.is_maximisation else "asc"
         )
         pop = self._fetch(sort=sort, only_alive=only_alive, requires_eval=False)
 

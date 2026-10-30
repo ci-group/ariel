@@ -1,5 +1,6 @@
 # Standard libraries
 import gc
+import os
 import random
 import time
 from pathlib import Path
@@ -101,10 +102,12 @@ TARGET_POSITIONS = [
 
 # Global constants
 # Get file name and location to create data save folder.
-SCRIPT_NAME = __file__.split("/")[-1][:-3]
+# Path().stem is used instead of splitting on "/" so this also works on
+# Windows, where __file__ contains backslashes.
+SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
 DATA = Path(CWD / "__data__" / SCRIPT_NAME)
-DATA.mkdir(exist_ok=True)
+DATA.mkdir(exist_ok=True, parents=True)
 
 
 # ============================================================================ #
@@ -225,10 +228,9 @@ def run_vision_simulation(
     """Custom runner that processes vision."""
 
     # Setup Renderer if not passed (creates a new context)
+    owns_renderer = renderer is None
     if renderer is None:
         renderer = mujoco.Renderer(model, height=24, width=32)
-
-    timestep = model.opt.timestep
 
     # Initialize control placeholder
     current_action = np.zeros(model.nu)
@@ -240,58 +242,67 @@ def run_vision_simulation(
 
     trajectory = []
 
-    while data.time < duration:
-        # Calculate deduced step count (Optimization from controller.py)
-        deduced_step = int(np.ceil(data.time / timestep))
+    # An integer step counter avoids the float-division drift of
+    # ceil(data.time / timestep), which skips or double-fires control steps
+    # after a few thousand accumulations.
+    step = 0
 
-        # --- CONTROL STEP ---
-        # Only run expensive vision and network pass every N steps
-        if deduced_step % control_step_freq == 0:
-            renderer.update_scene(data, camera=cam_name)
-            img = renderer.render()
+    try:
+        while data.time < duration:
+            # --- CONTROL STEP ---
+            # Only run expensive vision and network pass every N steps
+            if step % control_step_freq == 0:
+                renderer.update_scene(data, camera=cam_name)
+                img = renderer.render()
 
-            # 2. Process Vision
-            mask = isolate_green(img)
-            vision_inputs = analyze_sections(mask)
+                # 2. Process Vision
+                mask = isolate_green(img)
+                vision_inputs = analyze_sections(mask)
 
-            # 3. Prepare Inputs
-            robot_state = get_robot_state(data)
+                # 3. Prepare Inputs
+                robot_state = get_robot_state(data)
 
-            # Using both sin and cos gives the network a smooth, circular sense of time
-            phase_inputs = [
-                2 * np.sin(data.time * 2.0 * np.pi),
-                2 * np.cos(data.time * 2.0 * np.pi),
-            ]
+                # Using both sin and cos gives the network a smooth, circular sense of time
+                phase_inputs = [
+                    2 * np.sin(data.time * 2.0 * np.pi),
+                    2 * np.cos(data.time * 2.0 * np.pi),
+                ]
 
-            state_input = np.concatenate([
-                robot_state,
-                vision_inputs,
-                phase_inputs,  # Add to the end
-            ]).astype(np.float32)
+                state_input = np.concatenate([
+                    robot_state,
+                    vision_inputs,
+                    phase_inputs,  # Add to the end
+                ]).astype(np.float32)
 
-            # 4. Network Forward Pass
-            current_action = network.forward(model, data, state_input)
-            trajectory.append((data.qpos[0], data.qpos[1]))
+                # 4. Network Forward Pass
+                current_action = network.forward(model, data, state_input)
+                trajectory.append((data.qpos[0], data.qpos[1]))
 
-        # 5. Apply Control (Hold previous action if not a control step)
-        data.ctrl[:] = current_action
+            # 5. Apply Control (Hold previous action if not a control step)
+            data.ctrl[:] = current_action
 
-        # 6. Step Physics
-        mujoco.mj_step(model, data)
+            # 6. Step Physics
+            mujoco.mj_step(model, data)
+            step += 1
 
-        current_pos = np.array(data.qpos[0:3].copy())
-        total_path_length += np.linalg.norm(current_pos - last_pos)
-        last_pos = current_pos
+            current_pos = np.array(data.qpos[0:3].copy())
+            total_path_length += np.linalg.norm(current_pos - last_pos)
+            last_pos = current_pos
 
-        if target_position is not None:
-            planar_distance = float(
-                np.linalg.norm(current_pos[:2] - target_position[:2])
-            )
-            min_distance_to_target = min(
-                min_distance_to_target, planar_distance
-            )
-            if time_to_target is None and planar_distance <= REACH_RADIUS:
-                time_to_target = float(data.time)
+            if target_position is not None:
+                planar_distance = float(
+                    np.linalg.norm(current_pos[:2] - target_position[:2])
+                )
+                min_distance_to_target = min(
+                    min_distance_to_target, planar_distance
+                )
+                if time_to_target is None and planar_distance <= REACH_RADIUS:
+                    time_to_target = float(data.time)
+    finally:
+        # Only free the GL context we created ourselves; a caller-supplied
+        # renderer is reused across evaluations.
+        if owns_renderer:
+            renderer.close()
 
     if target_position is None:
         min_distance_to_target = float(np.linalg.norm(last_pos[:2]))
@@ -309,10 +320,16 @@ def run_vision_simulation(
 # ============================================================================ #
 
 
-def evolve(world, model, data) -> List[float]:
+def evolve(world, model, data) -> tuple[np.ndarray, int]:
     """Evolve the robot's movement using an evolutionary algorithm."""
 
-    tracker = Tracker(mujoco_obj_to_find=data, observable_attributes=["xpos"])
+    # Tracker expects a MuJoCo object *type* plus a name substring to bind,
+    # not the MjData object itself.
+    tracker = Tracker(
+        mujoco_obj_to_find=mujoco.mjtObj.mjOBJ_GEOM,
+        name_to_bind="core",
+        observable_attributes=["xpos"],
+    )
     tracker.setup(world.spec, data)
 
     # Identify Camera for ROBOT VISION (on the spider)
@@ -443,7 +460,14 @@ def evolve(world, model, data) -> List[float]:
         console.log(f"Best Fit (Avg): {gen_best:.4f}")
 
     best_ind = searcher.status["best"].values
-    return best_ind, input_dim
+
+    # Release the evaluation renderer's GL context before the replay/video
+    # stage creates its own.
+    renderer.close()
+
+    # np.array (not asarray) forces a writable copy; EvoTorch hands back a
+    # read-only tensor, which torch.Tensor() later warns about.
+    return np.array(best_ind, dtype=np.float32), input_dim
 
 
 # ============================================================================ #
@@ -492,7 +516,9 @@ if __name__ == "__main__":
 
     console.log(f"Evolution took {(end - start) / 60:.2f} minutes")
 
-    weights_path = "3_spider_vision_new.npy"
+    # Keep run artefacts inside this script's own __data__ folder instead of
+    # writing to whatever directory the script happens to be launched from.
+    weights_path = DATA / "best_weights.npy"
     # Unconditionally save the new weights, overwriting any old ones
     np.save(weights_path, best_weights)
     console.log(f"[green]Best weights saved to {weights_path}[/green]")
@@ -579,23 +605,25 @@ if __name__ == "__main__":
     # Timing Variables
     fps = 30
     dt = model.opt.timestep
-    steps_per_frame = int(1.0 / (fps * dt))
+    # max(1, ...) prevents an infinite loop when dt is large enough that
+    # 1 / (fps * dt) rounds down to zero.
+    steps_per_frame = max(1, int(round(1.0 / (fps * dt))))
     control_step_freq = 50
     current_ctrl = np.zeros(model.nu)
+    render_step = 0
 
     # Main Rendering Loop (Using Context Manager for safe memory handling)
     with mujoco.Renderer(model, height=480, width=640) as renderer:
         while data.time < DURATION:
             # INNER LOOP: Step physics N times to match Video FPS
             for _ in range(steps_per_frame):
-                deduced_step = int(np.ceil(data.time / dt))
-
-                if deduced_step % control_step_freq == 0:
+                if render_step % control_step_freq == 0:
                     current_ctrl = get_vision_control_signal(model, data)
 
                 # Safely copy control array
                 np.copyto(data.ctrl, current_ctrl)
                 mujoco.mj_step(model, data)
+                render_step += 1
 
             # OUTER LOOP: Render Frame (Once per 1/30th second)
             renderer.update_scene(

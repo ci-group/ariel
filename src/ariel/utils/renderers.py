@@ -234,39 +234,51 @@ def tracking_video_renderer(
 
     # MuJoCo visualisation configuration
     viz_options = mujoco.MjvOption()
-    viz_options.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = True
-    viz_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-    viz_options.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = True
-    viz_options.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = True
 
     # Reset state and time of simulation
     mujoco.mj_resetData(model, data)
 
-    # Find the core body ID for tracking
-    try:
-        core_body_id = mujoco.mj_name2id(
-            model,
-            mujoco.mjtObj.mjOBJ_BODY,
-            geom_to_track,
-        )
-        msg = f"Tracking core body ID: {core_body_id}"
-        log.info(msg)
-    except ValueError:
-        msg = f"Body name '{geom_to_track}' not found in the model."
-        msg += " Using default camera."
+    # Find the body to track by exact name first, then fall back to any body
+    # whose name contains "core".  mj_name2id returns -1 (not an exception)
+    # when the name is not found.
+    core_body_id = mujoco.mj_name2id(
+        model,
+        mujoco.mjtObj.mjOBJ_BODY,
+        geom_to_track,
+    )
+    if core_body_id == -1:
+        msg = f"Body '{geom_to_track}' not found — scanning for any 'core' body."
         log.warning(msg)
-        core_body_id = None
-        for i in range(model.nbody):
-            body_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i)
-            if body_name and "core" in body_name:
-                core_body_id = i
-                break
+        core_body_id = next(
+            (
+                i
+                for i in range(model.nbody)
+                if (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or "")
+                and "core" in (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or "")
+            ),
+            None,
+        )
+    if core_body_id is not None:
+        log.info(f"Tracking body ID: {core_body_id}")
+    else:
+        log.warning("No 'core' body found — using default free camera.")
 
     # Calculate steps per frame to avoid single iterations
     options = mujoco.MjOption()
     steps_per_frame = duration / (
         options.timestep * duration * video_recorder.fps
     )
+
+    # Build the tracking camera once (reused every frame)
+    if core_body_id is not None:
+        tracking_cam = mujoco.MjvCamera()
+        tracking_cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
+        tracking_cam.trackbodyid = core_body_id
+        tracking_cam.distance = tracking_distance
+        tracking_cam.azimuth = tracking_azimuth
+        tracking_cam.elevation = tracking_elevation
+    else:
+        tracking_cam = None
 
     # Call rendering engine
     with mujoco.Renderer(
@@ -278,25 +290,11 @@ def tracking_video_renderer(
             # Move simulation forward one iteration/step
             mujoco.mj_step(model, data, nstep=math.floor(steps_per_frame))
 
-            # Set up tracking camera if core body found
-            if core_body_id is not None:
-                # Create a tracking camera
-                camera = mujoco.MjvCamera()
-                camera.type = mujoco.mjtCamera.mjCAMERA_TRACKING
-                camera.trackbodyid = core_body_id
-                camera.distance = tracking_distance
-                camera.azimuth = tracking_azimuth
-                camera.elevation = tracking_elevation
-
-                # Update the renderer's camera
-                renderer.update_scene(
-                    data,
-                    scene_option=scene_option,
-                    camera=camera,
-                )
-            else:
-                # Use default camera
-                renderer.update_scene(data, scene_option=scene_option)
+            renderer.update_scene(
+                data,
+                scene_option=viz_options,
+                camera=tracking_cam,
+            )
 
             # Save frame
             video_recorder.write(frame=renderer.render())

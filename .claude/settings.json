@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\John\\\\Documents\\\\Ariel_Extra\\\\ariel\\\\src\\\\ariel\\\\\" -Recurse -Filter \"*.py\" | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "Bash(Get-ChildItem -Path 'c:\\\\Users\\\\John\\\\Documents\\\\Ariel_Extra\\\\ariel\\\\src\\\\ariel' -Recurse -Filter '*.py')",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(python -m pytest tests/unit/ -x --tb=short -q)",
+      "Bash(uv run *)",
+      "PowerShell($env:PYTHONIOENCODING=\"utf-8\"; cd 'c:\\\\Users\\\\John\\\\Documents\\\\Ariel_Extra\\\\ariel'; uv run pytest tests/unit/ --tb=line -q 2>&1 | Select-Object -Last 25)",
+      "PowerShell($env:PYTHONIOENCODING=\"utf-8\"; cd 'c:\\\\Users\\\\John\\\\Documents\\\\Ariel_Extra\\\\ariel'; uv run pytest tests/unit/ --tb=line -q 2>&1 | Select-Object -Last 10)",
+      "PowerShell($env:PYTHONIOENCODING=\"utf-8\"; cd 'c:\\\\Users\\\\John\\\\Documents\\\\Ariel_Extra\\\\ariel'; uv run pytest tests/unit/ --cov=ariel --cov-report=term-missing -q 2>&1 | Select-Object -Last 60)",
+      "PowerShell($env:PYTHONIOENCODING=\"utf-8\"; cd 'c:\\\\Users\\\\John\\\\Documents\\\\Ariel_Extra\\\\ariel'; uv run pip install pytest-cov 2>&1 | Select-Object -Last 5)",
+      "PowerShell($env:PYTHONIOENCODING=\"utf-8\"; cd 'c:\\\\Users\\\\John\\\\Documents\\\\Ariel_Extra\\\\ariel'; uv run pytest tests/unit/test_ec/test_genotypes/test_nde.py tests/unit/test_body_phenotypes/test_robogen_lite/test_decoders.py --tb=short -q 2>&1 | Select-Object -Last 15)",
+      "PowerShell($env:PYTHONIOENCODING=\"utf-8\"; cd 'c:\\\\Users\\\\John\\\\Documents\\\\Ariel_Extra\\\\ariel'; uv run pytest tests/unit/ --cov=ariel --cov-report=term -q 2>&1 | Select-Object -Last 15)"
+    ]
+  }
+}

@@ -71,7 +71,7 @@ warnings.filterwarnings(
 import argparse
 parser = argparse.ArgumentParser(description="Randomised waypoint navigation")
 parser.add_argument("--budget",        type=int,   default=100,  help="CMA generations")
-parser.add_argument("--population",    type=int,   default=40,   help="Requested CMA population (enforced ≥ min-lambda, even)")
+parser.add_argument("--population",    type=int,   default=40,   help="Requested CMA population (enforced >= min-lambda, even)")
 parser.add_argument("--dur",           type=float, default=60.0, help="Max episode duration (s)")
 parser.add_argument("--reach-radius",  type=float, default=0.35, help="Planar reach radius (m)")
 parser.add_argument("--num-waypoints", type=int,   default=3,    help="Waypoints per episode")
@@ -465,7 +465,7 @@ def evolve() -> tuple[np.ndarray, Optional[np.ndarray], Optional[list[np.ndarray
             )
             console.log(
                 f"[yellow]Warm start: embedded {loaded.shape[0]}-param weights "
-                f"(no-progress → progress network) from {warm_path}[/yellow]"
+                f"(no-progress -> progress network) from {warm_path}[/yellow]"
             )
 
         else:
@@ -546,7 +546,7 @@ def evolve() -> tuple[np.ndarray, Optional[np.ndarray], Optional[list[np.ndarray
                 speed_pct = (-best - NUM_WAYPOINTS * 10.0) * 100.0
                 console.log(
                     f"Best fitness: {best:.3f}  "
-                    f"({best_wps}/{NUM_WAYPOINTS} waypoints — {speed_pct:.1f}% speed bonus)  "
+                    f"({best_wps}/{NUM_WAYPOINTS} waypoints - {speed_pct:.1f}% speed bonus)  "
                     f"wps: {wp_coords}"
                 )
             else:
@@ -590,7 +590,7 @@ def replay_in_viewer(
             waypoints = [raw[i] for i in range(len(raw))]
             console.log(f"[cyan]Auto-loaded waypoints from {auto_wps}[/cyan]")
         else:
-            console.log("[yellow]No waypoints file found — sampling fresh waypoints with BASE_SEED.[/yellow]")
+            console.log("[yellow]No waypoints file found - sampling fresh waypoints with BASE_SEED.[/yellow]")
             rng = np.random.default_rng(BASE_SEED)
             waypoints = sample_waypoints(rng)
 
@@ -617,7 +617,7 @@ def replay_in_viewer(
 
     control_renderer = mujoco.Renderer(model, height=96, width=128)
 
-    console.rule("[bold green]MuJoCo Viewer — Replay[/bold green]")
+    console.rule("[bold green]MuJoCo Viewer - Replay[/bold green]")
     console.log("Close the viewer window (or press Escape) to stop.")
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
@@ -694,18 +694,18 @@ def main() -> None:
     # future runs since it's a smooth summary of the converged search region.
     weights_path = DATA / "best_weights.npy"
     np.save(weights_path, recommendation_weights)
-    console.log(f"Evolution finished in {elapsed / 60:.1f} min. Weights → {weights_path}")
+    console.log(f"Evolution finished in {elapsed / 60:.1f} min. Weights -> {weights_path}")
 
     # Save the best-seen individual's weights and waypoints so --replay can
     # reproduce the exact episode that achieved the best fitness.
     if best_seen_weights is not None:
         best_seen_path = DATA / "best_seen_weights.npy"
         np.save(best_seen_path, best_seen_weights)
-        console.log(f"Best-seen weights → {best_seen_path}")
+        console.log(f"Best-seen weights -> {best_seen_path}")
     if best_seen_waypoints is not None:
         wps_path = DATA / "best_seen_waypoints.npy"
         np.save(wps_path, np.array(best_seen_waypoints))
-        console.log(f"Best-seen waypoints → {wps_path}")
+        console.log(f"Best-seen waypoints -> {wps_path}")
 
     if args.no_video:
         return
@@ -714,7 +714,7 @@ def main() -> None:
     # best_seen_weights is the individual that achieved best_seen_fitness; it was
     # directly evaluated (unlike the CMA mean) and we know its waypoint layout.
     if best_seen_weights is None or best_seen_waypoints is None:
-        console.log("[red]No evaluated individual found — skipping video.[/red]")
+        console.log("[red]No evaluated individual found - skipping video.[/red]")
         return
 
     replay_waypoints = best_seen_waypoints

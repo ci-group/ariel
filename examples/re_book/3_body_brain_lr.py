@@ -30,7 +30,10 @@ from rich.progress import (
 from rich.traceback import install
 
 # Local libraries
-from ariel import console
+from ariel.body_phenotypes.robogen_lite.config import (
+    NUM_OF_ROTATIONS,
+    NUM_OF_TYPES_OF_MODULES,
+)
 from ariel.body_phenotypes.robogen_lite.constructor import (
     construct_mjspec_from_graph,
 )
@@ -56,7 +59,9 @@ type ViewerTypes = Literal["launcher", "video", "simple", "no_control", "frame"]
 type PopulationFunc = Callable[[Population], Population]
 
 # --- DATA SETUP --- #
-SCRIPT_NAME = __file__.split("/")[-1][:-3]
+# Path().stem is used instead of splitting on "/" so this also works on
+# Windows, where __file__ contains backslashes.
+SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
 DATA = CWD / "__data__" / SCRIPT_NAME
 if DATA.exists():
@@ -73,8 +78,22 @@ DB_HANDLING_MODES = Literal["delete", "halt"]
 install()
 console = Console(width=120)
 RNG = np.random.default_rng(SEED)
-config = EASettings()
-ID_MANAGER = IdManager(node_start=6 + 13 - 1, innov_start=(6 * 13) - 1)
+random.seed(SEED)
+
+# Fitness is the *negative* distance to the target, so higher is better.
+config = EASettings(is_maximisation=True)
+
+# CPPN shape. The morphology decoder reads its outputs as
+# [connection score] + [one score per module type] + [one score per rotation],
+# so the output count must be derived from the module config. Hard-coding 13
+# (the old rotation count) makes the decoder index a rotation enum that no
+# longer exists and crashes with "N is not a valid ModuleRotationsIdx".
+NUM_CPPN_INPUTS = 6
+NUM_CPPN_OUTPUTS = 1 + NUM_OF_TYPES_OF_MODULES + NUM_OF_ROTATIONS
+ID_MANAGER = IdManager(
+    node_start=NUM_CPPN_INPUTS + NUM_CPPN_OUTPUTS - 1,
+    innov_start=(NUM_CPPN_INPUTS * NUM_CPPN_OUTPUTS) - 1,
+)
 
 # --- Overal Params ---
 # Robot
@@ -236,11 +255,16 @@ def survivor_selection(population: Population) -> Population:
 @EAOperation
 def learning(population: Population) -> Population:
     for ind in population:
-        if ind.tags["requires_lr"]:
+        # .get(): individuals restored from the database may predate the tag.
+        if ind.tags.get("requires_lr", False):
             robot = genotype_to_phenotype(ind)
             brain = learning_robot(robot)
             ind.tags["brain"] = brain
             ind.tags["requires_lr"] = False
+
+            # The learned brain changes the robot's behaviour, so its old
+            # fitness no longer describes it.
+            ind.requires_eval = True
 
     # Move videos folder to give it a timestamp
     timestamp = int(datetime.datetime.now(datetime.UTC).timestamp())
@@ -258,7 +282,15 @@ def evaluate(
     for ind in population:
         if ind.requires_eval:
             robot = genotype_to_phenotype(ind)
-            ind.fitness = evaluate_robot(robot, mode=mode)
+            # Score the robot with the brain that learning() found for it.
+            # Passing no brain here would throw the learning stage away and
+            # evaluate every individual with a default, untrained CPG.
+            # Assigning .fitness also clears requires_eval.
+            ind.fitness = evaluate_robot(
+                robot,
+                brain=ind.tags.get("brain"),
+                mode=mode,
+            )
     return population
 
 
@@ -368,30 +400,37 @@ def learning_robot(
     ) as progress:
         task_id = progress.add_task("Learning:", total=budget, loss_info="")
 
-        best_fitness = float("inf")
+        best_loss = float("inf")
         best_params = None
 
         for _ in range(budget):
             x = optimizer.ask()
             brain = x.kwargs
-            loss = evaluate_robot(robot, brain)
+
+            # evaluate_robot returns a *fitness* (negative distance, higher is
+            # better) but nevergrad minimises what it is told. Feeding the
+            # fitness straight in would train the controller to walk away
+            # from the target, so negate it into a loss (= distance) first.
+            loss = -evaluate_robot(robot, brain)
             optimizer.tell(x, loss)
 
-            if loss < best_fitness:
-                best_fitness = loss
+            if loss < best_loss:
+                best_loss = loss
                 best_params = x.kwargs
 
             # Update counter and custom loss text
             progress.update(
                 task_id,
                 advance=1,
-                loss_info=f"| Current: {loss:.4f} | Best: {best_fitness:.4f}",
+                loss_info=f"| Current: {loss:.4f} | Best: {best_loss:.4f}",
             )
 
-    # View best
-    x = optimizer.provide_recommendation()
-    brain = x.kwargs
-    loss = evaluate_robot(robot, brain, mode="video")
+    if best_params is None:
+        return None
+
+    # Record a video of the brain we actually keep, not of the optimizer's
+    # recommendation (which is a different point in parameter space).
+    evaluate_robot(robot, best_params, mode="video")
     return serialise_brain_to_json(best_params)
 
 
@@ -549,9 +588,12 @@ def evaluate_robot(
         duration=duration,
     )
 
-    # Calculate and print the fitness of your robot
+    # Calculate and print the fitness of your robot.
+    # A body whose core geom was never bound leaves the tracker empty; treat
+    # that as the worst possible score rather than raising KeyError.
+    history = tracker.history.get("xpos", {}).get(0, [])
     return fitness_function(
-        tracker.history["xpos"][0],
+        history,
         duration=duration,
     )
 
@@ -570,8 +612,8 @@ def genotype_to_phenotype(individual: Individual) -> CoreModule:
 def create_individual() -> Individual:
     """Initialize individual with CPPN morphology and flat controller vector."""
     genome = Genome.random(
-        num_inputs=6,
-        num_outputs=13,
+        num_inputs=NUM_CPPN_INPUTS,
+        num_outputs=NUM_CPPN_OUTPUTS,
         next_node_id=ID_MANAGER.get_next_node_id(),
         next_innov_id=ID_MANAGER.get_next_innov_id(),
     )
@@ -627,6 +669,10 @@ def main() -> None:
         population_list,
         operations=ops,
         num_steps=GENERATIONS,
+        # Must be forwarded explicitly: EA falls back to the global
+        # ariel.ec.config singleton otherwise, and get_solution() would rank
+        # the population the wrong way round.
+        is_maximisation=config.is_maximisation,
         db_file_path=DATA / "database.db",
         db_handling="delete",
     )

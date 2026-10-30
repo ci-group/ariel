@@ -1,12 +1,13 @@
 # Standard libraries
 import gc
+import queue
 import random
 from typing import Literal, cast, List, Optional, Any
 from pathlib import Path
 import time
 import os
 import threading
-import cv2 
+import cv2
 from concurrent.futures import ThreadPoolExecutor
 
 # Pretty little errors and progress bars
@@ -75,10 +76,12 @@ TARGET_POSITIONS = [
 
 # Global constants
 # Get file name and location to create data save folder.
-SCRIPT_NAME = __file__.split("/")[-1][:-3]
+# Path().stem is used instead of splitting on "/" so this also works on
+# Windows, where __file__ contains backslashes.
+SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
 DATA = Path(CWD / "__data__" / SCRIPT_NAME)
-DATA.mkdir(exist_ok=True)
+DATA.mkdir(exist_ok=True, parents=True)
 
 
 
@@ -195,10 +198,8 @@ def run_vision_simulation(model,
     # Setup Renderer if not passed (creates a new context)
     owns_renderer = renderer is None
     if renderer is None:
-        renderer = mujoco.Renderer(model, height=24, width=32) 
-    
-    timestep = model.opt.timestep
-    
+        renderer = mujoco.Renderer(model, height=24, width=32)
+
     # Initialize control placeholder
     current_action = np.zeros(model.nu)
 
@@ -206,17 +207,19 @@ def run_vision_simulation(model,
     total_path_length = 0.0
     min_distance_to_target = float("inf")
     time_to_target: Optional[float] = None
-    
+
     trajectory = []
-    
+
+    # An integer step counter avoids the float-division drift of
+    # ceil(data.time / timestep), which skips or double-fires control steps
+    # after a few thousand accumulations.
+    step = 0
+
     try:
         while data.time < duration:
-            # Calculate deduced step count (Optimization from controller.py)
-            deduced_step = int(np.ceil(data.time / timestep))
-            
             # --- CONTROL STEP ---
             # Only run expensive vision and network pass every N steps
-            if deduced_step % control_step_freq == 0:
+            if step % control_step_freq == 0:
                 renderer.update_scene(data, camera=cam_name)
                 img = renderer.render()
                 
@@ -248,6 +251,7 @@ def run_vision_simulation(model,
             
             # 6. Step Physics
             mujoco.mj_step(model, data)
+            step += 1
 
             current_pos = np.array(data.qpos[0:3].copy())
             total_path_length += np.linalg.norm(current_pos - last_pos)
@@ -277,7 +281,9 @@ def run_vision_simulation(model,
 # ============================================================================ #
 
 _THREAD_LOCAL = threading.local()
-_RENDER_INIT_LOCK = threading.Lock()
+# Contexts are built on the main thread up-front (see _prebuild_contexts) and
+# handed out to worker threads on first use.
+_CONTEXT_POOL: "queue.Queue[dict[str, Any]]" = queue.Queue()
 
 
 def _build_simulation_context() -> dict[str, Any]:
@@ -323,8 +329,7 @@ def _build_simulation_context() -> dict[str, Any]:
         hidden_size=32,
     )
 
-    with _RENDER_INIT_LOCK:
-        renderer = mujoco.Renderer(model, height=24, width=32)
+    renderer = mujoco.Renderer(model, height=24, width=32)
 
     return {
         "model": model,
@@ -337,10 +342,39 @@ def _build_simulation_context() -> dict[str, Any]:
     }
 
 
+def _release_gl_context_on_this_thread() -> None:
+    """Detach the OpenGL context that is current on the calling thread.
+
+    A GLFW context may only be current in one thread at a time. The renderers
+    built by _prebuild_contexts leave their context current on the main
+    thread, so it has to be released before a worker thread can claim it.
+    """
+    try:
+        import glfw
+
+        glfw.make_context_current(None)
+    except Exception:  # noqa: BLE001 - non-GLFW backends need no release
+        pass
+
+
+def _prebuild_contexts(num_contexts: int) -> None:
+    """Create every worker simulation context on the MAIN thread.
+
+    GLFW - MuJoCo's default GL backend on Windows and macOS - requires that
+    windows and OpenGL contexts are created on the main thread. Calling
+    mujoco.Renderer() from inside a worker thread crashes the interpreter
+    (access violation in glfwCreateWindow). So the contexts are built here,
+    before the thread pool starts, and each worker claims one on first use.
+    """
+    for _ in range(num_contexts):
+        _CONTEXT_POOL.put(_build_simulation_context())
+    _release_gl_context_on_this_thread()
+
+
 def _get_thread_context() -> dict[str, Any]:
-    """Lazily initialize one Mujoco context per worker thread."""
+    """Claim one pre-built Mujoco context for the calling worker thread."""
     if not hasattr(_THREAD_LOCAL, "ctx"):
-        _THREAD_LOCAL.ctx = _build_simulation_context()
+        _THREAD_LOCAL.ctx = _CONTEXT_POOL.get()
     return cast(dict[str, Any], _THREAD_LOCAL.ctx)
 
 
@@ -437,9 +471,16 @@ def evolve(world, model, data) -> tuple[np.ndarray, int]:
 
     console.log(f"Population size: {POP_SIZE} | Workers: {NUM_WORKERS}")
 
+    # Must happen before the pool starts: GL contexts can only be created on
+    # the main thread.
+    _prebuild_contexts(NUM_WORKERS)
+
     # The context manager handles worker shutdown and joining.
     with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
-        for bud in range(BUDGET + 1):
+        # range(BUDGET), not range(BUDGET + 1): the extra generation exhausts
+        # the optimizer's budget and returns POP_SIZE identical cached
+        # candidates.
+        for bud in range(BUDGET):
             candidates = [optimizer.ask() for _ in range(POP_SIZE)]
             fitnesses = list(executor.map(_evaluate_candidate, [c.value for c in candidates]))
 
@@ -447,7 +488,7 @@ def evolve(world, model, data) -> tuple[np.ndarray, int]:
                 optimizer.tell(candidate, fit)
 
             gen_best = float(np.min(fitnesses))
-            console.rule(f"Budget: {bud}/{BUDGET}")
+            console.rule(f"Budget: {bud + 1}/{BUDGET}")
             console.log(f"Best Fit (Gen): {gen_best:.4f}")
 
     best_ind = optimizer.provide_recommendation().value
@@ -499,7 +540,9 @@ if __name__ == "__main__":
 
     console.log(f"Evolution took {(end-start)/60:.2f} minutes")
 
-    weights_path = "3_spider_vision_new.npy"
+    # Keep run artefacts inside this script's own __data__ folder instead of
+    # writing to whatever directory the script happens to be launched from.
+    weights_path = DATA / "best_weights.npy"
     # Unconditionally save the new weights, overwriting any old ones
     np.save(weights_path, best_weights)
     console.log(f"[green]Best weights saved to {weights_path}[/green]")
@@ -589,21 +632,21 @@ if __name__ == "__main__":
     steps_per_frame = max(1, int(round(1.0 / (fps * dt))))
     control_step_freq = 50
     current_ctrl = np.zeros(model.nu)
+    render_step = 0
 
     # Main Rendering Loop (Using Context Manager for safe memory handling)
     with mujoco.Renderer(model, height=480, width=640) as renderer:
-        
+
         while data.time < DURATION:
             # INNER LOOP: Step physics N times to match Video FPS
             for _ in range(steps_per_frame):
-                deduced_step = int(np.ceil(data.time / dt))
-
-                if deduced_step % control_step_freq == 0:
+                if render_step % control_step_freq == 0:
                     current_ctrl = get_vision_control_signal(model, data)
 
                 # Safely copy control array
                 np.copyto(data.ctrl, current_ctrl)
                 mujoco.mj_step(model, data)
+                render_step += 1
 
             # OUTER LOOP: Render Frame (Once per 1/30th second)
             renderer.update_scene(

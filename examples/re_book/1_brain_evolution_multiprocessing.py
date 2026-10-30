@@ -102,7 +102,9 @@ TARGET_POSITIONS = [
 
 # Global constants
 # Get file name and location to create data save folder.
-SCRIPT_NAME = __file__.split("/")[-1][:-3]
+# Path().stem is used instead of splitting on "/" so this also works on
+# Windows, where __file__ contains backslashes.
+SCRIPT_NAME = Path(__file__).stem
 CWD = Path.cwd()
 DATA = Path(CWD / "__data__" / SCRIPT_NAME)
 DATA.mkdir(exist_ok=True, parents=True)
@@ -223,8 +225,6 @@ def run_vision_simulation(model,
     owns_renderer = renderer is None
     if renderer is None:
         renderer = mujoco.Renderer(model, height=24, width=32)
-
-    timestep = model.opt.timestep
 
     # Initialize control placeholder
     current_action = np.zeros(model.nu)

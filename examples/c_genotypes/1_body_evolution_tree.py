@@ -441,6 +441,7 @@ class MorphologyEvolution:
             population,
             operations=ops,
             num_steps=BUDGET,
+            is_maximisation=self.config.is_maximisation,
             db_file_path=self.config.db_file_path,
             db_handling=self.config.db_handling,
             quiet=self.config.quiet,

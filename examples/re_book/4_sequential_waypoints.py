@@ -65,7 +65,7 @@ warnings.filterwarnings(
 import argparse
 parser = argparse.ArgumentParser(description="Sequential waypoint navigation")
 parser.add_argument("--budget", type=int, default=200, help="CMA generations")
-parser.add_argument("--population", type=int, default=48, help="Requested CMA population (enforced ≥ min-lambda, even)")
+parser.add_argument("--population", type=int, default=48, help="Requested CMA population (enforced >= min-lambda, even)")
 parser.add_argument("--dur", type=float, default=60.0, help="Max episode duration (s)")
 parser.add_argument("--reach-radius", type=float, default=0.35, help="Planar reach radius (m)")
 parser.add_argument("--workers", type=int, default=max(1, os.cpu_count() or 1), help="Parallel worker processes")
@@ -427,7 +427,7 @@ def evolve() -> tuple[np.ndarray, int]:
                 speed_pct = (-best - NUM_WAYPOINTS * 10.0) * 100.0
                 console.log(
                     f"Best fitness: {best:.3f}  "
-                    f"({best_wps}/{NUM_WAYPOINTS} waypoints — {speed_pct:.1f}% speed bonus)"
+                    f"({best_wps}/{NUM_WAYPOINTS} waypoints - {speed_pct:.1f}% speed bonus)"
                 )
             else:
                 console.log(
@@ -450,7 +450,7 @@ def main() -> None:
 
     weights_path = DATA / "best_weights.npy"
     np.save(weights_path, best_weights)
-    console.log(f"Evolution finished in {elapsed / 60:.1f} min. Weights → {weights_path}")
+    console.log(f"Evolution finished in {elapsed / 60:.1f} min. Weights -> {weights_path}")
 
     if args.no_video:
         return

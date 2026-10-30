@@ -157,7 +157,7 @@ def test_all_heightmap_functions() -> None:
             "crater_depth": 1.0,
             "crater_radius": 0.3,
         },
-        "smooth_edges": {
+        "smooth_edges_heightmap": {
             "dims": (100, 100),
             "edge_width": 25,
         },
