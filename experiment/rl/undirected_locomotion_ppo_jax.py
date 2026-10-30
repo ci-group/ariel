@@ -520,6 +520,24 @@ def train(args: argparse.Namespace) -> tuple[Any, Any, Path]:
     rl_cfg.num_envs = num_envs
     rl_cfg.batch_size = BATCH_RATIO * num_envs // NUM_MINIBATCHES
 
+    # Architecture override — ties policy and value heads to the same
+    # (width, depth). Used by experiment/original_idea/sweep_arch.sh.
+    if (args.hidden_width is None) != (args.n_hidden_layers is None):
+        raise SystemExit(
+            "--hidden-width and --n-hidden-layers must be set together"
+        )
+    if args.hidden_width is not None:
+        if args.n_hidden_layers < 0:
+            raise SystemExit("--n-hidden-layers must be >= 0")
+        if args.hidden_width <= 0:
+            raise SystemExit("--hidden-width must be > 0")
+        layer_sizes = tuple([args.hidden_width] * args.n_hidden_layers)
+        rl_cfg.network_factory.policy_hidden_layer_sizes = layer_sizes
+        rl_cfg.network_factory.value_hidden_layer_sizes = layer_sizes
+        print(
+            f"arch override: tied policy/value hidden_layer_sizes={layer_sizes}"
+        )
+
     env_cfg = default_config()
     env_cfg.morphology = args.morphology
     env_cfg.n_pairs = args.n_pairs
@@ -536,11 +554,15 @@ def train(args: argparse.Namespace) -> tuple[Any, Any, Path]:
     eval_cfg.naccdmax = int(rl_cfg.num_eval_envs) * nacc
     eval_env = UndirectedLocomotionInsect(eval_cfg)
 
-    # Dir name encodes morphology + scaling + seed so sweeps don't collide.
-    # Fixed-size morphologies ("insect") skip the n{N} segment.
+    # Dir name encodes morphology + scaling + arch + seed so sweeps don't
+    # collide. Fixed-size morphologies ("insect") skip the n{N} segment.
+    # The w{W}_d{D} segment is only present when the arch override is set.
     tag_bits = [args.morphology]
     if args.morphology in ("centipede", "insect_n", "insect_longspine_n"):
         tag_bits.append(f"n{args.n_pairs}")
+    if args.hidden_width is not None:
+        tag_bits.append(f"w{args.hidden_width}")
+        tag_bits.append(f"d{args.n_hidden_layers}")
     tag_bits.append(f"seed{args.seed}")
     run_tag = "_".join(tag_bits)
     out_dir = (
@@ -753,6 +775,22 @@ def _parse_args() -> argparse.Namespace:
         type=int,
         default=None,
         help="Override NACONMAX_PER_ENV (default 320).",
+    )
+    parser.add_argument(
+        "--hidden-width",
+        type=int,
+        default=None,
+        help="Override hidden-layer width for both policy and value nets. "
+        "Must be set together with --n-hidden-layers. Default: baseline "
+        "config (policy=(32,32), value=(64,64)).",
+    )
+    parser.add_argument(
+        "--n-hidden-layers",
+        type=int,
+        default=None,
+        help="Override number of hidden layers for both policy and value "
+        "nets. 0 -> linear policy / value. Must be set together with "
+        "--hidden-width.",
     )
     return parser.parse_args()
 
