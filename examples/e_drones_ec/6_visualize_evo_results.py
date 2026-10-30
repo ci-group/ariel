@@ -55,6 +55,17 @@ parser.add_argument("--no-video", action="store_true",
                     help="Skip the MuJoCo video step.")
 parser.add_argument("--view", action="store_true",
                     help="Open MuJoCo passive viewer instead of writing MP4.")
+parser.add_argument("--video-width",  type=int, default=1920)
+parser.add_argument("--video-height", type=int, default=1080)
+parser.add_argument("--video-fps",    type=int, default=60)
+parser.add_argument("--cam-distance", type=float, default=5.0,
+                    help="Tracking-camera distance from the drone (m).")
+parser.add_argument("--cam-elevation", type=float, default=-25.0,
+                    help="Tracking-camera elevation angle (degrees).")
+parser.add_argument("--cam-azimuth",  type=float, default=120.0,
+                    help="Tracking-camera azimuth angle (degrees).")
+parser.add_argument("--crf", type=int, default=17,
+                    help="x264 constant-rate factor (lower = higher quality, 17–20 is visually lossless).")
 args = parser.parse_args()
 
 if args.no_show:
@@ -194,10 +205,12 @@ else:
     import mujoco
     from stable_baselines3 import PPO
 
+    import shutil
+    import subprocess
+
     from ariel.body_phenotypes.drone.backends import blueprint_to_mjspec
     from ariel.simulation.environments import SimpleFlatWorld
     from ariel.simulation.tasks.drone_gate_env import DroneGateEnv
-    from ariel.utils.video_recorder import VideoRecorder
 
     print(f"\nLoading policy from {policy_path} …")
     propellers = blueprint_to_propellers(bp, convention="ned")
@@ -324,6 +337,15 @@ else:
     data_mj = mujoco.MjData(model_mj)
     model_mj.opt.timestep = args.dt
 
+    # Multisample anti-aliasing in the offscreen framebuffer (edges on the
+    # arms/rotors/gate frames become clean instead of jaggy/aliased).
+    model_mj.vis.quality.offsamples = 8
+    model_mj.vis.quality.shadowsize = 4096
+    # Grow the offscreen framebuffer so we can render at HD/FHD resolutions
+    # (MuJoCo default is 640×480 which caps renderer width/height).
+    model_mj.vis.global_.offwidth  = max(model_mj.vis.global_.offwidth,  args.video_width)
+    model_mj.vis.global_.offheight = max(model_mj.vis.global_.offheight, args.video_height)
+
     def _set_pose(idx: int) -> None:
         p = pos_enu[idx]
         q = quat_enu[idx]
@@ -348,20 +370,69 @@ else:
                     _time.sleep(slack)
                 idx += 1
     else:
+        # Force even dimensions (required by yuv420p).
+        W = args.video_width  - (args.video_width  % 2)
+        H = args.video_height - (args.video_height % 2)
+        FPS = args.video_fps
         mp4 = out_dir / f"evolved_figure8_{run_tag}.mp4"
-        recorder = VideoRecorder(
-            file_name=mp4.stem, output_folder=mp4.parent,
-            width=720, height=540, fps=30,
-        )
-        steps_per_frame = max(1, int(round(1.0 / (recorder.fps * args.dt))))
+
+        # Tracking camera that follows the evolved drone body.
+        # SimpleFlatWorld.spawn prefixes bodies with e.g. "robot1_" so an
+        # exact-name lookup fails — search by suffix instead.
+        drone_body_id = -1
+        for _bid in range(model_mj.nbody):
+            _bname = mujoco.mj_id2name(model_mj, mujoco.mjtObj.mjOBJ_BODY, _bid) or ""
+            if _bname.endswith("evolved_quad"):
+                drone_body_id = _bid
+                break
+        if drone_body_id < 0:
+            print("[warn] evolved_quad body not found — camera will not track.")
+        cam = mujoco.MjvCamera()
+        mujoco.mjv_defaultCamera(cam)
+        if drone_body_id >= 0:
+            cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
+            cam.trackbodyid = drone_body_id
+        cam.distance  = float(args.cam_distance)
+        cam.elevation = float(args.cam_elevation)
+        cam.azimuth   = float(args.cam_azimuth)
+
+        # Scene options: shadows + reflections on; wireframe/contact-geoms off.
+        scn_opt = mujoco.MjvOption()
+        mujoco.mjv_defaultOption(scn_opt)
+        scn_opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = 0
+        scn_opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = 0
+
+        # ffmpeg pipe (H.264 + yuv420p). Fixes the green streaks produced by
+        # OpenCV's `mp4v` writer, and gives much better compression at same quality.
+        if shutil.which("ffmpeg") is None:
+            raise SystemExit("ffmpeg not found on PATH — install ffmpeg to render video.")
+        ff_cmd = [
+            "ffmpeg", "-y", "-loglevel", "error",
+            "-f", "rawvideo", "-pix_fmt", "rgb24",
+            "-s", f"{W}x{H}", "-r", str(FPS),
+            "-i", "-",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-crf", str(args.crf), "-preset", "slow",
+            "-movflags", "+faststart",
+            str(mp4),
+        ]
+        proc = subprocess.Popen(ff_cmd, stdin=subprocess.PIPE)
+
+        steps_per_frame = max(1, int(round(1.0 / (FPS * args.dt))))
         t_render = _time.time()
-        with mujoco.Renderer(model_mj, width=recorder.width, height=recorder.height) as renderer:
-            for idx in range(0, len(pos_enu), steps_per_frame):
-                _set_pose(idx)
-                renderer.update_scene(data_mj)
-                recorder.write(frame=renderer.render())
-        recorder.release()
-        print(f"Rendered in {_time.time() - t_render:.2f}s")
+        n_frames = 0
+        try:
+            with mujoco.Renderer(model_mj, width=W, height=H) as renderer:
+                for idx in range(0, len(pos_enu), steps_per_frame):
+                    _set_pose(idx)
+                    renderer.update_scene(data_mj, camera=cam, scene_option=scn_opt)
+                    frame = renderer.render()  # (H, W, 3) uint8 RGB
+                    proc.stdin.write(frame.tobytes())
+                    n_frames += 1
+        finally:
+            proc.stdin.close()
+            proc.wait()
+        print(f"Rendered {n_frames} frames at {W}x{H}@{FPS} in {_time.time() - t_render:.2f}s")
         print(f"Video: {mp4}")
 
 print("\nDone.")
