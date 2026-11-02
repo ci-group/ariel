@@ -38,6 +38,7 @@ import torch
 from rich.console import Console
 from rich.progress import track
 from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import VecNormalize
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT / "goal_generator_ltu" / "polynomial_goal_generator"))
@@ -441,8 +442,16 @@ def _train_and_eval(genotype: dict, cfg: dict) -> tuple[float, Any, int]:
         return float("-inf"), None, 0
 
     n_motors     = len(propellers)
-    env          = cfg["make_env"](propellers)
-    n_steps      = max(64, cfg["ppo_steps"] // (cfg["num_envs"] * 10))
+    base_env     = cfg["make_env"](propellers)
+    # VecNormalize gives the policy a near-zero-mean / unit-std obs vector
+    # regardless of mixed obs scales (gate-frame pos ±5 m, body rates up to
+    # 50 rad/s, motor state ±1, yaw ±π). Reward is left raw — PPO's advantage
+    # normalisation handles that already.
+    env          = VecNormalize(base_env, norm_obs=True, norm_reward=False, clip_obs=10.0)
+    # Longer rollouts: previous floor was 64 steps (0.64 s simulated) at
+    # num_envs=2000, which gives GAE very little real-episode horizon. 256
+    # covers ≥ 2 gate transitions on the default track.
+    n_steps      = max(256, cfg["ppo_steps"] // (cfg["num_envs"] * 10))
     rollout_size = n_steps * cfg["num_envs"]
     _target      = max(4096, rollout_size // 4)
     batch_size   = next(b for b in range(_target, 0, -1) if rollout_size % b == 0)
@@ -466,7 +475,10 @@ def _train_and_eval(genotype: dict, cfg: dict) -> tuple[float, Any, int]:
         verbose=0,
     )
 
-    # Warm-start: copy weights from best known policy for this motor count.
+    # Warm-start: restore both the policy weights AND the optimizer state
+    # (Adam moments, step counter) from the best known same-topology policy.
+    # Copying only the policy state loses the momentum built up by the
+    # parent run — children would restart cold on the exploration frontier.
     warm_b64: str | None = cfg["policy_bank"].get(n_motors)
     if warm_b64 is not None:
         _tmp = Path(tempfile.mktemp(suffix=".zip"))
@@ -474,6 +486,14 @@ def _train_and_eval(genotype: dict, cfg: dict) -> tuple[float, Any, int]:
             _tmp.write_bytes(base64.b64decode(warm_b64))
             _warm = PPO.load(str(_tmp), env=env, device=cfg["device"])
             model.policy.load_state_dict(_warm.policy.state_dict())
+            try:
+                model.policy.optimizer.load_state_dict(
+                    _warm.policy.optimizer.state_dict()
+                )
+            except (ValueError, KeyError):
+                # Shape mismatch (shouldn't happen for same n_motors but
+                # guard anyway); fall back to a cold optimizer.
+                pass
             del _warm
         except Exception:
             pass
@@ -482,7 +502,9 @@ def _train_and_eval(genotype: dict, cfg: dict) -> tuple[float, Any, int]:
 
     model.learn(total_timesteps=cfg["ppo_steps"])
 
-    # Deterministic evaluation rollout.
+    # Deterministic evaluation rollout. Freeze VecNormalize stats so the
+    # evaluation obs distribution reflects training rather than drifting.
+    env.training = False
     obs      = env.reset()
     ep_rews: list[float] = []
     cur_rews = np.zeros(cfg["num_envs"], dtype=np.float32)
