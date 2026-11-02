@@ -49,7 +49,6 @@ def _dynamics_body(
     state:  torch.Tensor,   # (12+N, E)
     action: torch.Tensor,   # (N, E)
     # ---- scalar params (0-d tensors, morphology-specific) ----
-    k_w:  torch.Tensor,
     k_x:  torch.Tensor,
     k_y:  torch.Tensor,
     tau:  torch.Tensor,
@@ -59,10 +58,18 @@ def _dynamics_body(
     g:    torch.Tensor,
     W_R:  torch.Tensor,
     # ---- per-motor params ((N,1) tensors) ----
-    k_p:  torch.Tensor,
-    k_q:  torch.Tensor,
-    k_r:  torch.Tensor,
-    k_rr: torch.Tensor,
+    k_fx:       torch.Tensor,  # body-frame x translational accel
+    k_fy:       torch.Tensor,  # body-frame y translational accel
+    k_fz:       torch.Tensor,  # body-frame z translational accel
+    k_Mx_force: torch.Tensor,  # body-frame x moment from thrust force
+    k_My_force: torch.Tensor,  # body-frame y moment from thrust force
+    k_Mz_force: torch.Tensor,  # body-frame z moment from thrust force
+    k_Mx_react: torch.Tensor,  # body-frame x moment from spin reaction
+    k_My_react: torch.Tensor,  # body-frame y moment from spin reaction
+    k_Mz_react: torch.Tensor,  # body-frame z moment from spin reaction
+    k_Mx_dot:   torch.Tensor,  # body-frame x moment from dW reaction
+    k_My_dot:   torch.Tensor,  # body-frame y moment from dW reaction
+    k_Mz_dot:   torch.Tensor,  # body-frame z moment from dW reaction
 ) -> torch.Tensor:
     """Vectorised drone dynamics — state_dot = f(state, action, params).
 
@@ -101,7 +108,11 @@ def _dynamics_body(
     vby = R01 * vx + R11 * vy + R21 * vz
 
     # ---- motor model ----------------------------------------------------
-    W   = (w + 1.0) * (0.5 * W_R) + w_lo              # (N, E)  rad/s
+    # State w ∈ [-1, 1] maps to W ∈ [W_MIN_N, W_MAX_N] = [0, 3000] rad/s per
+    # the reference convention (see dynamics_params.py:142-148). This is
+    # intentionally independent of the physical motor idle floor `w_lo`
+    # (which the sqrt-poly below still uses for the Wc computation).
+    W   = (w + 1.0) * (0.5 * W_R)                     # (N, E)  rad/s
     U   = ((action + 1.0) * 0.5).clamp(0.0, 1.0)      # (N, E)  ∈ [0,1]
     sq_arg = (k_sq * U * U + (1.0 - k_sq) * U).clamp(min=0.0)
     Wc  = (w_hi - w_lo) * sq_arg.sqrt() + w_lo        # (N, E)
@@ -111,23 +122,24 @@ def _dynamics_body(
     # ---- aggregate motor quantities -------------------------------------
     W2     = W * W
     sum_W  = W.sum(dim=0)
-    sum_W2 = W2.sum(dim=0)
 
-    # ---- forces ---------------------------------------------------------
-    T  = -k_w * sum_W2
+    # ---- forces (body frame, per-motor thrust along n_i) ---------------
+    Fx = (k_fx * W2).sum(dim=0)
+    Fy = (k_fy * W2).sum(dim=0)
+    Fz = (k_fz * W2).sum(dim=0)
     Dx = -k_x * vbx * sum_W
     Dy = -k_y * vby * sum_W
 
-    # ---- moments --------------------------------------------------------
-    Mx = (k_p  * W2).sum(dim=0)
-    My = (k_q  * W2).sum(dim=0)
-    Mz = (k_r  * W ).sum(dim=0) + (k_rr * dW).sum(dim=0)
+    # ---- moments (angular accel = r×F + spin react + dW react) ---------
+    Mx = (k_Mx_force * W2).sum(dim=0) + (k_Mx_react * W).sum(dim=0) + (k_Mx_dot * dW).sum(dim=0)
+    My = (k_My_force * W2).sum(dim=0) + (k_My_react * W).sum(dim=0) + (k_My_dot * dW).sum(dim=0)
+    Mz = (k_Mz_force * W2).sum(dim=0) + (k_Mz_react * W).sum(dim=0) + (k_Mz_dot * dW).sum(dim=0)
 
     # ---- translational kinematics / dynamics ----------------------------
     d_x,  d_y,  d_z  = vx, vy, vz
-    d_vx = R00 * Dx + R01 * Dy + R02 * T
-    d_vy = R10 * Dx + R11 * Dy + R12 * T
-    d_vz = g   + R20 * Dx + R21 * Dy + R22 * T
+    d_vx = R00 * (Fx + Dx) + R01 * (Fy + Dy) + R02 * Fz
+    d_vy = R10 * (Fx + Dx) + R11 * (Fy + Dy) + R12 * Fz
+    d_vz = g   + R20 * (Fx + Dx) + R21 * (Fy + Dy) + R22 * Fz
 
     # ---- Euler-angle kinematics (ZYX) -----------------------------------
     d_phi   = p + (q * sphi + r * cphi) * tanth
@@ -171,8 +183,10 @@ def _build_torch_dynamics(
     def _t(v):
         return torch.tensor(v, device=device, dtype=dtype)
 
-    # Build parameter tensors for this morphology.
-    p_k_w  = _t(params["k_w"])
+    def _per_motor(key):
+        return _t(params[key]).view(num_motors, 1)
+
+    # Shared / scalar params.
     p_k_x  = _t(params["k_x"])
     p_k_y  = _t(params["k_y"])
     p_tau  = _t(params["tau"])
@@ -181,10 +195,21 @@ def _build_torch_dynamics(
     p_w_hi = _t(params["w_max"])
     p_g    = _t(gravity)
     p_W_R  = _t(_W_RANGE)
-    p_k_p  = _t(params["k_p_signed"]).view(num_motors, 1)
-    p_k_q  = _t(params["k_q_signed"]).view(num_motors, 1)
-    p_k_r  = _t(params["k_r_signed"]).view(num_motors, 1)
-    p_k_rr = _t(params["k_r_react_signed"]).view(num_motors, 1)
+
+    # Per-motor force / moment coefficients. See dynamics_params.py for
+    # the physical meaning and derivation of each coefficient.
+    p_k_fx       = _per_motor("k_fx")
+    p_k_fy       = _per_motor("k_fy")
+    p_k_fz       = _per_motor("k_fz")
+    p_k_Mx_force = _per_motor("k_Mx_force")
+    p_k_My_force = _per_motor("k_My_force")
+    p_k_Mz_force = _per_motor("k_Mz_force")
+    p_k_Mx_react = _per_motor("k_Mx_react")
+    p_k_My_react = _per_motor("k_My_react")
+    p_k_Mz_react = _per_motor("k_Mz_react")
+    p_k_Mx_dot   = _per_motor("k_Mx_dot")
+    p_k_My_dot   = _per_motor("k_My_dot")
+    p_k_Mz_dot   = _per_motor("k_Mz_dot")
 
     # Choose compiled vs. plain depending on device.
     _fn = _dynamics_body_compiled if device.type == "cuda" else _dynamics_body
@@ -192,8 +217,11 @@ def _build_torch_dynamics(
     def dynamics(state: torch.Tensor, action: torch.Tensor) -> torch.Tensor:
         return _fn(
             state, action,
-            p_k_w, p_k_x, p_k_y, p_tau, p_k_sq, p_w_lo, p_w_hi, p_g, p_W_R,
-            p_k_p, p_k_q, p_k_r, p_k_rr,
+            p_k_x, p_k_y, p_tau, p_k_sq, p_w_lo, p_w_hi, p_g, p_W_R,
+            p_k_fx, p_k_fy, p_k_fz,
+            p_k_Mx_force, p_k_My_force, p_k_Mz_force,
+            p_k_Mx_react, p_k_My_react, p_k_Mz_react,
+            p_k_Mx_dot,   p_k_My_dot,   p_k_Mz_dot,
         )
 
     return dynamics
@@ -236,7 +264,11 @@ class TorchDroneGateEnv(VecEnv):
         dt: float = 0.01,
         max_steps: int = 1200,
         action_filter_alpha: float = 1.0,
-        gate_reward: float = 1.0,
+        # Default 0.0 matches the NumPy env (final-gate-only +10). A per-gate
+        # +1 was previously the default here but caused training to collapse
+        # on fig8 (10-seed × 10M-step experiment documented in
+        # drone_gate_env.py:456-460); autoresearch exp_086 corroborates.
+        gate_reward: float = 0.0,
         # Accepted for API compat with DroneGateEnv; not implemented here
         pause_if_collision: bool = False,
         num_state_history: int = 0,
@@ -284,6 +316,12 @@ class TorchDroneGateEnv(VecEnv):
 
         self.num_motors = self.drone_sim.num_motors
 
+        # Hover motor-state (normalised). Reset uses this instead of w=0
+        # (which is W=1500 rad/s — mid-range, not idle) so episodes start
+        # near flight trim rather than at a random point in [-1, 1].
+        W_hover = float(self.drone_sim.params["W_hover"])
+        self.w_hover_norm = float(2.0 * W_hover / _W_RANGE - 1.0)
+
         # Build the dynamics callable for this morphology's parameters.
         # The underlying _dynamics_body_compiled is a module-level compiled
         # function shared across all individuals, so torch.compile traces
@@ -300,7 +338,13 @@ class TorchDroneGateEnv(VecEnv):
 
         self.num_gates   = len(_gpos)
         self.gates_ahead = gates_ahead
-        self.gate_size   = 1.5
+        # Gate opening is a vertical rectangle perpendicular to the gate's
+        # forward direction (cos(yaw), sin(yaw)). gate_size is the lateral
+        # width (horizontal, in-plane); gate_half_height is the vertical
+        # half-extent. The old L∞ cube rewarded passing above/below the
+        # frame — switched to this explicit check in the P2 audit fixes.
+        self.gate_size        = 1.5
+        self.gate_half_height = 0.75
 
         self.gate_pos_t  = torch.tensor(_gpos, device=self.dev, dtype=self.dtype)   # (G, 3)
         self.gate_yaw_t  = torch.tensor(_gyaw, device=self.dev, dtype=self.dtype)   # (G,)
@@ -386,7 +430,10 @@ class TorchDroneGateEnv(VecEnv):
         n = self.num_motors
         u_lim = 2.0 * motor_limit - 1.0
         action_space      = spaces.Box(low=-1.0, high=u_lim, shape=(n,), dtype=np.float64)
-        self.state_len    = 12 + n + 4 * gates_ahead + self.num_rays
+        # Per future gate: 4 columns (gate-to-gate delta, kept for warm-start
+        # compat) + 3 columns (gate_pos − drone_pos in gate-i's frame, so the
+        # policy actually observes how far it is from the next gate).
+        self.state_len    = 12 + n + 7 * gates_ahead + self.num_rays
         observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(self.state_len,), dtype=np.float64
         )
@@ -436,16 +483,32 @@ class TorchDroneGateEnv(VecEnv):
         obs[:, 9:12]              = self.world_states[:, 9:12]
         obs[:, 12:12+self.num_motors] = self.world_states[:, 12:12+self.num_motors]
 
-        # Future gate offsets
+        # Future gate offsets. Per future gate we encode:
+        #   cols 0-2: gate-to-gate position delta in previous gate's frame
+        #             (constant per gate pair — purely a track feature)
+        #   col  3:   gate-to-gate yaw delta
+        #   cols 4-6: drone-relative position (gate_i_pos − drone_pos),
+        #             rotated into gate_i's frame. Lets the policy actually
+        #             observe where it is relative to future gates, which
+        #             the gate-to-gate deltas alone cannot.
         base = 12 + self.num_motors
+        drone_pos = self.world_states[:, 0:3]                     # (E, 3)
         for i in range(self.gates_ahead):
             idx = (self.target_gates + i + 1) % self.num_gates
-            obs[:, base+4*i : base+4*i+3] = self.gate_pos_rel_t[idx]
-            obs[:, base+4*i+3]            = self.gate_yaw_rel_t[idx]
+            obs[:, base+7*i : base+7*i+3] = self.gate_pos_rel_t[idx]
+            obs[:, base+7*i+3]            = self.gate_yaw_rel_t[idx]
+
+            future_gpos = self.gate_pos_t[idx]                    # (E, 3)
+            future_gyaw = self.gate_yaw_t[idx]                    # (E,)
+            fcg, fsg = future_gyaw.cos(), future_gyaw.sin()
+            dxyz = future_gpos - drone_pos                        # (E, 3)
+            obs[:, base+7*i+4] =  fcg * dxyz[:, 0] + fsg * dxyz[:, 1]
+            obs[:, base+7*i+5] = -fsg * dxyz[:, 0] + fcg * dxyz[:, 1]
+            obs[:, base+7*i+6] = dxyz[:, 2]
 
         # Ray-cast distances to cylindrical obstacles (body frame, xy plane).
         if self.num_rays > 0:
-            ray_base = base + 4 * self.gates_ahead
+            ray_base = base + 7 * self.gates_ahead
             obs[:, ray_base:ray_base + self.num_rays] = self._compute_ray_distances()
 
     def _compute_ray_distances(self) -> torch.Tensor:
@@ -503,14 +566,25 @@ class TorchDroneGateEnv(VecEnv):
             ang[:, 2]  = torch.rand(n_reset, device=self.dev, dtype=self.dtype) \
                          * 2 * math.pi - math.pi
             rates  = (torch.rand((n_reset, 3), device=self.dev, dtype=self.dtype) - 0.5) * 0.2
-            motors = torch.rand((n_reset, self.num_motors), device=self.dev, dtype=self.dtype) * 2 - 1
+            # Motors reset to hover-trim ± small noise so TWR starts near 1
+            # instead of random in [0, ~3×]. Previously uniform [-1, 1]
+            # which spawned many episodes already diverging at t=0 (see
+            # feedback memory re: high-TWR morph motor_init).
+            motor_noise = (torch.rand((n_reset, self.num_motors),
+                                      device=self.dev, dtype=self.dtype) - 0.5) * 0.2
+            motors = torch.full((n_reset, self.num_motors), self.w_hover_norm,
+                                device=self.dev, dtype=self.dtype) + motor_noise
         else:
             self.target_gates[mask] = 0
             pos    = self.start_pos_t.unsqueeze(0).expand(n_reset, -1).clone()
             vel    = torch.zeros((n_reset, 3), device=self.dev, dtype=self.dtype)
             ang    = torch.zeros((n_reset, 3), device=self.dev, dtype=self.dtype)
             rates  = torch.zeros((n_reset, 3), device=self.dev, dtype=self.dtype)
-            motors = torch.zeros((n_reset, self.num_motors), device=self.dev, dtype=self.dtype)
+            # Motors at exact hover-trim so a zero-action start keeps the
+            # drone roughly stationary rather than falling (W=1500 ≈ 91 %
+            # of hover for a stock quad with the old w=0 init).
+            motors = torch.full((n_reset, self.num_motors), self.w_hover_norm,
+                                device=self.dev, dtype=self.dtype)
 
         self.world_states[mask] = torch.cat([pos, vel, ang, rates, motors], dim=1)
         self.step_counts[mask]  = 0
@@ -543,9 +617,17 @@ class TorchDroneGateEnv(VecEnv):
             act = self.actions_t
 
         # ---- dynamics (entirely on device) -----------------------------
+        # RK4 integration (same action across stages — zero-order hold on
+        # the controller, which is already the case for the policy's
+        # dt-wide step). Reduces Euler-angle singularity divergence and
+        # keeps motor dynamics stable at larger dt.
         fs  = self.world_states                          # (E, 12+N)
-        fsd = self._dynamics(fs.T, act.T).T              # (E, 12+N)
-        new_states = fs + self.dt * fsd
+        aT  = act.T
+        k1 = self._dynamics(fs.T, aT).T
+        k2 = self._dynamics((fs + 0.5 * self.dt * k1).T, aT).T
+        k3 = self._dynamics((fs + 0.5 * self.dt * k2).T, aT).T
+        k4 = self._dynamics((fs +       self.dt * k3).T, aT).T
+        new_states = fs + (self.dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
 
         # ---- divergence check ------------------------------------------
         diverged = ~(
@@ -592,11 +674,18 @@ class TorchDroneGateEnv(VecEnv):
             rewards = rewards - self.altitude_floor_coef * floor_excess
 
         # ---- gate passing ----------------------------------------------
+        # Gate forward normal: (cos, sin) in world xy. Lateral in-plane
+        # direction: (-sin, cos). "crossed" means the drone moved from the
+        # back half-space to the front across the gate plane. "in_gate"
+        # means it did so inside the vertical rectangle opening — the old
+        # L∞ cube would have credited passes well above/below the frame.
         nx = gyaw.cos();  ny = gyaw.sin()
         proj_old = (pos_old[:, 0] - gpos[:, 0]) * nx + (pos_old[:, 1] - gpos[:, 1]) * ny
         proj_new = (pos_new[:, 0] - gpos[:, 0]) * nx + (pos_new[:, 1] - gpos[:, 1]) * ny
         crossed  = (proj_old < 0) & (proj_new > 0)
-        in_gate  = (pos_new - gpos).abs().amax(dim=1) < (self.gate_size / 2)
+        lateral  = (pos_new[:, 0] - gpos[:, 0]) * (-ny) + (pos_new[:, 1] - gpos[:, 1]) * nx
+        z_rel    = pos_new[:, 2] - gpos[:, 2]
+        in_gate  = (lateral.abs() < (self.gate_size / 2)) & (z_rel.abs() < self.gate_half_height)
         gate_passed = crossed & in_gate
 
         rewards[gate_passed] += self.gate_reward
@@ -645,6 +734,11 @@ class TorchDroneGateEnv(VecEnv):
         gates_passed_snapshot = self.num_gates_passed.clone()
 
         self.world_states = new_states
+        # Snapshot pre-reset observations — SB3 bootstraps truncated episodes
+        # from info["terminal_observation"], so this must be the state the
+        # drone actually reached, not the subsequent reset state.
+        self._update_obs()
+        terminal_obs_t = self._obs_t.clone()
         self._reset_envs(dones)
         self._update_obs()
 
@@ -653,6 +747,7 @@ class TorchDroneGateEnv(VecEnv):
         # Never call .item() inside the per-env loop — each .item() on a CUDA
         # tensor forces a full GPU sync, creating O(num_envs) stalls per step.
         obs_np          = self._obs_t.cpu().numpy()
+        terminal_obs_np = terminal_obs_t.cpu().numpy()
         rewards_np      = rewards.cpu().numpy()
         dones_np        = dones.cpu().numpy()
         gp_np           = gates_passed_snapshot.cpu().numpy()
@@ -672,7 +767,7 @@ class TorchDroneGateEnv(VecEnv):
                  for i in range(self.num_envs)]
         for i in range(self.num_envs):
             if dones_np[i]:
-                infos[i]["terminal_observation"] = obs_np[i]
+                infos[i]["terminal_observation"] = terminal_obs_np[i]
             if max_steps_np[i]:
                 infos[i]["TimeLimit.truncated"] = True
 

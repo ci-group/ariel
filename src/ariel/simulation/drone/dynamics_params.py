@@ -1,31 +1,54 @@
 """Reference-form dynamics parameter derivation.
 
-Maps an airevolve propeller configuration into the 22-parameter reference
-dynamics form (matching optimal_quad_control_RL/randomization.py:5-10's
-`params_5inch` schema, but with per-motor coefficients computed from the
-actual airevolve morphology rather than sysid'd from flight data).
+Maps an airevolve propeller configuration into a per-motor coefficient set
+consumed by both the symbolic (``DroneSimulator._setup_dynamics``) and the
+PyTorch (``torch_drone_gate_env._dynamics_body``) dynamics bodies.
 
-This is the airevolve runtime equivalent of
-`experimentation/reference_drone_sim.py:derive_params_2inch_from_airevolve`.
-The runtime version generalizes to any prop size via
-`get_extended_prop_params` (Phase 1) and to any 4-motor symmetric or
-asymmetric quad. Generalization to N motors arrives in Phase 4.
+The dynamics assume each motor i has position ``r_i = (x_i, y_i, z_i)`` and
+unit thrust normal ``n_i = (nx_i, ny_i, nz_i)`` in the body frame. Thrust is
+``F_i = k_f · W_i² · n_i`` (a 3-vector, not just along -z). This generalises
+the previous "all motors upright" assumption so morphologies with tilted
+propellers and non-flat arm layouts are actually simulated by the dynamics
+rather than silently flattened.
 
-Sign convention: we bake position and spin signs into the per-motor
-coefficients themselves, so the downstream symbolic build is
-morphology-agnostic. The reference's `_build_dynamics_func` hardcodes signs
-for a specific motor layout (see reference_drone_sim.py:280-291); our
-runtime pulls those signs out of the formula and into the parameter dict.
+Coefficients returned by :func:`derive_reference_params`
+----------------------------------------------------------
 
-* `k_p_signed[i] = -y_i · k_f / Ixx` so that `Mx = sum_i k_p_signed[i] · W_i²`.
-* `k_q_signed[i] = +x_i · k_f / Iyy` so that `My = sum_i k_q_signed[i] · W_i²`.
-* `k_r_signed[i] = spin_i · 2 · k_m · W_hover / Izz` for the linear-W yaw term.
-* `k_r_react_signed[i] = spin_i · k_r_react_borrow` for the dW yaw term.
+Shared (one per morphology):
+  * ``n_motors``: number of motors
+  * ``k_w``: scalar k_f/m, kept for API compat (``T = -k_w · ΣW²`` in the
+    legacy formulation; new code should prefer ``k_fx/fy/fz`` instead)
+  * ``k_x, k_y``: body-frame drag coefficients
+  * ``tau, k, w_min, w_max``: motor model parameters
 
-Where spin_i = +1 for "ccw", -1 for "cw" (the convention is verified via
-the per-step parity test in unit_tests/test_dynamics_parity.py).
+Per-motor arrays (length n_motors) — force / translational accel:
+  * ``k_fx[i] = k_f · nx_i / m``   contributes to body-frame a_x
+  * ``k_fy[i] = k_f · ny_i / m``   contributes to body-frame a_y
+  * ``k_fz[i] = k_f · nz_i / m``   contributes to body-frame a_z
 
-See `experimentation/RUNTIME_DYNAMICS_MIGRATION.md` Phase 2.1.
+Per-motor arrays — moment from thrust force (r × F):
+  * ``k_Mx_force[i] = k_f · (y_i·nz_i − z_i·ny_i) / Ixx``
+  * ``k_My_force[i] = k_f · (z_i·nx_i − x_i·nz_i) / Iyy``
+  * ``k_Mz_force[i] = k_f · (x_i·ny_i − y_i·nx_i) / Izz``
+
+Per-motor arrays — moment from spin reaction (linearised at hover W):
+  * ``k_Mx_react[i] = -spin_i · 2·k_m·W_hover · nx_i / Ixx``
+  * ``k_My_react[i] = -spin_i · 2·k_m·W_hover · ny_i / Iyy``
+  * ``k_Mz_react[i] = -spin_i · 2·k_m·W_hover · nz_i / Izz``
+
+Per-motor arrays — moment from motor acceleration (dW) reaction:
+  * ``k_Mx_dot[i] = -spin_i · k_r_react · nx_i``
+  * ``k_My_dot[i] = -spin_i · k_r_react · ny_i``
+  * ``k_Mz_dot[i] = -spin_i · k_r_react · nz_i``
+
+For the upright case (``n_i = (0, 0, -1)``, ``z_i = 0``) these reduce exactly
+to the previous ``k_p_signed, k_q_signed, k_r_signed, k_r_react_signed``
+quadruple — see the parity test in
+``tests/unit/test_simulation/test_tasks/test_torch_numpy_dynamics_equivalence.py``.
+
+Thrust normals come from ``blueprint_to_propellers(bp, convention="ned")``
+so ``n_i`` is a unit vector in NED body frame (``nz_i ≈ -1`` for upright
+motors; thrust acts along -z world when the drone is level).
 """
 from __future__ import annotations
 
@@ -51,37 +74,31 @@ def derive_reference_params(
     prop_size,
     gravity: float = 9.81,
 ) -> dict:
-    """Derive a reference-form parameter dict for an airevolve drone config.
+    """Derive the per-motor coefficient dict for an airevolve drone config.
 
     Args:
-        propellers: list of propeller dicts (`loc`, `dir`, `propsize`).
-        mass: total drone mass in kg (from DroneConfiguration.mass).
+        propellers: list of propeller dicts with ``loc = (x, y, z)``,
+            ``dir = (nx, ny, nz, rotation)``, and ``propsize``. ``n`` is
+            expected to be a unit vector (as emitted by
+            :func:`ariel.body_phenotypes.drone.backends.blueprint_to_propellers`).
+        mass: total drone mass in kg (from ``DroneConfiguration.mass``).
         inertia: 3x3 inertia matrix in body frame.
         prop_size: prop size for fetching aerodynamic constants
-            (k_drag, k_r_react, k, w_min). All propellers assumed same size.
+            (``k_drag``, ``k_r_react``, ``k``, ``w_min``). All propellers
+            assumed to share the same size.
         gravity: m/s².
 
     Returns:
-        dict with keys:
-            n_motors (int): number of motors
-            k_w (float): thrust acceleration coefficient (a_z = -k_w · sum(W²))
-            k_x, k_y (float): body-frame drag accel coefficients (single values, all motors)
-            k_p_signed (list[float]): per-motor roll-moment coefficient (signed)
-            k_q_signed (list[float]): per-motor pitch-moment coefficient (signed)
-            k_r_signed (list[float]): per-motor yaw-moment coefficient (linear W, signed)
-            k_r_react_signed (list[float]): per-motor yaw-moment from dW (signed)
-            tau, k, w_min, w_max (float): motor model parameters
+        dict with the coefficients documented at the top of this module.
 
     Notes:
-        * Asymmetric morphologies are supported via per-motor `k_p_i, k_q_i`
-          computed from the actual `loc`. Spin asymmetry is supported via
-          per-motor `k_r_signed`.
-        * `k_x, k_y, k, w_min, k_r_react, tau` are single per-prop-size values
-          (borrowed from the closest sysid set in propeller_data.py). Per-motor
-          variation in these is a Phase 6 polish item.
-        * `k_r_signed` is a *linearization* at hover throttle. For hover,
-          `dMz/dW ≈ 2·k_m·W_hover`. Away from hover this loses fidelity; the
-          reference accepts this as a sysid-level approximation.
+        * Asymmetric morphologies and tilted motors are both supported.
+        * ``k_x, k_y, k, w_min, k_r_react, tau`` are single per-prop-size
+          values (borrowed from the closest sysid set in
+          :mod:`propeller_data`). Per-motor variation is Phase 6 work.
+        * The react term is a *linearisation* at hover throttle. For hover,
+          ``dMz/dW ≈ 2·k_m·W_hover``. Away from hover this loses fidelity;
+          the reference accepts this as a sysid-level approximation.
     """
     n = len(propellers)
     if n == 0:
@@ -90,13 +107,13 @@ def derive_reference_params(
     extended = get_extended_prop_params(prop_size)
     k_f, k_m = extended["constants"]
     w_max = float(extended["wmax"])
+    k_r_react = float(extended["k_r_react"])
 
     Ixx = float(inertia[0, 0])
     Iyy = float(inertia[1, 1])
     Izz = float(inertia[2, 2])
     m = float(mass)
 
-    # Hover motor speed (per motor) for linearizing the yaw torque term.
     F_hover_per_motor = m * gravity / n
     if F_hover_per_motor <= 0 or k_f <= 0:
         raise ValueError(
@@ -105,37 +122,85 @@ def derive_reference_params(
         )
     W_hover = float(np.sqrt(F_hover_per_motor / k_f))
 
-    k_p_signed = []
-    k_q_signed = []
-    k_r_signed = []
-    k_r_react_signed = []
-    for prop in propellers:
-        x_i = float(prop["loc"][0])
-        y_i = float(prop["loc"][1])
-        spin = _spin_sign(prop["dir"][3])
+    k_fx:        list[float] = []
+    k_fy:        list[float] = []
+    k_fz:        list[float] = []
+    k_Mx_force:  list[float] = []
+    k_My_force:  list[float] = []
+    k_Mz_force:  list[float] = []
+    k_Mx_react:  list[float] = []
+    k_My_react:  list[float] = []
+    k_Mz_react:  list[float] = []
+    k_Mx_dot:    list[float] = []
+    k_My_dot:    list[float] = []
+    k_Mz_dot:    list[float] = []
+    motor_positions: list[list[float]] = []
+    thrust_normals:  list[list[float]] = []
 
-        # M_x = sum_i (-y_i · F_z_i) / Ixx = sum_i (-y_i · k_f · W_i²) / Ixx
-        k_p_signed.append(-y_i * k_f / Ixx)
-        # M_y = sum_i (+x_i · F_z_i) / Iyy = sum_i (+x_i · k_f · W_i²) / Iyy
-        k_q_signed.append(+x_i * k_f / Iyy)
-        # M_z (steady, linearized at hover): spin_i · 2 · k_m · W_hover / Izz
-        k_r_signed.append(spin * 2.0 * k_m * W_hover / Izz)
-        # M_z (motor-acceleration reaction): spin_i · k_r_react
-        k_r_react_signed.append(spin * float(extended["k_r_react"]))
+    for prop in propellers:
+        x_i, y_i, z_i = (float(v) for v in prop["loc"])
+        nx_i, ny_i, nz_i, rotation = prop["dir"]
+        nx_i = float(nx_i); ny_i = float(ny_i); nz_i = float(nz_i)
+        spin = _spin_sign(rotation)
+
+        # Translational accel from this motor's thrust (body frame).
+        k_fx.append(k_f * nx_i / m)
+        k_fy.append(k_f * ny_i / m)
+        k_fz.append(k_f * nz_i / m)
+
+        # Angular accel from thrust-force cross moment arm (r × F / I).
+        k_Mx_force.append(k_f * (y_i * nz_i - z_i * ny_i) / Ixx)
+        k_My_force.append(k_f * (z_i * nx_i - x_i * nz_i) / Iyy)
+        k_Mz_force.append(k_f * (x_i * ny_i - y_i * nx_i) / Izz)
+
+        # Angular accel from spin-reaction torque, linearised at hover W.
+        # tau_react = -spin · 2·k_m·W_hover · W · n_i / I_axis
+        k_Mx_react.append(-spin * 2.0 * k_m * W_hover * nx_i / Ixx)
+        k_My_react.append(-spin * 2.0 * k_m * W_hover * ny_i / Iyy)
+        k_Mz_react.append(-spin * 2.0 * k_m * W_hover * nz_i / Izz)
+
+        # Angular accel from motor-speed-derivative reaction. k_r_react is a
+        # sysid'd Izz-normalised constant from the reference; we treat it as
+        # a per-axis angular-accel coefficient along n_i so the upright case
+        # (nz=-1) reproduces the previous scalar formula exactly.
+        k_Mx_dot.append(-spin * k_r_react * nx_i)
+        k_My_dot.append(-spin * k_r_react * ny_i)
+        k_Mz_dot.append(-spin * k_r_react * nz_i)
+
+        motor_positions.append([x_i, y_i, z_i])
+        thrust_normals.append([nx_i, ny_i, nz_i])
 
     return {
         "n_motors": n,
         "k_w": k_f / m,
         "k_x": float(extended["k_x_drag"]),
         "k_y": float(extended["k_y_drag"]),
-        "k_p_signed": k_p_signed,
-        "k_q_signed": k_q_signed,
-        "k_r_signed": k_r_signed,
-        "k_r_react_signed": k_r_react_signed,
+        # Per-motor force / moment coefficients (12 arrays × n_motors).
+        "k_fx": k_fx,
+        "k_fy": k_fy,
+        "k_fz": k_fz,
+        "k_Mx_force": k_Mx_force,
+        "k_My_force": k_My_force,
+        "k_Mz_force": k_Mz_force,
+        "k_Mx_react": k_Mx_react,
+        "k_My_react": k_My_react,
+        "k_Mz_react": k_Mz_react,
+        "k_Mx_dot":   k_Mx_dot,
+        "k_My_dot":   k_My_dot,
+        "k_Mz_dot":   k_Mz_dot,
+        # Motor model (shared).
         "tau": float(extended["tau"]),
         "k": float(extended["k"]),
         "w_min": float(extended["w_min"]),
         "w_max": w_max,
+        # Debug / introspection — the raw motor placements and normals used.
+        "motor_positions": motor_positions,
+        "thrust_normals":  thrust_normals,
+        # Underlying constants, kept for consumers that need to reconstruct.
+        "k_f": float(k_f),
+        "k_m": float(k_m),
+        "m":   m,
+        "W_hover": W_hover,
     }
 
 

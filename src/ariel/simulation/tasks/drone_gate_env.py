@@ -100,6 +100,13 @@ class DroneGateEnv(VecEnv):
         # Motor time constant for first-order dynamics (matches reference 5-inch sysid).
         self.motor_tau = 0.04
 
+        # Hover motor-state (normalised). Reset uses this instead of w=0
+        # (which is W=1500 rad/s — mid-range, not idle) so episodes start
+        # near flight trim rather than at a random point in [-1, 1].
+        from ariel.simulation.drone.dynamics_params import W_MAX_N, W_MIN_N
+        W_hover = float(self.drone_sim.params["W_hover"])
+        self.w_hover_norm = float(2.0 * W_hover / (W_MAX_N - W_MIN_N) - 1.0)
+
         # Define the race track
         self.start_pos = start_pos.astype(np.float32)
         self.gate_pos = gates_pos.astype(np.float32)
@@ -155,7 +162,9 @@ class DroneGateEnv(VecEnv):
         # observation space: pos[G], vel[G], att[eulerB->G], rates[B], rpms, future_gates[G], future_gate_dirs[G]
         # [G] = reference frame aligned with target gate
         # [B] = body frame
-        self.state_len = 12+num_motors+4*self.gates_ahead+4*self.num_action_history
+        # Per future gate: 4 cols (gate-to-gate delta) + 3 cols (drone-to-gate_i
+        # delta in gate_i's frame) — audit fix for drone-relative future gates.
+        self.state_len = 12+num_motors+7*self.gates_ahead+4*self.num_action_history
         self.obs_len = self.state_len*(1+self.num_state_history)
         observation_space = spaces.Box(
             low  = np.array([-np.inf]*self.obs_len),
@@ -300,21 +309,37 @@ class DroneGateEnv(VecEnv):
         # Update rpms
         new_states[:,12:12+self.num_motors] = self.world_states[:,12:12+self.num_motors]
 
-        # Update future gates relative to current gate
+        # Update future gates. Per future gate i we encode:
+        #   cols 0-2: gate-to-gate position delta in previous gate's frame
+        #             (constant per gate pair — purely a track feature)
+        #   col  3:   gate-to-gate yaw delta
+        #   cols 4-6: drone-relative position (gate_i_pos − drone_pos),
+        #             rotated into gate_i's frame — lets the policy see
+        #             its distance to upcoming gates.
+        drone_pos = self.world_states[:, 0:3]  # (num_envs, 3)
         for i in range(self.gates_ahead):
             indices = (self.target_gates+i+1)
             # loop when out of bounds
             indices = indices % self.num_gates
             valid = indices < self.num_gates
-            new_states[valid,12+self.num_motors+4*i:12+self.num_motors+4*i+3] = self.gate_pos_rel[indices[valid]]
-            new_states[valid,12+self.num_motors+4*i+3] = self.gate_yaw_rel[indices[valid]]
+            base_col = 12 + self.num_motors + 7*i
+            new_states[valid, base_col:base_col+3] = self.gate_pos_rel[indices[valid]]
+            new_states[valid, base_col+3] = self.gate_yaw_rel[indices[valid]]
+
+            future_gpos = self.gate_pos[indices]              # (num_envs, 3)
+            future_gyaw = self.gate_yaw[indices]              # (num_envs,)
+            fcg = np.cos(future_gyaw);  fsg = np.sin(future_gyaw)
+            dxyz = future_gpos - drone_pos                     # (num_envs, 3)
+            new_states[:, base_col+4] =  fcg * dxyz[:, 0] + fsg * dxyz[:, 1]
+            new_states[:, base_col+5] = -fsg * dxyz[:, 0] + fcg * dxyz[:, 1]
+            new_states[:, base_col+6] = dxyz[:, 2]
 
         # update action history
         self.action_hist = np.roll(self.action_hist, 1, axis=1)
         self.action_hist[:,0] = self.actions
 
         for i in range(self.num_action_history):
-            new_states[:,12+self.num_motors+4*self.gates_ahead+4*i:12+self.num_motors+4*self.gates_ahead+4*i+4] = self.action_hist[:,(i+1)*self.history_step_size-1]
+            new_states[:,12+self.num_motors+7*self.gates_ahead+4*i:12+self.num_motors+7*self.gates_ahead+4*i+4] = self.action_hist[:,(i+1)*self.history_step_size-1]
         
         # update state history
         self.state_hist = np.roll(self.state_hist, 1, axis=1)
@@ -351,10 +376,13 @@ class DroneGateEnv(VecEnv):
             q0 = np.random.uniform(-0.1,0.1, size=(num_reset,))
             r0 = np.random.uniform(-0.1,0.1, size=(num_reset,))
 
-            # Motor speeds w_i are in [-1, 1] (reference-form normalization;
-            # see DroneSimulator state convention). Was [0, 1] under the old
-            # dynamics — see Phase 2.3 in RUNTIME_DYNAMICS_MIGRATION.md.
-            w0 = np.random.uniform(-1, 1, size=(num_reset,self.num_motors))
+            # Motors reset to hover-trim ± small noise so TWR starts near 1
+            # instead of random in [0, ~3×]. Previously uniform [-1, 1]
+            # which spawned many episodes already diverging at t=0.
+            w0 = (
+                self.w_hover_norm
+                + np.random.uniform(-0.1, 0.1, size=(num_reset, self.num_motors))
+            )
 
         else: # always start at the first gate, fixed orientation
             # set target gates to 0
@@ -367,16 +395,18 @@ class DroneGateEnv(VecEnv):
             vx0 = np.zeros((num_reset,))
             vy0 = np.zeros((num_reset,))
             vz0 = np.zeros((num_reset,))
-            
+
             phi0   = np.zeros((num_reset,))
             theta0 = np.zeros((num_reset,))
             psi0   = np.zeros((num_reset,))
-            
+
             p0 = np.zeros((num_reset,))
             q0 = np.zeros((num_reset,))
             r0 = np.zeros((num_reset,))
 
-            w0 = np.zeros((num_reset,self.num_motors))
+            # Motors at exact hover-trim so a zero-action start keeps the
+            # drone roughly stationary rather than falling.
+            w0 = np.full((num_reset, self.num_motors), self.w_hover_norm)
 
         w0 = np.hsplit(w0, self.num_motors)
 
@@ -417,11 +447,20 @@ class DroneGateEnv(VecEnv):
         else:
             action_for_dynamics = self.actions
 
+        # RK4 integration (same action across stages — zero-order hold on
+        # the controller, which is already the case for the policy's
+        # dt-wide step). Reduces Euler-angle singularity divergence and
+        # keeps motor dynamics stable at larger dt.
         full_state = self.world_states  # (num_envs, 12+N)
-        full_state_dot = self.drone_sim.dynamics_func(
-            full_state.T, action_for_dynamics.T
-        ).T  # (num_envs, 12+N)
-        new_states = (full_state + self.dt * full_state_dot).astype(np.float32)
+        dyn = self.drone_sim.dynamics_func
+        aT = action_for_dynamics.T
+        k1 = np.asarray(dyn(full_state.T, aT)).T
+        k2 = np.asarray(dyn((full_state + 0.5 * self.dt * k1).T, aT)).T
+        k3 = np.asarray(dyn((full_state + 0.5 * self.dt * k2).T, aT)).T
+        k4 = np.asarray(dyn((full_state +       self.dt * k3).T, aT)).T
+        new_states = (
+            full_state + (self.dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        ).astype(np.float32)
 
         # Detect numerical divergence (NaN, Inf, or excessively large finite values)
         diverged = np.any(~np.isfinite(new_states) | (np.abs(new_states) > 1e6), axis=1)
@@ -444,14 +483,21 @@ class DroneGateEnv(VecEnv):
         prog_rewards = d2g_old - d2g_new
         rewards = prog_rewards - rat_penalty
 
-        # Gate passing/collision
+        # Gate passing/collision — rectangle in gate plane (horizontal in-
+        # plane width + vertical half-height). Previously an L∞ cube which
+        # credited passes well above/below the frame.
         normal = np.array([np.cos(yaw_gate), np.sin(yaw_gate)]).T
+        lateral_axis = np.array([-np.sin(yaw_gate), np.cos(yaw_gate)]).T
         # dot product of normal and position vector over axis 1
         pos_old_projected = (pos_old[:,0]-pos_gate[:,0])*normal[:,0] + (pos_old[:,1]-pos_gate[:,1])*normal[:,1]
         pos_new_projected = (pos_new[:,0]-pos_gate[:,0])*normal[:,0] + (pos_new[:,1]-pos_gate[:,1])*normal[:,1]
         passed_gate_plane = (pos_old_projected < 0) & (pos_new_projected > 0)
         gate_size = 1.5
-        gate_passed = passed_gate_plane & np.all(np.abs(pos_new - pos_gate)<gate_size/2, axis=1)
+        gate_half_height = 0.75
+        lateral = (pos_new[:,0]-pos_gate[:,0])*lateral_axis[:,0] + (pos_new[:,1]-pos_gate[:,1])*lateral_axis[:,1]
+        z_rel = pos_new[:,2] - pos_gate[:,2]
+        in_gate = (np.abs(lateral) < gate_size/2) & (np.abs(z_rel) < gate_half_height)
+        gate_passed = passed_gate_plane & in_gate
 
         # +10 only on the final gate of the lap. Per-gate was tried in
         # session 2 (10-seed × 10M steps, native fig8) and all 10 seeds
@@ -491,29 +537,37 @@ class DroneGateEnv(VecEnv):
         if self.pause:
             dones = dones & ~dones
             self.dones = dones
+            terminal_states = self.states.copy()
         elif self.pause_if_collision:
             update = ~dones
-            # Update world states
+            # Update world states for non-done envs; done envs are frozen.
             self.world_states[update] = new_states[update]
             self.update_states()
+            terminal_states = self.states.copy()
         else:
-            # Update world states
+            # Update world states (keep terminal state in world_states briefly).
             self.world_states = new_states
-            # reset env if done (and update states)
+            # Snapshot pre-reset observations — SB3 bootstraps truncated
+            # episodes from info["terminal_observation"], so this must be
+            # the state the drone actually reached, not the reset state.
+            self.update_states()
+            terminal_states = self.states.copy()
+            # Reset env if done (overwrites world_states[dones] and
+            # recomputes self.states for the post-reset view).
             self.reset_(dones)
 
         # Write info dicts
         infos = [{} for _ in range(self.num_envs)]
         for i in range(self.num_envs):
             if dones[i]:
-                infos[i]["terminal_observation"] = self.states[i]
+                infos[i]["terminal_observation"] = terminal_states[i]
             if max_steps_reached[i]:
                 infos[i]["TimeLimit.truncated"] = True
             # extra info for debugging
             infos[i]["out_of_bounds"] = out_of_bounds[i]
             infos[i]["gate_passed"] = gate_passed[i]
             infos[i]["num_gates_passed"] = gates_passed_before_reset
-            
+
         return self.states, rewards, dones, infos
     
     def close(self):

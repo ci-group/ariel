@@ -56,17 +56,6 @@ def _random_states(rng: np.random.RandomState, num_envs: int, num_motors: int):
     return state, action
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "KNOWN DRIFT (2026-07-27): torch `_build_torch_dynamics` and numpy "
-        "`drone_sim.dynamics_func` do not produce identical state_dot for "
-        "the standard quad. Max abs diff ~0.62 in accelerations. Suspected "
-        "source: aero-drag or motor-lag terms encoded differently. This is "
-        "the divergence the audit warned about — fix upstream, then flip "
-        "this marker."
-    ),
-)
 def test_dynamics_func_matches_torch_build():
     """Numpy `dynamics_func` and the torch-built dynamics agree on state_dot."""
     torch_env, numpy_env = _standard_envs(num_envs=4)
@@ -99,10 +88,6 @@ def test_dynamics_func_matches_torch_build():
         )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Consequence of the dynamics drift above; flip together.",
-)
 def test_single_step_trajectory_matches():
     """One Euler step of dynamics reproduces the same world_state on both envs.
 
@@ -134,6 +119,77 @@ def test_single_step_trajectory_matches():
     np.testing.assert_allclose(new_state_th, new_state_np, atol=1e-5, rtol=1e-4)
 
 
+def _tilted_motor_propellers(rng: np.random.RandomState):
+    """A 6-motor layout with 3D positions, tilted thrust vectors, and both spins.
+
+    Exercises every per-motor coefficient path (k_f*/k_M*_force/react/dot)
+    with non-zero cross-coupling. Thrust normals are unit vectors in NED
+    body frame (nz≈-1 for upright); we rotate each one by random (roll, pitch)
+    around body-x and body-y so nx and ny are also non-trivial.
+    """
+    propellers = []
+    for i in range(6):
+        # Random body-frame position (NED): include a non-zero z offset so
+        # the (y·nz − z·ny) and (z·nx − x·nz) moment-arm terms both exercise.
+        pos = rng.uniform(-0.15, 0.15, size=3).astype(float)
+        pos[2] = float(rng.uniform(-0.05, 0.05))
+
+        # Random tilt: build unit normal by rotating (0, 0, -1) by random
+        # roll (around x) and pitch (around y). Keeps |n| = 1 exactly.
+        roll = float(rng.uniform(-0.4, 0.4))
+        pitch = float(rng.uniform(-0.4, 0.4))
+        cr, sr = np.cos(roll), np.sin(roll)
+        cp, sp = np.cos(pitch), np.sin(pitch)
+        # R = Ry(pitch) · Rx(roll) applied to [0, 0, -1]
+        nx = -sp * cr
+        ny = sr
+        nz = -cp * cr
+
+        spin = "ccw" if (i % 2 == 0) else "cw"
+        propellers.append({
+            "loc": [float(pos[0]), float(pos[1]), float(pos[2])],
+            "dir": [float(nx), float(ny), float(nz), spin],
+            "propsize": 2,
+        })
+    return propellers
+
+
+def test_dynamics_tilted_motor_matches():
+    """Torch and numpy dynamics must agree even for tilted thrust vectors
+    and non-flat motor layouts — the generalisation of the previously
+    upright-only dynamics (see dynamics_params.py).
+    """
+    rng = np.random.RandomState(42)
+    propellers = _tilted_motor_propellers(rng)
+
+    torch_env = TorchDroneGateEnv(
+        num_envs=4, device="cpu", seed=0, propellers=propellers,
+        initialize_at_random_gates=False, action_filter_alpha=1.0,
+    )
+    numpy_env = DroneGateEnv(
+        num_envs=4, propellers=torch_env.drone_sim.config.propellers,
+        seed=0, initialize_at_random_gates=False, action_filter_alpha=1.0,
+    )
+    num_motors = torch_env.num_motors
+    assert num_motors == 6
+
+    torch_dyn = _build_torch_dynamics(
+        torch_env.drone_sim.params, num_motors,
+        torch_env.drone_sim.g, torch.device("cpu"), torch.float32,
+    )
+
+    for trial in range(5):
+        state_np, action_np = _random_states(rng, num_envs=4, num_motors=num_motors)
+        sdot_np = numpy_env.drone_sim.dynamics_func(state_np.T, action_np.T).T
+        sdot_th = torch_dyn(
+            torch.from_numpy(state_np.T), torch.from_numpy(action_np.T),
+        ).T.numpy()
+        np.testing.assert_allclose(
+            sdot_th, sdot_np, atol=1e-4, rtol=1e-4,
+            err_msg=f"tilted trial {trial}: torch and numpy disagree",
+        )
+
+
 def test_env_construction_no_render_warning():
     """`render_mode` is unconditionally set — SB3 must not emit its
     'render_mode attribute not defined' warning on env construction."""
@@ -150,5 +206,7 @@ if __name__ == "__main__":
     print("[OK] dynamics_func matches _build_torch_dynamics")
     test_single_step_trajectory_matches()
     print("[OK] single Euler step matches")
+    test_dynamics_tilted_motor_matches()
+    print("[OK] tilted-motor parity")
     test_env_construction_no_render_warning()
     print("[OK] no render_mode warning on construction")
