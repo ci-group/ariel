@@ -13,7 +13,7 @@ class GapWorld(BaseWorld):
 
     name: str = "gap-world"
 
-    gap_width: float = 0.30
+    gap_width: float = 0.10
     platform_length: float = 2.0
     platform_width: float = 2.0
     platform_height: float = 0.05

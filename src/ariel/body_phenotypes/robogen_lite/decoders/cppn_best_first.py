@@ -138,7 +138,7 @@ class MorphologyDecoderBestFirst:
                     )
 
                     child_length = None
-                    if (child_type == ModuleType.BRICKand self.variable_brick_length):
+                    if (child_type == ModuleType.BRICK and self.variable_brick_length):
                         child_length = scale_brick_length(raw_length_output)
 
                     if (
