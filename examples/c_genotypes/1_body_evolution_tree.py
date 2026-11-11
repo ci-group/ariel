@@ -11,7 +11,6 @@ import contextlib
 import copy
 
 # Standard library
-import random
 import time
 from pathlib import Path
 
@@ -28,6 +27,9 @@ from rich.console import Console
 from rich.progress import track
 from rich.traceback import install
 
+from ariel.body_phenotypes.robogen_lite.collision_validation import (
+    is_physically_valid,
+)
 from ariel.body_phenotypes.robogen_lite.config import (
     ALLOWED_ROTATIONS,
     IDX_OF_CORE,
@@ -48,6 +50,7 @@ from ariel.ec import (
 from ariel.ec.genotypes.tree.operators import (
     _prune_invalid_edges,
     crossover_subtree,
+    mutate_brick_length,
     mutate_hoist,
     mutate_replace_node,
     mutate_shrink,
@@ -170,6 +173,10 @@ def calculate_morphological_fitness(genome: TreeGenome) -> float:
         if robot_graph.number_of_nodes() == 0:
             return float("inf")
 
+        # Reject physically invalid morphologies.
+        if not is_physically_valid(robot_graph):
+            return float("inf")
+
         measures = MorphologicalMeasures(robot_graph)
 
         # Weighted combination of morphological properties
@@ -263,16 +270,20 @@ class MorphologyEvolution:
             # Hoist mutation: promote child to replace parent
             mutate_hoist(new)
 
+        # Additional brick length mutation (20% chance)
+        if RNG.random() < 0.2:
+            mutate_brick_length(new)
+
         # Additional rotation mutation (20% chance)
         if RNG.random() < 0.2:
             noncore = [nid for nid in new.nodes if nid != IDX_OF_CORE]
             if noncore:
-                nid = random.choice(noncore)
+                nid = RNG.choice(noncore)
                 # choose a new rotation allowed for its type
                 mtype = ModuleType[new.nodes[nid]["type"]]
                 rots = [r.name for r in ALLOWED_ROTATIONS[mtype]]
                 if rots:
-                    new.nodes[nid]["rotation"] = random.choice(rots)
+                    new.nodes[nid]["rotation"] = RNG.choice(rots)
 
         # prune any invalid edges before returning
         _prune_invalid_edges(new)
@@ -298,7 +309,7 @@ class MorphologyEvolution:
 
         # If disconnected, return copy of a parent instead
         if not is_connected_tree(chosen):
-            return TreeGenome.from_dict(random.choice([t1, t2]).to_dict())
+            return TreeGenome.from_dict(RNG.choice([t1, t2]).to_dict())
 
         return chosen
 
@@ -329,10 +340,11 @@ class MorphologyEvolution:
         while len(population) + len(new_offspring) < target_pool:
             use_sexual = len(parents) >= 2 and RNG.random() < 0.5
             if use_sexual:
-                p1, p2 = random.sample(parents, 2)
+                i1, i2 = RNG.choice(len(parents), size=2, replace=False)
+                p1, p2 = parents[i1], parents[i2]
                 c_morph = self.crossover_morphologies(p1, p2)
             else:
-                parent = random.choice(parents)
+                parent = parents[RNG.integers(len(parents))]
                 c_morph = TreeGenome.from_dict(parent.genotype)
 
             # mutate morphology
@@ -398,26 +410,21 @@ class MorphologyEvolution:
                 ind.alive = False
 
         # Print statistics
-        avg_fitness = np.mean([
+        valid_fitnesses = [
             ind.fitness_
             for ind in survivors
             if ind.fitness_ is not None and ind.fitness_ != float("inf")
-        ])
-        min_fitness = min(
-            ind.fitness_
-            for ind in survivors
-            if ind.fitness_ is not None and ind.fitness_ != float("inf")
-        )
-        max_fitness = max(
-            ind.fitness_
-            for ind in survivors
-            if ind.fitness_ is not None and ind.fitness_ != float("inf")
-        )
+        ]
 
-        console.log(
-            f"[green]Survivor Selection:[/green] "
-            f"Avg={avg_fitness:.4f}, Min={min_fitness:.4f}, Max={max_fitness:.4f}",
-        )
+        if valid_fitnesses:
+            avg_fitness = np.mean(valid_fitnesses)
+            min_fitness = min(valid_fitnesses)
+            max_fitness = max(valid_fitnesses)
+
+            console.log(f"[green]Survivor Selection:[/green] " f"Avg={avg_fitness:.4f}, Min={min_fitness:.4f}, Max={max_fitness:.4f}",)
+        else:
+            console.log("[yellow]Survivor Selection: No physically valid survivors[/yellow]")
+
         return population
 
     def evolve(self) -> Individual | None:
@@ -470,13 +477,21 @@ def main() -> None:
         fitness = calculate_morphological_fitness(genome)
 
         try:
-            measures = MorphologicalMeasures(genome.to_networkx())
+            graph = genome.to_networkx()
+            measures = MorphologicalMeasures(graph)
             console.log(f"Best Fitness Score: {fitness:.4f}")
             console.log(f"Modules: {measures.num_modules}")
             console.log(f"Joints: {measures.num_active_hinges}")
             console.log(f"Symmetry: {measures.symmetry:.4f}")
             console.log(f"Branching: {measures.branching:.4f}")
             console.log(f"Length of Limbs: {measures.length_of_limbs:.4f}")
+
+            brick_lengths = [float(data["length"]) for _, data in graph.nodes(data=True) if data["type"] == ModuleType.BRICK.name and "length" in data]
+            if brick_lengths:
+                console.log("Brick Lengths: " + ", ".join(f"{length * 1000:.2f} mm" for length in brick_lengths),)
+                console.log(f"Mean Brick Length: {np.mean(brick_lengths) * 1000:.2f} mm")
+
+            console.log(f"Physically Valid: {is_physically_valid(graph)}")
             console.log(f"\nElapsed time: {elapsed:.2f}s")
         except Exception as e:
             console.log(f"[red]Error analyzing best individual: {e}[/red]")

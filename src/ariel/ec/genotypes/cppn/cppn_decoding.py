@@ -71,7 +71,7 @@ if __name__ == "__main__":
     num_initial_mutations = 5
 
     T, R = NUM_OF_TYPES_OF_MODULES, NUM_OF_ROTATIONS
-    NUM_CPPN_INPUTS, NUM_CPPN_OUTPUTS = 6, 1 + T + R
+    NUM_CPPN_INPUTS, NUM_CPPN_OUTPUTS = 6, 1 + T + R + 1
 
     # 1. Define the starting innovation ID for the first genome as 0.
     initial_innov_id = 0
