@@ -75,17 +75,34 @@ cd ariel
   uv venv
 ```
 
-3. Sync the virtual environment with the requirements, choosing **one** of:
+3. Sync the virtual environment with the requirements
 
 ```bash
-uv sync --extra cpu   # CPU-only machines and Apple Silicon Macs: no NVIDIA CUDA libraries
-uv sync --extra gpu   # machines with an NVIDIA GPU: CUDA 12.8 build of PyTorch + MuJoCo MJX/Warp
+uv sync
 ```
 
-The `cpu` option gives a much smaller environment (~3 GB instead of ~9 GB), because it skips the CUDA runtime libraries that the default PyTorch wheel pulls in on Linux.
+This installs everything ARIEL needs, with the CPU build of PyTorch. It works on any machine (Linux, Windows, and Apple Silicon Macs) and keeps the environment small (~3 GB), because it skips the NVIDIA CUDA libraries.
 
-> **Apple Silicon (M1/M2/M3/…) users: use `--extra cpu`.** It installs the native macOS PyTorch build, which still supports the Mac GPU through `torch.device("mps")`. The `gpu` option is meant for NVIDIA hardware and gives no benefit on a Mac.
+> **Apple Silicon (M1/M2/M3/…) users:** plain `uv sync` is all you need. It installs the native macOS PyTorch build, which still supports the Mac GPU through `torch.device("mps")`.
 > Intel Macs are not supported, as PyTorch ≥ 2.8 no longer ships wheels for them.
+
+<details>
+<summary><b>Optional: NVIDIA GPU support</b></summary>
+
+If you have an NVIDIA GPU and want CUDA-accelerated PyTorch plus GPU-batched simulation with MuJoCo MJX/Warp, swap the default `cpu` group for the `gpu` group:
+
+```bash
+uv sync --no-group cpu --group gpu
+```
+
+The two groups can't be installed together. Because `uv run` re-syncs with the default (CPU) group, either pass the same flags to it (`uv run --no-group cpu --group gpu ...`) or set them once in your shell:
+
+```bash
+export UV_NO_GROUP=cpu
+uv run --group gpu examples/re_book/1_brain_evolution.py
+```
+
+</details>
 
 4. Run an example, in this case, brain evolution (aka learning) using:
 

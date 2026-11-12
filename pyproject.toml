@@ -41,10 +41,16 @@ dependencies = [
   "sqlmodel>=0.0.25",
 ]
 
-# torch / torchvision are required, but come in two flavours. Pick exactly one:
-#   uv sync --extra cpu   -> CPU-only torch (no NVIDIA CUDA libraries, ~6 GB smaller)
-#   uv sync --extra gpu   -> CUDA torch + MuJoCo MJX/Warp for GPU-batched simulation
-[project.optional-dependencies]
+[project.urls]
+Homepage = "https://github.com/ci-group/ariel"
+Repository = "https://github.com/ci-group/ariel"
+Documentation = "https://ariel.readthedocs.io"
+Changelog = "https://github.com/ci-group/ariel/releases"
+
+[dependency-groups]
+# torch / torchvision are required and come in two flavours (mutually exclusive):
+#   uv sync                               -> default: CPU-only torch (no NVIDIA CUDA libraries)
+#   uv sync --no-group cpu --group gpu    -> CUDA torch + MuJoCo MJX/Warp, for NVIDIA GPUs
 cpu = [
   "torch>=2.8.0",
   "torchvision>=0.23.0",
@@ -56,13 +62,6 @@ gpu = [
 ]
 
 
-[project.urls]
-Homepage = "https://github.com/ci-group/ariel"
-Repository = "https://github.com/ci-group/ariel"
-Documentation = "https://ariel.readthedocs.io"
-Changelog = "https://github.com/ci-group/ariel/releases"
-
-[dependency-groups]
 dev = [
     "mypy>=1.18.2",
     "pytest>=8.4.2",
@@ -120,18 +119,19 @@ where = ["src"]
 
 [tool.uv]
 package = true
-conflicts = [[{ extra = "cpu" }, { extra = "gpu" }]]
+default-groups = ["dev", "cpu"]
+conflicts = [[{ group = "cpu" }, { group = "gpu" }]]
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cpu", group = "cpu" },
   # CUDA wheels don't exist for macOS; there torch comes from PyPI instead.
-  { index = "pytorch-cu128", extra = "gpu", marker = "sys_platform != 'darwin'" },
+  { index = "pytorch-cu128", group = "gpu", marker = "sys_platform != 'darwin'" },
 ]
 torchvision = [
-  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cpu", group = "cpu" },
   # CUDA wheels don't exist for macOS; there torch comes from PyPI instead.
-  { index = "pytorch-cu128", extra = "gpu", marker = "sys_platform != 'darwin'" },
+  { index = "pytorch-cu128", group = "gpu", marker = "sys_platform != 'darwin'" },
 ]
 
 [[tool.uv.index]]
