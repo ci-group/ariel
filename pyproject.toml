@@ -20,7 +20,6 @@ dependencies = [
   "keyboard>=0.13.5",
   "manifold3d>=3.4.0",
   "matplotlib>=3.9.4",
-  "mujoco>=3.3.6",
   "networkx>=3.2.1",
   "nevergrad>=1.0.12",
   "nicegui>=2.24.1",
@@ -41,18 +40,22 @@ dependencies = [
   "sqlmodel>=0.0.25",
 ]
 
-# torch / torchvision are required, but come in two flavours. Pick exactly one:
-#   uv sync --extra cpu   -> CPU-only torch (no NVIDIA CUDA libraries, ~6 GB smaller)
-#   uv sync --extra gpu   -> CUDA torch + MuJoCo MJX/Warp for GPU-batched simulation
+# torch / torchvision / mujoco are required, but come in two flavours. Pick exactly one:
+#   uv sync --extra cpu   -> CPU-only torch (no NVIDIA CUDA libraries, ~6 GB smaller) + MuJoCo 4
+#   uv sync --extra gpu   -> CUDA torch + MuJoCo 3.x MJX/Warp for GPU-batched simulation
+# NOTE: mujoco lives in the extras (not the base deps) because the CPU path is on
+# MuJoCo 4 while the GPU (MJX/Warp) path stays on MuJoCo 3.x for now.
 [project.optional-dependencies]
 cpu = [
   "torch>=2.8.0",
   "torchvision>=0.23.0",
+  "mujoco==4.0.0",
 ]
 gpu = [
   "torch>=2.8.0",
   "torchvision>=0.23.0",
-  "mujoco-mjx[warp]>=3.6.0",
+  "mujoco>=3.6.0,<4",
+  "mujoco-mjx[warp]>=3.6.0,<4",
 ]
 
 
