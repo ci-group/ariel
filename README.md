@@ -17,6 +17,7 @@
 --- -->
 
 ## Documentation
+
 [ARIEL main documentation page](https://ci-group.github.io/ariel/)
 
 ## Quickstart
@@ -60,24 +61,34 @@ All Python dependencies are declared in [`pyproject.toml`](pyproject.toml) and a
 This project uses [uv](https://docs.astral.sh/uv/).
 
 To run the code examples, please do:
+
 1. Clone the repository
+
 ```bash
 git clone https://github.com/ci-group/ariel.git
 cd ariel
 ```
+
 2. Create a uv virtual environment inside the repository folder
+
 ```bash
   uv venv
 ```
+
 3. Sync the virtual environment with the requirements, choosing **one** of:
+
 ```bash
-uv sync --extra cpu   # CPU-only machines (e.g. laptops): CPU build of PyTorch, no NVIDIA CUDA libraries
+uv sync --extra cpu   # CPU-only machines and Apple Silicon Macs: no NVIDIA CUDA libraries
 uv sync --extra gpu   # machines with an NVIDIA GPU: CUDA 12.8 build of PyTorch + MuJoCo MJX/Warp
 ```
-The `cpu` option gives a much smaller environment (~3 GB instead of ~9 GB), because it skips
-the CUDA runtime libraries that the default PyTorch wheel pulls in on Linux.
-On macOS both options install the standard PyTorch from PyPI.
+
+The `cpu` option gives a much smaller environment (~3 GB instead of ~9 GB), because it skips the CUDA runtime libraries that the default PyTorch wheel pulls in on Linux.
+
+> **Apple Silicon (M1/M2/M3/…) users: use `--extra cpu`.** It installs the native macOS PyTorch build, which still supports the Mac GPU through `torch.device("mps")`. The `gpu` option is meant for NVIDIA hardware and gives no benefit on a Mac.
+> Intel Macs are not supported, as PyTorch ≥ 2.8 no longer ships wheels for them.
+
 4. Run an example, in this case, brain evolution (aka learning) using:
+
 ```bash
 uv run examples/re_book/1_brain_evolution.py
 ```
@@ -141,6 +152,7 @@ The [`examples/`](examples/) folder is the best entry point for learning the fra
 ARIEL has two official publications, at the ALIFE 2026 conference and at the PPSN 2026 conference.
 
 ### ALIFE 2026
+
 ```bibtex
 @proceedings{10.1162/ISAL.a.962,
     author = {Di Matteo, Jacopo Michele and Grigoriadis, Ioannis and Richárd Ferencz, Áron and Schwarzenbach, Lilly and Eiben, A.E.},
@@ -159,6 +171,7 @@ ARIEL has two official publications, at the ALIFE 2026 conference and at the PPS
 ```
 
 ### PPSN 2026
+
 ```bibtex
 @InProceedings{10.1007/978-3-032-36226-1_36,
     author="Grigoriadis, Ioannis and Schwarzenbach, Lilly and Ferencz, {\'A}ron Rich{\'a}rd and di Matteo, Jacopo Michele",
