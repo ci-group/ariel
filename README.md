@@ -53,7 +53,7 @@ From here, see [`examples/`](examples/) for adding controllers, defining fitness
 - **MuJoCo** ≥ 3.3.6
 - **[uv](https://docs.astral.sh/uv/)** for environment and dependency management
 
-All Python dependencies are declared in [`pyproject.toml`](pyproject.toml) and are installed automatically by `uv sync`.
+All Python dependencies are declared in [`pyproject.toml`](pyproject.toml) and are installed by `uv sync` (see [Installation and Running](#installation-and-running) for the CPU / GPU options).
 
 ## Installation and Running
 
@@ -69,10 +69,14 @@ cd ariel
 ```bash
   uv venv
 ```
-3. Sync the virtual environment with the requirements
+3. Sync the virtual environment with the requirements, choosing **one** of:
 ```bash
-uv sync
+uv sync --extra cpu   # CPU-only machines (e.g. laptops): CPU build of PyTorch, no NVIDIA CUDA libraries
+uv sync --extra gpu   # machines with an NVIDIA GPU: CUDA 12.8 build of PyTorch + MuJoCo MJX/Warp
 ```
+The `cpu` option gives a much smaller environment (~3 GB instead of ~9 GB), because it skips
+the CUDA runtime libraries that the default PyTorch wheel pulls in on Linux.
+On macOS both options install the standard PyTorch from PyPI.
 4. Run an example, in this case, brain evolution (aka learning) using:
 ```bash
 uv run examples/re_book/1_brain_evolution.py

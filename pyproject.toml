@@ -21,7 +21,6 @@ dependencies = [
   "manifold3d>=3.4.0",
   "matplotlib>=3.9.4",
   "mujoco>=3.3.6",
-  "mujoco-mjx[warp]>=3.6.0",
   "networkx>=3.2.1",
   "nevergrad>=1.0.12",
   "nicegui>=2.24.1",
@@ -40,8 +39,20 @@ dependencies = [
   "rich>=14.1.0",
   "sqlalchemy>=2.0.43",
   "sqlmodel>=0.0.25",
+]
+
+# torch / torchvision are required, but come in two flavours. Pick exactly one:
+#   uv sync --extra cpu   -> CPU-only torch (no NVIDIA CUDA libraries, ~6 GB smaller)
+#   uv sync --extra gpu   -> CUDA torch + MuJoCo MJX/Warp for GPU-batched simulation
+[project.optional-dependencies]
+cpu = [
   "torch>=2.8.0",
   "torchvision>=0.23.0",
+]
+gpu = [
+  "torch>=2.8.0",
+  "torchvision>=0.23.0",
+  "mujoco-mjx[warp]>=3.6.0",
 ]
 
 
@@ -109,6 +120,29 @@ where = ["src"]
 
 [tool.uv]
 package = true
+conflicts = [[{ extra = "cpu" }, { extra = "gpu" }]]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  # CUDA wheels don't exist for macOS; there torch comes from PyPI instead.
+  { index = "pytorch-cu128", extra = "gpu", marker = "sys_platform != 'darwin'" },
+]
+torchvision = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  # CUDA wheels don't exist for macOS; there torch comes from PyPI instead.
+  { index = "pytorch-cu128", extra = "gpu", marker = "sys_platform != 'darwin'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
 
 [project.scripts]
 ariel = "ariel.__main__:cli"
