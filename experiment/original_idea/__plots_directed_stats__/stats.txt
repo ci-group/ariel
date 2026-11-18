@@ -1,0 +1,33 @@
+Directed capacity sweep — 63 runs, n=[1, 2, 4], widths=[16, 64, 256], depths=[0, 1, 3]
+Primary metric: targets reached / episode; per-run score = mean of last 4 evals (94–112M steps).
+
+Pre-specified comparison: linear (w=16, d=0) vs largest (w=256, d=3).
+  n=1: largest 5.24 ±0.35   linear 0.66 ±1.47   gap 4.58  (Welch t=13.03, p=0.0038)   linear/largest = 0.13
+  n=2: largest 4.42 ±1.05   linear 1.38 ±1.16   gap 3.04  (Welch t=8.36, p=0.00117)   linear/largest = 0.31
+  n=4: largest 4.75 ±0.83   linear 2.68 ±0.51   gap 2.06  (Welch t=9.14, p=0.00181)   linear/largest = 0.57
+
+Linear policy, n=4 vs n=1: Welch t=5.59, p=0.0185
+
+Interaction test  y ~ log2(n) * is_linear  (OLS on per-seed scores).
+b3 > 0  <=>  the linear policy improves more with n than the largest network,
+i.e. the capacity advantage shrinks as n grows.
+  [K=1                                       ] b3=+1.167 per doubling of n  95% CI [+0.553, +1.780]  p=0.00113  (N=18, dof=14)   slope: largest -0.241, linear +0.926
+  [K=1, non-learning linear seeds dropped    ] b3=+0.992 per doubling of n  95% CI [+0.398, +1.585]  p=0.00318  (N=17, dof=13)   slope: largest -0.241, linear +0.751
+  [K=2                                       ] b3=+1.222 per doubling of n  95% CI [+0.637, +1.807]  p=0.000517  (N=18, dof=14)   slope: largest -0.252, linear +0.970
+  [K=2, non-learning linear seeds dropped    ] b3=+1.062 per doubling of n  95% CI [+0.489, +1.634]  p=0.00149  (N=17, dof=13)   slope: largest -0.252, linear +0.810
+  [K=4                                       ] b3=+1.257 per doubling of n  95% CI [+0.716, +1.797]  p=0.000199  (N=18, dof=14)   slope: largest -0.245, linear +1.011
+  [K=4, non-learning linear seeds dropped    ] b3=+1.126 per doubling of n  95% CI [+0.582, +1.671]  p=0.000635  (N=17, dof=13)   slope: largest -0.245, linear +0.881
+  [K=6                                       ] b3=+1.266 per doubling of n  95% CI [+0.757, +1.776]  p=0.000106  (N=18, dof=14)   slope: largest -0.263, linear +1.004
+  [K=6, non-learning linear seeds dropped    ] b3=+1.158 per doubling of n  95% CI [+0.633, +1.684]  p=0.00037  (N=17, dof=13)   slope: largest -0.263, linear +0.896
+  (non-learning = linear seed with score < 0.05 targets/episode)
+
+Cells still improving at end of training (fitted gain over last 4 evals > 5% of mean): 7/21
+  n=1 w=16 d=0: mean 0.66, fitted gain +0.51 over window
+  n=1 w=16 d=1: mean 2.00, fitted gain +0.49 over window
+  n=1 w=64 d=3: mean 4.38, fitted gain +0.24 over window
+  n=2 w=16 d=1: mean 2.96, fitted gain +0.34 over window
+  n=2 w=64 d=1: mean 4.03, fitted gain +0.22 over window
+  n=4 w=16 d=0: mean 2.68, fitted gain +0.20 over window
+  n=4 w=16 d=1: mean 2.94, fitted gain +0.20 over window
+
+Caveats: 3 seeds per cell (t_{0.975,2}=4.30 -> wide CIs); n has only 3 levels, so the trend in n is not resolved beyond 'monotone over 1,2,4'; the largest arch is the pre-specified comparison, other arch choices are exploratory.

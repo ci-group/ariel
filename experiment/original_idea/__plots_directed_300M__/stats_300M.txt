@@ -1,0 +1,16 @@
+17 finished 300M runs in directed_capacity_sweep_linear300M
+
+== budget 100M (score = mean targets/ep over evals in [80M, 115M]) ==
+  n=1: linear (d=0): 0.37 ±1.04 (k=3, seeds 0.29 0.82 0.00)   w=256, d=3: 5.03 ±1.94 (k=2, seeds 5.19 4.88)   gap 4.66 (Welch p=0.000527), ratio 0.07
+  n=2: linear (d=0): 1.89 ±0.63 (k=3, seeds 1.62 1.94 2.12)   w=256, d=3: 4.25 ±0.43 (k=3, seeds 4.45 4.13 4.18)   gap 2.36 (Welch p=0.000361), ratio 0.45
+  n=4: linear (d=0): 2.55 ±0.84 (k=3, seeds 2.17 2.83 2.65)   w=256, d=3: 4.57 ±0.41 (k=3, seeds 4.57 4.41 4.74)   gap 2.02 (Welch p=0.00303), ratio 0.56
+  interaction b3 = +1.277 per doubling of n, 95% CI [+0.787, +1.768], p=8.29e-05 (N=17, n levels=[1, 2, 4])
+    slope per doubling: largest -0.187, linear +1.090
+
+== budget 300M (score = mean targets/ep over evals in [240M, 345M]) ==
+  n=1: linear (d=0): 1.64 ±1.86 (k=3, seeds 2.37 1.66 0.88)   w=256, d=3: 5.52 ±0.54 (k=2, seeds 5.48 5.56)   gap 3.88 (Welch p=0.0116), ratio 0.30
+  n=2: linear (d=0): 2.90 ±0.66 (k=3, seeds 2.61 3.13 2.96)   w=256, d=3: 4.63 ±0.46 (k=3, seeds 4.84 4.56 4.50)   gap 1.73 (Welch p=0.00124), ratio 0.63
+  n=4: linear (d=0): 3.08 ±0.78 (k=3, seeds 2.76 3.10 3.39)   w=256, d=3: 5.18 ±0.31 (k=3, seeds 5.30 5.05 5.20)   gap 2.10 (Welch p=0.00303), ratio 0.59
+  interaction b3 = +0.837 per doubling of n, 95% CI [+0.193, +1.480], p=0.0148 (N=17, n levels=[1, 2, 4])
+    slope per doubling: largest -0.113, linear +0.724
+
