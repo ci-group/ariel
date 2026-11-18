@@ -2,19 +2,19 @@ version = 1
 revision = 5
 requires-python = ">=3.12"
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version >= '3.14' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
+    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version == '3.13.*' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version == '3.13.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version < '3.13' and sys_platform == 'darwin'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
     "python_full_version < '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'linux')",
+    "python_full_version < '3.13' and sys_platform == 'darwin'",
 ]
 conflicts = [[
-    { package = "ariel", extra = "cpu" },
-    { package = "ariel", extra = "gpu" },
+    { package = "ariel", group = "cpu" },
+    { package = "ariel", group = "gpu" },
 ]]
 
 [[package]]
@@ -257,6 +257,7 @@ wheels = [
 name = "ariel"
 version = "0.0.0"
 source = { editable = "." }
+default-groups = ["cpu", "dev"]
 dependencies = [
     { name = "attrs" },
     { name = "deap" },
@@ -289,24 +290,14 @@ dependencies = [
     { name = "sqlmodel" },
 ]
 
-[package.optional-dependencies]
-cpu = [
-    { name = "mujoco", version = "4.0.0", source = { registry = "https://pypi.org/simple" } },
-    { name = "torch", version = "2.8.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torch", version = "2.8.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torchvision", version = "0.23.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux' and extra == 'extra-5-ariel-cpu') or (python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torchvision", version = "0.23.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (platform_machine != 'aarch64' and sys_platform == 'linux' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-]
-gpu = [
-    { name = "mujoco", version = "3.8.0", source = { registry = "https://pypi.org/simple" } },
-    { name = "mujoco-mjx", extra = ["warp"], marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torch", version = "2.8.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torchvision", version = "0.23.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torchvision", version = "0.23.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-]
-
 [package.dev-dependencies]
+cpu = [
+    { name = "mujoco", version = "4.0.1", source = { registry = "https://pypi.org/simple" } },
+    { name = "torch", version = "2.8.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torch", version = "2.8.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torchvision", version = "0.23.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux' and extra == 'group-5-ariel-cpu') or (python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torchvision", version = "0.23.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (platform_machine != 'aarch64' and sys_platform == 'linux' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+]
 dev = [
     { name = "mypy" },
     { name = "pytest" },
@@ -332,6 +323,14 @@ docs = [
     { name = "sphinx-click" },
     { name = "sphinx-copybutton" },
     { name = "sphinx-design" },
+]
+gpu = [
+    { name = "mujoco", version = "3.8.0", source = { registry = "https://pypi.org/simple" } },
+    { name = "mujoco-mjx", extra = ["warp"], marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torch", version = "2.8.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torchvision", version = "0.23.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torchvision", version = "0.23.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 stubs = [
     { name = "lxml-stubs" },
@@ -372,9 +371,6 @@ requires-dist = [
     { name = "keyboard", specifier = ">=0.13.5" },
     { name = "manifold3d", specifier = ">=3.4.0" },
     { name = "matplotlib", specifier = ">=3.9.4" },
-    { name = "mujoco", marker = "extra == 'cpu'", specifier = "==4.0.0" },
-    { name = "mujoco", marker = "extra == 'gpu'", specifier = ">=3.6.0,<4" },
-    { name = "mujoco-mjx", extras = ["warp"], marker = "extra == 'gpu'", specifier = ">=3.6.0,<4" },
     { name = "networkx", specifier = ">=3.2.1" },
     { name = "nevergrad", specifier = ">=1.0.12" },
     { name = "nicegui", specifier = ">=2.24.1" },
@@ -393,16 +389,14 @@ requires-dist = [
     { name = "rich", specifier = ">=14.1.0" },
     { name = "sqlalchemy", specifier = ">=2.0.43" },
     { name = "sqlmodel", specifier = ">=0.0.25" },
-    { name = "torch", marker = "sys_platform == 'darwin' and extra == 'gpu'", specifier = ">=2.8.0" },
-    { name = "torch", marker = "sys_platform != 'darwin' and extra == 'gpu'", specifier = ">=2.8.0", index = "https://download.pytorch.org/whl/cu128", conflict = { package = "ariel", extra = "gpu" } },
-    { name = "torch", marker = "extra == 'cpu'", specifier = ">=2.8.0", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "ariel", extra = "cpu" } },
-    { name = "torchvision", marker = "sys_platform == 'darwin' and extra == 'gpu'", specifier = ">=0.23.0" },
-    { name = "torchvision", marker = "sys_platform != 'darwin' and extra == 'gpu'", specifier = ">=0.23.0", index = "https://download.pytorch.org/whl/cu128", conflict = { package = "ariel", extra = "gpu" } },
-    { name = "torchvision", marker = "extra == 'cpu'", specifier = ">=0.23.0", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "ariel", extra = "cpu" } },
 ]
-provides-extras = ["cpu", "gpu"]
 
 [package.metadata.requires-dev]
+cpu = [
+    { name = "mujoco", specifier = "==4.0.1" },
+    { name = "torch", specifier = ">=2.8.0", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "ariel", group = "cpu" } },
+    { name = "torchvision", specifier = ">=0.23.0", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "ariel", group = "cpu" } },
+]
 dev = [
     { name = "mypy", specifier = ">=1.18.2" },
     { name = "pytest", specifier = ">=8.4.2" },
@@ -428,6 +422,14 @@ docs = [
     { name = "sphinx-click", specifier = ">=6.0.0" },
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
     { name = "sphinx-design", specifier = ">=0.6.1" },
+]
+gpu = [
+    { name = "mujoco", specifier = ">=3.6.0,<4" },
+    { name = "mujoco-mjx", extras = ["warp"], specifier = ">=3.6.0,<4" },
+    { name = "torch", marker = "sys_platform != 'darwin'", specifier = ">=2.8.0", index = "https://download.pytorch.org/whl/cu128", conflict = { package = "ariel", group = "gpu" } },
+    { name = "torch", marker = "sys_platform == 'darwin'", specifier = ">=2.8.0" },
+    { name = "torchvision", marker = "sys_platform != 'darwin'", specifier = ">=0.23.0", index = "https://download.pytorch.org/whl/cu128", conflict = { package = "ariel", group = "gpu" } },
+    { name = "torchvision", marker = "sys_platform == 'darwin'", specifier = ">=0.23.0" },
 ]
 stubs = [
     { name = "lxml-stubs", specifier = ">=0.5.1" },
@@ -1045,8 +1047,8 @@ dependencies = [
     { name = "glfw" },
     { name = "labmaze" },
     { name = "lxml" },
-    { name = "mujoco", version = "3.8.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "mujoco", version = "4.0.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
+    { name = "mujoco", version = "3.8.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "mujoco", version = "4.0.1", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
     { name = "numpy" },
     { name = "protobuf" },
     { name = "pyopengl" },
@@ -1136,10 +1138,10 @@ wheels = [
 
 [package.optional-dependencies]
 epath = [
-    { name = "fsspec", marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "importlib-resources", marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "typing-extensions", marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "zipp", marker = "extra == 'extra-5-ariel-gpu'" },
+    { name = "fsspec", marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "importlib-resources", marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "typing-extensions", marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "zipp", marker = "extra == 'group-5-ariel-gpu'" },
 ]
 
 [[package]]
@@ -1154,10 +1156,10 @@ dependencies = [
     { name = "packaging" },
     { name = "pandas" },
     { name = "ray" },
-    { name = "torch", version = "2.8.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torch", version = "2.8.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torch", version = "2.8.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "torch", version = "2.8.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torch", version = "2.8.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torch", version = "2.8.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/55/14/e1b47de208b9cdc42bf1aa37111549e61255c411a92e054c1dc1b9b52f05/evotorch-0.6.1.tar.gz", hash = "sha256:498a21ede6996decc317c8d5dfbcdc5ab2a947f98572bde3eff4806d023840b8", size = 1845477, upload-time = "2025-05-14T17:10:51.966Z" }
 wheels = [
@@ -2567,22 +2569,22 @@ name = "mujoco"
 version = "3.8.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version >= '3.14' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
+    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version == '3.13.*' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version == '3.13.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version < '3.13' and sys_platform == 'darwin'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
     "python_full_version < '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'linux')",
+    "python_full_version < '3.13' and sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "absl-py", marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "etils", extra = ["epath"], marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "glfw", marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "numpy", marker = "extra == 'extra-5-ariel-gpu'" },
-    { name = "pyopengl", marker = "extra == 'extra-5-ariel-gpu'" },
+    { name = "absl-py", marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "etils", extra = ["epath"], marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "glfw", marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "numpy", marker = "extra == 'group-5-ariel-gpu'" },
+    { name = "pyopengl", marker = "extra == 'group-5-ariel-gpu'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e2/d8/9aae1a021b6e15ee69d805d893e01dda71cbaae1c75d5f8ec8e12916cb7c/mujoco-3.8.0.tar.gz", hash = "sha256:250afe57458d6881b2d7659fa0029a128cb57cbbb620268d95647fb9ad742183", size = 918250, upload-time = "2026-04-24T22:59:07.531Z" }
 wheels = [
@@ -2605,64 +2607,64 @@ wheels = [
 
 [[package]]
 name = "mujoco"
-version = "4.0.0"
+version = "4.0.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version >= '3.14' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
+    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version == '3.13.*' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version == '3.13.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version < '3.13' and sys_platform == 'darwin'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
     "python_full_version < '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'linux')",
+    "python_full_version < '3.13' and sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "glfw", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
-    { name = "mujoco-core", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
-    { name = "mujoco-studio", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
-    { name = "numpy", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
-    { name = "pyopengl", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
+    { name = "glfw", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
+    { name = "mujoco-core", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
+    { name = "mujoco-studio", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
+    { name = "numpy", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
+    { name = "pyopengl", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2d/5e/8592ff48ce4848a844030a4ad82004b9de9bc33e6bed55feb8c87baaeb84/mujoco-4.0.0.tar.gz", hash = "sha256:c503ff7003dd7dfee19b575aed6a409fb9bc15bf9f1c4053892c793e05b5edb3", size = 154838, upload-time = "2026-11-06T15:39:17.295Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/33/f7/235af1e87699ca1b1433cd1220c92742a39725ec3b61c1c151e7f9ef9f71/mujoco-4.0.1.tar.gz", hash = "sha256:bf669f944288038571a79dbbb98c9e94d4b9b2d97eaae5c98cf75f74be2f1c6d", size = 154912, upload-time = "2026-11-11T16:25:30.149Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/93/90/6a6b168225cb354d343e01cd272e526b6798fd957693e878a785c71a2fd2/mujoco-4.0.0-py3-none-any.whl", hash = "sha256:693a48af2b683c8613f750be66c69a3262014becb0f08674730c4d461a2f0a8d", size = 108599, upload-time = "2026-11-06T15:39:14.795Z" },
+    { url = "https://files.pythonhosted.org/packages/37/50/a347e51f8a85cffcd02111165ea2b50508abeb89a30661bfe5442b1de411/mujoco-4.0.1-py3-none-any.whl", hash = "sha256:3a0ce4c6cd76dd599a89e60513ac1b03404642363a42267bcfd6b028cc753417", size = 108623, upload-time = "2026-11-11T16:25:28.431Z" },
 ]
 
 [[package]]
 name = "mujoco-core"
-version = "4.0.0"
+version = "4.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
+    { name = "numpy", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d6/50/5745a505dd14526bb13f71cbfab61d0382f2560256b127e74a007517f59e/mujoco_core-4.0.0.tar.gz", hash = "sha256:7300cc232f27ceb8694aa45b26c790667eebd4a06286156b49b9726e3bf1d7cf", size = 1847546, upload-time = "2026-11-06T15:35:43.954Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/fb/55e0bbfa81dc9f0c1db559813cba914a267f2547c43918c97e4c1597b134/mujoco_core-4.0.1.tar.gz", hash = "sha256:062883cac035b1b3ae6a769cccd155ecc8f06d8c1cb004c33e01d1cb0f0ccf49", size = 1849567, upload-time = "2026-11-11T16:19:55.415Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/f8/0a60ca5db2de881f9823bbca90e5672b98d0aa65acaeb7c05b0c26aba950/mujoco_core-4.0.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:7e8386c3f26b8a6e944b4698d2498877b5693971e598dec8954db8743e4cbb4b", size = 9916935, upload-time = "2026-11-06T15:33:52.982Z" },
-    { url = "https://files.pythonhosted.org/packages/93/5f/7d25e43da4704091bd9bf4740b29036ae5fc51339ba0b0cd35072ec4449c/mujoco_core-4.0.0-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:4f132a6ae0de32ebb56058f7d31f7a489226210882957014ba54d9289cf1a674", size = 8957659, upload-time = "2026-11-06T15:33:56.309Z" },
-    { url = "https://files.pythonhosted.org/packages/8d/9c/87f0a0fac3f08f98e70ce04aefcf4f63bfe13475bcfa2c47aef5d56fd67b/mujoco_core-4.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1cea4f32972ade944fef7a9b586272a83352bf0c6404455d7ea56d7f9edaa136", size = 9681493, upload-time = "2026-11-06T15:33:59.875Z" },
-    { url = "https://files.pythonhosted.org/packages/53/51/2152104ee3b64c8c27bfe00302edf0920c7f34cb9a0b9c8452bbe254c77b/mujoco_core-4.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:561c94e59b8cc36dd56ec10c16e38ef715813ab6891ac1e4164ba880fb878657", size = 8219480, upload-time = "2026-11-06T15:34:03.561Z" },
-    { url = "https://files.pythonhosted.org/packages/b8/1e/dbe269bc593f072ed2ef18dcd25e1bf500fccee847a825273744e794bb5f/mujoco_core-4.0.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:293dbdb773685abd1c9dfe42383295547686db87b0b18ed831e0e61a9ca2fde7", size = 9916861, upload-time = "2026-11-06T15:34:06.528Z" },
-    { url = "https://files.pythonhosted.org/packages/bb/78/a7595e8fadc91591446684a8312e1d4ee2e1a99bd27e51c995a5bd441bf6/mujoco_core-4.0.0-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5bd12369c76e96ad39ce67d402a264b46dfedcfec0c9d4107e4666f2c0ffc445", size = 8957659, upload-time = "2026-11-06T15:34:10.574Z" },
-    { url = "https://files.pythonhosted.org/packages/13/8d/70b6cc96cf744364adf4532bfe2a2f14a911af1d7728c53bd1375cd53827/mujoco_core-4.0.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d26949cc65f0b88b0a4fe7ac4c83b2e2f1f90453ea24bfa3da17b1d0f7fc0cee", size = 9681770, upload-time = "2026-11-06T15:34:14.688Z" },
-    { url = "https://files.pythonhosted.org/packages/52/3a/00455201bf398e015b2a7ca9b5b6ce502ebf98f5a23579810fc979c33e97/mujoco_core-4.0.0-cp313-cp313-win_amd64.whl", hash = "sha256:e854fa58792dfc0b90093e0100ef8a0696232bfd19084f306501a31a5ca21e41", size = 8219897, upload-time = "2026-11-06T15:34:20.054Z" },
-    { url = "https://files.pythonhosted.org/packages/07/98/b2b328c2d118b8a6674fd2d9b8b415129c3bd97a80a55ef80c81b42e2c4e/mujoco_core-4.0.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:331d755e29ad042e7fb81ea693b300d87a79d8c73a9277109a8b8712bdb193f5", size = 9928791, upload-time = "2026-11-06T15:34:23.381Z" },
-    { url = "https://files.pythonhosted.org/packages/82/2d/7c623b9d593bf9ada77406bad9537906d0e04447d03ba572376b862d63cb/mujoco_core-4.0.0-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:1bf26e31a6712ed8f12332598a6f4632c0759d266615573d9d6a864a9f95fb00", size = 8972185, upload-time = "2026-11-06T15:34:27.256Z" },
-    { url = "https://files.pythonhosted.org/packages/e7/48/2553a481be45f34802da24aa1f25c2f815cd28266976783585bfe4a7af63/mujoco_core-4.0.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:857a287fd63c65449880dc8e1539d039461d453fa0c9716545511fa38e7749f6", size = 9687915, upload-time = "2026-11-06T15:34:32.039Z" },
-    { url = "https://files.pythonhosted.org/packages/99/d2/314b732af2bfa58496c0dc042e122fd92a557e383d0d5c59166b8bfe7624/mujoco_core-4.0.0-cp314-cp314-win_amd64.whl", hash = "sha256:f0b9496756cdf457c307f5be9c593d03005589241de2c07500abee46cff6b974", size = 8679886, upload-time = "2026-11-06T15:34:35.654Z" },
-    { url = "https://files.pythonhosted.org/packages/aa/18/dedaaafa075e72f3f850094ac3a33114a00002073497da80a0575e13752b/mujoco_core-4.0.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:fb41c525315eb3bb144be7988e1a85c02328f06df5865626b17ae65540f2335d", size = 10227439, upload-time = "2026-11-06T15:34:42.785Z" },
-    { url = "https://files.pythonhosted.org/packages/7c/3f/5cfd0d6e04a26364f45293507f1fea42bc9a2cad1a071996f231ec13b550/mujoco_core-4.0.0-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:76c225d2761b4ea0771104f3b5fb493c79c60b102ce9d84947bb7ef2e81d13e9", size = 9258485, upload-time = "2026-11-06T15:34:49.469Z" },
-    { url = "https://files.pythonhosted.org/packages/ed/35/9b13adf233981e0dc78e1b11e50132b66928e7e1a526691e9551ff83dcd9/mujoco_core-4.0.0-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d32c73f614877f74542d8fcd662077b4479217d28acfdbea056f33b56c446e45", size = 9662573, upload-time = "2026-11-06T15:34:53.037Z" },
-    { url = "https://files.pythonhosted.org/packages/38/82/89dd029c7d381b894ac812a33d93a78b00725cde552eb13bcc87c8bcf2f4/mujoco_core-4.0.0-cp314-cp314t-win_amd64.whl", hash = "sha256:0da84689fff4436d7f5e846c6bca154a8192e45202963287e0ea938998c5657f", size = 9001428, upload-time = "2026-11-06T15:35:03.06Z" },
-    { url = "https://files.pythonhosted.org/packages/40/3f/89cfe87c1f8c8f245bd27a98b2c2d964b158a47a5a6bd24a10bf601a3193/mujoco_core-4.0.0-cp315-cp315-macosx_11_0_arm64.whl", hash = "sha256:16f6d8cdbb9c0bf0f107a04347944751986394839abce35dcf0e7ac6d9910533", size = 9928806, upload-time = "2026-11-06T15:35:10.273Z" },
-    { url = "https://files.pythonhosted.org/packages/06/99/ab4ded6109ddde7ac717904ee28af73413dea340fb8877cbbfba8694e30e/mujoco_core-4.0.0-cp315-cp315-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:28ea55fbaf229bb8d5f656d974ad05de8cdffcfce6cb1f0e3d10f5b0dcfb2f36", size = 8972206, upload-time = "2026-11-06T15:35:14.752Z" },
-    { url = "https://files.pythonhosted.org/packages/f3/eb/a5f6f287eb96bec0a18bb28b16acd5ba5e3c7ac74edc447eece4a716e342/mujoco_core-4.0.0-cp315-cp315-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:995b39f99d6d263a82077dfc7cf0fc2631d4061dba4b635f4c73511281160acb", size = 9687907, upload-time = "2026-11-06T15:35:18.859Z" },
-    { url = "https://files.pythonhosted.org/packages/2b/6f/0deefce30c415ff2206a74b25f5162fb05230dafdb8af4bdd63f4169ebe5/mujoco_core-4.0.0-cp315-cp315-win_amd64.whl", hash = "sha256:215fa7e8efc7885adf8e8bb768f24e321a3a5a9ba9bd498608e8183708aecf56", size = 8679895, upload-time = "2026-11-06T15:35:21.947Z" },
-    { url = "https://files.pythonhosted.org/packages/ae/c5/2bf34a80afbee4e4b313c7596eff3225c6734cbcf2684b53a3418fea233f/mujoco_core-4.0.0-cp315-cp315t-macosx_11_0_arm64.whl", hash = "sha256:004c380c058204aeb73e5f6a2545ae7567075c646a108ff64cb04968c4687625", size = 10227776, upload-time = "2026-11-06T15:35:24.65Z" },
-    { url = "https://files.pythonhosted.org/packages/69/d5/c85f132d3953b86ae0794520136923ecdbf44240c035a796b2c50b7c2de9/mujoco_core-4.0.0-cp315-cp315t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a693bd571dc1c09f4a5b3221832432d703ad59692a3814216ddd056822ac1160", size = 9257331, upload-time = "2026-11-06T15:35:29.014Z" },
-    { url = "https://files.pythonhosted.org/packages/9e/d3/691e68a0702e237b577e78035bfe47acc2fb48924445652323ed2cd5ffd3/mujoco_core-4.0.0-cp315-cp315t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:30bb44cb6721deff8a0f057a83348752d291ebe646379a3ca5fe83e5baf080e2", size = 9661888, upload-time = "2026-11-06T15:35:32.983Z" },
-    { url = "https://files.pythonhosted.org/packages/04/d0/a4d2b16ac3addd38072a372e68f3d203f35ac0d27872dff9f020dbed6a14/mujoco_core-4.0.0-cp315-cp315t-win_amd64.whl", hash = "sha256:129bc43fe04f0320c4cf959b35393d6fcc816946984e6dbecdfa5d87d8ea94dd", size = 9000921, upload-time = "2026-11-06T15:35:36.62Z" },
+    { url = "https://files.pythonhosted.org/packages/64/93/243d260483723230528f38ffe4a1fb71abf01cf42455013e169c5b1c9a04/mujoco_core-4.0.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:c9b68ab5bea2557ed6b27b6160beebbb9804dba49b624c2fbb5bc2f5a38262a1", size = 9920947, upload-time = "2026-11-11T16:18:56.089Z" },
+    { url = "https://files.pythonhosted.org/packages/2d/e5/d2ac34f1f4e06fcdd05c1e85741cb2adf5a23642fafe43545113b2d5832d/mujoco_core-4.0.1-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a401eaea5295a29d50c6fdfdb8df8d73c525ab2153751f91c36bd6ccdff95822", size = 8961229, upload-time = "2026-11-11T16:18:58.461Z" },
+    { url = "https://files.pythonhosted.org/packages/f5/b0/7848d860e0a8262cfc6c504affcf9a481f17d198cd00c9ca0bcad32de159/mujoco_core-4.0.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:efbfb6e8f2bd63c5f19473f8093f01696937ef453d647b3c7a92620f5873b845", size = 9684944, upload-time = "2026-11-11T16:19:01.02Z" },
+    { url = "https://files.pythonhosted.org/packages/d6/9e/e7238fdc9ca2f0dd53de15702b3ff16f603ee1148cb4666c5e7a8cdecc01/mujoco_core-4.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:296f4d02b58df353a3fd6fc1b4fcea180c1622660a36b54d547db1ac8d67bc55", size = 8222366, upload-time = "2026-11-11T16:19:03.192Z" },
+    { url = "https://files.pythonhosted.org/packages/69/c7/9239d33b1b5aaef808208f0753ba9fb16e2398019d205ed96266427dbd74/mujoco_core-4.0.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:918f0127ceb56faacb1374ae6bf49f2e426d4cc11a8b98939ccfbbcb9ebab7e8", size = 9920909, upload-time = "2026-11-11T16:19:05.43Z" },
+    { url = "https://files.pythonhosted.org/packages/fc/54/b46bd3c15a760109558ffb11a871da8416fff22ef8b2862b08f27580efad/mujoco_core-4.0.1-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:554d7145476bf4354dbe170794f984088f187b09ea1588bd2c9ec6b85a623e3a", size = 8961329, upload-time = "2026-11-11T16:19:07.875Z" },
+    { url = "https://files.pythonhosted.org/packages/79/b9/0e7a12212b6ead89c64df69f2751d505cc85559735583e203dd9db9e2ae9/mujoco_core-4.0.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:578c67b41be8a715b488f1f1b6bab13534f11c020d407b9605826f72eed086b3", size = 9685237, upload-time = "2026-11-11T16:19:10.359Z" },
+    { url = "https://files.pythonhosted.org/packages/4c/e4/47ed37e018a7a802d300289a792b522d3a9f968b52731c1500b40db7f07f/mujoco_core-4.0.1-cp313-cp313-win_amd64.whl", hash = "sha256:767f1c1f1f8e0126b7175c06303f630546b512005bb19744690a0bf941dc4855", size = 8222728, upload-time = "2026-11-11T16:19:12.544Z" },
+    { url = "https://files.pythonhosted.org/packages/d7/04/6f74f6ebcf90b24c0437f91eade610da586cae5a81fe824fa3e991d7493a/mujoco_core-4.0.1-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:69a49a94a889c7d4ba9bfb3103b0bff90f470923e68e81b4a7f159dab5bec8a7", size = 9932734, upload-time = "2026-11-11T16:19:14.637Z" },
+    { url = "https://files.pythonhosted.org/packages/41/b1/b7026e7892c5cdc7648bdba72fceb59fc3203553d138f3e2690b84bc20ff/mujoco_core-4.0.1-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:8302949d06b403a30a7ca3e5922c760847cd2a2a9c3d0b727955f833a140e6dc", size = 8975847, upload-time = "2026-11-11T16:19:17.083Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/a1/52021bd39a8a471dcb197695df98ea4bc74f357e4c733cfaa0eebb76e17f/mujoco_core-4.0.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a7f604671bc606ecd4753c32adba37587dc4022735e16c75c9f4fffd3e202bf2", size = 9691364, upload-time = "2026-11-11T16:19:19.605Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/d2/e636e117610c4f4aab467ec827d672c8c8042e67adec72640f23867bd5e2/mujoco_core-4.0.1-cp314-cp314-win_amd64.whl", hash = "sha256:0a05aba091445450b8316ec7b05ddb49cac68f29ee540a16bb98b8ae86ad02f3", size = 8683112, upload-time = "2026-11-11T16:19:22.749Z" },
+    { url = "https://files.pythonhosted.org/packages/82/b0/9512a1f114d064063590821f26ba3dbd719e2b3ea2dd4b1c7d4c9145a80e/mujoco_core-4.0.1-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:dd51f3ceebd9c7360fa5ef7c0f58c6ab48acd536d11d1bd445d91bb855c2eb81", size = 10231423, upload-time = "2026-11-11T16:19:25.109Z" },
+    { url = "https://files.pythonhosted.org/packages/03/2d/80d4619d3e79dd1b52baba1b1680c6344812e13664416b79e23167f3e02e/mujoco_core-4.0.1-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:c003d0fcebcd6ebcad79b79eba955536dc669786d986339ca724ac4fa862f616", size = 9262121, upload-time = "2026-11-11T16:19:27.833Z" },
+    { url = "https://files.pythonhosted.org/packages/8f/08/d3e6c955123f67ef2604c67fa169c03fd34a11c74c681d948a6fc8933476/mujoco_core-4.0.1-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d41110c1fcd214d628b5b188dd4a035675bd6acdf421858b2985ee5cf6901f85", size = 9666032, upload-time = "2026-11-11T16:19:30.23Z" },
+    { url = "https://files.pythonhosted.org/packages/00/6d/22606f772b6d20105929de241103a8a57bb462146c98f66c899560a9303e/mujoco_core-4.0.1-cp314-cp314t-win_amd64.whl", hash = "sha256:0367f250e239ce97b289e32a7846ced89abc87eaee5f4395aa456c20aa88aa0e", size = 9004454, upload-time = "2026-11-11T16:19:32.617Z" },
+    { url = "https://files.pythonhosted.org/packages/85/69/3cc285da846f4438afbd03435e183b623fa573f026538540c6e4dd95d2b9/mujoco_core-4.0.1-cp315-cp315-macosx_11_0_arm64.whl", hash = "sha256:178ad4b8c2ec76f09ee48610f855de0ea9183a56dfc396455d019a34c08b7043", size = 9932756, upload-time = "2026-11-11T16:19:35.77Z" },
+    { url = "https://files.pythonhosted.org/packages/72/ce/063656ea75b51edf0310f2e563007576d4297d74d520ec2d939abd0602e6/mujoco_core-4.0.1-cp315-cp315-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:268f2b4d80d21e1f25055f87767733650dd2554332784c8670fa41cae784f471", size = 8975863, upload-time = "2026-11-11T16:19:38.367Z" },
+    { url = "https://files.pythonhosted.org/packages/54/8f/1fdba717f109d040dcd8eebf999040ff327b4b8816772850034d7f9a38ae/mujoco_core-4.0.1-cp315-cp315-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:e4a1469775302a3b37fb4d8eead3568ed7719dcd1a4a09e6bbb4be7d5b8cf7fd", size = 9691361, upload-time = "2026-11-11T16:19:40.751Z" },
+    { url = "https://files.pythonhosted.org/packages/85/9d/4ff2c22a3f70087d1179a6b757d070dab68fcd6ebb4aaf2e76ba605090ef/mujoco_core-4.0.1-cp315-cp315-win_amd64.whl", hash = "sha256:42561e6d11923dfb18680d85c2c29ac04b2877a64660ba6c101bb6a10a882e67", size = 8683117, upload-time = "2026-11-11T16:19:43.253Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/5b/062c0e69a927ee6119b49d8bf738f203e132449a0754a27fa9e1c4f95cc0/mujoco_core-4.0.1-cp315-cp315t-macosx_11_0_arm64.whl", hash = "sha256:d39d7cb54f03efd7f6be31a9f2252b7db8602a5a14a523546859bd602c6485cb", size = 10231780, upload-time = "2026-11-11T16:19:45.64Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/fe/a8d42e170ce103a4901827378cc98b567406b34d24887b9eeb06a6109fe3/mujoco_core-4.0.1-cp315-cp315t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ac0390e9f144034bd8bcf03b2801f81fa608d8ba3f112c7bf58509d37de83da9", size = 9260920, upload-time = "2026-11-11T16:19:48.693Z" },
+    { url = "https://files.pythonhosted.org/packages/44/76/03f1c31a2644e551d31eac39bd5bb9e69a2ef65817efdd8904925ae3aa01/mujoco_core-4.0.1-cp315-cp315t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:96cfa3a59ce674c5923f3af7fbfecd09987132ac15cd6caf6511136c85473b83", size = 9665350, upload-time = "2026-11-11T16:19:50.875Z" },
+    { url = "https://files.pythonhosted.org/packages/2e/a7/a7e2960bc304c63f7cb538dbc2542496d77cb460d01951ea46682f06ee55/mujoco_core-4.0.1-cp315-cp315t-win_amd64.whl", hash = "sha256:79917041c8878068a2fa89232ae6e084591912c356c907c876b56967982c8f5e", size = 9004011, upload-time = "2026-11-11T16:19:53.424Z" },
 ]
 
 [[package]]
@@ -2671,7 +2673,7 @@ version = "3.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "absl-py" },
-    { name = "etils", extra = ["epath"], marker = "extra == 'extra-5-ariel-gpu'" },
+    { name = "etils", extra = ["epath"], marker = "extra == 'group-5-ariel-gpu'" },
     { name = "jax" },
     { name = "jaxlib" },
     { name = "mujoco", version = "3.8.0", source = { registry = "https://pypi.org/simple" } },
@@ -2690,39 +2692,49 @@ warp = [
 
 [[package]]
 name = "mujoco-studio"
-version = "4.0.0"
+version = "4.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "mujoco-core", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
-    { name = "numpy", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
-    { name = "websockets", marker = "extra == 'extra-5-ariel-cpu' or extra != 'extra-5-ariel-gpu'" },
+    { name = "mujoco-core", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
+    { name = "mujoco-studio-wasm", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
+    { name = "numpy", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
+    { name = "websockets", marker = "extra == 'group-5-ariel-cpu' or extra != 'group-5-ariel-gpu'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/a2/f4ec990f1a217f8463238c7b09ead5a7a2e0d87175db8c2a2dbf1e821444/mujoco_studio-4.0.0.tar.gz", hash = "sha256:19714399ab9870e7775018fe343c0b729103a8b9e6c814ad535ec108a74989dd", size = 2961716, upload-time = "2026-11-06T15:38:46.625Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/eb/57a62669a40678a8e01d7bd05ce3122af948a19c81fff6c386f5e9dc1c3b/mujoco_studio-4.0.1.tar.gz", hash = "sha256:d5bc8ba43d747737c3922411a7b6466f984983018abdd5f46bb8ba20f6c4cece", size = 421236, upload-time = "2026-11-11T16:21:53.784Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/28/98/e5837138e1e9ebecaff34ef900f2a12ebbdf1667904b93e8f366eb1c703c/mujoco_studio-4.0.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:c75081e35fe086e84e192e765bcfc12eed440ce10526745d22b1b2c4ff3ba77e", size = 11735551, upload-time = "2026-11-06T15:37:24.565Z" },
-    { url = "https://files.pythonhosted.org/packages/28/70/3d6e3522916c072bd51aea42838f37114ec4070fffc2e9af0e599ca5774e/mujoco_studio-4.0.0-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:3858f688723c588343938833caad8c03e504dd75944774d9b30dd07d1b9f5789", size = 12220400, upload-time = "2026-11-06T15:37:27.055Z" },
-    { url = "https://files.pythonhosted.org/packages/0a/c3/315abe24109a7ff12093b31d12a941574b38d5d5319362ac01af5ee6aaf6/mujoco_studio-4.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:4f204a727d4ed2ca061584ef7e91a5462711b6ad210eb351e16914c4d5f06e6a", size = 12809252, upload-time = "2026-11-06T15:37:31.752Z" },
-    { url = "https://files.pythonhosted.org/packages/ee/89/e7d3f13b0887fc9f58dcdf74e7ccea4673d99ba72fc6d86dbaee68915df3/mujoco_studio-4.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:32f8337a1d10e43c833df4b05742e49ff220920481827d88fef94b72405bc1d2", size = 8573421, upload-time = "2026-11-06T15:37:34.657Z" },
-    { url = "https://files.pythonhosted.org/packages/f4/b3/612374a3e729a461729d7650c15b1d6868cad14689f8887d63216c1d9291/mujoco_studio-4.0.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:68364a479de66eeb86973814d37dbef23b93281d6b79d27f2afe21b7b53799f7", size = 11735807, upload-time = "2026-11-06T15:37:38.072Z" },
-    { url = "https://files.pythonhosted.org/packages/fc/63/866b19a46fe31e3e60f997c224bb87ac90406e0eb01bf9c25dc4f42d9677/mujoco_studio-4.0.0-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:1d9296994544abac26f85914556f021bb333df128e61312f75cf71757a3f5936", size = 12220469, upload-time = "2026-11-06T15:37:40.803Z" },
-    { url = "https://files.pythonhosted.org/packages/53/cd/919e007d928fbe42d583d56c1b0e284649272ddbad09a3f4550ef974f86f/mujoco_studio-4.0.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:5097b1001a864b4b35c76d311be6b5db551f9be2a614dfa49bd57388bc94875f", size = 12809484, upload-time = "2026-11-06T15:37:44.54Z" },
-    { url = "https://files.pythonhosted.org/packages/29/98/d95d59a9b46050a5cda8bbf70dcdfaca542161759ae8d6426ddac5e0a5a1/mujoco_studio-4.0.0-cp313-cp313-win_amd64.whl", hash = "sha256:4f39fe2b6391817090b696f928175e40eb5b6933a521ad841d581e2eb05e8756", size = 8573698, upload-time = "2026-11-06T15:37:47.758Z" },
-    { url = "https://files.pythonhosted.org/packages/db/ab/db02f5746694da8a667267a926b301a0c0d650cfcbb7f81a89156ea47505/mujoco_studio-4.0.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:f24f3c46ac9efbcbd21ca750ca77b7a8a4a835cfeff86df32823f231baa13a73", size = 11738757, upload-time = "2026-11-06T15:37:51.747Z" },
-    { url = "https://files.pythonhosted.org/packages/31/ba/b49ea45be7a2a7ff8af87096278bc59b918325647bbbcd8aaba415f92f31/mujoco_studio-4.0.0-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:d7245617acf711de9953bfa924506cb0bd5b37af529094ad39cb75421a38210d", size = 12225493, upload-time = "2026-11-06T15:37:56.053Z" },
-    { url = "https://files.pythonhosted.org/packages/01/11/6c472cc048cce0d7f2922ff8f563c48ab9a471d42233fbf6161b561c6f38/mujoco_studio-4.0.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b227886f55aa0d2daaed7c5ef1e8d5572c88695dddc215ede011638728f60b3a", size = 12808162, upload-time = "2026-11-06T15:37:59.963Z" },
-    { url = "https://files.pythonhosted.org/packages/a2/9e/9f5b7bf6c88526bb5e799cb98647e088fd331bb3c94800e42920ed584e35/mujoco_studio-4.0.0-cp314-cp314-win_amd64.whl", hash = "sha256:ef06212630c6e9575f92676a5ef4fdcc4e3421e437f637c61b1a5e1578c4427e", size = 8874179, upload-time = "2026-11-06T15:38:03.287Z" },
-    { url = "https://files.pythonhosted.org/packages/39/af/d7f1bbbbc477436ea33faa2573717b62f065bdd50ba518210b5ba666d10a/mujoco_studio-4.0.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:e667037249219edd8fec0d17425f029cf870c0fcb924bf0166237956bd4801a7", size = 11767127, upload-time = "2026-11-06T15:38:08.012Z" },
-    { url = "https://files.pythonhosted.org/packages/2a/6a/6b9d91b2bd9c9a69bbcea85734f3b6e9371d1ae1878231acc41f8e6cfe7c/mujoco_studio-4.0.0-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:6ad40303e4e74faf5d5e1abb9e31fd07d64c9db6eff45c97f3c03c9d0f563482", size = 12281827, upload-time = "2026-11-06T15:38:10.692Z" },
-    { url = "https://files.pythonhosted.org/packages/3e/d2/13f00e9641db75226f0451f936bf28c0564f9c464a681c4609c1f126f35b/mujoco_studio-4.0.0-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:bcf808eda7ec5ed7b46bf19e531a7ef5cd1647eaaeade5401ca8f1cc60684d1f", size = 12822277, upload-time = "2026-11-06T15:38:13.723Z" },
-    { url = "https://files.pythonhosted.org/packages/d4/e8/acd0a52b248166753e939fd7ae7389a5cc85f7ebd61bdebd9356104ec22a/mujoco_studio-4.0.0-cp314-cp314t-win_amd64.whl", hash = "sha256:32a364b9b258c8d2e5bf47ad87102766981036583f9889667861d6c09fc1eb5c", size = 8918588, upload-time = "2026-11-06T15:38:16.92Z" },
-    { url = "https://files.pythonhosted.org/packages/71/58/310ec16dd3a48e727950a2cc45ea949c91d192b9e6434b7178081e0a2660/mujoco_studio-4.0.0-cp315-cp315-macosx_11_0_arm64.whl", hash = "sha256:39b8d85f786438012c51c1ffcf4981296665ef5530ffe071647324df56f89ab2", size = 11738750, upload-time = "2026-11-06T15:38:20.172Z" },
-    { url = "https://files.pythonhosted.org/packages/c8/9a/807c683e4f5292ce13f0819738dae8d91ec190c0168dff6f36bc9c1c7e2b/mujoco_studio-4.0.0-cp315-cp315-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:c10277ccb7cbe57bf7080997d7273b023597689bd703168ce624d9d06b86d08e", size = 12225576, upload-time = "2026-11-06T15:38:23.52Z" },
-    { url = "https://files.pythonhosted.org/packages/d1/2e/305e84dfb3ec560c73e65cfbf27766997a7ff0d6554c4cdb6c9c38cb2633/mujoco_studio-4.0.0-cp315-cp315-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ddb3dc360f252b8c78f7ad178f02db79707aa9e9f1849534a5a913b96ae71e64", size = 12808094, upload-time = "2026-11-06T15:38:26.877Z" },
-    { url = "https://files.pythonhosted.org/packages/7d/6b/1703add0cd2254e525eafe29228481910f9ad47d3e655500ced50f6a22ae/mujoco_studio-4.0.0-cp315-cp315-win_amd64.whl", hash = "sha256:9669bfc4999886507515057082a6ac3f6c4da9bec4702bc85ba8f2748faffb4f", size = 8874172, upload-time = "2026-11-06T15:38:30.148Z" },
-    { url = "https://files.pythonhosted.org/packages/c4/e1/357d76025aaf717368042b64a02374951dd8395022749aba9db650d9ea6f/mujoco_studio-4.0.0-cp315-cp315t-macosx_11_0_arm64.whl", hash = "sha256:091618faf09261b050b220a55d90226fe17eae4e459224dcd4c85c14f5b78f88", size = 11767233, upload-time = "2026-11-06T15:38:33.433Z" },
-    { url = "https://files.pythonhosted.org/packages/52/da/6999e2cbe63e034406452b8e41bf9279d52191f43622c92ffa082351bbd4/mujoco_studio-4.0.0-cp315-cp315t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:c68ab56ffaa3f245a33044ec2671d352bfe10ded5c67987654b6eb243c8e9d2f", size = 12281684, upload-time = "2026-11-06T15:38:36.598Z" },
-    { url = "https://files.pythonhosted.org/packages/fd/cb/bf38a78ee5a6de85872f365944c66bc399e38808bc95c2c9b82a4cf39e2a/mujoco_studio-4.0.0-cp315-cp315t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:424b2cf25d800d25e5e08ff7526a9d2f54d86fb5ba16a805c5f52f3a6a672d49", size = 12822066, upload-time = "2026-11-06T15:38:40.919Z" },
-    { url = "https://files.pythonhosted.org/packages/0f/10/26185b958e22c4060413b414c2fb2221965718d78816633a215f74d322f8/mujoco_studio-4.0.0-cp315-cp315t-win_amd64.whl", hash = "sha256:af0fc259861030c65a51828039c1e0a17ddd01ed39ee15567f862c950f959d33", size = 8918478, upload-time = "2026-11-06T15:38:43.425Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/0e/f2db09bab7dfc888ca1158e43a4cb0daa8ea6b7c0e40043b6e442653ffba/mujoco_studio-4.0.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:c7939d48e5933e2bc9c92726939aa9b1e960481ba279b3dbdf6e70b29e04e67d", size = 7841031, upload-time = "2026-11-11T16:21:03.15Z" },
+    { url = "https://files.pythonhosted.org/packages/a6/41/e73d8b8ca1a7727294bdc4ab74765335e97510a383f94d270c1dc8778dbb/mujoco_studio-4.0.1-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:4a58749829eef277375a0dedde533a4c88e0c396dd2b4f57f99146f67cf2c652", size = 8288869, upload-time = "2026-11-11T16:21:05.61Z" },
+    { url = "https://files.pythonhosted.org/packages/30/c5/39781fb518059323aedacdd32cf7089ad39aa58ca211d2a2c44fb8cbc11f/mujoco_studio-4.0.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c9f8e18cccbc69de0c888f487e2d3348c31b87f578ef557659b7bf4a3a739f38", size = 8749028, upload-time = "2026-11-11T16:21:07.771Z" },
+    { url = "https://files.pythonhosted.org/packages/13/7f/a42796ce63c3de4a4e2b4b63c2e6194f58f5947b5c6822bdcc7e3227b46c/mujoco_studio-4.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:95f0265ea176b75166eece21e350f6a6b226486e4f7657761d8b8eb2fbecc8fc", size = 8014662, upload-time = "2026-11-11T16:21:10.001Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/33/715463cebaf6a092b2ca1756555c0899c0a464beea35bcf8f8aa93bfb3ad/mujoco_studio-4.0.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:d4af70cd2a132d4c5cafaec67a741f694fd76615deef580e7770aa257926a19f", size = 7840937, upload-time = "2026-11-11T16:21:12.186Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/6b/122fae837ba6866583ca320c74532319b0aaee32a1c4b9e460f6e5f0d571/mujoco_studio-4.0.1-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:742323ab12b39b9320b3abbd57c2889efd375a55b2e9ec74b33c048f6aa5785d", size = 8288723, upload-time = "2026-11-11T16:21:14.729Z" },
+    { url = "https://files.pythonhosted.org/packages/34/66/7437daa3ca2cbd9a4a89a89b4bc7bcfdcead566b03c661337b1fd157e379/mujoco_studio-4.0.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:cbfe9e39fb89cd43b6d1236b9d8c676e833c763c694cab433ba381eb34c95c1d", size = 8749236, upload-time = "2026-11-11T16:21:17.078Z" },
+    { url = "https://files.pythonhosted.org/packages/18/60/0af24570bd85a48f812ba40c432c79aaa3eb70dd45f3677337d34403f267/mujoco_studio-4.0.1-cp313-cp313-win_amd64.whl", hash = "sha256:09352051bcba7510b51a26cb02c47c7ff8ab1c71c332919f92c77e71d5ee9b07", size = 8014774, upload-time = "2026-11-11T16:21:19.878Z" },
+    { url = "https://files.pythonhosted.org/packages/10/10/df8afbc0c6be0ac9ee67d3e4aecbd5d0a244d4d1815a75ed9cd166f6e5f3/mujoco_studio-4.0.1-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:97769087a45147b9fb268be9d9a21704d459597bbd51fc13a9a18ba3f85e679b", size = 7843302, upload-time = "2026-11-11T16:21:21.657Z" },
+    { url = "https://files.pythonhosted.org/packages/be/2b/c4590b63b47e1c2b13edc1c35a7f2e741dbc2428ed3e1a7f7e4384a59aea/mujoco_studio-4.0.1-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b357e13ce28cf4f4dd295f114d4b0e82d1feee7111a8ffe1350622d965299600", size = 8293746, upload-time = "2026-11-11T16:21:23.875Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/9f/a9530a7d499929e526086887d115844583aeb60200ff5b044afd6df59815/mujoco_studio-4.0.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0b61366845178e3586c397813910aca870d2a0bd873aaf886abbe5da7ecd4ad7", size = 8746819, upload-time = "2026-11-11T16:21:26.065Z" },
+    { url = "https://files.pythonhosted.org/packages/e9/19/a85c8b88c137009d1d346c5586a9c927b8b425eae6a41185e45e35e0cb4b/mujoco_studio-4.0.1-cp314-cp314-win_amd64.whl", hash = "sha256:6ac5101abd06d9fa93b29586deb13770739a877f43130e501ae37344ea747618", size = 8298609, upload-time = "2026-11-11T16:21:28.221Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/0b/d82feb76770c14309fb7fd85d188ae9e0796abb847d4e41bd363d851e238/mujoco_studio-4.0.1-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:9ee8b9538f27cedab6098d20a82d357e68214b4abfb9451ca0854b83122c840d", size = 7867936, upload-time = "2026-11-11T16:21:30.062Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/8b/9edef95507d9fa7f2d05e3d67a9449c97ddcc89723d536242a07fbfc400c/mujoco_studio-4.0.1-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:4e7ab01683047b7fb99f2c5c38207b575ce12e2c4f4d9dfa2f81db4e7fbddb7a", size = 8348985, upload-time = "2026-11-11T16:21:32.033Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/ae/9424b4553c753173fae124b41ce17ced17c0619c07ae26c0cd08bd8bb875/mujoco_studio-4.0.1-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1e15902b5744aa1d3cab583a8080cb1de3241474c25b829aed114c5c93620881", size = 8757721, upload-time = "2026-11-11T16:21:33.907Z" },
+    { url = "https://files.pythonhosted.org/packages/0c/57/daa8a28c156e8519c012fccd1b06c3f33eb404af59808d1d8d4d6ec2e6a1/mujoco_studio-4.0.1-cp314-cp314t-win_amd64.whl", hash = "sha256:d95c65dba5396bec10e1227c9941b1db148448b5afc783286ed95636d7850183", size = 8336362, upload-time = "2026-11-11T16:21:36.641Z" },
+    { url = "https://files.pythonhosted.org/packages/89/f5/5b451066aacb10a37619bcc114503e9e9228e3fe18bbaf6e19536694fad9/mujoco_studio-4.0.1-cp315-cp315-macosx_11_0_arm64.whl", hash = "sha256:efaec48d5c19a7ca740e6888307207d2310493e0e04415f6a487202f0374c838", size = 7843308, upload-time = "2026-11-11T16:21:38.349Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/e0/61212777d7022fbc163882b09cb20b13e64db48e6817494b80b6b1e1ce67/mujoco_studio-4.0.1-cp315-cp315-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:bf3fa51ac8f822e7880ddd19ce71d6e3e4ff736c7b867313e96de2d6857075e2", size = 8293849, upload-time = "2026-11-11T16:21:40.06Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/c5/06b62325df0fa02c3bc6224ee518efa4696689974273f77fa0960df97310/mujoco_studio-4.0.1-cp315-cp315-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f3e15f713a6f3f804ac70fb32783d34e92009dd1746b003205dbb9c906da58ad", size = 8746726, upload-time = "2026-11-11T16:21:42.088Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/84/b9ba990019e47aff9df573fd1bd3b2b25377cea0f6b70d8f623324d6bbc2/mujoco_studio-4.0.1-cp315-cp315-win_amd64.whl", hash = "sha256:fc019628b1e5197ed4a6116f8b6edca46744cdb19ee73e05dfcb33946ddab0b0", size = 8298599, upload-time = "2026-11-11T16:21:44.228Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/5a/6f161c36bd73a809d4c9b428488e1ea3ef0b2fe9346130957690696475a4/mujoco_studio-4.0.1-cp315-cp315t-macosx_11_0_arm64.whl", hash = "sha256:029f8fab63cb57639b9eae5cc2af8d767476a96aef3c0c572f9c170714ef2ebd", size = 7867785, upload-time = "2026-11-11T16:21:46.309Z" },
+    { url = "https://files.pythonhosted.org/packages/6e/da/95a923d19f46611cf8f4c14087f52c05b1a298f17222fa70619900c4c357/mujoco_studio-4.0.1-cp315-cp315t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:064e5c6f74d3190d6b26a98e5b2dc3ee7e46eaafa5f80a5c75ecf1b7b8cbf772", size = 8348728, upload-time = "2026-11-11T16:21:48.041Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/5e/30b42bc9edd34f172583fef914352f0695f4214dc5e22a3931fd4214f5b7/mujoco_studio-4.0.1-cp315-cp315t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:e9bb01087ce46c0dac0c8aeca3afaa0685ee45ab2c44c99cfb274aebb092b790", size = 8757748, upload-time = "2026-11-11T16:21:49.821Z" },
+    { url = "https://files.pythonhosted.org/packages/e2/2c/2d2bbfe31ec07a37f6c9c7328b2be06f789d43366367e1b4a37d49fab610/mujoco_studio-4.0.1-cp315-cp315t-win_amd64.whl", hash = "sha256:5f967719fb535d4f1fb193869a49bdc3b2bf731b6784cc1014b980c4f71770bf", size = 8336270, upload-time = "2026-11-11T16:21:51.951Z" },
+]
+
+[[package]]
+name = "mujoco-studio-wasm"
+version = "4.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5b/20/d58817c428a858f9df7e46b18ea0434a581544a61756908f23acfb0cda38/mujoco_studio_wasm-4.0.1.tar.gz", hash = "sha256:90eb6c05d57e5b3171cf8a2ac4f491e3f1a1dcab2c06375f49b5c98dac8d5bfa", size = 2482121, upload-time = "2026-11-11T16:20:47.965Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b9/f7/f59dc75abfbc4f232666ada6ae3946da0af8a8bcd46f058ee063786c3681/mujoco_studio_wasm-4.0.1-py3-none-any.whl", hash = "sha256:14d724721c971ec208baeb6b449797a9cd456ea0331bc8e8a8722e7823e60ccc", size = 2442076, upload-time = "2026-11-11T16:20:45.826Z" },
 ]
 
 [[package]]
@@ -3231,7 +3243,7 @@ name = "nvidia-cudnn-cu12"
 version = "9.10.2.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "nvidia-cublas-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fa/41/e79269ce215c857c935fd86bcfe91a451a584dfc27f1e068f568b9ad1ab7/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:c9132cc3f8958447b4910a1720036d9eff5928cc3179b0a51fb6d167c6cc87d8", size = 705026878, upload-time = "2025-06-06T21:52:51.348Z" },
@@ -3244,7 +3256,7 @@ name = "nvidia-cufft-cu12"
 version = "11.3.3.83"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/bc/7771846d3a0272026c416fbb7e5f4c1f146d6d80704534d0b187dd6f4800/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:848ef7224d6305cdb2a4df928759dca7b1201874787083b6e7550dd6765ce69a", size = 193109211, upload-time = "2025-03-07T01:44:56.873Z" },
@@ -3276,9 +3288,9 @@ name = "nvidia-cusolver-cu12"
 version = "11.7.3.90"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cusparse-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "nvidia-cublas-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cusparse-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c8/32/f7cd6ce8a7690544d084ea21c26e910a97e077c9b7f07bf5de623ee19981/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:db9ed69dbef9715071232caa9b69c52ac7de3a95773c2db65bdba85916e4e5c0", size = 267229841, upload-time = "2025-03-07T01:46:54.356Z" },
@@ -3291,7 +3303,7 @@ name = "nvidia-cusparse-cu12"
 version = "12.5.8.93"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bc/f7/cd777c4109681367721b00a106f491e0d0d15cfa1fd59672ce580ce42a97/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:9b6c161cb130be1a07a27ea6923df8141f3c295852f4b260c65f18f3e0a091dc", size = 288117129, upload-time = "2025-03-07T01:47:40.407Z" },
@@ -7791,13 +7803,13 @@ resolution-markers = [
     "python_full_version < '3.13' and sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "filelock", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "fsspec", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "jinja2", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "networkx", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "setuptools", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "sympy", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "typing-extensions", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "filelock", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "fsspec", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "jinja2", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "networkx", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "setuptools", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "sympy", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "typing-extensions", marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.8.0-cp312-none-macosx_11_0_arm64.whl", hash = "sha256:a47b7986bee3f61ad217d8a8ce24605809ab425baf349f97de758815edd2ef54", upload-time = "2025-10-01T23:35:50Z" },
@@ -7810,39 +7822,39 @@ name = "torch"
 version = "2.8.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version >= '3.14' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
+    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version == '3.13.*' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version == '3.13.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
-    "python_full_version < '3.13' and sys_platform == 'darwin'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
     "python_full_version < '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'linux')",
+    "python_full_version < '3.13' and sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "filelock", marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "fsspec", marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "jinja2", marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "networkx", marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cuda-runtime-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cudnn-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cufft-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cufile-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-curand-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cusolver-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cusparse-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cusparselt-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-nccl-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "setuptools", marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "sympy", marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "typing-extensions", marker = "(sys_platform == 'darwin' and extra == 'extra-5-ariel-gpu') or (extra != 'extra-5-ariel-cpu' and extra != 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "filelock", marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "fsspec", marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "jinja2", marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "networkx", marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cudnn-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cufft-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cufile-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-curand-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cusolver-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cusparse-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cusparselt-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-nccl-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "setuptools", marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "sympy", marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "typing-extensions", marker = "(sys_platform == 'darwin' and extra == 'group-5-ariel-gpu') or (extra != 'group-5-ariel-cpu' and extra != 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/49/0c/2fd4df0d83a495bb5e54dca4474c4ec5f9c62db185421563deeb5dabf609/torch-2.8.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:e2fab4153768d433f8ed9279c8133a114a034a61e77a3a104dcdf54388838705", size = 101906089, upload-time = "2025-08-06T14:53:52.631Z" },
@@ -7864,22 +7876,22 @@ name = "torch"
 version = "2.8.0+cpu"
 source = { registry = "https://download.pytorch.org/whl/cpu" }
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version >= '3.14' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'linux')",
+    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version == '3.13.*' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version == '3.13.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
     "python_full_version < '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'linux')",
 ]
 dependencies = [
-    { name = "filelock", marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "fsspec", marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "jinja2", marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "networkx", marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "setuptools", marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "sympy", marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "typing-extensions", marker = "(python_full_version >= '3.14' and extra == 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "filelock", marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "fsspec", marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "jinja2", marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "networkx", marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "setuptools", marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "sympy", marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "typing-extensions", marker = "(python_full_version >= '3.14' and extra == 'group-5-ariel-cpu') or (sys_platform != 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.8.0%2Bcpu-cp312-cp312-linux_s390x.whl", hash = "sha256:0e34e276722ab7dd0dffa9e12fe2135a9b34a0e300c456ed7ad6430229404eb5", upload-time = "2025-10-01T23:33:41Z" },
@@ -7910,28 +7922,28 @@ resolution-markers = [
     "(python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'linux')",
 ]
 dependencies = [
-    { name = "filelock", marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "fsspec", marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "jinja2", marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "networkx", marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cuda-runtime-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cudnn-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cufft-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cufile-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-curand-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cusolver-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cusparse-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-cusparselt-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-nccl-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "setuptools", marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "sympy", marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "typing-extensions", marker = "(sys_platform != 'darwin' and extra == 'extra-5-ariel-gpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "filelock", marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "fsspec", marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "jinja2", marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "networkx", marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cudnn-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cufft-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cufile-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-curand-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cusolver-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cusparse-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-cusparselt-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-nccl-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "setuptools", marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "sympy", marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "typing-extensions", marker = "(sys_platform != 'darwin' and extra == 'group-5-ariel-gpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cu128/torch-2.8.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:4354fc05bb79b208d6995a04ca1ceef6a9547b1c4334435574353d381c55087c", upload-time = "2025-10-01T23:51:02Z" },
@@ -7947,16 +7959,16 @@ name = "torchvision"
 version = "0.23.0"
 source = { registry = "https://download.pytorch.org/whl/cpu" }
 resolution-markers = [
-    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
     "python_full_version == '3.13.*' and platform_machine == 'aarch64' and sys_platform == 'linux'",
-    "python_full_version < '3.13' and sys_platform == 'darwin'",
+    "python_full_version == '3.13.*' and sys_platform == 'darwin'",
     "python_full_version < '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version < '3.13' and sys_platform == 'darwin'",
 ]
 dependencies = [
     { name = "numpy", marker = "(python_full_version < '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.14' and sys_platform == 'darwin')" },
     { name = "pillow", marker = "(python_full_version < '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.14' and sys_platform == 'darwin')" },
-    { name = "torch", version = "2.8.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
-    { name = "torch", version = "2.8.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux' and extra == 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "torch", version = "2.8.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and sys_platform == 'darwin' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
+    { name = "torch", version = "2.8.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(python_full_version < '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux' and extra == 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torchvision-0.23.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:e0e2c04a91403e8dd3af9756c6a024a1d9c0ed9c0d592a8314ded8f4fe30d440", upload-time = "2025-08-05T20:11:47Z" },
@@ -8001,9 +8013,9 @@ name = "torchvision"
 version = "0.23.0+cpu"
 source = { registry = "https://download.pytorch.org/whl/cpu" }
 resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "python_full_version >= '3.14' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "(python_full_version >= '3.14' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.14' and sys_platform != 'darwin' and sys_platform != 'linux')",
+    "python_full_version >= '3.14' and sys_platform == 'darwin'",
     "(python_full_version == '3.13.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.13.*' and sys_platform != 'darwin' and sys_platform != 'linux')",
     "(python_full_version < '3.13' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'linux')",
 ]
@@ -8104,7 +8116,7 @@ name = "triton"
 version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "setuptools", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'extra-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'extra-5-ariel-cpu') or (extra == 'extra-5-ariel-cpu' and extra == 'extra-5-ariel-gpu')" },
+    { name = "setuptools", marker = "(platform_machine != 'aarch64' and sys_platform == 'linux' and extra != 'group-5-ariel-cpu') or (sys_platform != 'darwin' and sys_platform != 'linux' and extra != 'group-5-ariel-cpu') or (extra == 'group-5-ariel-cpu' and extra == 'group-5-ariel-gpu')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d0/66/b1eb52839f563623d185f0927eb3530ee4d5ffe9d377cdaf5346b306689e/triton-3.4.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:31c1d84a5c0ec2c0f8e8a072d7fd150cab84a9c239eaddc6706c081bfae4eb04", size = 155560068, upload-time = "2025-07-30T19:58:37.081Z" },
