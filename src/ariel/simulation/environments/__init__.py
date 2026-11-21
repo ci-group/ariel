@@ -12,6 +12,15 @@ from ariel.simulation.environments._compound_world import (
 from ariel.simulation.environments._crater import (
     CraterTerrainWorld,
 )
+from ariel.simulation.environments._gap import (
+    GapWorld,
+)
+from ariel.simulation.environments._step import (
+    StepWorld,
+)
+from ariel.simulation.environments._low_ceiling import (
+    LowCeilingWorld,
+)
 from ariel.simulation.environments._rugged import (
     RuggedTerrainWorld,
 )
@@ -38,4 +47,7 @@ __all__ = [
     "RuggedTiltedWorld",
     "SimpleFlatWorld",
     "SimpleTiltedWorld",
+    "GapWorld",
+    "LowCeilingWorld",
+    "StepWorld",
 ]
