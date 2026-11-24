@@ -276,6 +276,56 @@ def main():
     fig.savefig(args.out_dir / "convergence_vs_final.png", dpi=150)
     plt.close(fig)
 
+    plot_conv_spread(cells, ns, col, handles, args.out_dir / "convergence_vs_final_seeds.png")
+
+
+def plot_conv_spread(cells, ns, col, handles, out):
+    """Every seed + architecture mean per n, and the spread of those points as a function of n.
+
+    Spread is computed over the architectures present at every n (so a cell still queued
+    at large n doesn't shrink the spread artificially), over all seeds of those cells.
+    """
+    have = lambda n, a: any(not np.isnan(r["steps_conv"]) for r in cells.get((n,) + a, []))
+    common = [a for a in ARCHS if all(have(n, a) for n in ns)]
+    fig, axes = plt.subplots(1, len(ns) + 1, figsize=(4.0 * (len(ns) + 1), 4.0))
+    sd_x, sd_y = [], []
+    for ax, n in zip(axes, ns):
+        cx, cy = [], []
+        for a in ARCHS:
+            rs = [r for r in cells.get((n,) + a, []) if not np.isnan(r["steps_conv"])]
+            if not rs:
+                continue
+            xs = np.array([r["steps_conv"] for r in rs]) / 1e6
+            ys = np.array([r["final"] for r in rs])
+            ax.scatter(xs, ys, color=col[a], marker=marker(a), s=22, alpha=0.55, lw=0)
+            ax.scatter(xs.mean(), ys.mean(), color=col[a], marker=marker(a), s=80,
+                       edgecolors="k", linewidths=0.6)
+            if a in common:
+                cx += list(xs); cy += list(ys)
+        sd_x.append(np.std(cx, ddof=1)); sd_y.append(np.std(cy, ddof=1))
+        n_arch = sum(1 for a in ARCHS if have(n, a))
+        ax.set_title(f"n={n}  SD steps={sd_x[-1]:.0f}M  SD final={sd_y[-1]:.2f}"
+                     + ("" if n_arch == len(ARCHS) else f"\n{n_arch}/{len(ARCHS)} archs so far"), fontsize=9)
+        ax.set_xlabel(f"env steps to {CONV_FRAC:.0%} of own final (M)")
+        ax.grid(alpha=0.3)
+    axes[0].set_ylabel("final targets / episode")
+    for ax in axes[1:len(ns)]:
+        ax.sharex(axes[0]); ax.sharey(axes[0])
+    s = axes[-1]
+    s.plot(ns, sd_x, "ko-", label="SD steps-to-90% (M)")
+    s.set_ylim(0, None); s.set_xlabel("n"); s.set_ylabel("SD of steps-to-90% (M)")
+    s.set_xticks(ns); s.grid(alpha=0.3)
+    s2 = s.twinx()
+    s2.plot(ns, sd_y, "s-", color="tab:red", label="SD final targets/ep")
+    s2.set_ylabel("SD of final targets / episode", color="tab:red"); s2.set_ylim(0, None)
+    h1, l1 = s.get_legend_handles_labels(); h2, l2 = s2.get_legend_handles_labels()
+    s.legend(h1 + h2, l1 + l2, fontsize=7, loc="upper right")
+    s.set_title(f"spread vs n ({len(common)} archs present at every n, all seeds)", fontsize=9)
+    fig.legend(handles=handles[:-1], loc="lower center", ncol=len(ARCHS), fontsize=8, frameon=False)
+    fig.suptitle("Convergence time vs final, every seed (small) + architecture mean (large)", fontsize=9)
+    fig.tight_layout(rect=(0, 0.06, 1, 0.95))
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
 
 if __name__ == "__main__":
     main()

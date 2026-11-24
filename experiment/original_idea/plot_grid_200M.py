@@ -30,7 +30,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from plot_sweep_stats import interaction_test, load_runs, plot_3d, t_ci_half, welch
+from matplotlib import cm, colors
+
+from plot_sweep_stats import interaction_test, load_runs, t_ci_half, welch
 
 HERE = Path(__file__).resolve().parent
 DATA = HERE.parent / "__data__"
@@ -78,6 +80,49 @@ def arch_name(w, d):
     return "linear" if d == 0 else f"w{w} d{d}"
 
 
+def plot_3d(cells, n, widths, depths, zlim, out_path):
+    """Same look as plot_sweep_3d.py (__plots_directed__): opaque bars, mean ± std
+    labels, and the linear result repeated semi-transparently across widths
+    (depth 0 has no width, it is one measurement)."""
+    fig = plt.figure(figsize=(7.5, 6))
+    ax = fig.add_subplot(projection="3d")
+    ax.computed_zorder = False  # draw back-to-front by hand, labels last
+    norm = colors.Normalize(*zlim)
+    cmap = plt.get_cmap("viridis")
+    bar = 0.6
+    linear = cells.get((n, 16, 0))
+    order = sorted(((i, w, j, d) for i, w in enumerate(widths) for j, d in enumerate(depths)),
+                   key=lambda c: -(c[0] + c[2]))
+    labels = []
+    for z_order, (i, w, j, d) in enumerate(order):
+        c, alpha = cells.get((n, w, d)), 0.9
+        if c is None and d == 0 and linear is not None:
+            c, alpha = linear, 0.35
+        if c is None:
+            continue
+        z = c["mean"]
+        ax.bar3d(i - bar / 2, j - bar / 2, 0.0, bar, bar, z, color=cmap(norm(z)), alpha=alpha,
+                 shade=True, edgecolor="k", linewidth=0.3, zorder=z_order)
+        labels.append((i, j, z, c["sd"]))
+    for i, j, z, sd in labels:
+        ax.text(i, j, max(z, 0.0), f"{z:.2f}\n±{sd:.2f}", ha="center", va="bottom", fontsize=7,
+                zorder=1000, bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.75))
+    ax.set_xticks(range(len(widths)))
+    ax.set_xticklabels([str(w) for w in widths])
+    ax.set_yticks(range(len(depths)))
+    ax.set_yticklabels([("0 (linear)" if d == 0 else str(d)) for d in depths])
+    ax.set_xlabel("network width")
+    ax.set_ylabel("network depth")
+    ax.set_zlabel(LABEL)
+    ax.set_zlim(*zlim)
+    ax.view_init(elev=25, azim=-130)
+    ax.set_title(f"Directed capacity sweep (200M) — insect_n n={n}\n"
+                 "final targets/episode (mean ± std over seeds)")
+    fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, shrink=0.6, pad=0.1, label=LABEL)
+    fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
 def plot_by_capacity(cells, ns, out):
     fig, axes = plt.subplots(1, len(ns), figsize=(4.2 * len(ns), 3.8), sharey=True)
     widths = sorted({w for (_, w, d) in cells if d > 0})
@@ -97,7 +142,7 @@ def plot_by_capacity(cells, ns, out):
         if c:
             ax.errorbar([16], [c["mean"]], yerr=[c["ci"]], color="k", marker="s",
                         capsize=3, label="linear", ls="none")
-            ax.scatter([16] * 3, c["scores"], color="k", s=10, alpha=0.5)
+            ax.scatter([16] * len(c["scores"]), c["scores"], color="k", s=10, alpha=0.5)
             if c["improving"]:
                 ax.annotate("↑", (16, c["mean"]), xytext=(-12, 4),
                             textcoords="offset points")
@@ -192,12 +237,9 @@ def main():
     depths = sorted({r["d"] for r in runs})
     archs = sorted({(w, d) for (_, w, d) in cells}, key=lambda a: (a[1] > 0, a[0] * max(a[1], 1), a[1]))
 
-    top = max(c["mean"] + c["ci"] for c in cells.values())
-    zlim = (0.0, float(np.ceil(top + 0.5)))
+    zlim = (0.0, max(c["mean"] for c in cells.values()) * 1.15)  # shared across n
     for n in ns:
-        plot_3d(cells, n, widths, depths, zlim, LABEL,
-                f"insect_n n={n} · 200M steps · targets/episode (last 25% of evals)",
-                args.out_dir / f"targets_3d_n{n}.png")
+        plot_3d(cells, n, widths, depths, zlim, args.out_dir / f"targets_3d_n{n}.png")
     plot_by_capacity(cells, ns, args.out_dir / "targets_by_capacity.png")
     plot_curves(runs, ns, archs, args.out_dir / "learning_curves.png")
 
