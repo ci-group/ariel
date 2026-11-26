@@ -3,20 +3,18 @@ from mujoco._constants import *
 from mujoco._enums import *
 from mujoco._errors import *
 from mujoco._functions import *
-from mujoco._render import *
 from mujoco._specs import *
 from mujoco._structs import *
-from mujoco.gl_context import *
+from mujoco._render import *
+from mujoco.rendering.classic.gl_context import *
 from _typeshed import Incomplete
-from mujoco import _specs as _specs, _structs as _structs
-from mujoco.renderer import Renderer as Renderer
-from typing import Any, IO, Sequence
-from typing_extensions import TypeAlias
+from mujoco import _specs
+from mujoco.rendering.classic.renderer import Renderer as Renderer
+from typing import Any, IO, Sequence, TypeAlias
 
-__path__: Incomplete
-_SYSTEM: Incomplete
 proc_translated: Incomplete
 is_rosetta: Incomplete
+MJTNUM_DTYPE: Incomplete
 MjStruct: TypeAlias
 
 def to_zip(spec: _specs.MjSpec, file: str | IO[bytes]) -> None:
@@ -36,40 +34,18 @@ def from_zip(file: str | IO[bytes]) -> _specs.MjSpec:
   """
 
 class _MjBindModel:
-    elements: Incomplete
+    """Wrapper for MjModel that allows binding multiple specs."""
     def __init__(self, elements: Sequence[Any]) -> None: ...
     def __getattr__(self, key: str): ...
+    def __setattr__(self, key: str, value: Any): ...
 
 class _MjBindData:
-    elements: Incomplete
+    """Wrapper for MjData that allows binding multiple specs."""
     def __init__(self, elements: Sequence[Any]) -> None: ...
     def __getattr__(self, key: str): ...
+    def __setattr__(self, key: str, value: Any): ...
 
-def _bind_model(model: _structs.MjModel, specs: Sequence[MjStruct] | MjStruct):
-    """Bind a Mujoco spec to a mjModel.
-
-  Args:
-    model: The mjModel to bind to.
-    specs: The mjSpec elements to use for binding, can be a single element or a
-      sequence.
-  Returns:
-    A MjModelGroupedViews object or a list of the same type.
-  """
-def _bind_data(data: _structs.MjData, specs: Sequence[MjStruct] | MjStruct):
-    """Bind a Mujoco spec to a mjData.
-
-  Args:
-    data: The mjData to bind to.
-    specs: The mjSpec elements to use for binding, can be a single element or a
-      sequence.
-  Returns:
-    A MjDataGroupedViews object or a list of the same type.
-  """
-
+__version__: Incomplete
 HEADERS_DIR: Incomplete
 PLUGINS_DIR: Incomplete
 PLUGIN_HANDLES: Incomplete
-
-def _load_all_bundled_plugins() -> None: ...
-
-__version__: Incomplete

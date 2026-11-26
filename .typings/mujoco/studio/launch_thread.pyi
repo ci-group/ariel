@@ -1,0 +1,26 @@
+from mujoco.studio import endpoints as endpoints, messages as messages, viewer_handle as viewer_handle, viewer_protocol as viewer_protocol
+from typing import Any, Callable
+
+class ThreadSnapshotChannel(messages.SnapshotChannel):
+    """SnapshotChannel for in-process threaded mode.
+
+  Stores per-type snapshot by reference and wakes the viewer thread when put.
+  """
+    def __init__(self) -> None: ...
+    def put(self, snapshot: messages.Snapshot) -> None: ...
+    def reclaim_unconsumed(self, snapshot_type: type[messages.Snapshot]) -> messages.Snapshot | None:
+        """Pops and returns an unconsumed pending snapshot of ``snapshot_type``."""
+    def get(self) -> list[messages.Snapshot]: ...
+    def close(self) -> None: ...
+
+class ThreadEventChannel(messages.EventChannel):
+    """EventChannel for in-process threaded mode using a thread-safe queue."""
+    def __init__(self) -> None: ...
+    def put(self, event: messages.Event) -> None: ...
+    def get(self) -> list[messages.Event]: ...
+    def close(self) -> None: ...
+
+def make_thread_endpoints() -> tuple[endpoints.ViewerEndpoint, endpoints.SimEndpoint]:
+    """Creates connected in-process thread-safe endpoints."""
+def launch_thread(target_fn: Callable[[endpoints.ViewerEndpoint], None], *, sim_plugins: list[Any] | None = None) -> viewer_handle.ViewerHandle:
+    """Launches a viewer target function in a daemon thread and returns a ViewerHandle."""

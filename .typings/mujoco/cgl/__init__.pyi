@@ -1,15 +1,14 @@
-from _typeshed import Incomplete
+import contextlib
+from collections.abc import Generator
 from mujoco.cgl import cgl as cgl
-
-_ATTRIB = cgl.CGLPixelFormatAttribute
-_PROFILE = cgl.CGLOpenGLProfile
 
 class GLContext:
     """An EGL context for headless accelerated OpenGL rendering on GPU devices."""
-    _pix: Incomplete
-    _context: Incomplete
     def __init__(self, max_width, max_height) -> None: ...
     def make_current(self) -> None: ...
+    @contextlib.contextmanager
+    def as_current(self) -> Generator[None]:
+        """Temporarily makes this context current, restoring any prior context."""
     def free(self) -> None:
         """Frees resources associated with this context."""
     def __del__(self) -> None: ...

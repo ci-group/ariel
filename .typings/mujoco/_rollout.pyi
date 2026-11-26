@@ -3,8 +3,8 @@ import numpy.typing
 import typing
 
 class Rollout:
-    def __init__(self, nthread: typing.SupportsInt) -> None:
-        """__init__(self: mujoco._rollout.Rollout, *, nthread: typing.SupportsInt) -> None
+    def __init__(self, nthread: typing.SupportsInt | typing.SupportsIndex) -> None:
+        """__init__(self: mujoco._rollout.Rollout, *, nthread: typing.SupportsInt | typing.SupportsIndex) -> None
 
 
         Construct a rollout object containing a thread pool for parallel rollouts.
@@ -14,9 +14,8 @@ class Rollout:
                                if zero, this pool is not started and rollouts run on the calling thread
 
         """
-    def _pybind11_conduit_v1_(self, *args, **kwargs): ...
-    def rollout(self, model: list, data: list, nstep: typing.SupportsInt, control_spec: typing.SupportsInt, state0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64], warmstart0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., control: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., state: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., sensordata: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., chunk_size: typing.SupportsInt | None = ...) -> None:
-        """rollout(self: mujoco._rollout.Rollout, model: list, data: list, nstep: typing.SupportsInt, control_spec: typing.SupportsInt, state0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64], warmstart0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, control: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, state: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, sensordata: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, chunk_size: typing.SupportsInt | None = None) -> None
+    def rollout(self, model: list, data: list, nstep: typing.SupportsInt | typing.SupportsIndex, control_spec: typing.SupportsInt | typing.SupportsIndex, state0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64], warmstart0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., control: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., state: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., sensordata: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = ..., chunk_size: typing.SupportsInt | typing.SupportsIndex | None = ...) -> None:
+        """rollout(self: mujoco._rollout.Rollout, model: list, data: list, nstep: typing.SupportsInt | typing.SupportsIndex, control_spec: typing.SupportsInt | typing.SupportsIndex, state0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64], warmstart0: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, control: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, state: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, sensordata: typing.Annotated[numpy.typing.ArrayLike, numpy.float64] | None = None, chunk_size: typing.SupportsInt | typing.SupportsIndex | None = None) -> None
 
 
         Roll out batch of trajectories from initial states, get resulting states and sensor values.

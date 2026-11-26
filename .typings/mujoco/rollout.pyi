@@ -2,7 +2,6 @@ import mujoco
 import types
 from _typeshed import Incomplete
 from collections.abc import Sequence
-from mujoco import _rollout as _rollout
 from numpy import typing as npt
 
 class Rollout:
@@ -101,24 +100,3 @@ def rollout(model: mujoco.MjModel | Sequence[mujoco.MjModel], data: mujoco.MjDat
   Raises:
     ValueError: bad shapes or sizes.
   """
-def _check_must_be_numeric(**kwargs) -> None: ...
-def _check_number_of_dimensions(ndim, **kwargs) -> None: ...
-def _check_trailing_dimension(dim, **kwargs) -> None: ...
-def _ensure_2d(arg): ...
-def _ensure_3d(arg): ...
-def _infer_dimension(dim, value, **kwargs):
-    """Infers dimension `dim` given guess `value` from set of arrays.
-
-  Args:
-    dim: Dimension to be inferred.
-    value: Initial guess of inferred value (1: unknown).
-    **kwargs: List of arrays which should all have the same size (or 1) along
-      dimension dim.
-
-  Returns:
-    Inferred dimension.
-
-  Raises:
-    ValueError: If mismatch between array shapes or initial guess.
-  """
-def _tile_if_required(array, dim0, dim1=None): ...

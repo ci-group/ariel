@@ -1,9 +1,12 @@
-from _typeshed import Incomplete
+import contextlib
+from collections.abc import Generator
 
 class GLContext:
     """An OpenGL context created via GLFW."""
-    _context: Incomplete
     def __init__(self, max_width, max_height) -> None: ...
     def make_current(self) -> None: ...
+    @contextlib.contextmanager
+    def as_current(self) -> Generator[None]:
+        """Temporarily makes this context current, restoring any prior context."""
     def free(self) -> None: ...
     def __del__(self) -> None: ...

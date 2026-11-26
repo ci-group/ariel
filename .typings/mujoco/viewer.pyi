@@ -4,7 +4,6 @@ import numpy as np
 import queue
 import types
 from _typeshed import Incomplete
-from mujoco import _simulate as _simulate
 from typing import Callable
 
 PERCENT_REALTIME: Incomplete
@@ -13,17 +12,9 @@ SIM_REFRESH_FRACTION: float
 CallbackType: Incomplete
 LoaderType: Incomplete
 KeyCallbackType = Callable[[int], None]
-_LoaderWithPathType: Incomplete
-_InternalLoaderType = LoaderType | _LoaderWithPathType
-_Simulate: Incomplete
 
 class Handle:
     """A handle for interacting with a MuJoCo viewer."""
-    _sim: Incomplete
-    _cam: Incomplete
-    _opt: Incomplete
-    _pert: Incomplete
-    _user_scn: Incomplete
     def __init__(self, sim: _Simulate, cam: mujoco.MjvCamera, opt: mujoco.MjvOption, pert: mujoco.MjvPerturb, user_scn: mujoco.MjvScene | None) -> None: ...
     @property
     def cam(self): ...
@@ -69,7 +60,6 @@ class Handle:
     """
     def clear_images(self) -> None: ...
     def close(self) -> None: ...
-    def _get_sim(self) -> _Simulate | None: ...
     def is_running(self) -> bool: ...
     def lock(self): ...
     def sync(self, state_only: bool = False): ...
@@ -82,16 +72,6 @@ class Handle:
 class _MjPythonBase(metaclass=abc.ABCMeta):
     def launch_on_ui_thread(self, model: mujoco.MjModel, data: mujoco.MjData, handle_return: queue.Queue[Handle] | None, key_callback: KeyCallbackType | None): ...
 
-_MJPYTHON: _MjPythonBase | None
-
-def _file_loader(path: str) -> _LoaderWithPathType:
-    """Loads an MJCF model from file path."""
-def _reload(simulate: _Simulate, loader: _InternalLoaderType, notify_loaded: Callable[[], None] | None = None) -> tuple[mujoco.MjModel, mujoco.MjData] | None:
-    """Internal function for reloading a model in the viewer."""
-def _physics_loop(simulate: _Simulate, loader: _InternalLoaderType | None):
-    """Physics loop for the GUI, to be run in a separate thread."""
-def _launch_internal(model: mujoco.MjModel | None = None, data: mujoco.MjData | None = None, *, run_physics_thread: bool, loader: _InternalLoaderType | None = None, handle_return: queue.Queue[Handle] | None = None, key_callback: KeyCallbackType | None = None, show_left_ui: bool = True, show_right_ui: bool = True) -> None:
-    """Internal API, so that the public API has more readable type annotations."""
 def launch(model: mujoco.MjModel | None = None, data: mujoco.MjData | None = None, *, loader: LoaderType | None = None, show_left_ui: bool = True, show_right_ui: bool = True) -> None:
     """Launches the Simulate GUI."""
 def launch_from_path(path: str) -> None:

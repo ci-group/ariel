@@ -1,5 +1,5 @@
 import collections.abc
-import mujoco._render
+import mujoco._structs
 import numpy
 import typing
 from typing import ClassVar
@@ -7,7 +7,6 @@ from typing import ClassVar
 class Mutex:
     def __init__(self, *args, **kwargs) -> None:
         """Initialize self.  See help(type(self)) for accurate signature."""
-    def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     def __enter__(self) -> None:
         """__enter__(self: mujoco._simulate.Mutex) -> None"""
     def __exit__(self, arg0: object, arg1: object, arg2: object) -> None:
@@ -23,7 +22,6 @@ class Simulate:
     ui1_enable: int
     def __init__(self, arg0: object, arg1: object, arg2: object, arg3: object, arg4: bool, arg5: object) -> None:
         """__init__(self: mujoco._simulate.Simulate, arg0: object, arg1: object, arg2: object, arg3: object, arg4: bool, arg5: object) -> None"""
-    def _pybind11_conduit_v1_(self, *args, **kwargs): ...
     def add_to_history(self) -> None:
         """add_to_history(self: mujoco._simulate.Simulate) -> None"""
     def clear_figures(self) -> None:
@@ -46,22 +44,22 @@ class Simulate:
         """lock(self: mujoco._simulate.Simulate) -> mujoco._simulate.Mutex"""
     def render_loop(self) -> None:
         """render_loop(self: mujoco._simulate.Simulate) -> None"""
-    def set_figures(self, viewports_figures: collections.abc.Sequence[tuple[mujoco._render.MjrRect, object]]) -> None:
-        """set_figures(self: mujoco._simulate.Simulate, viewports_figures: collections.abc.Sequence[tuple[mujoco._render.MjrRect, object]]) -> None"""
-    def set_images(self, viewports_images: collections.abc.Sequence[tuple[mujoco._render.MjrRect, numpy.ndarray]]) -> None:
-        """set_images(self: mujoco._simulate.Simulate, viewports_images: collections.abc.Sequence[tuple[mujoco._render.MjrRect, numpy.ndarray]]) -> None"""
-    def set_texts(self, overlay_texts: collections.abc.Sequence[tuple[typing.SupportsInt, typing.SupportsInt, str, str]]) -> None:
-        """set_texts(self: mujoco._simulate.Simulate, overlay_texts: collections.abc.Sequence[tuple[typing.SupportsInt, typing.SupportsInt, str, str]]) -> None"""
+    def set_figures(self, viewports_figures: collections.abc.Sequence[tuple[mujoco._structs.MjrRect, object]]) -> None:
+        """set_figures(self: mujoco._simulate.Simulate, viewports_figures: collections.abc.Sequence[tuple[mujoco._structs.MjrRect, object]]) -> None"""
+    def set_images(self, viewports_images: collections.abc.Sequence[tuple[mujoco._structs.MjrRect, numpy.ndarray]]) -> None:
+        """set_images(self: mujoco._simulate.Simulate, viewports_images: collections.abc.Sequence[tuple[mujoco._structs.MjrRect, numpy.ndarray]]) -> None"""
+    def set_texts(self, overlay_texts: collections.abc.Sequence[tuple[typing.SupportsInt | typing.SupportsIndex, typing.SupportsInt | typing.SupportsIndex, str, str]]) -> None:
+        """set_texts(self: mujoco._simulate.Simulate, overlay_texts: collections.abc.Sequence[tuple[typing.SupportsInt | typing.SupportsIndex, typing.SupportsInt | typing.SupportsIndex, str, str]]) -> None"""
     def sync(self, state_only: bool = ...) -> None:
         """sync(self: mujoco._simulate.Simulate, state_only: bool = False) -> None"""
     def uiloadrequest_decrement(self) -> None:
         """uiloadrequest_decrement(self: mujoco._simulate.Simulate) -> None"""
-    def update_hfield(self, arg0: typing.SupportsInt) -> None:
-        """update_hfield(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt) -> None"""
-    def update_mesh(self, arg0: typing.SupportsInt) -> None:
-        """update_mesh(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt) -> None"""
-    def update_texture(self, arg0: typing.SupportsInt) -> None:
-        """update_texture(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt) -> None"""
+    def update_hfield(self, arg0: typing.SupportsInt | typing.SupportsIndex) -> None:
+        """update_hfield(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt | typing.SupportsIndex) -> None"""
+    def update_mesh(self, arg0: typing.SupportsInt | typing.SupportsIndex) -> None:
+        """update_mesh(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt | typing.SupportsIndex) -> None"""
+    def update_texture(self, arg0: typing.SupportsInt | typing.SupportsIndex) -> None:
+        """update_texture(self: mujoco._simulate.Simulate, arg0: typing.SupportsInt | typing.SupportsIndex) -> None"""
     @property
     def busywait(self) -> int:
         """(arg0: mujoco._simulate.Simulate) -> int"""
@@ -99,8 +97,8 @@ class Simulate:
     def uiloadrequest(self) -> int:
         """(arg0: mujoco._simulate.Simulate) -> int"""
     @property
-    def viewport(self) -> mujoco._render.MjrRect:
-        """(arg0: mujoco._simulate.Simulate) -> mujoco._render.MjrRect"""
+    def viewport(self) -> mujoco._structs.MjrRect:
+        """(arg0: mujoco._simulate.Simulate) -> mujoco._structs.MjrRect"""
 
-def set_glfw_dlhandle(arg0: typing.SupportsInt) -> None:
-    """set_glfw_dlhandle(arg0: typing.SupportsInt) -> None"""
+def set_glfw_dlhandle(arg0: typing.SupportsInt | typing.SupportsIndex) -> None:
+    """set_glfw_dlhandle(arg0: typing.SupportsInt | typing.SupportsIndex) -> None"""

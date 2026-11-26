@@ -2,7 +2,6 @@ import abc
 import dataclasses
 import enum
 import numpy as np
-from _typeshed import Incomplete
 from typing import Callable, Sequence, TextIO
 
 class Verbosity(enum.Enum):
@@ -17,8 +16,6 @@ class Status(enum.Enum):
     MAX_ITER = ...
     DX_TOL = ...
     G_TOL = ...
-
-_STATUS_MESSAGE: Incomplete
 
 @dataclasses.dataclass(frozen=True)
 class IterLog:
@@ -97,7 +94,7 @@ class Quadratic(Norm):
             * Projected Hessian: `proj.T @ proj`.
     """
 
-def least_squares(x0: np.ndarray, residual: Callable[[np.ndarray], np.ndarray], bounds: Sequence[np.ndarray] | None = None, jacobian: Callable[[np.ndarray, np.ndarray], np.ndarray] | None = None, norm: Norm = ..., eps: float = ..., mu_min: float = 1e-06, mu_max: float = 100000000.0, mu_factor: float = ..., xtol: float = 1e-08, gtol: float = 1e-08, max_iter: int = 100, verbose: Verbosity | int = ..., output: TextIO | None = None, iter_callback: Callable[[list[IterLog]], None] | None = None, check_derivatives: bool = False) -> tuple[np.ndarray, list[IterLog]]:
+def least_squares(x0: np.ndarray, residual: Callable[[np.ndarray], np.ndarray], bounds: Sequence[np.ndarray] | None = None, jacobian: Callable[[np.ndarray, np.ndarray], np.ndarray] | None = None, norm: Norm = ..., eps: float = ..., mu_min: float = 1e-06, mu_max: float = 100000000.0, mu_factor: float = ..., xtol: float = 1e-08, gtol: float = 1e-08, max_iter: int = 100, verbose: Verbosity | int = ..., output: TextIO | None = None, iter_callback: Callable[[list[IterLog]], None] | None = None, check_derivatives: bool = False, x_scale: float | np.ndarray | str | None = None) -> tuple[np.ndarray, list[IterLog]]:
     """Nonlinear Least Squares minimization with box bounds.
 
   Args:
@@ -119,6 +116,12 @@ def least_squares(x0: np.ndarray, residual: Callable[[np.ndarray], np.ndarray], 
     output: Optional file or StringIO to which to print messages.
     iter_callback: Optional iteration callback, takes trace argument.
     check_derivatives: Compare user-defined Jacobian and norm against fin-diff.
+    x_scale: Per-parameter scaling (matches scipy's x_scale). Setting
+      x_scale=D solves the problem in the change of variables z = x / D
+      and un-scales the result. None (default) or 1.0 is no scaling.
+      'jac' sets D_i = 1 / ||J(:, i)|| at each iteration. An array of
+      shape (n,) (or a positive scalar) is used as D directly. Note
+      that mu, mu_min and mu_max then act on the scaled subproblem.
 
   Returns:
     x: best solution found
@@ -155,6 +158,9 @@ def check_jacobian(residual: Callable[[np.ndarray], np.ndarray], x: np.ndarray, 
 
   Returns:
     n_res: updated number of residual evaluations.
+
+  Raises:
+    ValueError: If either Jacobian contains nonfinite values or they disagree.
   """
 def check_norm(r: np.ndarray, norm: Norm, eps: np.float64, output: TextIO | None = None):
     """Check user-provided norm against internal finite-differencing.

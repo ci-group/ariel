@@ -1,9 +1,6 @@
-from _typeshed import Incomplete
-from absl.testing import absltest
+from absl.testing import parameterized
 from mujoco import msh2obj as msh2obj
 
-_MESH_FIELDS: Incomplete
-_XML: str
-
-class MshTest(absltest.TestCase):
+class MshTest(parameterized.TestCase):
+    def test_optional_vertex_attributes(self, has_normals, has_texcoords, expected_face) -> None: ...
     def test_obj_model_matches_msh_model(self) -> None: ...
